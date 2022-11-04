@@ -1,0 +1,9 @@
+<div>
+    @livewire('manage-classe-subjects')
+    @livewire('add-new-pupil')
+    @livewire('edit-pupil-perso-data')
+    @livewire('create-new-classe')
+    @livewire('create-level')
+    @livewire('create-subject')
+    @livewire('insert-pupil-marks')
+</div>

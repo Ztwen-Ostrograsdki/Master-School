@@ -1,0 +1,1 @@
+DELETE * FROM `ztwen_school`.`pupil_absences`;
