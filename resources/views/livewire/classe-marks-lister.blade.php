@@ -76,54 +76,21 @@
                                 {{-- LES EPE --}}
                                 @if($marks[$p->id]['epe'])
                                     @foreach ($marks[$p->id]['epe'] as $m => $epe)
-                                    <td class="text-center cursor-pointer" 
-                                            x-on:dblclick="
-                                                @this.call('setTargetMark', 'epe', {{$epe->id}}, {{$p->id}});
-                                                editing_mark = true;
-                                                edit_key = {{$p->id}};
-                                                mark_key = {{$epe->id}};
-                                            ">
-                                            <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$epe->id}} ">
-                                                <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                    <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                                </form>
-                                            </span>
-                                            <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$epe->id}}))" class="w-100 cursor-pointer"> {{ $epe->value }} </span>
+                                        <td x-on:dblclick="@this.call('setTargetedMark', {{$p->id}}, {{$epe->id}})" class="text-center cursor-pointer">
+                                            <span class="w-100 cursor-pointer"> {{ $epe->value }} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['epe'] && count($marks[$p->id]['epe']) < $epeMaxLenght)
                                         @for ($e = (count($marks[$p->id]['epe']) + 1); $e <= $epeMaxLenght; $e++)
-                                            <td class="text-center cursor-pointer" 
-                                            x-on:dblclick="
-                                                @this.call('setTargetMark', 'epe', null, {{$p->id}});
-                                                editing_mark = true;
-                                                edit_key = {{$p->id}};
-                                                mark_key = {{$e}};
-                                            ">
-                                            <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$e}}">
-                                                <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                    <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                                </form>
-                                            </span>
-                                            <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$e}}))" class="w-100 cursor-pointer"> - </span>
-                                        </td>
+                                            <td class="text-center cursor-pointer">
+                                                <span class="w-100 cursor-pointer"> - </span>
+                                            </td>
                                         @endfor
                                     @endif
                                 @else
                                     @for ($epev=1; $epev <= $epeMaxLenght; $epev++)
-                                        <td class="text-center cursor-pointer" 
-                                            x-on:dblclick="
-                                                @this.call('setTargetMark', 'epe', null, {{$p->id}});
-                                                editing_mark = true;
-                                                edit_key = {{$p->id}};
-                                                mark_key = {{$epev}};
-                                            ">
-                                            <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$epev}}">
-                                                <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                    <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                                </form>
-                                            </span>
-                                            <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$epev}}))" class="w-100 cursor-pointer"> - </span>
+                                        <td class="text-center cursor-pointer">
+                                            <span class="w-100 cursor-pointer"> - </span>
                                         </td>
                                     @endfor
                                 @endif
@@ -131,55 +98,21 @@
                                 {{-- LES PARTICIPATIONS --}}
                                 @if($marks[$p->id]['participation'])
                                     @foreach ($marks[$p->id]['participation'] as $l => $part)
-                                        <td class="text-center cursor-pointer" 
-                                            x-on:dblclick="
-                                                @this.call('setTargetMark', 'participation', {{$part->id}}, {{$p->id}});
-                                                editing_mark = true;
-                                                edit_key = {{$p->id}};
-                                                mark_key = {{$part->id}};
-                                            ">
-                                            <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$part->id}}">
-                                                <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                    <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                                </form>
-                                            </span>
-                                            <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$part->id}}))" class="w-100 cursor-pointer"> {{ $part->value }} </span>
+                                        <td x-on:dblclick="@this.call('setTargetedMark', {{$p->id}}, {{$part->id}})" class="text-center cursor-pointer">
+                                            <span class="w-100 cursor-pointer"> {{ $part->value }} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['participation'] && count($marks[$p->id]['participation']) < $participMaxLenght)
                                         @for ($part=(count($marks[$p->id]['participation']) + 1); $part <= $participMaxLenght; $part++)
-                                            <td class="text-center cursor-pointer" 
-                                            x-on:dblclick="
-                                                @this.call('setTargetMark', 'participation', null, {{$p->id}});
-                                                editing_mark = true;
-                                                edit_key = {{$p->id}};
-                                                mark_key = {{$part}};
-                                            ">
-                                            <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$part}}">
-                                                <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                    <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                                </form>
-                                            </span>
-                                            <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$part}}))" class="w-100 cursor-pointer"> - </span>
-                                        </td>
+                                            <td class="text-center cursor-pointer">
+                                                <span class="w-100 cursor-pointer"> - </span>
+                                            </td>
                                         @endfor
                                     @endif
                                 @else
                                     @for ($part_v=1; $part_v <= $participMaxLenght; $part_v++)
-                                        <td class="text-center cursor-pointer" 
-                                            x-on:dblclick="
-                                                @this.call('setTargetMark', 'participation', null, {{$p->id}});
-                                                editing_mark = true;
-                                                edit_key = {{$p->id}};
-                                                mark_key = {{$part_v}};
-                                            "
-                                        >
-                                            <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$part_v}}">
-                                                <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                    <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                                </form>
-                                            </span>
-                                            <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$part_v}}))" class="w-100 cursor-pointer"> - </span>
+                                        <td class="text-center cursor-pointer">
+                                            <span class="w-100 cursor-pointer"> - </span>
                                         </td>
                                     @endfor
                                 @endif
@@ -187,58 +120,22 @@
                                 {{-- LES DEVOIRS --}}
                                 @if ($marks[$p->id]['dev'])
                                     @foreach ($marks[$p->id]['dev'] as $q => $dev)
-                                        <td class="text-center cursor-pointer" 
-                                            x-on:dblclick="
-                                                @this.call('setTargetMark', 'devoir', {{$dev->id}}, {{$p->id}});
-                                                editing_mark = true;
-                                                edit_key = {{$p->id}};
-                                                mark_key = {{$dev->id}};
-                                            "
-                                        >
-                                            <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$q}}">
-                                                <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                    <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                                </form>
-                                            </span>
-                                            <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$dev->id}}))" class="w-100 cursor-pointer"> {{$dev->value}} </span>
+                                        <td x-on:dblclick="@this.call('setTargetedMark', {{$p->id}}, {{$dev->id}})" class="text-center cursor-pointer">
+                                            <span class="w-100 cursor-pointer"> {{$dev->value}} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['dev'] && count($marks[$p->id]['dev']) < $devMaxLenght)
                                         @for ($d=(count($marks[$p->id]['dev']) + 1); $d <= $devMaxLenght; $d++)
-                                            <td class="text-center cursor-pointer" 
-                                                    x-on:dblclick="
-                                                        @this.call('setTargetMark', 'devoir', null, {{$p->id}});
-                                                        editing_mark = true;
-                                                        edit_key = {{$p->id}};
-                                                        mark_key = {{$d}};
-                                                    "
-                                                >
-                                                <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$d}}">
-                                                    <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                        <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                                    </form>
-                                                </span>
-                                                <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$d}}))"  class="w-100 cursor-pointer"> - </span>
+                                            <td class="text-center cursor-pointer">
+                                                <span  class="w-100 cursor-pointer"> - </span>
                                             </td>
                                         @endfor
                                     @endif
 
                                 @else
                                     @for ($dvv=1; $dvv <= $devMaxLenght; $dvv++)
-                                        <td class="text-center cursor-pointer" 
-                                            x-on:dblclick="
-                                                @this.call('setTargetMark', 'devoir', null, {{$p->id}});
-                                                editing_mark = true;
-                                                edit_key = {{$p->id}};
-                                                mark_key = {{$dvv}};
-                                            "
-                                        >
-                                        <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$dvv}}">
-                                            <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                            </form>
-                                        </span>
-                                        <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$dvv}}))"  class="w-100 cursor-pointer"> - </span>
+                                        <td class="text-center cursor-pointer">
+                                        <span  class="w-100 cursor-pointer"> - </span>
                                     </td>
                                     @endfor
                                 @endif
@@ -249,53 +146,18 @@
                                 <td class="text-center">actions</td>
                             @else
                                 @for ($ev=1; $ev <= $epeMaxLenght; $ev++)
-                                    <td class="text-center cursor-pointer" 
-                                        x-on:dblclick="
-                                            @this.call('setTargetMark', 'epe', null, {{$p->id}});
-                                            editing_mark = true;
-                                            edit_key = {{$p->id}};
-                                            mark_key = {{$ev}};
-                                        "
-                                    >
-                                        <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$ev}}">
-                                            <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                            </form>
-                                        </span>
-                                        <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$ev}}))"  class="w-100 cursor-pointer"> - </span>
+                                    <td class="text-center cursor-pointer">
+                                        <span  class="w-100 cursor-pointer"> - </span>
                                     </td>
                                 @endfor
                                 @for ($part_v=1; $part_v <= $participMaxLenght; $part_v++)
-                                    <td class="text-center cursor-pointer" 
-                                        x-on:dblclick="
-                                            @this.call('setTargetMark', 'participation', null, {{$p->id}});
-                                            editing_mark = true;
-                                            edit_key = {{$p->id}};
-                                            mark_key = {{$part_v}};
-                                        "
-                                    >
-                                        <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$part_v}}">
-                                            <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                            </form>
-                                        </span>
-                                        <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$part_v}}))"  class="w-100 cursor-pointer"> - </span>
+                                    <td class="text-center cursor-pointer">
+                                        <span class="w-100 cursor-pointer"> - </span>
                                     </td>
                                 @endfor
                                 @for ($dv=1; $dv <= $devMaxLenght; $dv++)
-                                    <td class="text-center cursor-pointer" 
-                                        x-on:dblclick="
-                                            @this.call('setTargetMark', 'devoir', null, {{$p->id}});
-                                            editing_mark = true;
-                                            edit_key = {{$p->id}};
-                                            mark_key = {{$dv}};
-                                        ">
-                                        <span class="w-100" x-show="editing_mark == true && edit_key == {{$p->id}} && mark_key == {{$dv}}">
-                                            <form class="d-inline bg-transparent mx-auto m-0 p-0" wire:submit.prevent="updateMark">
-                                                <input class="p-0 bg-transparent m-0 mx-auto @if($invalid_mark) text-danger invalid-feedback border-danger border @endif" type="text" name="mark" wire:model="edit_mark_value">
-                                            </form>
-                                        </span>
-                                        <span x-show="(!editing_mark) || (editing_mark && (edit_key == {{$p->id}} && mark_key !== {{$dv}}))"  class="w-100 cursor-pointer"> - </span>
+                                    <td class="text-center cursor-pointer">
+                                        <span class="w-100 cursor-pointer"> - </span>
                                     </td>
                                 @endfor
                                 <td class=" text-center moy-epe-note"> - </td>

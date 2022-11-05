@@ -32,6 +32,10 @@ window.addEventListener('modal-insertPupilMarks', function(e) {
     $('#insertPupilMarks').modal('show');
 });
 
+window.addEventListener('modal-markManager', function(e) {
+    $('#markManagerModal').modal('show');
+});
+
 window.addEventListener('modal-displayMyNotifications', function(e) {
     $('#displayMyNotificationsModal').modal();
 });

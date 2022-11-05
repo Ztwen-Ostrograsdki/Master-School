@@ -104,25 +104,13 @@ class ClasseMarksLister extends Component
     }
 
 
-    public function setTargetMark($edit_mark_type, $mark_id = null, $pupil_id = null)
+    public function setTargetedMark($pupil_id, $mark_id)
     {
-        if ($mark_id) {
-            $mark = Mark::find($mark_id);
-            if ($mark) {
-                $this->targetedMark = $mark;
-                $this->edit_mark_value = $mark->value;
-            }
-            else{
-                $this->dispatchBrowserEvent('Toast', ['title' => "Une erreure s'est produite", 'message' => "La note est introuvable", 'type' => 'error']);
-                $this->reset('edit_mark_value', 'edit_mark_type', 'edit_key');
-
-            }
-        } 
-        elseif($pupil_id){
-            $this->targetedMark = null;
-            $this->edit_mark_value = 0;
-            $this->pupil_id = $pupil_id;
-            $this->edit_mark_type = $edit_mark_type;
+        if ($mark_id && $pupil_id) {
+            $this->emit('editPupilMarkLiveEvent', $pupil_id, $mark_id);
+        }
+        else{
+            $this->dispatchBrowserEvent('Toast', ['title' => "Une erreure s'est produite", 'message' => "La note est introuvable", 'type' => 'error']);
         }
     }
 
