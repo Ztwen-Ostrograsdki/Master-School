@@ -2,20 +2,21 @@
 
 namespace App\Models;
 
-use App\Models\Mark;
-use App\Models\Image;
-use App\Models\Level;
-use App\Models\Classe;
-use App\Models\PupilLates;
-use App\Models\SchoolYear;
-use App\Models\PupilCursus;
-use App\Models\PupilAbsences;
 use App\Helpers\DateFormattor;
 use App\Helpers\ModelTraits\PupilTraits;
-use Illuminate\Database\Eloquent\Model;
 use App\Helpers\ZtwenManagers\GaleryManager;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Classe;
+use App\Models\Image;
+use App\Models\Level;
+use App\Models\Mark;
+use App\Models\PupilAbsences;
+use App\Models\PupilCursus;
+use App\Models\PupilLates;
+use App\Models\RelatedMark;
+use App\Models\SchoolYear;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pupil extends Model
 {
@@ -83,6 +84,11 @@ class Pupil extends Model
     public function marks()
     {
         return $this->hasMany(Mark::class);
+    }
+
+    public function related_marks()
+    {
+        return $this->hasMany(RelatedMark::class);
     }
     public function parents()
     {

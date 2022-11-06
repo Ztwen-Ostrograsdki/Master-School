@@ -6,9 +6,6 @@
                     {{ $pupil ? " de l'apprenant " : ''}}  
                     <span class="text-warning">{{ $pupil ? $pupil->getName() : "" }}</span>
                 </h5>
-                <h5 class="card-title cursor-pointer mx-3"> apprenant{{ $pupil->sexe == 'female' ? "e" : ''}} en classe de
-                    <span class="text-warning">{{ $pupil ? $pupil->classe->name : "" }}</span>
-                </h5>
                 <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
                       <i class="fa fa-minus"></i>
@@ -16,6 +13,23 @@
                     <button type="button" class="btn btn-tool" data-card-widget="remove">
                       <i class="fa fa-times"></i>
                     </button>
+                </div>
+                <div class="card-tools mr-3">
+                    <ul class="nav nav-pills ml-auto">
+                        <li class="nav-item dropdown">
+                          <a class="nav-link dropdown-toggle border border-primary" data-toggle="dropdown" href="#">
+                            Reglages <span class="caret"></span>
+                          </a>
+                          <div class="dropdown-menu">
+                            <a class="dropdown-item" tabindex="-1" wire:click="resetMarks" href="#">Rafraichir les notes</a>
+                            <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
+                            <a class="dropdown-item" tabindex="-1" href="#">Rafraichir les notes relatives</a><a class="dropdown-item" wire:click="resetMarks" tabindex="-1" href="#">Rafraichir les retards</a>
+                            <a class="dropdown-item" tabindex="-1" href="#">Mettre à jour</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
+                          </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
             <div class="card-body">
@@ -151,28 +165,18 @@
                         </li>
                     </ul>
                     <ul class="nav nav-pills ml-auto p-2">
-                        <li class="nav-item dropdown">
-                          <a class="nav-link dropdown-toggle border border-primary" data-toggle="dropdown" href="#">
-                            Reglages <span class="caret"></span>
-                          </a>
-                          <div class="dropdown-menu">
-                            <a class="dropdown-item" tabindex="-1" href="#">Une action...</a>
-                            <a class="dropdown-item" tabindex="-1" wire:click="resetMarks" href="#">Rafraichir les notes</a>
-                            <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
-                            <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Rafraichir les notes</a><a class="dropdown-item" wire:click="resetMarks" tabindex="-1" href="#">Rafraichir les retards</a>
-                            <a class="dropdown-item" tabindex="-1" href="#">Mettre à jour</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
-                          </div>
-                        </li>
                         <li wire:click="setPupilProfilActiveSection('marks')" class="nav-item">
                             <a class="nav-link border border-white mx-1 @if((session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'marks') || !session('pupil_profil_section_selected')) active @endif" href="#tab_1" data-toggle="tab">Notes
                             </a>
                         </li>
+                        <li wire:click="setPupilProfilActiveSection('related_marks')" class="nav-item">
+                            <a class="nav-link @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'related_marks') active @endif border border-white mx-1" href="#tab_2" data-toggle="tab">Sanctions - Bonus</a>
+                        </li>
                         <li wire:click="setPupilProfilActiveSection('absences')" class="nav-item">
-                            <a class="nav-link @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'absences') active @endif border border-white mx-1" href="#tab_2" data-toggle="tab">Absence</a>
-                        </li><li wire:click="setPupilProfilActiveSection('lates')" class="nav-item">
-                            <a class="nav-link @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'lates') active @endif border border-white mx-1" href="#tab_2" data-toggle="tab">Retards</a>
+                            <a class="nav-link @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'absences') active @endif border border-white mx-1" href="#tab_3" data-toggle="tab">Absence</a>
+                        </li>
+                        <li wire:click="setPupilProfilActiveSection('lates')" class="nav-item">
+                            <a class="nav-link @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'lates') active @endif border border-white mx-1" href="#tab_4" data-toggle="tab">Retards</a>
                         </li>
                     </ul>
                 @else
@@ -218,10 +222,13 @@
                     <div class="tab-pane les-notes-de-eleve @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'marks') active @elseif(!session()->has('pupil_profil_section_selected')) active @endif" id="tab_1">
                         @livewire('pupil-marks-listing', ['pupil_id' => $pupil->id])
                     </div>
-                    <div class="tab-pane les-absences-de-eleve @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'absences') active @endif" id="tab_2">
+                    <div class="tab-pane les-sanctions-de-eleve @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'related_marks') active @endif" id="tab_2">
+                        @livewire('pupil-related-marks', ['pupil_id' => $pupil->id])
+                    </div>
+                    <div class="tab-pane les-absences-de-eleve @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'absences') active @endif" id="tab_3">
                         @livewire('pupil-absences', ['pupil_id' => $pupil->id])
                     </div>
-                    <div class="tab-pane les-retards-de-eleve @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'lates') active @endif" id="tab_3">
+                    <div class="tab-pane les-retards-de-eleve @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'lates') active @endif" id="tab_4">
                         @livewire('pupil-lates', ['pupil_id' => $pupil->id])
                     </div>
                 @endif

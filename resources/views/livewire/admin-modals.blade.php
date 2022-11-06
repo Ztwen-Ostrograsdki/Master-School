@@ -6,5 +6,6 @@
     @livewire('create-level')
     @livewire('create-subject')
     @livewire('insert-pupil-marks')
+    @livewire('insert-pupil-related-mark')
     @livewire('mark-manager')
 </div>

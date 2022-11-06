@@ -11,6 +11,7 @@ use App\Models\Pupil;
 use App\Models\PupilAbsences;
 use App\Models\PupilCursus;
 use App\Models\PupilLates;
+use App\Models\RelatedMark;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeacherAbsences;
@@ -42,6 +43,12 @@ class SchoolYear extends Model
 	{
 		return $this->morphedByMany(Mark::class, 'schoolable');
 	}
+
+	public function related_marks()
+	{
+		return $this->morphedByMany(RelatedMark::class, 'schoolable');
+	}
+
     public function classeHistories()
 	{
 		return $this->morphedByMany(ClasseHistory::class, 'schoolable');

@@ -146,6 +146,7 @@ class ClassePresenceAbsence extends Component
                 'school_year_id' => $this->school_year_model->id,
                 'school_year' => $this->school_year_model->school_year,
                 'pupil_id' => $pupil->id,
+                'classe_id' => $pupil->classe_id,
                 'semestre' => $this->semestre_selected,
                 'subject_id' => $this->classe_subject_selected,
             ]);
@@ -185,7 +186,7 @@ class ClassePresenceAbsence extends Component
                     'pupil_id' => $pupil->id,
                     'semestre' => $this->semestre_selected,
                     'subject_id' => $this->classe_subject_selected,
-                    'pupil_id' => $pupil->id,
+                    'classe_id' => $pupil->classe_id,
                 ]);
             }
         }

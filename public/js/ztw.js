@@ -27,6 +27,9 @@ window.addEventListener('modal-createNewLevel', function(e) {
 window.addEventListener('modal-createNewSubject', function(e) {
     $('#createNewSubject').modal('show');
 });
+window.addEventListener('modal-insertPupilRelatedMark', function(e) {
+    $('#insertPupilRelatedMarks').modal('show');
+});
 
 window.addEventListener('modal-insertPupilMarks', function(e) {
     $('#insertPupilMarks').modal('show');

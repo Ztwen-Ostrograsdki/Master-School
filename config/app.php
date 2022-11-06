@@ -20,6 +20,11 @@ return [
     'payment_type_default' => 'Mobile',
     'admin_key' => 'ah07Xw68ee',
 
+    'marks_type' => ['epe', 'devoir', 'participation'],
+    'related_marks_type' => ['bonus', 'minus'],
+    
+    'admin_key' => 'ah07Xw68ee',
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

@@ -1,4 +1,4 @@
-<x-z-modal-generator :topPosition="300" :hasHeader="true" :modalHeaderTitle="'Gestionnaire de notes'" :width="6" :icon="'fa fa-bookmark'" :modalName="'markManagerModal'" :modalBodyTitle="'Gestionnaire de note: Edition-Suppresion'">
+<x-z-modal-generator :topPosition="50" :hasHeader="true" :modalHeaderTitle="'Gestionnaire de notes'" :width="6" :icon="'fa fa-bookmark'" :modalName="'markManagerModal'" :modalBodyTitle="'Gestionnaire de note: Edition-Suppresion'">
     @if($pupil && $mark)
     <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submitMark">
         <div class="row justify-between">
