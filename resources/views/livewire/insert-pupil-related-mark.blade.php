@@ -1,4 +1,4 @@
-<x-z-modal-generator :topPosition="300" :hasHeader="true" :modalHeaderTitle="'Insertion de notes relatives'" :width="6" :icon="'fa fa-pen'" :modalName="'insertPupilRelatedMarks'" :modalBodyTitle="'Sanction - Bonus'">
+<x-z-modal-generator :topPosition="0" :hasHeader="true" :modalHeaderTitle="'Insertion de notes relatives'" :width="7" :icon="'fa fa-pen'" :modalName="'insertPupilRelatedMarks'" :modalBodyTitle="'Sanction - Bonus'">
     @if($pupil && $subjects && count($subjects) > 0)
     <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submitMarks">
         <div class="row justify-between">
@@ -58,25 +58,34 @@
                                 @enderror
                             </div>
                         </div>
+                        <div class="col-12 m-0 p-0">
+                            <x-z-input :width="'col-12'" :type="'text'" :error="$errors->first('motif')" :modelName="'motif'" :labelTitle="'Le motif de la note'" ></x-z-input>
+                        </div>
                         <div class="col-12 mt-1 d-flex justify-content-between row m-0 p-0">
-                            <div class="col-3">
-                                <x-z-input :width="'col-12'" :hideLabel="'d-none'" :type="'text'" :error="$errors->first('motif')" :modelName="'motif'" :labelTitle="'Le motif'" ></x-z-input>
+                            <div class="p-0 m-0 mt-0 mb-2 row col-6">
+                                <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer"> Date de la séance de cours </label>
+                                <input placeholder="La date" class="text-white form-control bg-transparent border border-white px-2 @error('date') text-danger border-danger @enderror" wire:model="date" type="date" name="date">
                             </div>
-                            <div class="col-1">
-                            <select class="px-2 form-select text-white z-bg-secondary w-100 @error('start') text-danger border border-danger @enderror" wire:model="start" name="start" id="start">
-                                    <option disabled class="" value="{{null}}">Choisissez l'heure de début</option>
-                                    @for ($s = 7; $s < 19; $s++)
-                                        <option  value="{{$s}}">{{$s . 'H'}}</option>
-                                    @endfor
-                                </select>
-                            </div>
-                            <div class="col-1">
-                                <select class="px-2 form-select text-white z-bg-secondary w-100 @error('end') text-danger border border-danger @enderror" wire:model.defer="end" name="end" id="end">
-                                    <option disabled class="" value="{{null}}">Choisissez l'heure de fin</option>
-                                    @for ($e = ($start + 1); $e < 20; $e++)
-                                        <option  value="{{$e}}">{{$e . 'H'}}</option>
-                                    @endfor
-                                </select>
+                            <div class="col-6">
+                                <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer"> Horaire de cours : Début - Fin </label>
+                                <div class="col-12 m-0 p-0 d-flex justify-content-between">
+                                    <div class="col-6 p-0 m-0">
+                                        <select class="px-2 form-select text-white z-bg-secondary w-100 @error('start') text-danger border border-danger @enderror" wire:model="start" name="start">
+                                            <option disabled class="" value="{{null}}">Choisissez l'heure de début</option>
+                                            @for ($s = 7; $s < 19; $s++)
+                                                <option  value="{{$s}}">{{$s . 'H'}}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                    <div class="col-6 p-0 m-0 ml-1">
+                                        <select class="px-2 form-select text-white z-bg-secondary w-100 @error('end') text-danger border border-danger @enderror" wire:model.defer="end" name="end">
+                                            <option disabled class="" value="{{null}}">Choisissez l'heure de fin</option>
+                                            @for ($e = ($start + 1); $e < 20; $e++)
+                                                <option  value="{{$e}}">{{$e . 'H'}}</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

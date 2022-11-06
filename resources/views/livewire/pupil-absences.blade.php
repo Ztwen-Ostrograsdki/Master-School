@@ -28,7 +28,7 @@
                             {{ $absence->subject->name }}
                         </td>
                         
-                        <td class="text-center">{{ $absence->date }}</td>
+                        <td class="text-center">{{ $absence->__getDateAsString($absence->date) }}</td>
                         <td class="text-center"> {{ $absence->horaire }}</td>
                         <td class="text-center"> {{ $absence->motif }}</td>
                         <td class="text-center"> 

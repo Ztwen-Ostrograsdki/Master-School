@@ -30,7 +30,7 @@
                             {{ $late->subject->name }}
                         </td>
                         
-                        <td class="text-center">{{ $late->date }}</td>
+                        <td class="text-center">{{ $late->__getDateAsString($late->date) }}</td>
                         <td class="text-center"> {{ $late->horaire }}</td>
                         <td class="text-center"> {{ $late->coming_hour }}</td>
                         <td class="text-center"> {{ $late->duration }}</td>

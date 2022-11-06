@@ -8,6 +8,7 @@ use App\Models\School;
 use App\Models\SchoolYear;
 use App\Models\Subject;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class InsertPupilRelatedMark extends Component
@@ -16,7 +17,8 @@ class InsertPupilRelatedMark extends Component
     public $classe_id;
     public $pupil_id;
     public $subject_id;
-    public $marks;
+    public $marks = 4;
+    public $tabsMark = [];
     public $type = 'bonus';
     public $motif;
     public $horaire;
@@ -28,14 +30,12 @@ class InsertPupilRelatedMark extends Component
     public $semestre_type = 'Semestre';
     public $school_year;
     public $subjects = [];
-    public $classe_subject_selected;
 
     public function render()
     {
         $types_of_marks = [
             'minus' => 'Sanction',
             'bonus' => 'Bonus'
-
         ];
         $semestres = [1, 2];
         $school = School::first();
@@ -63,6 +63,7 @@ class InsertPupilRelatedMark extends Component
 
             if($pupil && $subject){
                 $this->pupil = $pupil;
+                $this->pupil_id = $pupil->id;
                 
                 if($semestre){
                     $this->semestre_id = $semestre;
@@ -99,6 +100,7 @@ class InsertPupilRelatedMark extends Component
         $pupil = $this->pupil;
         $start = $this->start;
         $end = $this->end;
+        $this->horaire = $start . 'H - ' . $end . 'H';
 
         if($school_year && $subject_id && $classe_id && $semestre && $type && $marks){
             $marks = explode('-', $marks);
@@ -111,36 +113,38 @@ class InsertPupilRelatedMark extends Component
                 if(!is_numeric($mark)){
                     return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres!", 'type' => 'error']);
                 }
-                elseif(floatval($mark) > 20 || floatval($mark) < 0){
-                    return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres compris entre 00 et 20!", 'type' => 'error']);
+                elseif($type == 'bonus' && (floatval($mark) > 10 || floatval($mark) < 0)){
+                    return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les bonus doivent être des nombres compris entre 00 et 10!", 'type' => 'error']);
+                }
+                elseif($type == 'minus' && (floatval($mark) > 100 || floatval($mark) <= 1)){
+                    return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les moins doivent être des nombres compris entre 01 et 100!", 'type' => 'error']);
                 }
             }
 
-            return false;
+            $this->tabsMark = $tabs;
 
-            if($tabs !== []){
-                $make = DB::transaction(function($e) use ($tabs, $pupil, $subject_id, $semestre, $classe_id, $type, $school_year_model){
-                    foreach($tabs as $validMark){
-                        DB::transaction(function($e) use ($validMark, $pupil, $subject_id, $semestre, $classe_id, $type, $school_year_model){
+            if($this->tabsMark !== []){
+                $make = DB::transaction(function($e) use ($school_year_model){
+                    foreach($this->tabsMark as $validMark){
+                        DB::transaction(function($e) use ($validMark, $school_year_model){
                             $mark = RelatedMark::create([
                                 'value' => $validMark, 
-                                'pupil_id' => $pupil->id, 
-                                'subject_id' => $subject_id, 
-                                'classe_id' => $classe_id, 
-                                'semestre' => $semestre, 
-                                'type' => $type, 
-                                'level_id' => $pupil->level_id, 
-                                'horaire' => $this->start . 'H - ' . $this->end . 'H',
+                                'pupil_id' => $this->pupil_id, 
+                                'subject_id' => $this->subject_id, 
+                                'classe_id' => $this->classe_id, 
+                                'semestre' => $this->semestre_id, 
+                                'type' => $this->type, 
+                                'level_id' => $this->pupil->level_id, 
+                                'horaire' => $this->horaire,
                                 'motif' => $this->motif,
                                 'date' => $this->date,
                             ]);
                             if ($mark) {
-                                $school_year_model->marks()->attach($mark->id);
+                                $school_year_model->related_marks()->attach($mark->id);
                             }
 
                         });
                     }
-
                     DB::afterCommit(function(){
                         $this->emit('pupilUpdated');
                         $this->emit('classeUpdated');

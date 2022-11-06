@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\DateFormattor;
 use App\Models\Classe;
 use App\Models\Level;
 use App\Models\Pupil;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class RelatedMark extends Model
 {
+    use DateFormattor;
+    
     protected $fillable = [
         'value', 
         'pupil_id', 
@@ -66,6 +69,17 @@ class RelatedMark extends Model
     public function level()
     {
         return $this->belongsTo(Level::class);
+    }
+
+    public function getValue()
+    {
+        if ($this->type == 'bonus') {
+            return  '+ ' . $this->value;
+        }
+        elseif ($this->type == 'minus') {
+            return  '- ' . $this->value;
+        }
+
     }
 
 }

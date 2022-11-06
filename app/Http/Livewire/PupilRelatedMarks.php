@@ -4,7 +4,9 @@ namespace App\Http\Livewire;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Pupil;
+use App\Models\RelatedMark;
 use App\Models\School;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class PupilRelatedMarks extends Component
@@ -122,21 +124,28 @@ class PupilRelatedMarks extends Component
         $this->emit('insertRelatedMarkLiveEvent', $this->pupil_id, $subject_id, $semestre, $school_year_model->id);
     }
 
-    public function delete($late_id)
+    public function delete($mark_id)
     {
-        return false;
-        if($late_id){
-            $late = Lates::find($late_id);
-            if($late){
-                $m = $late->delete();
-                if($m){
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Mise à jour réussie avec succès!", 'type' => 'success']);
-                }
-                else{
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Mise à jour échouée!", 'type' => 'error']);
+        if($mark_id){
+            $mark = RelatedMark::find($mark_id);
+            if($mark){
+                DB::transaction(function($e) use ($mark){
+                    $school_year_model = $mark->school_year();
+                    $detach = $school_year_model->related_marks()->detach($mark->id);
 
-                }
-                $this->emit('pupilUpdated', $late->pupil_id);
+                    if($detach){
+                        $m = $mark->delete();
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Mise à jour échouée!", 'type' => 'error']);
+                    }
+                    DB::afterCommit(function(){
+                        $this->emit('pupilUpdated');
+                        $this->emit('classeUpdated');
+                        $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Mise à jour réussie avec succès!", 'type' => 'success']);
+
+                    });
+                });
             }
         }
     }

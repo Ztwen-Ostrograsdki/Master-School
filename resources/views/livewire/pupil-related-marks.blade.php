@@ -27,32 +27,32 @@
             </thead>
             <tbody>
                 @foreach($related_marks as $k => $mark)
-                    <tr class="@if($mark->justified) text-success @else text-danger @endif">
+                    <tr class="">
                         <td class="text-center border-right">{{ $loop->iteration }}</td>
                         <td class="text-capitalize pl-2" >
                             {{ $mark->subject->name }}
                         </td>
                         
-                        <td class="text-center">{{ $mark->date }}</td>
+                        <td class="text-center">{{ $mark->__getDateAsString($mark->date) }}</td>
                         <td class="text-center"> {{ $mark->horaire }}</td>
-                        <td class="text-center"> {{ $mark->coming_hour }}</td>
-                        <td class="text-center"> {{ $mark->duration }}</td>
+                        <td class="text-center @if($mark->type == 'bonus') text-success @else text-danger @endif"> {{ $mark->getValue() }}</td>
+                        <td class="text-center"> {{ $mark->type }}</td>
                         <td class="text-center"> {{ $mark->motif }}</td>
                         <td class="text-center"> 
                             <span class="row w-100 m-0 p-0">
-                                <span title="Supprimer ce retard" wire:click="delete({{$mark->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                <span title="Supprimer cette note" wire:click="delete({{$mark->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
                                     <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
                                 </span>
                                 @if($mark->justified)
-                                    <span title="Marquer comme non justifié" wire:click="unjustified({{$mark->id}})" class="text-warning col-4 m-0 p-0 cursor-pointer border-right border-left">
+                                    <span title="Marquer comme non justifié" class="text-warning col-4 m-0 p-0 cursor-pointer border-right border-left">
                                     <span class="fa bi-person-x-fill py-2 px-2"></span>
                                 </span>
                                 @else
-                                    <span title="Marquer comme justifié" wire:click="justified({{$mark->id}})" class="text-success col-4 m-0 p-0 cursor-pointer border-right border-left">
+                                    <span title="Marquer comme justifié" class="text-success col-4 m-0 p-0 cursor-pointer border-right border-left">
                                         <span class="fa fa-check py-2 px-2"></span>
                                     </span>
                                 @endif
-                                <span title="Editer" wire:click="edit({{$alte->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                <span title="Editer" wire:click="edit({{$mark->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
                                     <span class="text-primary cursor-pointer fa fa-edit py-2 px-2"></span>
                                 </span>
                             </span>

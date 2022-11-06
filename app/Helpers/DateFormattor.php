@@ -50,6 +50,23 @@ trait DateFormattor{
     ];
 
 
+    public function __getDateAsString($date = null)
+    {
+        if($date){
+            $parts = array_reverse(explode('-', $date));
+
+            $day = $parts[0];
+            $month = $parts[1];
+            $year = $parts[2];
+
+            return $day . ' ' . $this->monthsTab[$month - 1] . ' ' . $year;
+        }
+
+
+
+    }
+
+
     public function __setDate()
     {
         $tabs = explode(' ', $this->created_at);

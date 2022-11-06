@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\DateFormattor;
 use App\Models\Subject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class PupilLates extends Model
 {
     use HasFactory;
+    use DateFormattor;
 
     protected $fillable = [
         'pupil_id',
