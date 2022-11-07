@@ -61,9 +61,9 @@ class PupilLates extends Component
             $pupil = Pupil::find($pupil_id);
             if($pupil){
                 $lates = $pupil->lates()
-                                  ->where('school_year_id', $school_year_model->id)
-                                  ->where('semestre', $semestre)
-                                  ->get();
+                               ->where('school_year_id', $school_year_model->id)
+                               ->where('semestre', $semestre)
+                               ->get();
 
             }
             else{

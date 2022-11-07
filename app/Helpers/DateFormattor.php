@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 
 
 trait DateFormattor{
@@ -50,16 +50,23 @@ trait DateFormattor{
     ];
 
 
-    public function __getDateAsString($date = null)
+    public function __getDateAsString($date = null, $substr = 3)
     {
         if($date){
             $parts = array_reverse(explode('-', $date));
 
-            $day = $parts[0];
-            $month = $parts[1];
-            $year = $parts[2];
 
-            return $day . ' ' . $this->monthsTab[$month - 1] . ' ' . $year;
+            $day = Carbon::parse($date)->locale('fr')->dayName;
+            $dayNumber = Carbon::parse($date)->locale('fr')->day;
+
+
+            $month = Carbon::parse($date)->locale('fr')->monthName;
+            $year = Carbon::parse($date)->locale('fr')->year;
+
+            if($substr){
+                return mb_substr($day, 0, 3) . ' ' . ($dayNumber > 9 ? $dayNumber : '0'. $dayNumber) . ' ' . mb_substr($month, 0, 3) . ' ' . $year;
+            }
+            return $day . ' ' . ($dayNumber > 9 ? $dayNumber : '0'. $dayNumber) . ' ' . $month . ' ' . $year;
         }
 
 

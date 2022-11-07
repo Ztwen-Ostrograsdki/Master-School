@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Helpers\DateFormattor;
 use App\Helpers\ModelTraits\PupilTraits;
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Helpers\ZtwenManagers\GaleryManager;
 use App\Models\Classe;
+use App\Models\ClassePupilSchoolYear;
 use App\Models\Image;
 use App\Models\Level;
 use App\Models\Mark;
@@ -25,6 +27,7 @@ class Pupil extends Model
     use GaleryManager;
     use DateFormattor;
     use PupilTraits;
+    use ModelQueryTrait;
 
     protected $fillable = [
         'firstName',
@@ -40,8 +43,16 @@ class Pupil extends Model
         'authorized',
         'level_id',
         'residence',
-        'last_school_from'
+        'last_school_from',
+        'bonus_counter',
+        'minus_counter',
+        'last_related_mark',
     ];
+
+    public function classesSchoolYears()
+    {
+        return $this->hasMany(ClassePupilSchoolYear::class);
+    }
 
     public function school_years()
     {
@@ -90,6 +101,91 @@ class Pupil extends Model
     {
         return $this->hasMany(RelatedMark::class);
     }
+
+    public function getRelatedMarksCounter(int $classe_id, int $subject_id, int $semestre, $school_year, $type = 'bonus', $signed = false)
+    {
+        $this->bonus_counter = 0; 
+        $this->minus_counter = 0; 
+        if($classe_id && $subject_id && $semestre && $school_year){
+            if(is_numeric($school_year)){
+                $school_year_model = SchoolYear::where('id', $school_year)->first();
+            }
+            else{
+                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+            }
+            if($school_year_model){
+                $school_year_model->related_marks()->where('pupil_id', $this->id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', $type)->each(function($mark) use ($type){
+                    if($type == 'bonus'){
+                        $this->bonus_counter = $this->bonus_counter + $mark->value;
+                    }
+                    elseif ($type == 'minus') {
+                        $this->minus_counter = $this->minus_counter + $mark->value;
+                    }
+                });
+            }
+        }
+        if($type == 'bonus'){
+            return( $signed && $this->bonus_counter > 0) ?  ' + '. $this->bonus_counter : $this->bonus_counter ;
+        }
+        elseif ($type == 'minus') {
+            return ($signed && $this->minus_counter > 0) ? ' - '. $this->minus_counter : $this->minus_counter ;
+        }
+    }
+
+
+    public function getLastRelatedMark(int $classe_id, int $subject_id, int $semestre, $school_year, $signed = false)
+    {
+        if($classe_id && $subject_id && $semestre && $school_year){
+            if(is_numeric($school_year)){
+                $school_year_model = SchoolYear::where('id', $school_year)->first();
+            }
+            else{
+                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+            }
+            if($school_year_model){
+                $this->last_related_mark = $school_year_model->related_marks()->where('pupil_id', $this->id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->orderBy('related_marks.id', 'desc')->first();
+            }
+        }
+        return $this->last_related_mark;
+
+    }
+
+    public function getLastRelatedMarkValue(int $classe_id, int $subject_id, int $semestre, $school_year, $signed = false)
+    {
+        $mark = $this->getLastRelatedMark($classe_id, $subject_id, $semestre, $school_year);
+        if($mark){
+            return $signed ? ($mark->type == 'bonus' ? ' + '. $mark->value : ' - ' . $mark->value) : $mark->value;
+        }
+        return null;
+
+    }
+
+    public function getLastRelatedMarkDate(int $classe_id, int $subject_id, int $semestre, $school_year)
+    {
+        $mark = $this->getLastRelatedMark($classe_id, $subject_id, $semestre, $school_year);
+        if($mark){
+            return $mark->__getDateAsString($mark->date);
+        }
+        return null;
+
+    } 
+
+    public function getLastRelatedMarkHoraire(int $classe_id, int $subject_id, int $semestre, $school_year)
+    {
+        $mark = $this->getLastRelatedMark($classe_id, $subject_id, $semestre, $school_year);
+        if($mark){
+            return $mark->horaire;
+        }
+        return null;
+
+    }
+
+
+
+
+
+
+
     public function parents()
     {
         return $this->hasMany(ParentPupil::class);
@@ -137,32 +233,68 @@ class Pupil extends Model
     }
 
 
+
+
     public function getArchives()
     {
-        $classes = [];
+        $all_classes = [];
         $school_years = SchoolYear::all();
 
         $pupil_school_years = $this->school_years;
         if(count($pupil_school_years) > 0){
-            $pupil_classes = $this->classes()->pluck('classes.id')->toArray();
-            foreach ($pupil_school_years as $school_year) {
-                $classe = $school_year->classes()->whereIn('classes.id', $pupil_classes)->first();
-                if($classe){
-                    $classes[] = [
-                        'classe' => $classe,
-                        'school_year' => $school_year
-                    ];
-
+            $classesSchoolYears = $this->classesSchoolYears;
+            if($classesSchoolYears){
+                foreach ($classesSchoolYears as $school_year_classe) {
+                    $classe = $school_year_classe->classe;
+                    $school_year = $school_year_classe->school_year;
+                    
+                    if($classe && $school_year){
+                        $all_classes[] = [
+                            'classe' => $classe,
+                            'school_year' => $school_year
+                        ];
+                    }
                 }
             }
-            return $classes;
-
+           
+            return $all_classes;
         }
         else{
-
             return null;
+        }
+    }
+
+
+    public function getCurrentClasse($school_year = null)
+    {
+        $classe = null;
+        if($school_year){
+            if(is_numeric($school_year)){
+                $school_year_model = SchoolYear::where('id', $school_year)->first();
+            }
+            else{
+                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+            }
+        }
+        else{
+            $school_year_model = $this->getSchoolYear();
 
         }
+
+        $relation = $this->classesSchoolYears()->where('school_year_id', $school_year_model->id)->first();
+        if($relation){
+            $classe = $relation->classe;
+        }
+
+        return $classe;
+
+
+    }
+
+
+
+    public function isDoingThisClasseInThisSchoolYear($classe, $school_year)
+    {
 
 
 

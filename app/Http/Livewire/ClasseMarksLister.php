@@ -68,7 +68,7 @@ class ClasseMarksLister extends Component
             }
         }
         if($classe){
-            $pupils = $classe->getClassePupils();
+            $pupils = $classe->getPupils($school_year_model->id);
         }
 
         $marks = $this->classe->getMarks($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
@@ -189,10 +189,28 @@ class ClasseMarksLister extends Component
     public function insertMarks($pupil_id)
     {
         $subject_id = session('classe_subject_selected');
-        $semestre = session('semestre_selected');
-        $classe_id = $this->classe_id;
-        $school_year_model = $this->getSchoolYear();
-        $this->emit('addNewsMarksLiveEvent', $pupil_id, $classe_id, $subject_id, $semestre, $school_year_model->id);
+        if($subject_id){
+            $semestre = session('semestre_selected');
+            $classe_id = $this->classe_id;
+            $school_year_model = $this->getSchoolYear();
+            $this->emit('addNewsMarksLiveEvent', $pupil_id, $classe_id, $subject_id, $semestre, $school_year_model->id);
+        }
+        else{
+            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une matière en premier!", 'type' => 'error']);
+        }
+    }
+
+    public function insertRelatedMark($pupil_id, $semestre = null, $school_year = null)
+    {
+        $subject_id = session('classe_subject_selected');
+        if($subject_id){
+            $semestre = session('semestre_selected');
+            $school_year_model = $this->getSchoolYear();
+            $this->emit('insertRelatedMarkLiveEvent', $pupil_id, $subject_id, $semestre, $school_year_model->id);
+        }
+        else{
+            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une matière en premier!", 'type' => 'error']);
+        }
     }
 
 

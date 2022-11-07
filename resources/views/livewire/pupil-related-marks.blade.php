@@ -33,7 +33,7 @@
                             {{ $mark->subject->name }}
                         </td>
                         
-                        <td class="text-center">{{ $mark->__getDateAsString($mark->date) }}</td>
+                        <td class="text-center text-capitalize">{{ $mark->__getDateAsString($mark->date) }}</td>
                         <td class="text-center"> {{ $mark->horaire }}</td>
                         <td class="text-center @if($mark->type == 'bonus') text-success @else text-danger @endif"> {{ $mark->getValue() }}</td>
                         <td class="text-center"> {{ $mark->type }}</td>

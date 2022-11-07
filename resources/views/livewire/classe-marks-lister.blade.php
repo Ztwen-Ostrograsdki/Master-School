@@ -143,7 +143,12 @@
                                 <td class=" text-center moy-note"> - </td>
                                 <td class=" text-center moy-coef-note"> - </td>
                                 <td class=" text-center rank-note"> - </td>
-                                <td class="text-center">actions</td>
+                                <td class="text-center">
+                                    <span wire:click="insertRelatedMark({{$p->id}})" title="Ajouter une note relative : Sanction ou Bonus" class="cursor-pointer">
+                                        <strong class="bi-plus text-success"></strong>/
+                                        <strong class="text-danger"> - </strong>
+                                    </span>
+                                </td>
                             @else
                                 @for ($ev=1; $ev <= $epeMaxLenght; $ev++)
                                     <td class="text-center cursor-pointer">

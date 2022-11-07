@@ -61,9 +61,10 @@ class PupilRelatedMarks extends Component
 
             $pupil = Pupil::find($pupil_id);
             if($pupil){
-                $related_marks = $pupil->related_marks()
-                                  ->where('semestre', $semestre)
-                                  ->get();
+                $related_marks = $school_year_model->related_marks()
+                                                   ->where('pupil_id', $pupil_id)
+                                                   ->where('semestre', $this->semestre_selected)
+                                                   ->get();
 
             }
             else{
@@ -117,11 +118,16 @@ class PupilRelatedMarks extends Component
     public function insertRelatedMark()
     {
         $subject_id = session('classe_subject_selected');
-        $semestre = session('semestre_selected');
-        $semestre = session('semestre_selected');
-        $school_year_model = $this->getSchoolYear();
+        if($subject_id){
+            $semestre = session('semestre_selected');
+            $school_year_model = $this->getSchoolYear();
 
-        $this->emit('insertRelatedMarkLiveEvent', $this->pupil_id, $subject_id, $semestre, $school_year_model->id);
+            $this->emit('insertRelatedMarkLiveEvent', $this->pupil_id, $subject_id, $semestre, $school_year_model->id);
+        }
+        else{
+            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une matière en premier!", 'type' => 'error']);
+
+        }
     }
 
     public function delete($mark_id)

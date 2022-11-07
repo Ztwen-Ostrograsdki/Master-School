@@ -91,12 +91,15 @@
                   <span wire:click="editClasseName({{$classe->id}})" class="fa fa-edit cursor-pointer mx-2"></span>
                 @endif
                 @if (!$editingClasseName)
-                <select id="semestre_selected" wire:model="semestre_selected" wire:change="changeSemestre" class="form-select ml-3">
-                  <option value="{{null}}">Veuillez sélectionner le {{$semestre_type}}</option>
-                  @foreach ($semestres as $semestre)
-                      <option value="{{$semestre}}">{{$semestre_type . ' ' . $semestre}}</option>
-                  @endforeach
-                </select>
+                <form class="d-inline" action="">
+                    @csrf()
+                    <select id="semestre_selected" wire:model="semestre_selected" wire:change="changeSemestre" class="form-select ml-3">
+                      <option value="{{null}}">Veuillez sélectionner le {{$semestre_type}}</option>
+                      @foreach ($semestres as $semestre)
+                          <option value="{{$semestre}}">{{$semestre_type . ' ' . $semestre}}</option>
+                      @endforeach
+                    </select>
+                </form>
                 @endif
               </h3>
               @if($classe)
@@ -120,8 +123,8 @@
                 </li>
                 <li wire:click="setClasseProfilActiveSection('liste')" class="nav-item"><a class="nav-link @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') == 'liste') active @elseif(!session()->has('classe_profil_section_selected')) active @endif border border-white" href="#tab_1" data-toggle="tab">Liste</a></li>
                 <li wire:click="setClasseProfilActiveSection('marks')" class="nav-item"><a class="nav-link @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'marks') active @endif border border-white mx-1" href="#tab_2" data-toggle="tab">Les Notes</a></li>
-                <li wire:click="setClasseProfilActiveSection('lates')" class="nav-item"><a class="nav-link @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'lates') active @endif border border-white" href="#tab_3" data-toggle="tab">Retard</a></li>
-                <li wire:click="setClasseProfilActiveSection('absences')" class="nav-item"><a class="nav-link @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'absences') active @endif border border-white mx-1" href="#tab_4" data-toggle="tab">Absence</a></li>
+                <li wire:click="setClasseProfilActiveSection('related_marks')" class="nav-item"><a class="nav-link @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'related_marks') active @endif border border-white" href="#tab_3" data-toggle="tab">Bonus - Sanctions</a></li>
+                <li wire:click="setClasseProfilActiveSection('lates_absences')" class="nav-item"><a class="nav-link @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'lates_absences') active @endif border border-white mx-1" href="#tab_4" data-toggle="tab">Absence</a></li>
               </ul>
               @else
               <h3 class="card-title ml-auto p-3 float-right text-warning">
@@ -153,10 +156,10 @@
                 <div class="tab-pane les-notes-de-la-classe @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'marks') active @endif" id="tab_2">
                     @livewire('classe-marks-lister', ['classe_id' => $classe->id])
                 </div>
-                <div class="tab-pane les-retard-de-la-classe @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'lates') active @endif" id="tab_3">
-                    @livewire('classe-marks-lister', ['classe_id' => $classe->id])
+                <div class="tab-pane les-retard-de-la-classe @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'related_marks') active @endif" id="tab_3">
+                    @livewire('classe-pupil-related-mark', ['classe_id' => $classe->id])
                 </div>
-                <div class="tab-pane les-absences-de-la-classe @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'absences') active @endif" id="tab_4">
+                <div class="tab-pane les-absences-de-la-classe @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'lates_absences') active @endif" id="tab_4">
                     @livewire('classe-presence-absence', ['classe_id' => $classe->id])
                 </div>
                 @endif

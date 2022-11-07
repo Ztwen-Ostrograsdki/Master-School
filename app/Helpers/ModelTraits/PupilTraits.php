@@ -5,6 +5,7 @@ use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\PupilAbsences;
 use App\Models\PupilLates;
 use App\Models\SchoolYear;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 trait PupilTraits{
@@ -288,6 +289,35 @@ trait PupilTraits{
             }
         }
     }
+
+
+    public function deleteAllPupilRelatedMarks(int $classe_id, int $subject_id, int $semestre, $school_year)
+    {
+        if($subject_id && $semestre && $school_year){
+            DB::transaction(function($e) use ($subject_id, $semestre, $school_year, $classe_id){
+                if(is_numeric($school_year)){
+                    $school_year_model = SchoolYear::where('id', $school_year)->first();
+                }
+                else{
+                    $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+                }
+                if($school_year_model){
+                    $school_year_model->related_marks()->where('pupil_id', $this->id)->where('semestre', $semestre)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->each(function($mark) use ($school_year_model){
+                        $detach = $school_year_model->related_marks()->detach($mark->id);
+                        if($detach){
+                            $mark->delete();
+                        }
+                    });
+                    return true;
+                }
+                return false;
+            });
+        }
+        return false;
+
+
+    }
+
 
     
 }

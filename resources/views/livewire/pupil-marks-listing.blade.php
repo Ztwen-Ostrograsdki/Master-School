@@ -11,7 +11,7 @@
         <div>
             <blockquote class="text-primary">
                 <h5 class="m-0 p-0 text-white-50">
-                    Les détails sur les notes
+                    Les détails sur les notes de {{$pupil->getName()}} année-scolaire {{session('school_year_selected')}} classe {{$pupil->getCurrentClasse() ? $pupil->getCurrentClasse()->name : ''}}
                 </h5>
             </blockquote>
         </div>

@@ -1,4 +1,4 @@
-<div class="m-0 p-0 w-100" x-data="{start_new_school: @entangle('start_new_school');" >  
+<div class="m-0 p-0 w-100" >  
     @if($has_school) 
         @if($has_data)
             @livewire('admin-container-component')
@@ -75,6 +75,7 @@
             </div>
         @else
             <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="buildSchool">
+                {{ csrf_field()}}
                 <div class="row mx-auto w-100 ">
                     <div class="col-12 col-xl-5 col-lg-5 col-xlg-5 mt-0 mb-2">
                         <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer" for="school_name">Le nom de votre école</label>

@@ -2,7 +2,7 @@
     <div class="px-2">
         <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
             <div class="card-header bg-dark"> 
-                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Informations Générales
+                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Informations Générales 
                     {{ $pupil ? " de l'apprenant " : ''}}  
                     <span class="text-warning">{{ $pupil ? $pupil->getName() : "" }}</span>
                 </h5>
@@ -87,7 +87,7 @@
                                 <div class="card-body">
                                     <x-ztitle-liner :title="'Nom : '" :value="$pupil->firstName"></x-ztitle-liner>
                                     <x-ztitle-liner :title="'Prénoms : '" :value="$pupil->lastName"></x-ztitle-liner>
-                                    <x-ztitle-liner :title="'Date de naissance : '" :value="$pupil->birth_day"></x-ztitle-liner>
+                                    <x-ztitle-liner classe="text-capitalize" :title="'Date de naissance : '" :value="$pupil->__getDateAsString($pupil->birth_day, null)"></x-ztitle-liner>
                                     <x-ztitle-liner :title="'Lieu de naissance : '" :value="$pupil->birth_city"></x-ztitle-liner>
                                     <x-ztitle-liner :title="'Domicile : '" :value="$pupil->residence"></x-ztitle-liner>
                                 </div>
@@ -196,16 +196,20 @@
                                 Veuillez cliquer sur le bouton pour lier cet apprenant à l'année {{ session('school_year_selected') }}
                             </span>
                             <div class="row">
-                                <span wire:click="joinPupilToSchoolYear" class="text-center btn-primary cursor-pointer border h6 p-2 m-2 col-7">
+                                <span wire:click="joinPupilToSchoolYear" class="text-center btn-primary cursor-pointer border h6 p-2 m-2 col-6">
                                     Générer les données de cet apprenant pour l'année scolaire {{ session('school_year_selected') }}
                                 </span>
-                                <form class="col-4" action="">
+                                @if($classes && count($classes) > 0)
+                                <form class="col-5 mt-2" action="">
                                     <div class="w-100">
-                                        <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer" for="">Veuillez préciser la classe </label>
                                         <select class="px-2 form-select text-white z-bg-secondary w-100 @error('classe_id') text-danger border border-danger @enderror" wire:model.defer="classe_id" name="classe_id">
-                                            <option disabled class="" value="{{null}}">Choisissez la classe</option>
+                                            <option class="" value="{{null}}">Choisissez la classe de l'apprenant en l'année scolaire {{ session('school_year_selected') }}</option>
                                             @foreach ($classes as $c)
-                                                <option  value="{{$c->id}}">{{$c->name}}</option>
+                                                @if(!$c->alreadyJoinedToThisYear())
+                                                    <option title="Vous ne pouvez pas sélectionner cette classe car elle n'est pas encore disponible en l'année scolaire {{ session('school_year_selected') }}" disabled  value="{{$c->id}}">{{$c->name}}</option>
+                                                @else
+                                                    <option  value="{{$c->id}}">{{$c->name}}</option>
+                                                @endif
                                             @endforeach
                                         </select>
                                         @error('classe_id')
@@ -213,6 +217,9 @@
                                         @enderror
                                     </div>
                                 </form>
+                                @else
+                                    <span class="text-warning float-right text-right mt-3">Aucune classe n'est disponible</span>
+                                @endif
                             </div>
                         </h6>
                   </blockquote>

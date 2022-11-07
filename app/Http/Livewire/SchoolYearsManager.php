@@ -10,6 +10,7 @@ class SchoolYearsManager extends Component
 {
     protected $listeners = [
         'schoolHasBeenCreated' => 'reloadData',
+        'schoolYearChangedExternallyLiveEvent' => 'reloadSchoolYear',
 
     ];
     public $school_year_selected;
@@ -51,6 +52,12 @@ class SchoolYearsManager extends Component
     public function changeSchoolYear()
     {
         session()->put('school_year_selected', $this->school_year_selected);
+        $this->emit("schoolYearChangedLiveEvent", $this->school_year_selected);
+    }
+
+    public function reloadSchoolYear($school_year)
+    {
+        $this->school_year_selected = $school_year;
         $this->emit("schoolYearChangedLiveEvent", $this->school_year_selected);
     }
 

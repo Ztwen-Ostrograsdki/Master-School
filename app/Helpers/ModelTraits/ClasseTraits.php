@@ -3,6 +3,7 @@ namespace App\Helpers\ModelTraits;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\SchoolYear;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -54,6 +55,34 @@ trait ClasseTraits{
     }
 
 
+    public function deleteAllRelatedMarks(int $subject_id, int $semestre, $school_year)
+    {
+        if($subject_id && $semestre && $school_year){
+            DB::transaction(function($e) use ($subject_id, $semestre, $school_year){
+                if(is_numeric($school_year)){
+                    $school_year_model = SchoolYear::where('id', $school_year)->first();
+                }
+                else{
+                    $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+                }
+                if($school_year_model){
+                    $school_year_model->related_marks()->where('classe_id', $this->id)->where('semestre', $semestre)->where('subject_id', $subject_id)->each(function($mark) use ($school_year_model){
+                        $detach = $school_year_model->related_marks()->detach($mark->id);
+                        if($detach){
+                            $mark->delete();
+                        }
+                    });
+                    return true;
+                }
+                return false;
+            });
+        }
+        return false;
+
+
+    }
+
+
     public function getMarks($subject_id, $semestre = 1, $school_year = null)
     {
         $allMarks = [];
@@ -69,47 +98,42 @@ trait ClasseTraits{
             }
         }
         if($school_year_model){
-            $pupils_of_this_year = $school_year_model->pupils()->where('level_id', $this->level_id)->get()->pluck('id')->toArray();
-            if($pupils_of_this_year > 0){
+            $pupils = $this->getPupils($school_year_model->id);
+                foreach($pupils as $pupil){
+                    $epes = [];
+                    $parts = [];
+                    $devs = [];
 
-                foreach($this->pupils as $pupil){
-                    if(in_array($pupil->id, $pupils_of_this_year)){
-                        $epes = [];
-                        $parts = [];
-                        $devs = [];
+                    $epes = $school_year_model->marks()
+                                              ->where('semestre', $semestre)
+                                              ->where('subject_id', $subject_id)
+                                              ->where('pupil_id', $pupil->id)
+                                              ->where('classe_id', $pupil->classe_id)
+                                              ->where('type', 'epe')
+                                              ->orderBy('id', 'asc')->get();
 
-                        $epes = $school_year_model->marks()
-                                                  ->where('semestre', $semestre)
-                                                  ->where('subject_id', $subject_id)
-                                                  ->where('pupil_id', $pupil->id)
-                                                  ->where('classe_id', $pupil->classe_id)
-                                                  ->where('type', 'epe')
-                                                  ->orderBy('id', 'asc')->get();
+                    $devs = $school_year_model->marks()
+                                              ->where('semestre', $semestre)
+                                              ->where('subject_id', $subject_id)
+                                              ->where('pupil_id', $pupil->id)
+                                              ->where('classe_id', $pupil->classe_id)
+                                              ->where('type', 'devoir')
+                                              ->orderBy('id', 'asc')->get();
 
-                        $devs = $school_year_model->marks()
-                                                  ->where('semestre', $semestre)
-                                                  ->where('subject_id', $subject_id)
-                                                  ->where('pupil_id', $pupil->id)
-                                                  ->where('classe_id', $pupil->classe_id)
-                                                  ->where('type', 'devoir')
-                                                  ->orderBy('id', 'asc')->get();
-
-                        $parts = $school_year_model->marks()
-                                                   ->where('semestre', $semestre)
-                                                   ->where('subject_id', $subject_id)
-                                                   ->where('pupil_id', $pupil->id)
-                                                   ->where('classe_id', $pupil->classe_id)
-                                                   ->where('type', 'participation')
-                                                   ->orderBy('id', 'asc')->get();
-                        
-                        $allMarks[$pupil->id] = [
-                            'epe' => $epes,
-                            'participation' => $parts,
-                            'dev' => $devs
-                        ];
-                    }
+                    $parts = $school_year_model->marks()
+                                               ->where('semestre', $semestre)
+                                               ->where('subject_id', $subject_id)
+                                               ->where('pupil_id', $pupil->id)
+                                               ->where('classe_id', $pupil->classe_id)
+                                               ->where('type', 'participation')
+                                               ->orderBy('id', 'asc')->get();
+                    
+                    $allMarks[$pupil->id] = [
+                        'epe' => $epes,
+                        'participation' => $parts,
+                        'dev' => $devs
+                    ];
                 }
-            }
         }
         return $allMarks;
     }

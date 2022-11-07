@@ -35,7 +35,7 @@ class ClassePupilsLister extends Component
     public function render()
     {
         $school_year = session('school_year_selected');
-        $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+        $school_year_model = $this->getSchoolYear();
 
         $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
         $school_years = SchoolYear::all();
@@ -43,7 +43,7 @@ class ClassePupilsLister extends Component
 
         if(session()->has('classe_subject_selected') && session('classe_subject_selected')){
             $subject_id = intval(session('classe_subject_selected'));
-            if(in_array($subject_id, $classe->subjects->pluck('id')->toArray())){
+            if($classe && in_array($subject_id, $classe->subjects->pluck('id')->toArray())){
                 session()->put('classe_subject_selected', $subject_id);
                 $classe_subject_selected = $subject_id;
             }
@@ -56,15 +56,7 @@ class ClassePupilsLister extends Component
         }
 
         if($classe){
-            $all_pupils = $classe->pupils()->orderBy('firstName', 'asc')->get();
-            foreach($all_pupils as $p){
-                if($p->school_years){
-                    $pupil_of_selected_school_year = $p->school_years()->where('school_year', $school_year)->first();
-                    if($pupil_of_selected_school_year){
-                        $pupils[] = $p;
-                    }
-                }
-            }
+            $pupils = $classe->getPupils($school_year_model->id);
         }
 
         return view('livewire.classe-pupils-lister', compact('classe', 'pupils', 'classe_subject_selected'));
@@ -120,6 +112,23 @@ class ClassePupilsLister extends Component
         }
 
     }
+
+
+    public function insertRelatedMark($pupil_id, $semestre = null, $school_year = null)
+    {
+        $subject_id = session('classe_subject_selected');
+        if($subject_id){
+            $semestre = session('semestre_selected');
+            $school_year_model = $this->getSchoolYear();
+
+            $this->emit('insertRelatedMarkLiveEvent', $pupil_id, $subject_id, $semestre, $school_year_model->id);
+        }
+        else{
+            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une matière en premier!", 'type' => 'error']);
+
+        }
+    }
+
 
     public function addNewPupilTo()
     {

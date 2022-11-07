@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\ClassePupilSchoolYear;
 use App\Models\Level;
 use App\Models\Pupil;
 use Illuminate\Support\Carbon;
@@ -46,12 +47,12 @@ class AddNewPupil extends Component
     public function mount()
     {
         $this->birth_day = (new \DateTime(Carbon::today()))->format('Y-m-d');
-        $this->school_year_model = $this->getSchoolYear();
     }
 
     public function render()
     {
         $levels = Level::all();
+        $this->school_year_model = $this->getSchoolYear();
         $classes = $this->school_year_model->classes;
         return view('livewire.add-new-pupil', compact('levels', 'classes'));
     }
@@ -60,6 +61,7 @@ class AddNewPupil extends Component
     public function addNewPupilToClasseLiveEvent($classe_id)
     {
         $classe = $this->school_year_model->classes()->where('classes.id', $classe_id)->first();
+        $this->school_year_model = $this->getSchoolYear();
         $this->classe = $classe;
         $this->classe_id = $classe->id;
         $this->level_id = $classe->level_id;
@@ -92,17 +94,30 @@ class AddNewPupil extends Component
                             ]
                         );
                         if($pupil){
-                            $this->school_year_model->pupils()->attach($pupil->id);
-                            $classe->classePupils()->attach($pupil->id);
+                            $joinedToClasseAndSchoolYear = ClassePupilSchoolYear::create(
+                                [
+                                    'classe_id' => $this->classe_id,
+                                    'pupil_id' => $pupil->id,
+                                    'school_year_id' => $this->school_year_model->id,
+                                ]
+                            );
+                            if($joinedToClasseAndSchoolYear){
+                                $this->school_year_model->pupils()->attach($pupil->id);
+                                $classe->classePupils()->attach($pupil->id);
+                            }
+                        }
+
+                        DB::afterCommit(function() use ($pupil, $classe){
                             $this->dispatchBrowserEvent('hide-form');
                             $this->resetErrorBag();
                             $this->reset('firstName', 'lastName', 'classe_id', 'contacts', 'sexe', 'nationality', 'birth_city', 'level_id', 'residence', 'last_school_from');
                             $this->dispatchBrowserEvent('Toast', ['title' => 'Inscription terminée', 'message' => "l'appreant $pupil->firstName $pupil->lastName a été ajouté à la classe de $classe->name avec succès! ", 'type' => 'success']);
                             $this->emit('classePupilListUpdated', $classe->id);
-                        }
+                            $this->emit('newPupilHasBeenAdded');
 
-                        $this->emit('newPupilHasBeenAdded');
+                        });
 
+                        
                     });
                 }
                 else{

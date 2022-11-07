@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
+use App\Models\ClassePupilSchoolYear;
 use App\Models\Pupil;
 use App\Models\School;
 use Illuminate\Support\Facades\DB;
@@ -58,6 +59,7 @@ class PupilProfil extends Component
     {
         $school = School::find(1);
         $semestres = [1, 2];
+        $classes = [];
         if($school){
             if($school->trimestre){
                 $this->semestre_type = 'trimestre';
@@ -69,8 +71,6 @@ class PupilProfil extends Component
         }
         $school_year_model = $this->getSchoolYear();
         $school_year = session('school_year_selected');
-
-        $classes = Classe::all();
 
         if(session()->has('semestre_selected') && session('semestre_selected')){
             $semestre = intval(session('semestre_selected'));
@@ -86,6 +86,7 @@ class PupilProfil extends Component
             $pupil = Pupil::find($pupil_id);
             if($pupil){
                 $joined = $pupil->school_years()->where('school_years.id', $school_year_model->id)->first();
+                    $classes = Classe::where('classes.level_id', $pupil->level_id)->get();
                 if($joined){
                     $this->joinedToThisYear = true;
                 }
@@ -196,9 +197,29 @@ class PupilProfil extends Component
                 $classe_yet = $classe->pupils()->where('pupils.id', $this->pupil_id)->first();
                 if(!$year_yet && !$classe_yet && $pupil){
                     DB::transaction(function($e) use ($school_year_model, $pupil, $classe){
-                        $school_year_model->pupils()->attach($pupil->id);
-                        $classe->classePupils()->attach($pupil->id);
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "L'apprenant a été mise à jour avec succès! Cet apprenant est désormais disponible en $school_year_model->school_year !", 'type' => 'success']);
+                        if($classe->alreadyJoinedToThisYear($school_year_model->id)){
+                            
+                            $joinedToClasseAndSchoolYear = ClassePupilSchoolYear::create(
+                                [
+                                    'classe_id' => $classe->id,
+                                    'pupil_id' => $pupil->id,
+                                    'school_year_id' => $school_year_model->id,
+                                ]
+                            );
+
+                            if($joinedToClasseAndSchoolYear){
+                                $school_year_model->pupils()->attach($pupil->id);
+                                $classe->classePupils()->attach($pupil->id);
+                            }
+                           
+                            DB::afterCommit(function() use($school_year_model){
+                                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "L'apprenant a été mise à jour avec succès! Cet apprenant est désormais disponible en $school_year_model->school_year !", 'type' => 'success']);
+                            });
+                        }
+                        else{
+                            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Il semble que vous être entrain de vouloir lier une classe qui n'est pas encore liéée à l'année scolaire sélectionnée!", 'type' => 'error']);
+                        }
+                        
                     });
 
                     $this->emit('pupilUpdated');
@@ -244,6 +265,15 @@ class PupilProfil extends Component
 
         }
         
+    }
+
+
+    public function changeSchoolYear($school_year_selected)
+    {
+        dd($school_year_selected);
+        $this->emit("schoolYearChangedLiveEvent", $school_year_selected);
+        $this->emit("schoolYearChangedExternallyLiveEvent", $school_year_selected);
+        $this->reloadPupilData();
     }
 
 

@@ -1,4 +1,5 @@
 <x-z-modal-generator :hasHeader="true" :modalHeaderTitle="'Inscription de nouvel apprenant(e)'" :width="6" :icon="'fa fa-user-plus'" :modalName="'addNewPupil'" :modalBodyTitle="'Inscription de nouvel apprenant à la classe'">
+    @if($classes)
     <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submit">
         <div class="row justify-between">
             <div class="mt-0 mb-2 col-11 mx-auto">
@@ -64,5 +65,6 @@
             <x-z-button :bg="'btn-primary'" class="text-dark">Valider</x-z-button>
         </div>
     </form>
+    @endif
     </x-z-modal-generator>
     

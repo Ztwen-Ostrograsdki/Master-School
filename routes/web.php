@@ -24,6 +24,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+// Route::any('test', 'TestController@test')->middleware('caffeinated');
+
+// Route::group(['middleware' => ['caffeinated']], function () {
+//     Route::any('test', 'TestController@test');
+// });
+
 Route::get('/', Home::class)->name('home');
 
 Route::group(['prefix' => '/administration'], function(){
