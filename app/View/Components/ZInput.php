@@ -20,13 +20,14 @@ class ZInput extends Component
      *
      * @return void
      */
-    public function __construct($modelName, $labelTitle = '', $type = 'text', $hasLabel = true, $hideLabel = '', $error = null, $width = 'w-100')
+    public function __construct($modelName, $labelTitle = '', $type = 'text', $hasLabel = true, $hideLabel = '', $error = null, $width = 'w-100', $placeholder = null)
     {
         $this->modelName = $modelName;
         $this->labelTitle = $labelTitle;
         $this->type = $type;
         $this->hasLabel = $hasLabel;
         $this->hideLabel = $hideLabel;
+        $this->placeholder = $placeholder;
         $this->error = $error;
         $this->width = $width;
     }

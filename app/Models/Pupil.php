@@ -102,7 +102,7 @@ class Pupil extends Model
         return $this->hasMany(RelatedMark::class);
     }
 
-    public function getRelatedMarksCounter(int $classe_id, int $subject_id, int $semestre, $school_year, $type = 'bonus', $signed = false)
+    public function getRelatedMarksCounter($classe_id, $subject_id, $semestre, $school_year, $type = 'bonus', $signed = false)
     {
         $this->bonus_counter = 0; 
         $this->minus_counter = 0; 
@@ -133,7 +133,7 @@ class Pupil extends Model
     }
 
 
-    public function getLastRelatedMark(int $classe_id, int $subject_id, int $semestre, $school_year, $signed = false)
+    public function getLastRelatedMark(int $classe_id, $subject_id, int $semestre, $school_year, $signed = false)
     {
         if($classe_id && $subject_id && $semestre && $school_year){
             if(is_numeric($school_year)){
@@ -150,7 +150,7 @@ class Pupil extends Model
 
     }
 
-    public function getLastRelatedMarkValue(int $classe_id, int $subject_id, int $semestre, $school_year, $signed = false)
+    public function getLastRelatedMarkValue(int $classe_id, $subject_id, int $semestre, $school_year, $signed = false)
     {
         $mark = $this->getLastRelatedMark($classe_id, $subject_id, $semestre, $school_year);
         if($mark){
@@ -160,7 +160,7 @@ class Pupil extends Model
 
     }
 
-    public function getLastRelatedMarkDate(int $classe_id, int $subject_id, int $semestre, $school_year)
+    public function getLastRelatedMarkDate(int $classe_id, $subject_id, int $semestre, $school_year)
     {
         $mark = $this->getLastRelatedMark($classe_id, $subject_id, $semestre, $school_year);
         if($mark){
@@ -170,7 +170,7 @@ class Pupil extends Model
 
     } 
 
-    public function getLastRelatedMarkHoraire(int $classe_id, int $subject_id, int $semestre, $school_year)
+    public function getLastRelatedMarkHoraire(int $classe_id, $subject_id, int $semestre, $school_year)
     {
         $mark = $this->getLastRelatedMark($classe_id, $subject_id, $semestre, $school_year);
         if($mark){

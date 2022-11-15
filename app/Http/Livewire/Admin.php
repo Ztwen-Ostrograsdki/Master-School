@@ -21,6 +21,7 @@ class Admin extends Component
         'throwSchoolBuiding' => 'throwSchoolBuiding',
         'schoolHasBeenCreated',
         'newLevelCreated' => 'reloadData',
+        'newClasseGroupCreated' => 'reloadData',
         'newClasseCreated' => 'reloadData',
         'newSubjectCreated' => 'reloadData',
         'newPupilHasBeenAdded' => 'reloadData',
@@ -95,6 +96,8 @@ class Admin extends Component
         $this->validate();
 
         $school_year_start  = $this->school_year_start;
+        $school_name  = $this->school_name;
+        $semestre_type  = $this->semestre_type;
         $parts = explode(' - ', $school_year_start);
         $start = intval($parts[0]);
         $end = intval($parts[1]);
@@ -102,64 +105,62 @@ class Admin extends Component
         $school_year_now = date('Y') . ' - ' . intval(date('Y') + 1);
 
         if($school_year_now == $school_year_start){
-            $db = DB::transaction(function($e) use($semestre_type, $school_name, $school_year_start) {
-                $school = School::create([
-                    'name' => $school_name,
-                    'semestre' => $this->areEquals($semestre_type, 'semestre'),
-                    'trimestre' => $this->areEquals($semestre_type, 'trimestre')
-                ]);
-                if($school){
-                    $s = SchoolYear::create(['school_year' => $school_year_start]);
+            DB::transaction(function($e) use($semestre_type, $school_name, $school_year_start) {
+                try {
+                    $school = School::create([
+                        'name' => $school_name,
+                        'semestre' => $this->areEquals($semestre_type, 'semestre'),
+                        'trimestre' => $this->areEquals($semestre_type, 'trimestre')
+                    ]);
+                    if($school){
+                        try {
+                            SchoolYear::create(['school_year' => $school_year_start]);
+                        } 
+                        catch (Exception $e) {
+                            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur!', 'message' => "$school_name n'a pu être créée, une erreure est survenue lors de la création des années scolaires!", 'type' => 'error']);
+                        }
 
-                    if($s){
-                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Validation réussie!', 'message' => "$school->name a été créée avec succès", 'type' => 'success']);
-                        $this->emit('schoolHasBeenCreated');
                     }
-
-                }
-                else{
-                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Validation interrompue!', 'message' => "$school_name n'a pu être créée!", 'type' => 'error']);
+                } 
+                catch (Exception $ee) {
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur!', 'message' => "$school_name n'a pu être créée, une erreure est survenue lors de la création!", 'type' => 'error']);
                 }
             });
 
-            if($db){
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Validation réussie!', 'message' => "$school->name a été créée avec succès", 'type' => 'success']);
+            DB::afterCommit(function() use ($school_name){
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Validation réussie!', 'message' => "$school_name a été créée avec succès", 'type' => 'success']);
                 $this->emit('schoolHasBeenCreated');
-            }
-            else{
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Une erreure est survenue!', 'message' => "$school_name n'a pu être créée!", 'type' => 'error']);
-            }
+            });
         }
         else{
-            $semestre_type = $this->semestre_type;
-            $school_name = $this->school_name;
-            $db = DB::transaction(function($e) use($semestre_type, $school_name, $start, $now) {
-                $school = School::create([
-                    'name' => $school_name,
-                    'semestre' => $this->areEquals($semestre_type, 'semestre'),
-                    'trimestre' => $this->areEquals($semestre_type, 'trimestre')
-                ]);
-                if($school){
-                    for ($i = $start; $i <= $now; $i++) { 
-                        $school_year = $i . ' - ' .intval($i + 1);
-                        SchoolYear::create(['school_year' => $school_year]);
+            DB::transaction(function($e) use($semestre_type, $school_name, $start, $now) {
+                try {
+                    $school = School::create([
+                        'name' => $school_name,
+                        'semestre' => $this->areEquals($semestre_type, 'semestre'),
+                        'trimestre' => $this->areEquals($semestre_type, 'trimestre')
+                    ]);
+                    if($school){
+                        for ($i = $start; $i <= $now; $i++) { 
+                            try {
+                                $school_year = $i . ' - ' .intval($i + 1);
+                                SchoolYear::create(['school_year' => $school_year]);
+                            } catch (Exception $ee) {
+                                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur!', 'message' => "$school_name n'a pu être créée, une erreure est survenue lors de la création des années scolaires!", 'type' => 'error']);
+                            }
+                        }
                     }
-                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Validation réussie!', 'message' => "$school->name a été créée avec succès", 'type' => 'success']);
-                    $this->emit('schoolHasBeenCreated');
-                }
-                else{
-                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Validation interrompue!', 'message' => "$school_name n'a pu être créée!", 'type' => 'error']);
+                    
+                } catch (Exception $e) {
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur!', 'message' => "$school_name n'a pu être créée, une erreure est survenue lors de la création!", 'type' => 'error']);
                 }
             });
 
-            if($db){
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Validation réussie!', 'message' => "$school->name a été créée avec succès", 'type' => 'success']);
+
+            DB::afterCommit(function() use ($school_name){
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Validation réussie!', 'message' => "$school_name a été créée avec succès", 'type' => 'success']);
                 $this->emit('schoolHasBeenCreated');
-            }
-            else{
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Une erreure est survenue!', 'message' => "$school_name n'a pu être créée!", 'type' => 'error']);
-            }
-            
+            });
         }
 
     }
@@ -244,6 +245,13 @@ class Admin extends Component
         }
 
     }
+
+    public function addNewClasseGroup()
+    {
+        $this->emit('createNewClasseGroupLiveEvent');
+    }
+
+    
 
 
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Helpers\ModelTraits\ClasseTraits;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\AverageModality;
+use App\Models\ClasseGroup;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\Coeficient;
 use App\Models\Image;
@@ -32,6 +33,7 @@ class Classe extends Model
         'slug',
         'description',
         'level_id',
+        'classe_group_id',
         'closed',
         'locked',
         'teacher_id'
@@ -56,19 +58,24 @@ class Classe extends Model
         $c_p_s_ys = $this->classePupilSchoolYear()->where('school_year_id', $school_year);
         if($c_p_s_ys->get() && count($c_p_s_ys->get()) > 0){
             $pupils_ids = $c_p_s_ys->pluck('pupil_id')->toArray();
-
-            foreach ($pupils_ids as $pupil_id) {
-                $pupil = Pupil::find($pupil_id);
-                if($pupil){
-                    $pupils[] = $pupil;
-                }
-            }
-
+            $pupils = Pupil::whereIn('id', $pupils_ids)
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->get();
         }
-
         return $pupils;
+    }
 
 
+    public function classe_group()
+    {
+        return $this->belongsTo(ClasseGroup::class);
+    }
+
+
+    public function promotion()
+    {
+        return $this->belongsTo(ClasseGroup::class);
     }
 
 
@@ -136,7 +143,6 @@ class Classe extends Model
     {
         return $this->belongsTo(Level::class);
     }
-
 
     public function coeficients()
     {

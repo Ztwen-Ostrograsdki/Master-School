@@ -57,8 +57,9 @@ trait ClasseTraits{
 
     public function deleteAllRelatedMarks(int $subject_id, int $semestre, $school_year)
     {
+        $action = false;
         if($subject_id && $semestre && $school_year){
-            DB::transaction(function($e) use ($subject_id, $semestre, $school_year){
+            DB::transaction(function($e) use ($subject_id, $semestre, $school_year, $action){
                 if(is_numeric($school_year)){
                     $school_year_model = SchoolYear::where('id', $school_year)->first();
                 }
@@ -66,20 +67,19 @@ trait ClasseTraits{
                     $school_year_model = SchoolYear::where('school_year', $school_year)->first();
                 }
                 if($school_year_model){
-                    $school_year_model->related_marks()->where('classe_id', $this->id)->where('semestre', $semestre)->where('subject_id', $subject_id)->each(function($mark) use ($school_year_model){
+                    $action = $school_year_model->related_marks()->where('classe_id', $this->id)->where('semestre', $semestre)->where('subject_id', $subject_id)->each(function($mark) use ($school_year_model){
                         $detach = $school_year_model->related_marks()->detach($mark->id);
                         if($detach){
                             $mark->delete();
                         }
                     });
-                    return true;
+
                 }
-                return false;
+            });
+            DB::afterCommit(function() use ($action){
+                return true;
             });
         }
-        return false;
-
-
     }
 
 

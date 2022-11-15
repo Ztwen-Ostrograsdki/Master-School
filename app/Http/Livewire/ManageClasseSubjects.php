@@ -27,26 +27,31 @@ class ManageClasseSubjects extends Component
 
     public function mount()
     {
-        $this->school_year_model = $this->getSchoolYear();
-        $this->school_year = $this->school_year_model->school_year;
+        
     }
 
     public function render()
     {
+        $this->school_year_model = $this->getSchoolYear();
+        if($this->school_year_model){
+            $this->school_year = $this->school_year_model->school_year;
+        }
         return view('livewire.manage-classe-subjects');
     }
 
 
     public function manageClasseSubjectsLiveEvent($classe_id)
     {
-        $classe = $this->school_year_model->classes()->where('classes.id', $classe_id)->first();
-        $this->classe = $classe;
-        $this->subjects = Subject::where('level_id', $classe->level_id)->get();
-        foreach($this->subjects as $s){
-            $this->classe_subjects_tabs[$s->id] = $s->name;
-        }
-        $this->classe_subjects = $classe->subjects->pluck('id')->toArray();
-        $this->dispatchBrowserEvent('modal-manageClasseSubjects');
+        if($classe_id && $this->school_year_model){
+            $classe = $this->school_year_model->classes()->where('classes.id', $classe_id)->first();
+            $this->classe = $classe;
+            $this->subjects = Subject::where('level_id', $classe->level_id)->get();
+            foreach($this->subjects as $s){
+                $this->classe_subjects_tabs[$s->id] = $s->name;
+            }
+            $this->classe_subjects = $classe->subjects->pluck('id')->toArray();
+            $this->dispatchBrowserEvent('modal-manageClasseSubjects');
+        }   
     }
 
 

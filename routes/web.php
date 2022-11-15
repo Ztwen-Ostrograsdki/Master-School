@@ -4,6 +4,7 @@ use App\Http\Controllers\BlockTemporaryMyAccount;
 use App\Http\Livewire\Admin;
 use App\Http\Livewire\AdminAuthorization;
 use App\Http\Livewire\AuthRedirections;
+use App\Http\Livewire\ClasseGroupProfil;
 use App\Http\Livewire\ClasseProfil;
 use App\Http\Livewire\Home;
 use App\Http\Livewire\MultiplePupilInsertion;
@@ -36,6 +37,7 @@ Route::get('/', Home::class)->name('home');
 Route::group(['prefix' => '/administration'], function(){
     Route::get('/', Admin::class)->name('admin');
     Route::get('/classe/{slug}', ClasseProfil::class)->name('classe_profil');
+    Route::get('/promotion/{slug}', ClasseGroupProfil::class)->name('classe_group_profil');
     Route::get('/élève/{id}', PupilProfil::class)->name('pupil_profil');
     Route::get('/inscription-élèves/inscription-multiple', MultiplePupilInsertion::class)->name('multiple_pupil_insertion');
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\ClasseGroup;
 use App\Models\Level;
 use App\Models\School;
 use App\Models\SchoolYear;
@@ -17,6 +18,7 @@ class AdminAsideComponent extends Component
         'classePupilListUpdated' => 'reloadData',
         'newClasseCreated' => 'reloadData',
         'classeUpdated' => 'reloadData',
+        'newClasseGroupCreated' => 'reloadData',
         'schoolHasBeenCreated' => 'reloadData',
         'newLevelCreated' => 'reloadData',
     ];
@@ -39,6 +41,7 @@ class AdminAsideComponent extends Component
         $classes = [];
         $pupils = [];
         $teachers = [];
+        $classe_groups = [];
 
         if($school_years > 0 && $has_school > 0){
             $this->has_school = true;
@@ -47,12 +50,13 @@ class AdminAsideComponent extends Component
             $levels = Level::all();
             $classes = $school_year->classes;
             $pupils = $school_year->pupils;
+            $classe_groups = ClasseGroup::all();
             $teachers = $school_year->teachers;
         }
 
         
 
-        return view('livewire.admin-aside-component', compact('levels', 'pupils', 'teachers', 'classes', 'school_name'));
+        return view('livewire.admin-aside-component', compact('levels', 'pupils', 'teachers', 'classes', 'school_name', 'classe_groups'));
     }
 
     public function addNewPupil()

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Helpers\ModelTraits\LevelTraits;
 use App\Models\Classe;
+use App\Models\ClasseGroup;
 use App\Models\Mark;
 use App\Models\Pupil;
 use App\Models\PupilCursus;
@@ -76,6 +77,11 @@ class Level extends Model
     }
 
 
+
+    public function classe_groups()
+    {
+        return $this->hasMany(ClasseGroup::class);
+    }
 
     public function pupils()
     {

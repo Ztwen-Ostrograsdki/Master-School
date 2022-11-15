@@ -71,6 +71,20 @@ class ClassePupilRelatedMark extends Component
         }
     }
 
+    public function makeRelatedMarkTogether($classe_id = null, $semestre = null, $school_year = null, $together = true)
+    {
+        $classe_id ? $id = $classe_id : $id = $this->classe_id;
+        $subject_id = session('classe_subject_selected');
+        if($subject_id){
+            $semestre = session('semestre_selected');
+            $school_year_model = $this->getSchoolYear();
+            $this->emit('insertRelatedMarkLiveEvent', $id, $subject_id, $semestre, $school_year_model->id, $together);
+        }
+        else{
+            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une matière en premier!", 'type' => 'error']);
+        }
+    }
+
 
     public function deleteAllRelatedMarks()
     {
@@ -81,10 +95,10 @@ class ClassePupilRelatedMark extends Component
             $classe = Classe::find($this->classe_id);
             if($classe){
                 $del = $classe->deleteAllRelatedMarks($subject_id, $semestre, $school_year_model->id);
-                if($del){
+                if($del !== false){
                     $this->dispatchBrowserEvent('Toast', ['title' => 'Supression réussie', 'message' => "Les notes ont été bien rafraîchi!", 'type' => 'success']);
                 }
-                else{
+                elseif($del == false){
                     $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Une erreure inconnue s'est produite. Veuillez réessayer!", 'type' => 'error']);
                 }
             }

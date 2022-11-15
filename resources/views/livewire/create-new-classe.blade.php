@@ -1,14 +1,28 @@
-<x-z-modal-generator :hasHeader="true" :modalHeaderTitle="'Création de nouvelle classe'" :width="6" :icon="'fa fa-user-plus'" :modalName="'createNewClasse'" :modalBodyTitle="'Création de nouvelle classe'">
+<x-z-modal-generator :hasHeader="true" :modalHeaderTitle="'Création de nouvelle classe'" :width="6" :icon="'fa fa-school'" :modalName="'createNewClasse'" :modalBodyTitle="'Création de nouvelle classe'">
     <form x-data={} autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submit">
         <div class="row justify-between">
             <div class="mt-0 mb-2 col-11 mx-auto">
                 
-                <div class="d-flex row">
-                    <x-z-input :type="'text'" :error="$errors->first('name')" :modelName="'name'" :labelTitle="'Le Nom de la classe'" ></x-z-input>
+                <div class="d-flex row justify-between m-0 p-0">
+                    <div class="col-7 m-0 p-0">
+                        <x-z-input :type="'text'" :error="$errors->first('name')" :modelName="'name'" :labelTitle="'Le Nom de la classe'" ></x-z-input>
+                    </div>
+                    <div class="col-4 m-0 p-0">
+                        <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">La promotion </label>
+                        <select class="px-2 form-select text-white z-bg-secondary w-100 @error('classe_group_id') text-danger border border-danger @enderror" wire:model.defer="classe_group_id">
+                            <option class="" value="{{null}}">Choisissez la promotion</option>
+                            @foreach ($promotions as $p)
+                                <option  value="{{$p->id}}">{{$p->name}}</option>
+                            @endforeach
+                        </select>
+                        @error('classe_group_id')
+                            <small class="py-1 z-text-orange">{{$message}}</small>
+                        @enderror
+                    </div>
                 </div>
 
-                <div class="d-flex row">
-                    <div class="col-8">
+                <div class="d-flex row justify-between m-0 p-0 mt-1">
+                    <div class="col-7 m-0 p-0">
                         <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Le cycle </label>
                         <select class="px-2 form-select text-white z-bg-secondary w-100 @error('level_id') text-danger border border-danger @enderror" wire:model.defer="level_id">
                             <option disabled class="" value="{{null}}">Choisissez le cycle</option>
@@ -20,7 +34,7 @@
                             <small class="py-1 z-text-orange">{{$message}}</small>
                         @enderror
                     </div>
-                    <div class="col-4">
+                    <div class="col-4 m-0 p-0">
                         <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">L'année scolaire </label>
                         <select class="px-2 form-select text-white z-bg-secondary w-100 @error('school_year') text-danger border border-danger @enderror" wire:model.defer="school_year" name="school_year">
                             <option disabled class="" value="{{null}}">Choisissez une année</option>

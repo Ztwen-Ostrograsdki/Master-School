@@ -52,6 +52,10 @@
                         <span class="fa fa-bookmark"></span>
                         <span>Créer une matière</span>
                     </span>
+                    <span wire:click="addNewClasseGroup" class="btn btn-success text-left p-2 my-1 col-12 border border-white">
+                        <span class="fa fa-filter"></span>
+                        <span>Créer une promotion de classes</span>
+                    </span>
                 </div>
             </div>
         @endif

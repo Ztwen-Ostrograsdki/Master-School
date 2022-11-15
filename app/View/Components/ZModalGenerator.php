@@ -14,13 +14,13 @@ class ZModalGenerator extends Component
     public $bg_color = 'z-bg-secondary';
     public $header_color = 'text-white-50';
     public $icon = '';
-    public $topPosition = 10;
+    public $topPosition = 0;
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($modalName, $modalHeaderTitle = '', $hasHeader = true, $modalBodyTitle = '', $bg_color = 'z-bg-secondary', $header_color = 'text-white-50', $icon = '', $width = null, $topPosition = 10)
+    public function __construct($modalName, $modalHeaderTitle = '', $hasHeader = true, $modalBodyTitle = '', $bg_color = 'z-bg-secondary', $header_color = 'text-white-50', $icon = '', $width = null, $topPosition = 0)
     {
         $this->modalName = $modalName;
         $this->modalHeaderTitle = $modalHeaderTitle;

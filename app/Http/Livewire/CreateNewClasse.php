@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
+use App\Models\ClasseGroup;
 use App\Models\Level;
 use App\Models\Pupil;
 use App\Models\School;
@@ -19,12 +20,14 @@ class CreateNewClasse extends Component
     protected $listeners = ['createNewClasseLiveEvent' => 'createNewClasse'];
     public $name;
     public $level_id; 
+    public $classe_group_id; 
     public $school_year_model;
     public $school_year;
     public $classe;
 
     protected $rules = [
         'name' => 'required|unique:classes|min:2',
+        'classe_group_id' => 'required|bail',
     ];
 
 
@@ -36,19 +39,28 @@ class CreateNewClasse extends Component
     public function render()
     {
         $levels = Level::all();
+        $promotions = ClasseGroup::all();
         $school_years = SchoolYear::all();
-        $this->school_year = $this->school_year_model->id;
-        return view('livewire.create-new-classe', compact('levels', 'school_years'));
+        if($this->school_year_model){
+            $this->school_year = $this->school_year_model->id;
+        }
+        return view('livewire.create-new-classe', compact('levels', 'school_years', 'promotions'));
     }
 
 
     public function createNewClasse()
     {
         $levels = Level::all();
+        $classe_groups = ClasseGroup::all();
 
         if (count($levels) > 0) {
-            $this->level_id = Level::all()->shuffle()->first()->id;
-            $this->dispatchBrowserEvent('modal-createNewClasse');
+            if (count($classe_groups) > 0) {
+                $this->level_id = Level::all()->shuffle()->first()->id;
+                $this->dispatchBrowserEvent('modal-createNewClasse');
+            }
+            else{
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "Vous ne pouvez pas encore de créer de classe. Veuillez insérer d'abord des promotions de classes!", 'type' => 'error']);
+            }
         }
         else{
             $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "Vous ne pouvez pas encore de créer de classe. Veuillez insérer d'abord des cycles d'études!", 'type' => 'error']);
@@ -75,11 +87,6 @@ class CreateNewClasse extends Component
                     if($classe){
                         $school_year->classes()->attach($classe->id);
                         $this->dispatchBrowserEvent('hide-form');
-                        $level = str_replace('Le', '', $classe->level->getName());
-                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Création de classe terminée', 'message' => "la classe  $classe->name a été créé pour le cycle du $level avec succès!", 'type' => 'success']);
-                        $this->emit('newClasseCreated', $classe->id);
-                        $this->resetErrorBag();
-                        $this->reset('name', 'level_id', 'school_year');
                     }
                     else{
                         $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "La Création de la classe a échoué", 'type' => 'error']);
@@ -91,11 +98,13 @@ class CreateNewClasse extends Component
                 
             });
 
-            if($db){
-              
-            }
-            
-            
+            DB::afterCommit(function(){
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Création de classe terminée', 'message' => "la classe a été créé pour le cycle avec succès!", 'type' => 'success']);
+                $this->emit('newClasseCreated');
+                $this->resetErrorBag();
+                $this->reset('name', 'level_id', 'school_year');
+
+            });
         }
     }
 

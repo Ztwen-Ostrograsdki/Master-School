@@ -21,6 +21,9 @@ window.addEventListener('modal-editPupilPersoData', function(e) {
 window.addEventListener('modal-createNewClasse', function(e) {
     $('#createNewClasse').modal('show');
 });
+window.addEventListener('modal-createNewClasseGroup', function(e) {
+    $('#createNewClasseGroup').modal('show');
+});
 window.addEventListener('modal-createNewLevel', function(e) {
     $('#createNewLevel').modal('show');
 });

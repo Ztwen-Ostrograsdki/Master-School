@@ -62,15 +62,7 @@ class ClassePresenceAbsence extends Component
         if($classe){
             $subject_selected = $classe->subjects()->first();
             $subjects = $classe->subjects;
-            $all_pupils = $classe->pupils;
-            foreach($all_pupils as $p){
-                if($p->school_years){
-                    $pupil_of_selected_school_year = $p->school_years()->where('school_year', $school_year)->first();
-                    if($pupil_of_selected_school_year){
-                        $pupils[] = $p;
-                    }
-                }
-            }
+            $pupils = $classe->getPupils($school_year_model->id);
         }
 
         if(session()->has('semestre_selected') && session('semestre_selected')){

@@ -28,6 +28,12 @@ class CreateClassesTable extends Migration
                   ->on('levels')
                   ->onUpdate('restrict')
                   ->onDelete('restrict');
+            $table->unsignedBigInteger('classe_group_id')->nullable();
+            $table->foreign('classe_group_id')
+                  ->references('id')
+                  ->on('classe_groups')
+                  ->onUpdate('restrict')
+                  ->onDelete('restrict');
 
             $table->timestamps();
             $table->softDeletes();

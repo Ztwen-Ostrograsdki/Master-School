@@ -21,13 +21,14 @@ class SchoolYearsManager extends Component
 
     public function mount()
     {
-        $this->school_years = SchoolYear::all()->pluck('school_year');
+        
     }
 
     public function render()
     {
         $school = count(School::all());
         if($school > 0){
+            $this->school_years = SchoolYear::all()->pluck('school_year');
             $this->has_school = true;
             $school_year = date('Y') . ' - ' . intval(date('Y') + 1);
             if(session()->has('school_year_selected') && session('school_year_selected')){
@@ -42,7 +43,8 @@ class SchoolYearsManager extends Component
 
         }
         else{
-
+            $school_year = date('Y') . ' - ' . intval(date('Y') + 1);
+            $this->school_years = [$school_year];
 
         }
         return view('livewire.school-years-manager');

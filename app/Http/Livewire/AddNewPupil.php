@@ -51,9 +51,12 @@ class AddNewPupil extends Component
 
     public function render()
     {
+        $classes = [];
         $levels = Level::all();
         $this->school_year_model = $this->getSchoolYear();
-        $classes = $this->school_year_model->classes;
+        if($this->school_year_model){
+            $classes = $this->school_year_model->classes;
+        }
         return view('livewire.add-new-pupil', compact('levels', 'classes'));
     }
 
@@ -78,46 +81,65 @@ class AddNewPupil extends Component
                 $pupilNameHasAlreadyTaken = Pupil::where('lastName', $this->lastName)->where('firstName', $this->firstName)->first();
                 if(!$pupilNameHasAlreadyTaken){
                     DB::transaction(function($e) use ($classe) {
-                        $pupil = Pupil::create(
-                            [
-                                'firstName' => strtoupper($this->firstName),
-                                'lastName' => $this->lastName,
-                                'classe_id' => $this->classe_id,
-                                'contacts' => $this->contacts,
-                                'sexe' => $this->sexe,
-                                'birth_day' => $this->birth_day,
-                                'nationality' => $this->nationality,
-                                'birth_city' => $this->birth_city,
-                                'level_id' => $classe->level_id,
-                                'residence' => $this->residence,
-                                'last_school_from' => $this->last_school_from
-                            ]
-                        );
-                        if($pupil){
-                            $joinedToClasseAndSchoolYear = ClassePupilSchoolYear::create(
+                        try {
+                            $pupil = Pupil::create(
                                 [
+                                    'firstName' => strtoupper($this->firstName),
+                                    'lastName' => ucwords($this->lastName),
                                     'classe_id' => $this->classe_id,
-                                    'pupil_id' => $pupil->id,
-                                    'school_year_id' => $this->school_year_model->id,
+                                    'contacts' => $this->contacts,
+                                    'sexe' => $this->sexe,
+                                    'birth_day' => $this->birth_day,
+                                    'nationality' => $this->nationality,
+                                    'birth_city' => $this->birth_city,
+                                    'level_id' => $classe->level_id,
+                                    'residence' => $this->residence,
+                                    'last_school_from' => $this->last_school_from
                                 ]
                             );
-                            if($joinedToClasseAndSchoolYear){
-                                $this->school_year_model->pupils()->attach($pupil->id);
-                                $classe->classePupils()->attach($pupil->id);
+                            if($pupil){
+                                try {
+                                    $joinedToClasseAndSchoolYear = ClassePupilSchoolYear::create(
+                                        [
+                                            'classe_id' => $this->classe_id,
+                                            'pupil_id' => $pupil->id,
+                                            'school_year_id' => $this->school_year_model->id,
+                                        ]
+                                    );
+                                    if($joinedToClasseAndSchoolYear){
+                                        try {
+                                            $this->school_year_model->pupils()->attach($pupil->id);
+                                            $classe->classePupils()->attach($pupil->id);
+                                        } catch (Exception $e3) {
+                                            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'apprenant a échoué!", 'type' => 'error']);
+                                            
+                                        }
+                                    }
+                                    
+                                } catch (Exception $e2) {
+                                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'apprenant a échoué!", 'type' => 'error']);
+                                }
                             }
+                            else{
+                                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'apprenant a échoué!", 'type' => 'error']);
+                            }
+                            
+                        } catch (Exception $e1) {
+                            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'apprenant a échoué!", 'type' => 'error']);
+                            
                         }
+                    });
 
-                        DB::afterCommit(function() use ($pupil, $classe){
-                            $this->dispatchBrowserEvent('hide-form');
-                            $this->resetErrorBag();
-                            $this->reset('firstName', 'lastName', 'classe_id', 'contacts', 'sexe', 'nationality', 'birth_city', 'level_id', 'residence', 'last_school_from');
-                            $this->dispatchBrowserEvent('Toast', ['title' => 'Inscription terminée', 'message' => "l'appreant $pupil->firstName $pupil->lastName a été ajouté à la classe de $classe->name avec succès! ", 'type' => 'success']);
-                            $this->emit('classePupilListUpdated', $classe->id);
-                            $this->emit('newPupilHasBeenAdded');
+                    DB::afterCommit(function() use ($classe){
+                        $firstName = strtoupper($this->firstName);
+                        $lastName = ucwords($this->lastName);
+                        $this->dispatchBrowserEvent('hide-form');
+                        $this->resetErrorBag();
+                        $this->reset('firstName', 'lastName', 'classe_id', 'contacts', 'sexe', 'nationality', 'birth_city', 'level_id', 'residence', 'last_school_from');
+                        $this->dispatchBrowserEvent('Toast', ['title' => 'Inscription terminée', 'message' => "l'appreant $firstName $lastName a été ajouté à la classe de $classe->name avec succès! ", 'type' => 'success']);
+                        $this->emit('classePupilListUpdated');
+                        $this->emit('newPupilHasBeenAdded');
 
-                        });
-
-                        
                     });
                 }
                 else{

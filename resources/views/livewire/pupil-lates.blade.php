@@ -49,7 +49,7 @@
                                         <span class="fa fa-check py-2 px-2"></span>
                                     </span>
                                 @endif
-                                <span title="Editer" wire:click="edit({{$alte->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                <span title="Editer" wire:click="edit({{$late->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
                                     <span class="text-primary cursor-pointer fa fa-edit py-2 px-2"></span>
                                 </span>
                             </span>

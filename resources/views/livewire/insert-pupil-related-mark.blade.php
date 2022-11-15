@@ -1,5 +1,5 @@
 <x-z-modal-generator :topPosition="0" :hasHeader="true" :modalHeaderTitle="'Insertion de notes relatives'" :width="7" :icon="'fa fa-pen'" :modalName="'insertPupilRelatedMarks'" :modalBodyTitle="'Sanction - Bonus'">
-    @if($pupil && $subjects && count($subjects) > 0)
+    @if($target && $subjects && count($subjects) > 0)
     <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submitMarks">
         <div class="row justify-between">
             <div class="mt-0 mb-2 col-11 mx-auto">

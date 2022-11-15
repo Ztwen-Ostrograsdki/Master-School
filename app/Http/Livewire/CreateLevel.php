@@ -5,6 +5,8 @@ namespace App\Http\Livewire;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Level;
 use App\Models\SchoolYear;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class CreateLevel extends Component
@@ -38,38 +40,49 @@ class CreateLevel extends Component
     public function submit()
     {
         $this->validate();
-        if($this->name && $this->name !== null){
-            $level = Level::create(['name' => $this->name]);
-        }
-        elseif($this->other_level && $this->other_level !== null){
-            $level = Level::create(['name' => strtolower($this->other_level)]);
-        }
-        else{
-            $level = null;
-        }
-        if($level){
-
-            $this->dispatchBrowserEvent('hide-form');
-            $this->resetErrorBag();
-            $this->dispatchBrowserEvent('Toast', ['title' => 'Création du cycle terminée', 'message' => "le cycle  $level->name a été créé avec succès!", 'type' => 'success']);
-            if($this->joined){
-                $school_years = SchoolYear::all();
-                if (count($school_years) > 0) {
-                    foreach ($school_years as $school_year) {
-                        $school_year->levels()->attach($level->id);
+        $level = null;
+        DB::transaction(function($e) use ($level){
+            try {
+                if($this->name && $this->name !== null){
+                    $level = Level::create(['name' => $this->name]);
+                }
+                elseif($this->other_level && $this->other_level !== null){
+                    $level = Level::create(['name' => strtolower($this->other_level)]);
+                }
+                else{
+                    return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Ereur serveur', 'message' => "creation du cycle a échoué!", 'type' => 'error']);
+                }
+                if($level){
+                    try {
+                        $this->dispatchBrowserEvent('hide-form');
+                        $this->resetErrorBag();
+                        if($this->joined){
+                            $school_years = SchoolYear::all();
+                            if (count($school_years) > 0) {
+                                foreach ($school_years as $school_year) {
+                                    $school_year->levels()->attach($level->id);
+                                }
+                            }
+                        }
+                        else{
+                            $school_year_model = $this->getSchoolYear();
+                            $school_year_model->levels()->attach($level->id);
+                        }
+                        $this->reset('name', 'joined', 'other_level');
+                        $this->emit('newLevelCreated');
+                            
+                    } catch (QueryException $ee) {
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Ereur serveur', 'message' => "creation du cycle a échoué!", 'type' => 'error']);
                     }
                 }
-            }
-            else{
-                $school_year_model = $this->getSchoolYear();
-                $school_year_model->levels()->attach($level->id);
-            }
-            $this->reset('name', 'joined', 'other_level');
-            $this->emit('newLevelCreated');
-        }
-        else{
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Ereur serveur', 'message' => "creation du cycle a échoué!", 'type' => 'error']);
+            } catch (QueryException $eee) {
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Ereur serveur', 'message' => "creation du cycle a échoué!", 'type' => 'error']);
 
-        }
+            }
+        });
+        DB::afterCommit(function() use ($level){
+            $this->dispatchBrowserEvent('Toast', ['title' => 'Création du cycle terminée', 'message' => "le cycle $this->name a été créé avec succès!", 'type' => 'success']);
+
+        });
     }
 }

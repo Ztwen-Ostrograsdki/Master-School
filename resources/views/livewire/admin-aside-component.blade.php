@@ -154,7 +154,7 @@
               </li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
-                  <i class="nav-icon bi-people"></i>
+                  <i class="nav-icon bi-house"></i>
                   <p class="text-bold">
                     Les Classes
                     <i class="fas fa-angle-left right"></i>
@@ -202,9 +202,57 @@
               </li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
+                  <i class="nav-icon fa fa-filter"></i>
+                  <p class="text-bold">
+                    Les Promotions
+                    <i class="fas fa-angle-left right"></i>
+                    <span class="badge badge-secondary right">{{$classe_groups->count()}}</span>
+                  </p>
+                </a>
+                @foreach ($levels as $level)
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="nav-icon fas fa-plus"></i>
+                      <p>
+                        {{ $level->getName() }}
+                        <i class="fas fa-angle-left right"></i>
+                        <span class="badge badge-secondary right">{{ count($level->classe_groups) }}</span>
+                      </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                      @foreach ($classe_groups as $promotion)
+                        @if($promotion->level_id == $level->id)
+                          <li class="nav-item">
+                            <a href="{{route('classe_group_profil', [urlencode($promotion->name)])}}" class="nav-link">
+                              <i class="far fa-circle nav-icon"></i>
+                              <p> {{ $promotion->name }} </p>
+                            </a>
+                          </li>
+                        @endif
+                      @endforeach
+                    </ul>
+                  </li>
+                </ul>
+                @endforeach
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="#" wire:click="createNewClasse" class="nav-link text-secondary">
+                      <i class="nav-icon fas fa-school"></i>
+                      <p>
+                        Nouvelle classe
+                        <i class="fas fa-plus right"></i>
+                        <span class="badge badge-info right"></span>
+                      </p>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-edit"></i>
                   <p>
-                    Parents
+                     Les parents
                     <i class="fas fa-angle-left right"></i>
                   </p>
                 </a>

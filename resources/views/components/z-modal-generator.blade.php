@@ -4,8 +4,8 @@
    }
 @endphp
 
-<div wire:ignore.self class="modal lug fade" id="{{$modalName}}" role="dialog" style="position: absolute; top: {{$topPosition}}px;">
-    <div class="modal-dialog modal-z-xlg {{$width ? $col : ''}}" role="document">
+<div wire:ignore.self class="modal lug fade" id="{{$modalName}}" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-z-xlg {{$width ? $col : ''}}" role="document">
        <!-- Modal content-->
        <div class="modal-content z-bg-secondary-light-opac border" style="">
             @if($hasHeader)

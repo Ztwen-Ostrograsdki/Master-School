@@ -6,9 +6,19 @@
                 Fiche des santions de la classe de <span class="text-warning">{{ $classe->name }} </span> au cours de l'année scolaire {{ session('school_year_selected')}}
             </span>
 
-            <span wire:click="deleteAllRelatedMarks" title="Ajouter une note relative : Sanction ou Bonus" class="float-right btn btn-primary mr-2 border">
-                <span class="bi-trash text-orange"></span>
-                <span class="ml-1">Vider</span>
+            <span class="justify-content-between">
+                <span wire:click="deleteAllRelatedMarks" title="Ajouter une note relative : Sanction ou Bonus" class="float-right btn btn-primary mr-2 border">
+                    <span class="bi-trash text-orange"></span>
+                    <span class="ml-1">Vider</span>
+                </span>
+                <span wire:click="makeRelatedMarkTogether({{$classe->id}})" title="Ajouter une note collective à toute la classe de {{$classe->name}} : Sanction ou Bonus à toute la classe" class="float-right btn btn-warning mr-2 border">
+                    <span class="ml-1 text-dark">
+                        <span>+ / -</span> 
+                        <span class="fa-people"></span>
+                        <span class="bi-person text-dark"></span>
+                    </span>
+                </span>
+
             </span>
         </h6>
     </div>
