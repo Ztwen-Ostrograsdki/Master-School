@@ -24,6 +24,12 @@ window.addEventListener('modal-createNewClasse', function(e) {
 window.addEventListener('modal-createNewClasseGroup', function(e) {
     $('#createNewClasseGroup').modal('show');
 });
+window.addEventListener('modal-manageClasseGroup', function(e) {
+    $('#classeGroupManageModal').modal('show');
+});
+window.addEventListener('modal-editClasseGroup', function(e) {
+    $('#editClasseGroupModal').modal('show');
+});
 window.addEventListener('modal-createNewLevel', function(e) {
     $('#createNewLevel').modal('show');
 });

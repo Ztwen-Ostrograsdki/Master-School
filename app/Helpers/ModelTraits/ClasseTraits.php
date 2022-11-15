@@ -183,85 +183,85 @@ trait ClasseTraits{
 
 
 
-public function resetAllAbsences(int $school_year, int $semestre, int $subject_id)
-{
-    if($school_year && $semestre && $subject_id){
-        $school_year_model = SchoolYear::find($school_year);
-        if ($school_year_model) {
-            $pupils = $this->getClassePupils($school_year_model->school_year);
-            if($pupils){
-                foreach ($pupils as $p) {
-                    $absences = $p->absences()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->where('subject_id', $subject_id)->get();
-                    if($absences){
-                        foreach ($absences as $ab) {
-                            $ab->delete();
+    public function resetAllAbsences(int $school_year, int $semestre, int $subject_id)
+    {
+        if($school_year && $semestre && $subject_id){
+            $school_year_model = SchoolYear::find($school_year);
+            if ($school_year_model) {
+                $pupils = $this->getClassePupils($school_year_model->school_year);
+                if($pupils){
+                    foreach ($pupils as $p) {
+                        $absences = $p->absences()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->where('subject_id', $subject_id)->get();
+                        if($absences){
+                            foreach ($absences as $ab) {
+                                $ab->delete();
+                            }
                         }
                     }
                 }
             }
+
         }
-
     }
-}
 
 
-public function resetAllLates($school_year, $semestre, $subject_id)
-{
-    if($school_year && $semestre && $subject_id){
-        $pupils = $this->getClassePupils($school_year);
+    public function resetAllLates($school_year, $semestre, $subject_id)
+    {
+        if($school_year && $semestre && $subject_id){
+            $pupils = $this->getClassePupils($school_year);
 
-        if($pupils){
-            foreach ($pupils as $p) {
-                $lates = $p->lates()->where('school_year', $school_year)->where('semestre', $semestre)->where('subject_id', $subject_id)->get();
-                if($lates){
-                    $lates->delete();
+            if($pupils){
+                foreach ($pupils as $p) {
+                    $lates = $p->lates()->where('school_year', $school_year)->where('semestre', $semestre)->where('subject_id', $subject_id)->get();
+                    if($lates){
+                        $lates->delete();
+                    }
                 }
             }
-        }
 
+        }
     }
-}
 
 
-public function resetAllMarks($school_year = null, $semestre = null, $subject_id, $type = null)
-{
-    if($school_year && $semestre && $subject_id){
-        if(is_numeric($school_year)){
-            $school_year_model = SchoolYear::where('id', $school_year)->first();
-        }
-        else{
-            $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-        }
-        $marks = $school_year_model->marks()
-                                   ->where('semestre', $semestre)
-                                   ->where('classe_id', $this->id)
-                                   ->where('subject_id', $subject_id);
-        if($marks->get()->count()){
-            foreach ($marks->get() as $mark) {
-                $school_year_model->marks()->detach($mark->id);
+    public function resetAllMarks($school_year = null, $semestre = null, $subject_id, $type = null)
+    {
+        if($school_year && $semestre && $subject_id){
+            if(is_numeric($school_year)){
+                $school_year_model = SchoolYear::where('id', $school_year)->first();
             }
-            return $marks->forceDelete();
-
-        }
-
-    }
-    else {
-        $school_years = SchoolYear::all();
-
-        foreach ($school_years as $school_year_model) {
-            $marks = $school_year_model->marks()->where('classe_id', $this->id);
+            else{
+                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+            }
+            $marks = $school_year_model->marks()
+                                       ->where('semestre', $semestre)
+                                       ->where('classe_id', $this->id)
+                                       ->where('subject_id', $subject_id);
             if($marks->get()->count()){
-                // foreach ($marks->get() as $mark) {
-                //     $school_year_model->marks()->detach($mark->id);
-                // }
+                foreach ($marks->get() as $mark) {
+                    $school_year_model->marks()->detach($mark->id);
+                }
                 return $marks->forceDelete();
 
             }
-        }
 
-        
+        }
+        else {
+            $school_years = SchoolYear::all();
+
+            foreach ($school_years as $school_year_model) {
+                $marks = $school_year_model->marks()->where('classe_id', $this->id);
+                if($marks->get()->count()){
+                    // foreach ($marks->get() as $mark) {
+                    //     $school_year_model->marks()->detach($mark->id);
+                    // }
+                    return $marks->forceDelete();
+
+                }
+            }
+
+            
+        }
     }
-}
 
 
 }

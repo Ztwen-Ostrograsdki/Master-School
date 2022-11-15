@@ -1,7 +1,7 @@
 <div>
     @if($classe)
     @if ($subject_selected)
-        <h6 class="d-flex">
+        <h6 class="d-flex h6">
             <small>
                 Gestionnaire de la présence de cette classe à l'année {{ session('school_year_selected') }} en <span class="text-warning"> {{ $subject_selected->name }}</span>
             </small>
@@ -70,7 +70,7 @@
                 @endif
             @endif
             @if(!$makePresence && $subject_selected)
-            <span class="text-white mt-2">
+            <span class="text-white mt-2 h6">
                 Gestionnaire de la présence de cette classe à l'année {{ session('school_year_selected') }} en <span class="text-warning"> {{ $subject_selected->name }}</span>
             </span>
             <span wire:click="throwPresence" class="float-right cursor-pointer btn btn-primary border">Faire la présence</span>

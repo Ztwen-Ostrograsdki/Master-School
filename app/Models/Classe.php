@@ -52,10 +52,16 @@ class Classe extends Model
         return $this->hasMany(RelatedMark::class);
     }
 
-    public function getPupils(int $school_year)
+    public function getPupils($school_year)
     {
         $pupils = [];
-        $c_p_s_ys = $this->classePupilSchoolYear()->where('school_year_id', $school_year);
+        if(is_numeric($school_year)){
+            $school_year_model = SchoolYear::find($school_year);
+        }
+        else{
+            $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+        }
+        $c_p_s_ys = $this->classePupilSchoolYear()->where('school_year_id', $school_year_model->id);
         if($c_p_s_ys->get() && count($c_p_s_ys->get()) > 0){
             $pupils_ids = $c_p_s_ys->pluck('pupil_id')->toArray();
             $pupils = Pupil::whereIn('id', $pupils_ids)
@@ -64,6 +70,28 @@ class Classe extends Model
                              ->get();
         }
         return $pupils;
+    }
+
+
+    public function getClassePupilsOnGender(string $gender, $school_year)
+    {
+        $pupils = [];
+        if($school_year){
+            if ($gender) {
+                $pupils_all = $this->getPupils($school_year);
+                foreach($pupils_all as $pupil){
+                    if($pupil->sexe == $gender){
+                        $pupils[] = $pupil;
+                    }
+                }
+            }
+
+        }
+
+
+        return $pupils;
+
+
     }
 
 

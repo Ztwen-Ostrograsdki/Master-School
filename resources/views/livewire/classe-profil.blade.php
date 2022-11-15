@@ -19,8 +19,18 @@
                             <div class="info-box m-0 p-0 bg-info">
                                 <span class="info-box-icon"><i class="fa fa-user-friends"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Effectif</span>
-                                    <span class="info-box-number">{{ $classe ? 'G : ' . count($pupils) . ' - F : 15' : 00 }}</span>
+                                    <span class="info-box-text">Effectif 
+                                         (<b class="text-warning">
+                                            {{ count($classe->getPupils(session('school_year_selected')))}}
+                                        </b>)
+                                    </span>
+                                    <span class="info-box-number">
+
+                                        {{ $classe ? 
+                                            'G: ' . count($classe->getClassePupilsOnGender('male', session('school_year_selected'))) . ' 
+                                            - F: '. count($classe->getClassePupilsOnGender('female', session('school_year_selected'))) : ' vide'
+                                        }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -116,6 +126,7 @@
                     <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Rafraichir les retards</a>
                     <a class="dropdown-item" tabindex="-1" href="#">Mettre à jour</a>
                     <a class="dropdown-item" wire:click="createNewClasse" tabindex="-1" href="#">Créer une classe</a>
+                    <a class="dropdown-item" wire:click="editClasseGroup({{$classe->id}})" tabindex="-1" href="#">Modifier la promotion</a>
                     <a wire:click="editClasseSubjects({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Définir les matières</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" tabindex="-1" href="#">Autres</a>

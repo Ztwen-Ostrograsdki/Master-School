@@ -291,6 +291,11 @@ class ClasseProfil extends Component
         $this->emit('createNewClasseLiveEvent');
     }
 
+    public function editClasseGroup($classe_id)
+    {
+        $this->emit('editClasseGroupLiveEvent', $classe_id);
+    }
+
 
     public function reloadClasseData($school_year = null)
     {
