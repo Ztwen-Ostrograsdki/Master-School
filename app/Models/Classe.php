@@ -198,5 +198,63 @@ class Classe extends Model
 
     }
 
+    /**
+     * Pour avoir le format numerique des classes
+     * @return array [description]
+     */
+    public function getNumericName()
+    {
+        $name = $this->name;
+        if ($this->level->name === "secondary") {
+            $card = [];
+            $card['id'] = $this->id;
+            $card['name'] = $this->name;
+            $card['idc'] = "";
+
+            if(preg_match_all('/ /', $name)){
+                $card['idc'] = explode(' ', $name)[1];
+            }
+
+            if (preg_match_all('/Sixi/', $name)) { 
+                $card['sup'] = "ème";
+                $card['root'] = "6";
+            }
+            elseif (preg_match_all('/Cinqui/', $name)) {
+                $card['sup'] = "ème";
+                $card['root'] = "5";
+            }
+            elseif (preg_match_all('/Quatriem/', $name)) {
+                $card['sup'] = "ème";
+                $card['root'] = "4";
+            }
+            elseif (preg_match_all('/Troisie/', $name)) {
+                $card['sup'] = "ère";
+                $card['root'] = "3";
+            }
+            elseif (preg_match_all('/Seconde/', $name)) {
+                $card['sup'] = "nde";
+                $card['root'] = "2";
+            }
+            elseif (preg_match_all('/Premi/', $name)) {
+                $card['sup'] = "ère";
+                $card['root'] = "1";
+            }
+            elseif (preg_match_all('/Terminale/', $name)) {
+                $card['sup'] = "le";
+                $card['root'] = "T";
+                
+            }
+            else{
+                return ['root' => $name, 'sup' => "", 'idc' => "", 'id' => $this->id, 'root' => $name];
+            }
+
+            return $card;
+        }
+        else{
+            return ['root' => $name, 'sup' => "", 'idc' => "", 'id' => $this->id, 'root' => $name];
+        }
+
+    }
+
 
 }

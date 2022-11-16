@@ -29,6 +29,9 @@ window.addEventListener('modal-manageClasseGroup', function(e) {
 });
 window.addEventListener('modal-editClasseGroup', function(e) {
     $('#editClasseGroupModal').modal('show');
+})
+;window.addEventListener('modal-editClasseGroupCoeficients', function(e) {
+    $('#editClasseGroupCoeficientsModal').modal('show');
 });
 window.addEventListener('modal-createNewLevel', function(e) {
     $('#createNewLevel').modal('show');

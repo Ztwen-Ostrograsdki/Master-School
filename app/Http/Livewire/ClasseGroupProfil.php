@@ -15,6 +15,7 @@ class ClasseGroupProfil extends Component
     protected $listeners = [
         'classeUpdated' => 'reloadClasseGroupData',
         'classeGroupUpdated' => 'reloadClasseGroupData',
+        'classeGroupSubjectsUpdated' => 'reloadClasseGroupData',
         'schoolYearChangedLiveEvent' => 'reloadClasseGroupData',
         'newClasseCreated' => 'reloadClasseGroupData',
         'newLevelCreated' => 'reloadClasseGroupData'
@@ -55,6 +56,11 @@ class ClasseGroupProfil extends Component
         return view('livewire.classe-group-profil', compact('classe_group'));
     }
 
+    public function createNewClasseGroup()
+    {
+        $this->emit('createNewClasseGroupLiveEvent');
+    }
+
 
     public function addNewsClassesToThisClasseGroup($classe_group_id)
     {
@@ -86,12 +92,19 @@ class ClasseGroupProfil extends Component
             $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "La classe selectionnée n'existe pas! ", 'type' => 'error']);
         }
     }
-    
+
+
+    public function addNewsSubjectsToThisClasseGroup($classe_group_id)
+    {
+        $classe_group = ClasseGroup::find($classe_group_id);
+        if($classe_group){
+            $this->emit('manageClasseGroupSubjectsLiveEvent', $classe_group->id);
+        }
+
+    }
+
     public function editClasseGroupName($classe_group_id)
     {
-        // $classe = Classe::where('id', $classe_id)->first();
-        // $this->classe_id = $classe->id;
-        // $this->classeName = $classe->name;
         $this->editingClasseGroupeName = true;
     }
 
@@ -99,5 +112,11 @@ class ClasseGroupProfil extends Component
     public function reloadClasseGroupData($school_year = null)
     {
         $this->counter = 1;
+    }
+
+
+    public function setClasseGroupProfilActiveSection($section)
+    {
+        session()->put('classe_group_profil_section_selected', $section);
     }
 }

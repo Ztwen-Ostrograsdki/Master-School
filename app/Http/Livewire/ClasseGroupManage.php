@@ -70,6 +70,8 @@ class ClasseGroupManage extends Component
         }
         $this->classes = $classes;
     }
+
+    
     public function submit()
     {
         $this->validate();

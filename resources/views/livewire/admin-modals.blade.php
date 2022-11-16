@@ -4,6 +4,7 @@
     @livewire('edit-pupil-perso-data')
     @livewire('create-new-classe')
     @livewire('create-new-classe-group')
+    @livewire('edit-classe-group-coeficient')
     @livewire('classe-group-manage')
     @livewire('edit-classe-group')
     @livewire('create-level')

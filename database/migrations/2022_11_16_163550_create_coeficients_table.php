@@ -13,16 +13,22 @@ class CreateCoeficientsTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('coeficients');
         Schema::disableForeignKeyConstraints();
         Schema::create('coeficients', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('coef')->default(1);
-            $table->string('school_year')->nullable()->default(null);
-            $table->unsignedBigInteger('classe_id');
-            $table->unsignedBigInteger('subject_id');
-            $table->foreign('classe_id')
+            $table->unsignedBigInteger('school_year_id')->nullable()->default(null);
+            $table->foreign('school_year_id')
                   ->references('id')
-                  ->on('classes')
+                  ->on('school_years')
+                  ->onUpdate('cascade')
+                  ->onDelete('cascade');
+            $table->unsignedBigInteger('classe_group_id');
+            $table->unsignedBigInteger('subject_id');
+            $table->foreign('classe_group_id')
+                  ->references('id')
+                  ->on('classe_groups')
                   ->onDelete('cascade')
                   ->onUpdate('cascade'); 
             $table->foreign('subject_id')

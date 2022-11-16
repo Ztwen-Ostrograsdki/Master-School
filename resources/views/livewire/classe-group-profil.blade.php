@@ -20,7 +20,7 @@
             <div class="card-body">
                 <div class="container-fluid m-0 p-0 w-100">
                     <div class="card-deck w-100 p-0 m-0">
-                        <div class="card active" href="#tab_1" data-toggle="tab">
+                        <div class="card active" href="#tab_classe_group_1" data-toggle="tab">
                             <div class="info-box m-0 p-0 bg-info">
                                 <span class="info-box-icon"><i class="fa fa-user-friends"></i></span>
                                 <div class="info-box-content">
@@ -62,99 +62,83 @@
         </div>
     </div>
 
+    <div class="card mt-3 mx-2">
+        <div class="card-header d-flex p-0">
+            <h3 class="card-title">
+                <ul class="nav nav-pills ml-auto p-2">
+                    <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
+                        Reglages <span class="caret"></span>
+                      </a>
+                      <div class="dropdown-menu">
+                        <a class="dropdown-item" wire:click="deleteAllPupil({{$classe_group->id}})" tabindex="-1" href="#">Rafraichir la classe</a>
+                        <a class="dropdown-item" tabindex="-1" href="#">Vider toutes les notes</a>
+                        <a class="dropdown-item" tabindex="-1" href="#">Rafraichir les notes</a>
+                        <a class="dropdown-item" tabindex="-1" href="#">Rafraichir les absences</a>
+                        <a class="dropdown-item" tabindex="-1" href="#">Rafraichir les retards</a>
+                        <a class="dropdown-item" tabindex="-1" href="#">Mettre à jour</a>
+                        <a class="dropdown-item" wire:click="createNewClasseGroup" tabindex="-1" href="#">Créer une promotion</a>
+                        <a class="dropdown-item" wire:click="createNewClasse" tabindex="-1" href="#">Créer une classe</a>
+                        <a class="dropdown-item" wire:click="editClasseGroup({{$classe_group->id}})" tabindex="-1" href="#">Modifier la promotion</a>
+                        <a wire:click="editClasseSubjects({{$classe_group->id}})"  class="dropdown-item" tabindex="-1" href="#">Définir les coeficients</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
+                      </div>
+                    </li>
+                    <li wire:click="setClasseGroupProfilActiveSection('liste')" class="nav-item"><a class="nav-link @if(session()->has('classe_group_profil_section_selected') && session('classe_group_profil_section_selected') == 'liste') active @elseif(!session()->has('classe_group_profil_section_selected')) active @endif border border-white" href="#tab_classe_group_1" data-toggle="tab">Liste</a>
+                    </li>
+                    <li wire:click="setClasseGroupProfilActiveSection('coefs')" class="nav-item"><a class="nav-link @if(session()->has('classe_group_profil_section_selected') && session('classe_group_profil_section_selected') && session('classe_group_profil_section_selected') == 'coefs') active @endif border border-white mx-1" href="#tab_classe_group_2" data-toggle="tab">Gestion des coéfiscients</a>
+                    </li>
+                    <li class=" float-right">
+                        <span class="justify-content-between">
+                            <span class="float-right btn btn-primary mr-2 border">
+                                <span class="bi-trash text-orange"></span>
+                                <span class="ml-1">Vider</span>
+                            </span>
+                        </span>
+                    </li>
+                    <li class=" float-right">
+                        <span wire:click="addNewsClassesToThisClasseGroup({{$classe_group->id}})" title="Ajouter un groupe pédagogique à cette promotion de {{$classe_group->name}}" class="float-right btn btn-success mr-2 border">
+                            <span class="ml-1 text-dark">
+                                <span class="fa fa-plus"></span>
+                                <span class="bi-filter"></span>
+                            </span>
+                        </span>
+                    </li>
+                    <li class=" float-right">
+                        <span wire:click="addNewsSubjectsToThisClasseGroup({{$classe_group->id}})" title="Ajouter des matières à cette promotion de {{$classe_group->name}}" class="float-right btn btn-primary mr-2 border">
+                            <span class="ml-1 text-dark">
+                                <span class="fa fa-plus"></span>
+                                <span class="bi-pen"></span>
+                            </span>
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </h3>
+    </div>
 
     @if($classe_group)
-    <div class="my-1 mt-3 px-2">
-        <h6 class="m-0 p-0 py-1 rounded text-white-50 shadow border border-secondary d-flex justify-content-between">
-            <span class="pt-2 pl-2">
-                Listes des groupes pédagogiques de la promotion <span class="text-warning">{{ $classe_group->name }} </span> au cours de l'année scolaire {{ session('school_year_selected')}}
-            </span>
-
-            <span class="justify-content-between">
-                <span wire:click="deleteAllRelatedMarks" title="Ajouter une note relative : Sanction ou Bonus" class="float-right btn btn-primary mr-2 border">
-                    <span class="bi-trash text-orange"></span>
-                    <span class="ml-1">Vider</span>
-                </span>
-                <span wire:click="addNewsClassesToThisClasseGroup({{$classe_group->id}})" title="Ajouter un groupe pédagogique à la cette promotion de {{$classe_group->name}}" class="float-right btn btn-success mr-2 border">
-                    <span class="ml-1 text-dark">
-                        <span class="fa fa-plus"></span>
-                        <span class="bi-filter"></span>
-                    </span>
-                </span>
-
-            </span>
-        </h6>
-    </div>
-    <div class="w-100 m-0 p-0 mt-3 px-2">
-        @if(count($classe_group->classes))
-            <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white">
-                <col>
-                    <colgroup span="1"></colgroup>
-                    <colgroup span="1"></colgroup>
-                    <colgroup span="3"></colgroup>
-                    <colgroup span="3"></colgroup>
-                    <colgroup span="4"></colgroup>
-                    <tr class="text-center">
-                        <th rowspan="2" scope="colgroup">No</th>
-                        <th rowspan="2" class="text-capitalize" scope="colgroup">Les Groupes pédagogiques</th>
-                        <th colspan="3" scope="colgroup">Effectif</th>
-                        <th colspan="4" scope="colgroup">Actions</th>
-                    </tr>
-                    <tr class="text-center">
-                        <th scope="col">F</th>
-                        <th scope="col">G</th>
-                        <th scope="col">T</th>
-                        
-                        <th scope="col">Suppr</th>
-                        <th scope="col">Update</th>
-                        <th scope="col">Fermer</th>
-                        <th scope="col">Vider</th>
-                    </tr>
-
-                    @foreach($classe_group->classes as $classe)
-                        <tr class="">
-                            <th scope="row" class="text-center">{{ $loop->iteration }}</th>
-                            <th scope="row" class="text-left pl-2">
-                                <a title="charger le profil de la classe de {{ $classe->name }}" class="text-white w-100 d-inline-block" href="{{route('classe_profil', ['slug' => $classe->slug])}}">
-                                    {{ $classe->name }}
-                                </a>
-                            </th>
-                            <th scope="row" class="text-center">{{ count($classe->getClassePupilsOnGender('female', (session('school_year_selected')))) }}</th>
-                            <th scope="row" class="text-center">{{ count($classe->getClassePupilsOnGender('male', (session('school_year_selected')))) }}</th>
-                            <th scope="row" class="text-center">{{ count($classe->getPupils((session('school_year_selected')))) }}</th>
-                            <th scope="row" class="text-center cursor-pointer">
-                                <span wire:click="removeClasseFromThisGroup({{$classe->id}})" title="Retirer la classe de {{$classe->name}} définitivement de ce groupe ou de cette promotion" class="col-4 m-0 p-0 cursor-pointer">
-                                    <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
-                                </span>
-                            </th>
-                            <th scope="row" class="text-center cursor-pointer">
-                                <span title="Mettre à jour les données de la classe de {{$classe->name}}" class="w-100 m-0 p-0 cursor-pointer">
-                                    <span class="text-success fa fa-upload py-2 px-2"></span>
-                                </span>
-                            </th>
-                            <th scope="row" class="text-center cursor-pointer">
-                                <span title="Fermer la classe de {{$classe->name}}" class="col-4 m-0 p-0 cursor-pointer">
-                                    <span class="text-orange cursor-pointer fa fa-lock py-2 px-2"></span>
-                                </span>
-                            </th>
-                            <th scope="row" class="text-center cursor-pointer">
-                                <span title="Vider la classe de {{$classe->name}}" class="col-4 m-0 p-0 cursor-pointer">
-                                    <span class="text-warning cursor-pointer fa bi-trash py-2 px-2"></span>
-                                </span>
-                            </th>
-                        </tr>
-                    @endforeach
-            </table>            
-        @else
-            <div>
-                <blockquote class="">
-                    <h6 class="h6 text-white-50">
-                        La liste des groupes pédagogiques de <span class="text-warning">{{ $classe_group->name }} </span> au cours de l'année scolaire {{ session('school_year_selected')}} est viège. <br>
-                        
+        <div class="card-body p-0 m-0">
+          <div class="tab-content">
+            <div class="m-0 p-0">
+                <blockquote class="text-info">
+                    <h6 class="m-0 p-0 h6 py-1 text-white-50 shadow d-flex justify-content-between">
+                        <span class="pl-2">
+                            Listes des groupes pédagogiques de la promotion <span class="text-warning">{{ $classe_group->name }} </span> au cours de l'année scolaire {{ session('school_year_selected')}}
+                        </span>
                     </h6>
                 </blockquote>
             </div>
-        @endif                                         
+            @if($classe_group)
+            <div class="tab-pane la-liste-de-la-classe-promotion @if(session()->has('classe_group_profil_section_selected') && session('classe_group_profil_section_selected') == 'liste') active @elseif(!session()->has('classe_group_profil_section_selected')) active @endif" id="tab_classe_group_1">
+                @livewire('classe-group-classe-liste', ['classe_group_id' => $classe_group->id])
+            </div>
+            <div class="tab-pane les-notes-de-la-classe @if(session()->has('classe_group_profil_section_selected') && session('classe_group_profil_section_selected') && session('classe_group_profil_section_selected') == 'coefs') active @endif" id="tab_classe_group_2">
+                @livewire('classe-group-coef-liste', ['classe_group_id' => $classe_group->id])
+            </div>
+            @endif
+          </div>
         </div>
     @endif
 </div>
