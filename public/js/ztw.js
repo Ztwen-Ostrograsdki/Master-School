@@ -52,15 +52,19 @@ window.addEventListener('modal-markManager', function(e) {
 });
 
 window.addEventListener('modal-displayMyNotifications', function(e) {
-    $('#displayMyNotificationsModal').modal();
+    $('#displayMyNotificationsModal').modal('show');
+});
+window.addEventListener('modal-manageClasseModalities', function(e) {
+    $('#manageClasseModalitiesModal').modal('show');
+    $("#manageClasseModalitiesModal input").focus();
 });
 
 window.addEventListener('modal-openSingleChatModal', function(e) {
-    $('#singleChatModal').modal();
+    $('#singleChatModal').modal('show');
     $("#singleChatModal .chat-input").focus();
 });
 window.addEventListener('modal-adminAuthenticationModal', function(e) {
-    $('#adminAuthenticationModal').modal();
+    $('#adminAuthenticationModal').modal('show');
     $("#adminAuthenticationModal input").focus();
 });
 

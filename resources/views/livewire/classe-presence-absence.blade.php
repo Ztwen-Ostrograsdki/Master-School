@@ -1,82 +1,77 @@
 <div>
     @if($classe)
-    @if ($subject_selected)
-        <h6 class="d-flex h6">
-            <small>
-                Gestionnaire de la présence de cette classe à l'année {{ session('school_year_selected') }} en <span class="text-warning"> {{ $subject_selected->name }}</span>
-            </small>
-
-        </h6>
-    @endif
-    <blockquote class="text-info d-flex">
+    @if($makePresence)
+    <blockquote class="text-info d-flex border bg-success" style="position: fixed; right: 10px; top: 200px; z-index: 3000 !important; opacity: 0.96;">
         <h5 class="w-100 m-0 p-0">
-            @if($makePresence)
-                @if($subject_selected)
-                    <div class="d-flex row">
-                        <div class="col-2">
-                            <div class="p-0 m-0 mt-0 mb-2 row col-12 px-2">
-                                <input placeholder="La date" class="text-white form-control bg-transparent border border-white px-2 @error('date') text-danger border-danger @enderror" wire:model="date" type="date" name="date" id="{{rand(158785, 859745525)}}">
-                            </div>
+            @if($subject_selected)
+                <div class="d-flex row">
+                    <div class="col-2">
+                        <div class="p-0 m-0 mt-0 mb-2 row col-12 px-2">
+                            <input placeholder="La date" class="form-control bg-transparent border border-white px-2 @error('date') text-danger border-danger @enderror" wire:model="date" type="date" name="date" id="{{rand(158785, 859745525)}}">
                         </div>
-                        <div class="col-1">
-                            <select class="px-2 form-select text-white z-bg-secondary w-100 @error('coming_hour_H') text-danger border border-danger @enderror" wire:model.defer="coming_hour_H" name="coming_hour_H" id="coming_hour_H">
-                                <option disabled class="" value="{{null}}">Heure d'arrivée</option>
-                                @for ($ch = 7; $ch < 20; $ch++)
-                                    <option  value="{{$ch}}">{{$ch . 'H'}}</option>
-                                @endfor
-                            </select>
-                        </div>
-                        <div class="col-1">
-                            <select class="px-2 form-select text-white z-bg-secondary w-100 @error('coming_hour_M') text-danger border border-danger @enderror" wire:model="coming_hour_M" name="coming_hour_M" id="coming_hour_M">
-                                <option disabled class="" value="{{null}}">minutes d'arrivée</option>
-                                @for ($cm = 0; $cm < 60; $cm++)
-                                    <option  value="{{$cm}}">{{$cm . 'min'}}</option>
-                                @endfor
-                            </select>
-                        </div>
-                        <div class="col-1">
-                            <select class="px-2 form-select text-white z-bg-secondary w-100 @error('duration') text-danger border border-danger @enderror" wire:model.defer="duration" name="duration" id="duration">
-                                <option disabled class="" value="{{null}}">Minutes manquées</option>
-                                @for ($m = 5; $m < 3600; $m++)
-                                    <option  value="{{$m}}">{{$m . 'min'}}</option>
-                                @endfor
-                            </select>
-                        </div>
-                        <div class="col-3">
-                            <x-z-input :width="'col-12'" :hideLabel="'d-none'" :type="'text'" :error="$errors->first('motif')" :modelName="'motif'" :labelTitle="'Le motif'" ></x-z-input>
-                        </div>
-                        <div class="col-1">
-                        <select class="px-2 form-select text-white z-bg-secondary w-100 @error('start') text-danger border border-danger @enderror" wire:model="start" name="start" id="start">
-                                <option disabled class="" value="{{null}}">Choisissez l'heure de début</option>
-                                @for ($s = 7; $s < 19; $s++)
-                                    <option  value="{{$s}}">{{$s . 'H'}}</option>
-                                @endfor
-                            </select>
-                        </div>
-                        <div class="col-1">
-                            <select class="px-2 form-select text-white z-bg-secondary w-100 @error('end') text-danger border border-danger @enderror" wire:model.defer="end" name="end" id="end">
-                                <option disabled class="" value="{{null}}">Choisissez l'heure de fin</option>
-                                @for ($e = ($start + 1); $e < 20; $e++)
-                                    <option  value="{{$e}}">{{$e . 'H'}}</option>
-                                @endfor
-                            </select>
-                        </div>
-                        <span wire:click="cancelPresence" class="float-right cursor-pointer btn btn-primary border">Terminer la présence</span>
                     </div>
-                @else
-                <span>
-                    Veuillez sélectionner une matière d'abord dans la section <span class="text-warning">Notes</span> avant de continuer
-                </span>
-                @endif
-            @endif
-            @if(!$makePresence && $subject_selected)
-            <span class="text-white mt-2 h6">
-                Gestionnaire de la présence de cette classe à l'année {{ session('school_year_selected') }} en <span class="text-warning"> {{ $subject_selected->name }}</span>
+                    <div class="col-1">
+                        <select class="px-2 form-select custom-select bg-success text-dark bg-transparent w-100 @error('coming_hour_H') text-danger border border-danger @enderror" wire:model.defer="coming_hour_H" name="coming_hour_H" id="coming_hour_H">
+                            <option disabled class="" value="{{null}}">Heure d'arrivée</option>
+                            @for ($ch = 7; $ch < 20; $ch++)
+                                <option  value="{{$ch}}">{{$ch . 'H'}}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="col-1">
+                        <select class="px-2 form-select custom-select bg-success text-dark bg-transparent w-100 @error('coming_hour_M') text-danger border border-danger @enderror" wire:model="coming_hour_M" name="coming_hour_M" id="coming_hour_M">
+                            <option disabled class="" value="{{null}}">minutes d'arrivée</option>
+                            @for ($cm = 0; $cm < 60; $cm++)
+                                <option  value="{{$cm}}">{{$cm . 'min'}}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="col-1">
+                        <select class="px-2 form-select custom-select bg-success text-dark custom-select bg-transparent w-100 @error('duration') text-danger border border-danger @enderror" wire:model.defer="duration" name="duration" id="duration">
+                            <option disabled class="" value="{{null}}">Minutes manquées</option>
+                            @for ($m = 5; $m < 3600; $m++)
+                                <option  value="{{$m}}">{{$m . 'min'}}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <x-z-input :width="'col-12'" :hideLabel="'d-none'" :type="'text'" :error="$errors->first('motif')" :modelName="'motif'" :labelTitle="'Le motif'" ></x-z-input>
+                    </div>
+                    <div class="col-1">
+                    <select class="px-2 form-select custom-select bg-success text-dark bg-transparent w-100 @error('start') text-danger border border-danger @enderror" wire:model="start" name="start" id="start">
+                            <option disabled class="" value="{{null}}">Choisissez l'heure de début</option>
+                            @for ($s = 7; $s < 19; $s++)
+                                <option  value="{{$s}}">{{$s . 'H'}}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <div class="col-1">
+                        <select class="px-2 form-select custom-select bg-success text-dark bg-transparent w-100 @error('end') text-danger border border-danger @enderror" wire:model.defer="end" name="end" id="end">
+                            <option disabled class="" value="{{null}}">Choisissez l'heure de fin</option>
+                            @for ($e = ($start + 1); $e < 20; $e++)
+                                <option  value="{{$e}}">{{$e . 'H'}}</option>
+                            @endfor
+                        </select>
+                    </div>
+                    <span wire:click="cancelPresence" class="float-right cursor-pointer btn btn-primary border">Terminer la présence</span>
+                </div>
+            @else
+            <span>
+                Veuillez sélectionner une matière d'abord dans la section <span class="text-warning">Notes</span> avant de continuer
             </span>
-            <span wire:click="throwPresence" class="float-right cursor-pointer btn btn-primary border">Faire la présence</span>
             @endif
         </h5>
     </blockquote>
+    @endif
+    @if(!$makePresence && $subject_selected)
+    <span class="text-white mt-2 h6">
+        Gestionnaire de la présence de cette classe à l'année {{ session('school_year_selected') }} en <span class="text-warning"> {{ $subject_selected->name }}</span>
+    </span>
+    <span wire:click="throwPresence" class="float-right cursor-pointer btn btn-primary border mb-2">
+        Faire la présence
+        <span class="bi-clock"></span>
+    </span>
+    @endif
     <div class="w-100 m-0 p-0 mt-3">
     <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white">
         <thead class="text-white text-center">
@@ -93,7 +88,7 @@
             @foreach($pupils as $k => $p)
                 <tr class="">
                     <td class="text-center border-right">{{ $loop->iteration }}</td>
-                    <td class="text-capitalize pl-2" title="{{$p->id}}">
+                    <td class="text-capitalize pl-2" title="charger le profil de {{$p->getName()}}">
                         <a class="text-white w-100 m-0 p-0" href="{{route('pupil_profil', ['id' => $p->id])}}">
                             <span class="d-flex">
                                 <img width="23" class="border rounded-circle my-1" src="{{$p->__profil(110)}}" alt="photo de profil">

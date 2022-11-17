@@ -59,12 +59,9 @@ class InsertPupilMarks extends Component
             $subject = Subject::find($subject_id);
             $classe = Classe::find($classe_id);
 
-            if($pupil && $subject && $classe){
+            if($pupil && $subject && $classe && $semestre){
                 $this->pupil = $pupil;
-                
-                if($semestre){
-                    $this->semestre_id = $semestre;
-                }
+                $this->semestre_id = $semestre;
                 $this->subject_id = $subject_id;
                 $this->classe_id = $classe_id;
                 $this->school_year = $school_year;

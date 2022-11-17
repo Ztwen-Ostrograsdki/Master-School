@@ -35,11 +35,6 @@ class ManageClasseSubjects extends Component
         'subjects_selecteds' => 'required'
     ];
 
-    public function mount()
-    {
-        
-    }
-
     public function render()
     {
         $subjects_selecteds = [];
@@ -104,7 +99,7 @@ class ManageClasseSubjects extends Component
                             $this->emit('classeGroupSubjectsUpdated');
                     }
                     else{
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur', 'message' => "Cette matirère est déjà liée à la promotion!", 'type' => 'question']);
+                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur', 'message' => "Cette matière est déjà liée à la promotion!", 'type' => 'question']);
 
                     }
                 }
@@ -123,7 +118,7 @@ class ManageClasseSubjects extends Component
 
                     }
                     else{
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur', 'message' => "Cette matirère est déjà liée à la classe!", 'type' => 'question']);
+                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur', 'message' => "Cette matière est déjà liée à la classe!", 'type' => 'question']);
 
                     }
                 }

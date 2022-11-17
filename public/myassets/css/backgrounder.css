@@ -501,3 +501,10 @@ header .navbar {
 .z-fs-11px {
     font-size: 11px !important;
 }
+
+
+th{
+    font-size: inherit; !important;
+    font-weight: 200 !important;
+
+}

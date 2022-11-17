@@ -52,6 +52,12 @@ class Classe extends Model
         return $this->hasMany(RelatedMark::class);
     }
 
+    public function averageModalities()
+    {
+        return $this->hasMany(AverageModality::class);
+    }
+
+
     public function getPupils($school_year)
     {
         $pupils = [];
@@ -175,11 +181,6 @@ class Classe extends Model
     public function coeficients()
     {
         return $this->hasMany(Coeficient::class);
-    }
-
-    public function averageModalities()
-    {
-        return $this->hasMany(AverageModality::class);
     }
 
     public function alreadyJoinedToThisYear(int $school_year = null)

@@ -25,7 +25,7 @@ class ClasseProfil extends Component
     public $classeName;
     public $counter = 0;
     public $editingClasseName = false;
-    public $semestre_type = 'semestre';
+    public $semestre_type = 'Semestre';
     public $school_year;
     public $classe_subject_selected;
     public $semestre_selected = 1;
@@ -72,6 +72,16 @@ class ClasseProfil extends Component
         else{
             $this->semestre_selected = 1;
             session()->put('semestre_selected', $this->semestre_selected);
+        }
+
+
+        if(session()->has('semestre_type') && session('semestre_type')){
+            $semestre_type = session('semestre_type');
+            session()->put('semestre_type', $semestre_type);
+            $this->semestre_type = $semestre_type;
+        }
+        else{
+            session()->put('semestre_type', $this->semestre_type);
         }
 
 

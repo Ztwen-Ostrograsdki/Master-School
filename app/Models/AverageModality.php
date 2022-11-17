@@ -9,8 +9,9 @@ class AverageModality extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['modality', 'classe_id', 'subject_id', 'school_year'];
+    protected $fillable = ['modality', 'classe_id', 'subject_id', 'school_year', 'semestre', 'activated'];
 
+    protected $casts = ['trimestre'];
 
 
     

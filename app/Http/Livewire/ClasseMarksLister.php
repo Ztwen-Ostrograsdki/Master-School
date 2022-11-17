@@ -7,6 +7,7 @@ use App\Models\Classe;
 use App\Models\Mark;
 use App\Models\Pupil;
 use App\Models\School;
+use App\Models\Subject;
 use Livewire\Component;
 
 class ClasseMarksLister extends Component
@@ -23,9 +24,10 @@ class ClasseMarksLister extends Component
     public $classe_id;
     public $pupil_id;
     public $classe;
-    public $semestre_type = 'semestre';
+    public $semestre_type = 'Semestre';
     public $school_year;
     public $classe_subject_selected;
+    public $subject_selected;
     public $semestre_selected = 1;
     public $classe_subjects = [];
     public $classe_marks = [];
@@ -47,6 +49,9 @@ class ClasseMarksLister extends Component
     {
         $pupils = [];
         $noMarks = false;
+        $modality = null;
+        $modalitiesActivated = null;
+        $hasModalities = false;
 
 
         $school_year_model = $this->getSchoolYear();
@@ -60,18 +65,32 @@ class ClasseMarksLister extends Component
             $this->semestre_selected = $semestre;
         }
 
+        if(session()->has('semestre_type') && session('semestre_type')){
+            $semestre_type = session('semestre_type');
+            session()->put('semestre_type', $semestre_type);
+            $this->semestre_type = $semestre_type;
+        }
+        else{
+            session()->put('semestre_type', $this->semestre_type);
+        }
+
         if(session()->has('classe_subject_selected') && session('classe_subject_selected')){
             $subject_id = intval(session('classe_subject_selected'));
             if(in_array($subject_id, $this->classe_subjects->pluck('id')->toArray())){
                 session()->put('classe_subject_selected', $subject_id);
                 $this->classe_subject_selected = $subject_id;
+                $this->subject_selected = Subject::find($this->classe_subject_selected);
             }
         }
+
         if($classe){
             $pupils = $classe->getPupils($school_year_model->id);
         }
 
         $marks = $this->classe->getMarks($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
+
+        $averageEPETab = $this->classe->getMarksAverage($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year, 'epe');
+
 
         $epeMaxLenght = $this->classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'epe') + 1;
 
@@ -98,9 +117,21 @@ class ClasseMarksLister extends Component
             $noMarks = true;
         }
 
+        if($classe && $this->semestre_selected && $this->subject_selected){
+            $modality = $this->subject_selected->getAverageModalityOf($classe->id, $school_year_model->school_year, $semestre);
+            $modalitiesActivated = $classe->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->where('activated', true)->count() > 0;
+            $hasModalities = $classe->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->count() > 0;
+            if($modality){
+                $modality = $modality->modality;
+            }
+            else{
+                $modality = null;
+            }
+        }
 
 
-        return view('livewire.classe-marks-lister', compact('pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'marks_lenght'));
+
+        return view('livewire.classe-marks-lister', compact('pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'marks_lenght', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab'));
     }
 
 
@@ -114,74 +145,66 @@ class ClasseMarksLister extends Component
         }
     }
 
-
-    public function updateMark()
-    {
-        $edit_mark_value = $this->edit_mark_value;
-        if($this->targetedMark){
-            $mark = $this->targetedMark;
-            if(is_numeric($edit_mark_value) && $edit_mark_value >= 0 && $edit_mark_value <= 20){
-                $updated = $mark->update(['value' => $edit_mark_value]);
-                if($updated){
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour réussie', 'message' => "la note a été inséré avec succès!", 'type' => 'success']);
-                    $this->reset('edit_mark_value', 'edit_mark_type', 'edit_key', 'invalid_mark', 'editing_mark');
-                }
-                else{
-                    $this->dispatchBrowserEvent('Toast', ['title' => "Une erreure s'est produite", 'message' => "L'erreure est inconnue veuillez réessayer!", 'type' => 'error']);
-                    $this->reset('edit_mark_value', 'edit_mark_type', 'edit_key', 'invalid_mark', 'editing_mark');
-
-                }
-            }
-            else{
-                $this->dispatchBrowserEvent('Toast', ['title' => "La note est invalide", 'message' => "La note doit être un nombre compris entre 00 et 20", 'type' => 'warning']);
-                $this->invalid_mark = true;
-            }
-        }
-        else{
-            if(is_numeric($edit_mark_value) && $edit_mark_value >= 0 && $edit_mark_value <= 20){
-                $pupil = Pupil::find($this->pupil_id);
-                if ($pupil) {
-                    $subject_id = session('classe_subject_selected');
-                    $semestre = session('semestre_selected');
-                    $classe_id = $pupil->classe_id;
-                    $school_year_model = $this->getSchoolYear();
-                    $value = $edit_mark_value;
-                    $edit_mark_type = $this->edit_mark_type;
-
-                    $mark = Mark::create([
-                        'value' => $value, 
-                        'pupil_id' => $pupil->id, 
-                        'subject_id' => $subject_id, 
-                        'classe_id' => $classe_id, 
-                        'semestre' => $semestre, 
-                        'type' => $edit_mark_type, 
-                        'level_id' => $pupil->level_id, 
-                    ]);
-                    if ($mark) {
-                        $school_year_model->marks()->attach($mark->id);
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour réussie', 'message' => "la note a été inséré avec succès!", 'type' => 'success']);
-
-                        $this->reset('edit_mark_value', 'edit_mark_type', 'edit_key', 'invalid_mark', 'editing_mark');
-                    }
-                }
-                else{
-                    $this->dispatchBrowserEvent('Toast', ['title' => "Une erreure s'est produite", 'message' => "L'apprenant est introuvable", 'type' => 'error']);
-                }
-            }
-            else{
-                $this->dispatchBrowserEvent('Toast', ['title' => "La note est invalide", 'message' => "La note doit être un nombre compris entre 00 et 20", 'type' => 'warning']);
-                $this->invalid_mark = true;
-            }
-
-        }
-    }
-
     public function editClasseSubjects($classe_id = null)
     {
         $school_year = session('school_year_selected');
         $classe = Classe::where('id', $classe_id)->first();
         if($classe){
             $this->emit('manageClasseSubjectsLiveEvent', $classe->id);
+        }
+
+    } 
+
+    public function manageModality($classe_id = null, $subject_id = null, $semestre = null, $modality_id = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        if($classe_id == null){
+            $classe_id = $this->classe_id;
+        }
+        if($subject_id == null){
+            $subject_id = session('classe_subject_selected');
+        }
+        if($semestre == null){
+            $semestre = session('semestre_selected');
+        }
+
+        $mod = $this->subject_selected->getAverageModalityOf($classe_id, $school_year_model->school_year, $semestre);
+        $modality = $mod ? $mod->id : null;
+
+        $this->emit('manageClasseModalitiesLiveEvent', $classe_id, $subject_id, $school_year_model->id, $semestre, $modality);
+
+    }
+
+    public function activateModalities()
+    {
+        $this->activateModalityOrNot(true);
+    }
+
+
+    public function diseableModalities()
+    {
+        $this->activateModalityOrNot(false);
+    }
+
+    public function activateModalityOrNot($activated)
+    {
+
+        $school_year_model = $this->getSchoolYear();
+        $classe_id = $this->classe_id;
+        $subject_id = session('classe_subject_selected');
+        $semestre = session('semestre_selected');
+
+        $modalities = $this->classe->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre);
+
+        if($modalities->get()->count() > 0){
+            $updated = $modalities->each(function($modality) use ($activated){
+                $modality->update(['activated' => $activated]);
+            });
+            if($updated){
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour', 'message' => "C'est fait!", 'type' => 'success']);
+                $this->emit('classeUpdated');
+            }
         }
 
     }
@@ -218,6 +241,7 @@ class ClasseMarksLister extends Component
     {
         $this->count = 1;
         session()->put('classe_subject_selected', $this->classe_subject_selected);
+        $this->subject_selected = Subject::find($this->classe_subject_selected);
         $this->emit('selectedClasseSubjectChangeLiveEvent', $this->classe_subject_selected);
     }
 

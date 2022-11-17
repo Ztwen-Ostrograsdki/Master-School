@@ -2,6 +2,7 @@
 namespace App\Helpers\ModelTraits;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\Pupil;
 use App\Models\SchoolYear;
 use Illuminate\Support\Facades\DB;
 
@@ -99,43 +100,136 @@ trait ClasseTraits{
         }
         if($school_year_model){
             $pupils = $this->getPupils($school_year_model->id);
-                foreach($pupils as $pupil){
-                    $epes = [];
-                    $parts = [];
-                    $devs = [];
+            foreach($pupils as $pupil){
+                $epes = [];
+                $parts = [];
+                $devs = [];
 
-                    $epes = $school_year_model->marks()
-                                              ->where('semestre', $semestre)
-                                              ->where('subject_id', $subject_id)
-                                              ->where('pupil_id', $pupil->id)
-                                              ->where('classe_id', $pupil->classe_id)
-                                              ->where('type', 'epe')
-                                              ->orderBy('id', 'asc')->get();
+                $epes = $school_year_model->marks()
+                                          ->where('semestre', $semestre)
+                                          ->where('subject_id', $subject_id)
+                                          ->where('pupil_id', $pupil->id)
+                                          ->where('classe_id', $pupil->classe_id)
+                                          ->where('type', 'epe')
+                                          ->orderBy('id', 'asc')->get();
 
-                    $devs = $school_year_model->marks()
-                                              ->where('semestre', $semestre)
-                                              ->where('subject_id', $subject_id)
-                                              ->where('pupil_id', $pupil->id)
-                                              ->where('classe_id', $pupil->classe_id)
-                                              ->where('type', 'devoir')
-                                              ->orderBy('id', 'asc')->get();
+                $devs = $school_year_model->marks()
+                                          ->where('semestre', $semestre)
+                                          ->where('subject_id', $subject_id)
+                                          ->where('pupil_id', $pupil->id)
+                                          ->where('classe_id', $pupil->classe_id)
+                                          ->where('type', 'devoir')
+                                          ->orderBy('id', 'asc')->get();
 
-                    $parts = $school_year_model->marks()
-                                               ->where('semestre', $semestre)
-                                               ->where('subject_id', $subject_id)
-                                               ->where('pupil_id', $pupil->id)
-                                               ->where('classe_id', $pupil->classe_id)
-                                               ->where('type', 'participation')
-                                               ->orderBy('id', 'asc')->get();
-                    
-                    $allMarks[$pupil->id] = [
-                        'epe' => $epes,
-                        'participation' => $parts,
-                        'dev' => $devs
-                    ];
-                }
+                $parts = $school_year_model->marks()
+                                           ->where('semestre', $semestre)
+                                           ->where('subject_id', $subject_id)
+                                           ->where('pupil_id', $pupil->id)
+                                           ->where('classe_id', $pupil->classe_id)
+                                           ->where('type', 'participation')
+                                           ->orderBy('id', 'asc')->get();
+                
+                $allMarks[$pupil->id] = [
+                    'epe' => $epes,
+                    'participation' => $parts,
+                    'dev' => $devs
+                ];
+            }
         }
         return $allMarks;
+    }
+
+
+
+    public function getMarksAverage($subject_id, $semestre = 1, $school_year = null, $type = 'epe', $takeBonus = true, $takeSanctions = true)
+    {
+
+        $allMarks = $this->getMarks($subject_id, $semestre, $school_year);
+
+        $marksEPEs = [];
+        $marksPARTs = [];
+        $averageTab = [];
+
+        foreach ($allMarks as $pupil_id => $markTab1) {
+            $marksEPEs[$pupil_id] = $markTab1[$type];
+            $marksPARTs[$pupil_id] = $markTab1['participation'];
+        }
+        if(!$school_year){
+            $school_year_model = $this->getSchoolYear();
+        }
+        else{
+            if(is_numeric($school_year)){
+                $school_year_model = SchoolYear::where('id', $school_year)->first();
+            }
+            else{
+                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+            }
+        }
+
+        $modality = $this->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->where('subject_id', $subject_id)->first();
+
+        foreach ($marksEPEs as $pupil_id => $epeMarks) {
+            $epeSom = 0;
+            $partSom = 0;
+            $total = 0;
+
+            $pupilMaxMarksCount = count($epeMarks);
+            $max = $pupilMaxMarksCount;
+
+            if($modality && $modality->modality < $pupilMaxMarksCount){
+                $max = $modality->modality;
+            }
+
+            $epeBestMarksAll = [];
+            $epeBestMarks = [];
+
+            foreach ($epeMarks as $epe) {
+                $epeBestMarksAll[] = $epe->value;
+            }
+
+            for ($i=0; $i <= count($epeBestMarksAll); $i++) { 
+                $m = $epeBestMarksAll[$i];
+                if($m == max($epeBestMarksAll) && count($epeBestMarks) <= $max){
+                    $epeBestMarks[] = $m;
+                    unset($epeBestMarksAll[$i]);
+                }
+            }
+
+            $epeSom = $epeSom + array_sum($epeBestMarks);
+
+            $partsMarks = $marksPARTs[$pupil_id];
+
+            $max  = $max + count($partsMarks);
+
+
+
+            foreach ($partsMarks as $part) {
+                $partSom = $partSom + $part->value;
+            }
+
+
+            $total = $total + $epeSom + $partSom;
+
+            if($type == 'epe'){
+
+                $bonus_counter =  array_sum($school_year_model->related_marks()->where('pupil_id', $pupil_id)->where('classe_id', $this->id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', 'bonus')->pluck('value')->toArray());
+                $minus_counter =  array_sum($school_year_model->related_marks()->where('pupil_id', $pupil_id)->where('classe_id', $this->id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', 'minus')->pluck('value')->toArray());
+
+            }
+
+            $total = $total - $minus_counter + $bonus_counter;
+
+            if($total < 0){
+                $total = 0;
+            }
+
+            $averageTab[$pupil_id] = floatval(number_format(($total /($max)), 2));
+            $averageTab[$pupil_id] = $epeSom;
+
+        }
+
+        return $averageTab;
+
     }
 
 

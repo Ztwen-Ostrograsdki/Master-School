@@ -61,5 +61,10 @@ class Subject extends Model
         return $this->hasMany(AverageModality::class);
     }
 
+    public function getAverageModalityOf($classe_id, string $school_year, $semestre = null)
+    {
+       return $this->averageModalities()->where('classe_id', $classe_id)->where('school_year', $school_year)->where('semestre', $semestre)->first();
+    }
+
 
 }

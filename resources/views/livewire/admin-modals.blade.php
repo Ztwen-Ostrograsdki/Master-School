@@ -6,6 +6,7 @@
     @livewire('create-new-classe-group')
     @livewire('edit-classe-group-coeficient')
     @livewire('classe-group-manage')
+    @livewire('manage-classe-modalities')
     @livewire('edit-classe-group')
     @livewire('create-level')
     @livewire('create-subject')

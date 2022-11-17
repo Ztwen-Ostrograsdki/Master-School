@@ -6,7 +6,29 @@
             <option value="{{$subject->id}}">{{$subject->name}}</option>
             @endforeach
         </select>
-        <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-primary border border-white float-right" title="Ajouter une matière à cette classe">
+
+        <small class="text-warning m-2">
+            @if($modality)
+                <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, <b class="text-success">0{{$modality}}</b> notes seront prises en comptes!
+            @else
+                <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, toutes les notes seront prises en comptes!
+            @endif
+        </small>
+        @if($hasModalities)
+        <span class="text-warning float-right btn btn-secondary border">
+            @if($modalitiesActivated)
+                <span wire:click="diseableModalities" title="Désactiver tamporairement les modalités" class="bi-lock text-warning d-inline-block w-100 cursor-pointer"></span>
+            @else
+               <span wire:click="activateModalities" title="Réactiver les modalités" class="bi-unlock text-success d-inline-block w-100 cursor-pointer"></span>
+            @endif
+        </span>
+        @endif
+        <span wire:click="manageModality" class="btn btn-primary border border-white float-right mx-1" title="Editer les modalités de calcule de moyenne dans la matière sélectionnée dans cette classe">
+            <span class="fa bi-pen"></span>
+            <span class="fa bi-calculator"></span>
+            <span>Editer</span>
+        </span>
+        <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right" title="Ajouter une matière à cette classe">
             <span class="fa fa-bookmark"></span>
             <span>Ajouter</span>
         </span>
@@ -24,8 +46,7 @@
         <div class="w-100 m-0 p-0 mt-3">
             <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white text-center">
                     <col>
-                    <colgroup span="1"></colgroup>
-                    <colgroup span="1"></colgroup>
+                    <col>
                     <colgroup span="{{$epeMaxLenght}}"></colgroup>
                     <colgroup span="{{$participMaxLenght}}"></colgroup>
                     <colgroup span="{{$devMaxLenght}}"></colgroup>
@@ -33,14 +54,16 @@
                     <colgroup span="1"></colgroup>
                     <colgroup span="1"></colgroup>
                     <tr class="text-center">
-                        <th rowspan="2" scope="colgroup">No</th>
-                        <th rowspan="2" scope="colgroup">Les apprenants</th>
+                        <td rowspan="2">No</td>
+                        <td rowspan="2">Les apprenants</td>
                         <th colspan="{{$epeMaxLenght}}" scope="colgroup">Les interrogations</th>
                         <th colspan="{{$participMaxLenght}}" scope="colgroup">Les Participations</th>
                         <th colspan="{{$devMaxLenght}}" scope="colgroup">Les devoirs</th>
                         <th colspan="3" scope="colgroup">Les Moyennes</th>
-                        <th colspan="1" scope="colgroup">Le rang</th>
-                        <th colspan="1" scope="colgroup">Action</th>
+                        <td rowspan="2">Rang</td>
+                        <td rowspan="2">
+                            <span class="bi-tools"></span>
+                        </td>
                     </tr>
                     <tr class="text-center">
                         @for ($e = 1; $e <= $epeMaxLenght; $e++)
@@ -55,29 +78,39 @@
                         <th scope="col">Moy. Int</th>
                         <th scope="col">Moy</th>
                         <th scope="col">Moy. Coef</th>
-                        <th scope="col">Rang</th>
-                        <th scope="col"></th>
                         
                     </tr>
                     @foreach($pupils as $k => $p)
                         <tr class="text-left">
-                            <th scope="row" class="text-center border-right">{{ $k + 1 }}</th>
-                            <th class="text-capitalize p-0 m-0 row">
-                                <a class="text-white col-10 m-0 p-0 py-1" href="{{route('pupil_profil', ['id' => $p->id])}}">
+                            <th scope="row" class="text-center">{{ $loop->iteration }}</th>
+                            <th class="text-capitalize p-0 m-0 row justify-between">
+                                <a class="text-white m-0 p-0 py-1" href="{{route('pupil_profil', ['id' => $p->id])}}">
                                     <span class="d-flex justify-content-between">
                                         <span class="mx-2 d-none d-lg-inline d-xl-inline text-small">
                                             {{$p->getName()}}
                                         </span>
                                     </span>
                                 </a>
-                                <span wire:click="insertMarks({{$p->id}})" class="float-right col-1 cursor-pointer py-1 fa fa-edit" title="Insérer des notes"></span>
+                                <span class="float-right text-right">
+                                    <span class="mt-5">
+                                        <small class="text-success">
+                                            ({{ $p->getRelatedMarksCounter($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), 'bonus', true) }}) 
+                                        </small>
+                                            <small>  </small>
+                                         <small class="text-danger">
+                                             ({{ $p->getRelatedMarksCounter($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), 'minus', true) }})
+                                        </small>
+
+                                    </span>
+                                </span>
+                                <span wire:click="insertMarks({{$p->id}})" class="float-right col-1 cursor-pointer text-white-50 py-1 fa fa-edit" title="Insérer des notes"></span>
                             </th>
                             @if($marks[$p->id])
                                 {{-- LES EPE --}}
                                 @if($marks[$p->id]['epe'])
                                     @foreach ($marks[$p->id]['epe'] as $m => $epe)
                                         <td x-on:dblclick="@this.call('setTargetedMark', {{$p->id}}, {{$epe->id}})" class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer"> {{ $epe->value }} </span>
+                                            <span class="w-100 cursor-pointer"> {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['epe'] && count($marks[$p->id]['epe']) < $epeMaxLenght)
@@ -99,7 +132,7 @@
                                 @if($marks[$p->id]['participation'])
                                     @foreach ($marks[$p->id]['participation'] as $l => $part)
                                         <td x-on:dblclick="@this.call('setTargetedMark', {{$p->id}}, {{$part->id}})" class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer"> {{ $part->value }} </span>
+                                            <span class="w-100 cursor-pointer"> {{ $part->value >= 10 ? $part->value : '0'.$part->value }} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['participation'] && count($marks[$p->id]['participation']) < $participMaxLenght)
@@ -121,7 +154,7 @@
                                 @if ($marks[$p->id]['dev'])
                                     @foreach ($marks[$p->id]['dev'] as $q => $dev)
                                         <td x-on:dblclick="@this.call('setTargetedMark', {{$p->id}}, {{$dev->id}})" class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer"> {{$dev->value}} </span>
+                                            <span class="w-100 cursor-pointer"> {{ $dev->value >= 10 ? $dev->value : '0'.$dev->value }} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['dev'] && count($marks[$p->id]['dev']) < $devMaxLenght)
@@ -139,7 +172,7 @@
                                     </td>
                                     @endfor
                                 @endif
-                                <td class=" text-center moy-epe-note"> - </td>
+                                <td class=" text-center moy-epe-note {{$averageEPETab[$p->id] >= 10 ? 'text-success' : 'text-danger'}} "> {{ $averageEPETab[$p->id] >= 10 ? $averageEPETab[$p->id] : '0'.$averageEPETab[$p->id] }} </td>
                                 <td class=" text-center moy-note"> - </td>
                                 <td class=" text-center moy-coef-note"> - </td>
                                 <td class=" text-center rank-note"> - </td>
@@ -165,7 +198,7 @@
                                         <span class="w-100 cursor-pointer"> - </span>
                                     </td>
                                 @endfor
-                                <td class=" text-center moy-epe-note"> - </td>
+                                <td class=" text-center moy-epe-note"> </td>
                                 <td class=" text-center moy-note"> - </td>
                                 <td class=" text-center moy-coef-note"> - </td>
                                 <td class=" text-center rank-note"> - </td>

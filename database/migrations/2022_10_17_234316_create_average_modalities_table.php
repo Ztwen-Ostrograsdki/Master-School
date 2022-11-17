@@ -19,6 +19,10 @@ class CreateAverageModalitiesTable extends Migration
             $table->unsignedBigInteger('modality')->nullable()->default(null);
             $table->unsignedBigInteger('classe_id');
             $table->unsignedBigInteger('subject_id');
+            $table->string('trimestre')->nullable()->default(null);
+            $table->string('semestre')->nullable()->default(null);
+            $table->boolean('activated')->default(true);
+
             $table->string('school_year')->nullable()->default(null);
             $table->foreign('classe_id')
                   ->references('id')

@@ -38,13 +38,26 @@ class Admin extends Component
     public $start_new_school = false;
     public $has_data = false;
     public $school_name = "Mon école";
-    public $semestre_type = 'semestre';
+    public $semestre_type = 'Semestre';
     public $school_year_start;
     public $counter = 0;
+    public $semestre_selected = 1;
 
 
     public function mount()
     {
+        $school = School::first();
+        $semestres = [1, 2];
+        if($school){
+            if($school->trimestre){
+                $this->semestre_type = 'trimestre';
+                $semestres = [1, 2, 3];
+            }
+            else{
+                $semestres = [1, 2];
+            }
+        }
+
         $school_year = date('Y') . ' - ' . intval(date('Y') + 1);
         if(session()->has('school_year_selected') && session('school_year_selected')){
             $school_year = session('school_year_selected');
@@ -52,6 +65,16 @@ class Admin extends Component
         }
         else{
             session()->put('school_year_selected', $school_year);
+        }
+
+        if(session()->has('semestre_selected') && session('semestre_selected')){
+            $semestre = intval(session('semestre_selected'));
+            session()->put('semestre_selected', $semestre);
+            $this->semestre_selected = $semestre;
+        }
+        else{
+            $this->semestre_selected = 1;
+            session()->put('semestre_selected', $this->semestre_selected);
         }
        
     }
