@@ -1,6 +1,14 @@
 <x-z-modal-generator :topPosition="300" :hasHeader="true" :modalHeaderTitle="'Gestionnaire des coéfiscients'" :width="6" :icon="'fa bi-calculator'" :modalName="'editClasseGroupCoeficientsModal'" :modalBodyTitle="'Edition des coéfiscients'">
     @if($classe_group && $subjects && count($subjects) > 0)
     <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submit">
+        @if($coeficient)
+            <div class="mx-auto w-100 my-2 d-flex justify-content-center">
+                <span wire:click="deleteCoef" class="cursor-pointer d-inline-block col-8 btn bg-orange border border-white p-2">
+                    <span class="fa fa-trash text-warning"></span>
+                    Supprimer / Retirer le coefiscient 
+                </span>
+            </div>
+        @endif
         <div class="row justify-between">
             <div class="mt-0 mb-2 col-11 mx-auto">
                <div class="d-flex row">

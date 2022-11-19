@@ -6,7 +6,7 @@
             <option value="{{$subject->id}}">{{$subject->name}}</option>
             @endforeach
         </select>
-
+        @if($subject_selected)
         <small class="text-warning m-2">
             @if($modality)
                 <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, <b class="text-success">0{{$modality}}</b> notes seront prises en comptes!
@@ -17,9 +17,16 @@
         @if($hasModalities)
         <span class="text-warning float-right btn btn-secondary border">
             @if($modalitiesActivated)
-                <span wire:click="diseableModalities" title="Désactiver tamporairement les modalités" class="bi-lock text-warning d-inline-block w-100 cursor-pointer"></span>
+                <span wire:click="diseableModalities" title="Désactiver tamporairement les modalités" class="d-inline-block w-100 cursor-pointer">
+                    <small>Désactiver</small>
+                    <span class="bi-key text-warning"></span>
+
+                </span>
             @else
-               <span wire:click="activateModalities" title="Réactiver les modalités" class="bi-unlock text-success d-inline-block w-100 cursor-pointer"></span>
+                <span wire:click="activateModalities" title="Réactiver les modalités" class="d-inline-block w-100 cursor-pointer">
+                    <small>Activer</small>
+                    <span class="bi-unlock text-success"></span>
+                </span>
             @endif
         </span>
         @endif
@@ -28,6 +35,7 @@
             <span class="fa bi-calculator"></span>
             <span>Editer</span>
         </span>
+        @endif
         <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right" title="Ajouter une matière à cette classe">
             <span class="fa fa-bookmark"></span>
             <span>Ajouter</span>
@@ -38,13 +46,25 @@
         @if($pupils && $classe_subject_selected && count($pupils) > 0)
         <div>
             <blockquote class="text-primary">
-                <h5 class="m-0 p-0 text-white-50">
-                    Les détails sur les notes
+                <h5 class="m-0 p-0 text-white-50 h6 w-100 d-flex justify-content-between">
+                    <span>Les détails sur les notes</span>
+                    <span class="d-flex justify-content-between">
+                        @if($classe && $classe->classe_group)
+                            <a title="charger le profil de la promotion" class="text-success mx-1" href="{{route('classe_group_profil', ['slug' => $classe->classe_group->name])}}">
+                                Promotion {{ $classe->classe_group->name }}
+                            </a>
+                        @else
+                            <span wire:click="editClasseGroup({{$classe->id}})" title="Cette classe n'est pas encore liée à une promotion, veuillez cliquer afin de le faire et d'avoir accès aux coéfiscients des différentes matières" class="mx-1 p-0 px-2 btn btn-success border border-white">
+                                Promouvoir maintenant
+                            </span>
+                        @endif
+                        <span class="ml-3">Coef:  {{ $classe_subject_coef }}</span>
+                    </span>
                 </h5>
             </blockquote>
         </div>
         <div class="w-100 m-0 p-0 mt-3">
-            <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white text-center">
+            <table class="w-100 m-0 p-0 table-striped table-bordered z-table hoverable text-white text-center">
                     <col>
                     <col>
                     <colgroup span="{{$epeMaxLenght}}"></colgroup>
@@ -172,10 +192,23 @@
                                     </td>
                                     @endfor
                                 @endif
-                                <td class=" text-center moy-epe-note {{$averageEPETab[$p->id] >= 10 ? 'text-success' : 'text-danger'}} "> {{ $averageEPETab[$p->id] >= 10 ? $averageEPETab[$p->id] : '0'.$averageEPETab[$p->id] }} </td>
-                                <td class=" text-center moy-note"> - </td>
-                                <td class=" text-center moy-coef-note"> - </td>
-                                <td class=" text-center rank-note"> - </td>
+                                <td class=" text-center moy-epe-note {{$averageEPETab[$p->id] !== null ? ($averageEPETab[$p->id] >= 10 ? 'text-success' : 'text-danger') : 'text-warning'}} "> 
+                                    {{ $averageEPETab[$p->id] !== null ? ($averageEPETab[$p->id] >= 10 ? $averageEPETab[$p->id] : '0'.$averageEPETab[$p->id]) : ' - ' }} 
+                                </td>
+                                <td class=" text-center moy-note text-white-50 z-hover  {{$averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? 'bg-success' : 'bg-danger') : 'bg-secondary'}} "> 
+                                    {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? $averageTab[$p->id] : '0'.$averageTab[$p->id]) : ' - ' }} 
+                                </td>
+                                <td class=" text-center moy-coef-note"> 
+                                    {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? ($averageTab[$p->id] * $classe_subject_coef) : '0'.($averageTab[$p->id] * $classe_subject_coef)) : ' - ' }}
+                                </td>
+                                <td class=" text-center rank-note text-warning"> 
+                                    @if($ranksTab[$p->id])
+                                        <span>{{ $ranksTab[$p->id]['rank']}}</span><sup>{{ $ranksTab[$p->id]['exp']}}</sup>
+                                        <small> {{ $ranksTab[$p->id]['base'] }} </small>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     <span wire:click="insertRelatedMark({{$p->id}})" title="Ajouter une note relative : Sanction ou Bonus" class="cursor-pointer">
                                         <strong class="bi-plus text-success"></strong>/

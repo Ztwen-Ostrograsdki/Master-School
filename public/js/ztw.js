@@ -70,6 +70,13 @@ window.addEventListener('modal-adminAuthenticationModal', function(e) {
 
 
 $(function() {
+    $(".z-modal-closer").click(function() {
+        console.log('cliked');
+        $('.modal').modal('hide');
+    });
+});
+
+$(function() {
     $("#focus_photo_prf").click(function() {
         $("#photo_prf").focus();
     });

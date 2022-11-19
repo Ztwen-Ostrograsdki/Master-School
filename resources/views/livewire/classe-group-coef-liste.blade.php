@@ -12,7 +12,7 @@
             <tr>
                 @foreach($classe_group->classes as $classe)
                     <th scope="col">
-                        <a title="charger le profil de la classe de {{$classe->name}}" class="text-white d-inline-block w-100" href="{{route('classe_profil', ['slug' => $classe->name])}}">
+                        <a title="charger le profil de la classe de {{$classe->name}}" class="text-white d-inline-block w-100" href="{{route('classe_profil', ['slug' => $classe->slug])}}">
                             <span>{{$classe->getNumericName()['root']}}</span><sup>{{$classe->getNumericName()['sup']}}</sup>
                             <span>{{$classe->getNumericName()['idc']}}</span>
                         </a>

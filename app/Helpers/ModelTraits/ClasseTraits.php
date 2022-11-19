@@ -143,12 +143,18 @@ trait ClasseTraits{
 
     public function getMarksAverage($subject_id, $semestre = 1, $school_year = null, $type = 'epe', $takeBonus = true, $takeSanctions = true)
     {
-
-        $allMarks = $this->getMarks($subject_id, $semestre, $school_year);
-
         $marksEPEs = [];
         $marksPARTs = [];
         $averageTab = [];
+
+        if(!$subject_id){
+
+            return $averageTab;
+        }
+
+        $allMarks = $this->getMarks($subject_id, $semestre, $school_year);
+
+        
 
         foreach ($allMarks as $pupil_id => $markTab1) {
             $marksEPEs[$pupil_id] = $markTab1[$type];
@@ -176,26 +182,38 @@ trait ClasseTraits{
             $pupilMaxMarksCount = count($epeMarks);
             $max = $pupilMaxMarksCount;
 
-            if($modality && $modality->modality < $pupilMaxMarksCount){
+
+
+            if($modality && $modality->activated && $modality->modality < $pupilMaxMarksCount){
                 $max = $modality->modality;
+
+                $epeBestMarksAll = [];
+                $epeBestMarks = [];
+
+
+                foreach ($epeMarks as $epe_b) {
+                    $epeBestMarksAll[$epe_b->id] = $epe_b->value;
+                }
+
+                while (count($epeBestMarks) < $max) {
+                    $m = max($epeBestMarksAll);
+                    $key = array_search($m, $epeBestMarksAll);
+                    $epeBestMarks[$key] = $m;
+                    unset($epeBestMarksAll[$key]);
+                }
+
+                $epeSom = array_sum($epeBestMarks);
+
+
             }
+            else{
 
-            $epeBestMarksAll = [];
-            $epeBestMarks = [];
-
-            foreach ($epeMarks as $epe) {
-                $epeBestMarksAll[] = $epe->value;
-            }
-
-            for ($i=0; $i <= count($epeBestMarksAll); $i++) { 
-                $m = $epeBestMarksAll[$i];
-                if($m == max($epeBestMarksAll) && count($epeBestMarks) <= $max){
-                    $epeBestMarks[] = $m;
-                    unset($epeBestMarksAll[$i]);
+                foreach ($epeMarks as $epe) {
+                    $epeSom = $epeSom + $epe->value;
                 }
             }
 
-            $epeSom = $epeSom + array_sum($epeBestMarks);
+
 
             $partsMarks = $marksPARTs[$pupil_id];
 
@@ -223,14 +241,191 @@ trait ClasseTraits{
                 $total = 0;
             }
 
-            $averageTab[$pupil_id] = floatval(number_format(($total /($max)), 2));
-            $averageTab[$pupil_id] = $epeSom;
+            if($max == 0){
+                $averageTab[$pupil_id] = null;
+            }
+            else{
+                $averageTab[$pupil_id] = floatval(number_format(($total /($max)), 2));
+
+            }
 
         }
 
         return $averageTab;
 
     }
+
+    /**
+        * Get the pupil marks average about the epe marks and the devs marks
+        * @return array
+     */
+    public function getAverage($subject_id, $semestre = 1, $school_year = null, $takeBonus = true, $takeSanctions = true)
+    {
+
+        $epeAperages = $this->getMarksAverage($subject_id, $semestre, $school_year, 'epe', $takeBonus, $takeSanctions);
+
+        $allMarks = $this->getMarks($subject_id, $semestre, $school_year);
+
+        $devsMarks = [];
+        $averageTab = [];
+        $total = 0;
+
+        foreach ($allMarks as $pupil_id => $markTab1) {
+            $devsMarks[$pupil_id] = $markTab1['dev'];
+        }
+
+
+        foreach ($devsMarks as $pupil_id => $devs) {
+            $epeAperage = null;
+            $max = count($devs);
+            if(count($epeAperages) > 0){
+                $epeAperage = $epeAperages[$pupil_id];
+            }
+
+            $pupilDevsMarks = [];
+
+            if(count($devs) > 0){
+                foreach ($devs as $dev) {
+                    $pupilDevsMarks[$dev->id] = $dev->value;
+                }
+            }
+
+            if($epeAperage !== null){
+                $max = $max + 1;
+                $total = $epeAperage;
+            }
+
+            if($max == 0){
+                $averageTab[$pupil_id] = null;
+            }
+            else{
+                $total = array_sum($pupilDevsMarks) + $epeAperage;
+                $averageTab[$pupil_id] = floatval(number_format(($total /($max)), 2));
+
+            }
+        }
+
+
+
+        return $averageTab;
+
+    }
+
+
+    public function getClasseRank($subject_id, $semestre = 1, $school_year = null, $takeBonus = true, $takeSanctions = true)
+    {
+
+        $averagesTab = $this->getAverage($subject_id, $semestre, $school_year, $takeBonus, $takeSanctions);
+        
+        $ranksTab = [];
+        $ranksTab_init = [];
+        $ranksTab_init_associative = [];
+
+        foreach ($averagesTab as $pupil_id_1 => $average_1) {
+            if ($average_1 !== null) {
+                $ranksTab_init[$pupil_id_1] = $average_1;
+            }
+        }
+        
+
+        $size = count($ranksTab_init);
+
+        if($size > 0){
+
+            $k = 1;
+            while (count($ranksTab_init_associative) < $size) {
+                $av = max($ranksTab_init);
+                $pupil_id = array_search($av, $ranksTab_init);
+                $ranksTab_init_associative[$k] = [
+                    'id' => $pupil_id,
+                    'moy' => $av
+                ];
+                unset($ranksTab_init[$pupil_id]);
+                $k++;
+            }
+
+            if($ranksTab_init_associative !== []){
+                $size = count($ranksTab_init_associative);
+
+                $index = 1;
+                foreach ($ranksTab_init_associative as $key => $pupil_tab) {
+                    $moy = $pupil_tab['moy'];
+                    $id = $pupil_tab['id'];
+
+                    $pupil_model = Pupil::find($id);
+
+                    if($index == 1){
+                        $rank = 1;
+                        $exp = $pupil_model->sexe == 'male' ? 'er' : 'ère';
+                        $base = null;
+                    }
+                    else{
+                        $prev = $ranksTab_init_associative[$prev_index];
+
+                        if ($prev_rank == 1) {
+                            if($moy == $prev_moy){
+                                $rank = 1;
+                                $exp = $pupil_model->sexe == 'male' ? 'er' : 'ère';
+                                $base = 'ex';
+                            }
+                            else{
+                                if($moy == $prev_moy){
+                                    $rank = $prev_rank;
+                                    $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
+                                    $base = 'ex';
+                                }
+                                else{
+                                    $rank = $index;
+                                    $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
+                                    $base = null;
+                                }
+                            }
+                        }
+                        else{
+                            if($moy == $prev_moy){
+                                $rank = $prev_rank;
+                                $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
+                                $base = 'ex';
+                            }
+                            else{
+                                $rank = $index;
+                                $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
+                                $base = null;
+                            }
+
+                        }
+
+                        
+
+                    }
+
+                    $prev_rank = $rank;
+                    $prev_moy = $moy;
+                    $prev_index = $index;
+
+                    $ranksTab[$id] = [
+                        'rank' => $rank,
+                        'exp' => $exp,
+                        'base' => $base,
+                        'moy' => $moy,
+                        'id' => $pupil_model->id,
+                    ];
+
+                    $index++;
+                    
+                }
+
+            }
+
+        }
+        else{
+            return $ranksTab;
+        }
+
+        return $ranksTab;
+
+    }
+
 
 
 

@@ -79,6 +79,12 @@ class AdminAsideComponent extends Component
     }
 
 
+    public function addNewClasseGroup()
+    {
+        $this->emit('createNewClasseGroupLiveEvent');
+    }
+
+
     public function reloadData($school_year = null)
     {
         $this->counter = 1;

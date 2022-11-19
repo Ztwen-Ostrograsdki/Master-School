@@ -150,6 +150,12 @@ hr {
     font-size: 14px;
 }
 
+.hoverable tr:hover, tr:hover{
+    opacity: 1 !important;
+    background-color: rgba(10, 10, 40, 0.87) !important;
+    cursor: pointer;
+}
+
 .z-scale:hover {
     transform: scale(1.1);
 }
@@ -506,5 +512,10 @@ header .navbar {
 th{
     font-size: inherit; !important;
     font-weight: 200 !important;
+
+}
+
+.z-border-custum-warning{
+    border: thin solid yellow !important;
 
 }

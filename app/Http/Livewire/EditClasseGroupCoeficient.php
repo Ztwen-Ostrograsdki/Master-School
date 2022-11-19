@@ -57,7 +57,7 @@ class EditClasseGroupCoeficient extends Component
                 $coeficient = Coeficient::create([
                     'classe_group_id' => $this->classe_group->id,
                     'subject_id' => $this->subject_id,
-                    'school_year' => $school_year_model->id,
+                    'school_year_id' => $school_year_model->id,
                     'coef' => $this->value,
 
                 ]);
@@ -76,6 +76,31 @@ class EditClasseGroupCoeficient extends Component
 
             }
         }
+
+    }
+
+
+
+    public function deleteCoef()
+    {
+        if($this->coeficient){
+            $del = $this->coeficient->delete();
+            if($del){
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Opération réussie', 'message' => "La mise à jour a été effective!", 'type' => 'success']);
+                $this->dispatchBrowserEvent('hide-form');
+                $this->emit('classeGroupUpdated');
+                $this->reset('value', 'subject_id', 'coeficient');
+            }
+            else{
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Une ereure inconnue est survenue lors de la suppression! Veuillez vérifier votre requête et réessayer!", 'type' => 'error']);
+
+            }
+        }
+        else{
+            return $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Les données sont corrompues. Veuillez vérifier votre requête et réessayer!", 'type' => 'error']);
+
+        }
+
 
     }
 

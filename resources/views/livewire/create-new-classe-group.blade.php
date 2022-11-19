@@ -11,7 +11,7 @@
                 </div>
 
                 <div class="d-flex row justify-between">
-                    <div class="col-8">
+                    <div class="col-4">
                         <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Le cycle </label>
                         <select class="px-2 form-select text-white z-bg-secondary w-100 @error('level_id') text-danger border border-danger @enderror" wire:model.defer="level_id">
                             <option disabled class="" value="{{null}}">Choisissez le cycle</option>
@@ -23,8 +23,8 @@
                             <small class="py-1 z-text-orange">{{$message}}</small>
                         @enderror
                     </div>
-                    <div class="col-3">
-                        <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Promouvoir les classes </label>
+                    <div class="col-7">
+                        <label class="small z-text-cyan m-0 p-0 w-100 cursor-pointer">Promouvoir les classes ayant des noms similaires à la promotion ? </label>
                         <select class="px-2 form-select text-white z-bg-secondary w-100 @error('joining') text-danger border border-danger @enderror" wire:model.defer="joining">
                             <option value="{{false}}" class="" value="{{null}}">NON</option>
                             <option  value="{{true}}">OUI</option>

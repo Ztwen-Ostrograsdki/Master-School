@@ -19,7 +19,7 @@
                      @endif
                      <div class="d-flex justify-content-end w-20">
                         <div class="w-25"></div>
-                        <button type="button" class="close text-white" data-toggle="modal" data-dismiss="modal">&times;</button>
+                        <button type="button" class="close text-white z-modal-closer">&times;</button>
                      </div>
                   </div>
                </div>

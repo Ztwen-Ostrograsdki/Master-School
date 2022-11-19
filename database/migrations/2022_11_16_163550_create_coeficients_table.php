@@ -13,7 +13,6 @@ class CreateCoeficientsTable extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('coeficients');
         Schema::disableForeignKeyConstraints();
         Schema::create('coeficients', function (Blueprint $table) {
             $table->id();

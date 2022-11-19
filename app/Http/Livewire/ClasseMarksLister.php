@@ -91,6 +91,12 @@ class ClasseMarksLister extends Component
 
         $averageEPETab = $this->classe->getMarksAverage($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year, 'epe');
 
+        $averageTab = $this->classe->getAverage($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
+        
+        $ranksTab = $this->classe->getClasseRank($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
+
+        $classe_subject_coef = $this->classe->get_coefs($this->classe_subject_selected, $school_year_model->id, true);
+
 
         $epeMaxLenght = $this->classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'epe') + 1;
 
@@ -131,7 +137,11 @@ class ClasseMarksLister extends Component
 
 
 
-        return view('livewire.classe-marks-lister', compact('pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'marks_lenght', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab'));
+        return view('livewire.classe-marks-lister', 
+                    compact(
+                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'marks_lenght', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab'
+                    )
+                );
     }
 
 
@@ -185,6 +195,11 @@ class ClasseMarksLister extends Component
     public function diseableModalities()
     {
         $this->activateModalityOrNot(false);
+    }
+
+    public function editClasseGroup($classe_id = null)
+    {
+        $this->emit('editClasseGroupLiveEvent', $classe_id);
     }
 
     public function activateModalityOrNot($activated)

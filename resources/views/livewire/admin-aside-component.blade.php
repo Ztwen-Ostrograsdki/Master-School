@@ -93,7 +93,7 @@
                       </p>
                     </a>
                   </li>
-                  <li class="nav-item">
+                  <li class="nav-item text-primary">
                     <a href="{{route('multiple_pupil_insertion')}}" class="nav-link">
                       <i class="nav-icon fas bi-person-plus"></i>
                       <p>
@@ -237,10 +237,10 @@
                 @endforeach
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="#" wire:click="createNewClasse" class="nav-link text-secondary">
-                      <i class="nav-icon fas fa-school"></i>
+                    <a href="#" wire:click="addNewClasseGroup" class="nav-link text-info">
+                      <i class="nav-icon fas fa-filter"></i>
                       <p>
-                        Nouvelle classe
+                        Nouvelle Promotion
                         <i class="fas fa-plus right"></i>
                         <span class="badge badge-info right"></span>
                       </p>

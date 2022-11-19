@@ -178,9 +178,13 @@ class Classe extends Model
         return $this->belongsTo(Level::class);
     }
 
-    public function coeficients()
+    public function get_coefs($subject_id = null, $school_year = null, $value = true)
     {
-        return $this->hasMany(Coeficient::class);
+        if($this->classe_group){
+            $coef = $this->classe_group->coeficients()->where('subject_id', $subject_id)->where('school_year_id', $school_year)->first();
+            return $value ? ($coef ? $coef->coef : 1) : $coef;
+        }
+        return 1;
     }
 
     public function alreadyJoinedToThisYear(int $school_year = null)
