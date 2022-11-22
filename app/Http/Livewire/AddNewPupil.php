@@ -8,6 +8,7 @@ use App\Models\Level;
 use App\Models\Pupil;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class AddNewPupil extends Component
@@ -79,8 +80,16 @@ class AddNewPupil extends Component
             $classe = $this->school_year_model->classes()->where('classes.id', $this->classe_id)->first();
             if($classe->level_id == $this->level_id){
                 $pupilNameHasAlreadyTaken = Pupil::where('lastName', $this->lastName)->where('firstName', $this->firstName)->first();
+                $last_id = 0;
+                $last = Pupil::latest()->first();
+                if($last){
+                    $last_id = $last->id;
+                }
+
+                $matricule = date('Y'). '' .Str::random(3) . 'CSNDA' . ($last_id + 1);
+
                 if(!$pupilNameHasAlreadyTaken){
-                    DB::transaction(function($e) use ($classe) {
+                    DB::transaction(function($e) use ($classe, $matricule) {
                         try {
                             $pupil = Pupil::create(
                                 [
@@ -88,6 +97,7 @@ class AddNewPupil extends Component
                                     'lastName' => ucwords($this->lastName),
                                     'classe_id' => $this->classe_id,
                                     'contacts' => $this->contacts,
+                                    'matricule' => $matricule,
                                     'sexe' => $this->sexe,
                                     'birth_day' => $this->birth_day,
                                     'nationality' => $this->nationality,

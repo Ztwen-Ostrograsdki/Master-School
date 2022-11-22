@@ -32,6 +32,7 @@ class Pupil extends Model
     protected $fillable = [
         'firstName',
         'lastName',
+        'matricule',
         'classe_id',
         'contacts',
         'sexe',

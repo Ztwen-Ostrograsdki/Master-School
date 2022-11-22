@@ -71,16 +71,12 @@
                         Reglages <span class="caret"></span>
                       </a>
                       <div class="dropdown-menu">
-                        <a class="dropdown-item" wire:click="deleteAllPupil({{$classe_group->id}})" tabindex="-1" href="#">Rafraichir la classe</a>
-                        <a class="dropdown-item" tabindex="-1" href="#">Vider toutes les notes</a>
                         <a class="dropdown-item" tabindex="-1" href="#">Rafraichir les notes</a>
                         <a class="dropdown-item" tabindex="-1" href="#">Rafraichir les absences</a>
                         <a class="dropdown-item" tabindex="-1" href="#">Rafraichir les retards</a>
                         <a class="dropdown-item" tabindex="-1" href="#">Mettre à jour</a>
                         <a class="dropdown-item" wire:click="createNewClasseGroup" tabindex="-1" href="#">Créer une promotion</a>
-                        <a class="dropdown-item" wire:click="createNewClasse" tabindex="-1" href="#">Créer une classe</a>
-                        <a class="dropdown-item" wire:click="editClasseGroup({{$classe_group->id}})" tabindex="-1" href="#">Modifier la promotion</a>
-                        <a wire:click="editClasseSubjects({{$classe_group->id}})"  class="dropdown-item" tabindex="-1" href="#">Définir les coeficients</a>
+                        <a class="dropdown-item" wire:click="editClasseGroupData({{$classe_group->id}})" tabindex="-1" href="#">Modifier la promotion</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
                       </div>
@@ -101,7 +97,7 @@
                         <span wire:click="addNewsClassesToThisClasseGroup({{$classe_group->id}})" title="Ajouter un groupe pédagogique à cette promotion de {{$classe_group->name}}" class="float-right btn btn-success mr-2 border">
                             <span class="ml-1 text-dark">
                                 <span class="fa fa-plus"></span>
-                                <span class="bi-filter"></span>
+                                <span class="small">Classe</span>
                             </span>
                         </span>
                     </li>
@@ -109,7 +105,7 @@
                         <span wire:click="addNewsSubjectsToThisClasseGroup({{$classe_group->id}})" title="Ajouter des matières à cette promotion de {{$classe_group->name}}" class="float-right btn btn-primary mr-2 border">
                             <span class="ml-1 text-dark">
                                 <span class="fa fa-plus"></span>
-                                <span class="bi-pen"></span>
+                                <span class="small">Matières</span>
                             </span>
                         </span>
                     </li>

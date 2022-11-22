@@ -409,6 +409,7 @@ trait ClasseTraits{
                         'base' => $base,
                         'moy' => $moy,
                         'id' => $pupil_model->id,
+                        'pupil' => $pupil_model,
                     ];
 
                     $index++;
@@ -425,6 +426,254 @@ trait ClasseTraits{
         return $ranksTab;
 
     }
+
+    public function getClasseStats($semestre = 1, $school_year = null, $takeBonus = true, $takeSanctions = true)
+    {
+        $data = [];
+        $subjects = $this->subjects;
+
+        if(count($subjects) > 0){
+            foreach ($subjects as $subject) {
+                $averagesTab = $this->getClasseRank($subject->id, $semestre, $school_year, $takeBonus, $takeSanctions);
+                $bestGirl = null;
+                $weakGirl = null;
+                $girlFaileds_percentage = 0;
+                $girlFaileds_number = 0;
+
+                $girlSucceeds_number = 0;
+                $girlSucceeds_percentage = 0;
+
+                $girl_moy = 0;
+                $girl_moys = [];
+                
+                $weakBoy = null;
+                $bestBoy = null;
+                $boyFaileds_number = 0;
+                $boyFaileds_percentage = 0;
+                $boyFaileds_number = 0;
+                $boyFaileds_percentage = 0;
+
+                $boy_moy = 0;
+                $boy_moys = [];
+
+                $classe_moy = 0;
+
+
+                $totalFaileds_number = 0;
+                $totalFaileds_percentage = 0;
+                $totalSucceeds_number = 0;
+                $totalSucceeds_percentage = 0;
+
+                $stats = [];
+
+                $girls = [];
+                $boys = [];
+
+                $total_boys = 0;
+                $total_girls = 0;
+                $total_pupils = 0;
+
+
+                $failed_girls = [];
+                $succeed_girls = [];
+
+                $failed_boys = [];
+                $succeed_boys = [];
+
+                if(count($averagesTab) > 0){
+                    foreach ($averagesTab as $pupil_id => $average) {
+                        
+                        if($average['pupil']->sexe == 'male'){
+                            $boys[$pupil_id] = $average;
+                        }
+                        else{
+                            $girls[$pupil_id] = $average;
+                        }
+                    }
+
+                }
+
+
+
+                if($girls !== []){
+                    $max_girl = 0;
+                    $min_girl = 20;
+                    
+
+                    foreach ($girls as $girl_id => $girl) {
+                        $moy = $girl['moy'];
+                        $girl_moys[] = $moy;
+
+                        if($moy >= $max_girl){
+                            $max_girl = $moy;
+                            $bestGirl = $girl;
+                        }
+
+                        if ($moy <= $min_girl) {
+                            $min_girl = $moy;
+                            $weakGirl = $girl;
+                        }
+
+                        if($moy >= 10){
+                            $succeed_girls[$girl_id] = $girl;
+                        }
+                        else{
+                            $failed_girls[$girl_id] = $girl;
+                        }
+
+
+                        $girlSucceeds_number = count($succeed_girls);
+                        $girlSucceeds_percentage = floatval(number_format((count($succeed_girls) / count($girls)) * 100, 2));
+
+                        $girlFaileds_number = count($failed_girls);
+                        $girlFaileds_percentage = floatval(number_format((count($failed_girls) / count($girls)) * 100, 2));
+                    }
+
+
+                }
+
+                if($boys !== []){
+                    $max_boy = 0;
+                    $min_boy = 20;
+                    foreach ($boys as $boy_id => $boy) {
+                        $moy = $boy['moy'];
+                        $boy_moys[] = $moy;
+
+                        if($moy >= $max_boy){
+                            $max_boy = $moy;
+                            $bestBoy = $boy;
+                        }
+
+                        if ($moy <= $min_boy) {
+                            $min_boy = $moy;
+                            $weakBoy = $boy;
+                        }
+
+                        if($moy >= 10){
+                            $succeed_boys[$boy_id] = $boy;
+                        }
+                        else{
+                            $failed_boys[$boy_id] = $boy;
+                        }
+
+
+                        $boySucceeds_number = count($succeed_boys);
+                        $boySucceeds_percentage = floatval(number_format((count($succeed_boys) / count($boys)) * 100, 2));
+
+                        $boyFaileds_number = count($failed_boys);
+                        $boyFaileds_percentage = floatval(number_format((count($failed_boys) / count($boys)) * 100, 2));
+                        
+                    }
+
+                }
+
+                if($boy_moys !== []){
+                    $boy_moy = floatval(number_format((array_sum($boy_moys) / count($boy_moys)), 2));
+                } 
+
+                if($boy_moys !== []){
+                    $boy_moy = floatval(number_format((array_sum($boy_moys) / count($boy_moys)), 2));
+                }
+
+                $moy_size = count($girl_moys) + count($boy_moys);
+
+
+                if($moy_size > 0){
+                    $moys = 0;
+                    if(count($girl_moys) > 0){
+                        $moys = $moys + array_sum($girl_moys);
+                    }
+
+                    if(count($boy_moys) > 0){
+                        $moys = $moys + array_sum($boy_moys);
+                    }
+
+                    $classe_moy = floatval(number_format($moys / $moy_size , 2));
+                }
+
+
+
+                $total_boys = count($boys);
+                $total_girls = count($girls);
+
+                $total_pupils = $total_boys + $total_girls;
+
+
+
+                $totalFaileds_number = $girlFaileds_number + $boyFaileds_number;
+                $totalSucceeds_number = $girlSucceeds_number + $boySucceeds_number;
+
+                $total = $totalFaileds_number + $totalSucceeds_number;
+
+                $totalSucceeds_percentage = floatval(number_format(($totalSucceeds_number / $total) * 100, 2));
+                $totalFaileds_percentage = floatval(number_format(($totalFaileds_number / $total) * 100, 2));
+
+                $data[$subject->id] = [
+                    'subject_name' => $subject->name,
+                    'bestBoy' => $bestBoy,
+                    'weakBoy' => $weakBoy,
+                    'bestGirl' => $bestGirl,
+                    'weakGirl' => $weakGirl,
+
+                    'stats' => [
+                        'succeed' => [
+                            'G' => [
+                                'percentage' => $boySucceeds_percentage,
+                                'number' => $boySucceeds_number,
+                            ],
+
+                            'F' => [
+                                'percentage' => $girlSucceeds_percentage,
+                                'number' => $girlSucceeds_number,
+                            ],
+                            'T' => [
+                                'percentage' => $totalSucceeds_percentage,
+                                'number' => $totalSucceeds_number,
+                            ],
+                        ],
+
+                        'failed' => [
+                            'G' => [
+                                'percentage' => $boyFaileds_percentage,
+                                'number' => $boyFaileds_number,
+                            ],
+                            'F' => [
+                                'percentage' => $girlFaileds_percentage,
+                                'number' => $girlFaileds_number,
+                            ],
+                            'T' => [
+                                'percentage' => $totalFaileds_percentage,
+                                'number' => $totalFaileds_number,
+                            ],
+                        ],
+                    ],
+
+                    'moyenne' => [
+                        'girl_moy' => $girl_moy,
+                        'boy_moy' => $boy_moy,
+                        'classe_moy' => $classe_moy
+                    ],
+
+                    'effectif' =>[
+                        'G' => $total_boys,
+                        'F' => $total_girls,
+                        'T' => $total_pupils,
+
+                    ],
+
+                ];
+
+                
+            }
+            
+        }
+
+        return $data;
+        
+    }
+
+
+
 
 
 

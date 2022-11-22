@@ -1,16 +1,9 @@
 <div x-data="{editing_mark: @entangle('editing_mark'), edit_key: @entangle('edit_key'), mark_key: @entangle('mark_key'), olders: null}">
-    <div class="w-100 my-1">
-        <span wire:click="addNewPupil" class="btn btn-primary border border-white float-right" title="Ajouter une matière à cette classe">
-            <span  class="fa fa-bookmark"></span>
-            <span>Ajouter 1</span>
-        </span>
-
-    </div>
     <div class="my-2">
         @if($pupil)
         <div>
             <blockquote class="text-primary">
-                <h5 class="m-0 p-0 text-white-50">
+                <h5 class="m-0 h6 p-0 py-2 text-white-50">
                     Les détails sur les notes de {{$pupil->getName()}} année-scolaire {{session('school_year_selected')}} classe {{$pupil->getCurrentClasse() ? $pupil->getCurrentClasse()->name : ''}}
                 </h5>
             </blockquote>
@@ -18,14 +11,14 @@
         <div class="w-100 m-0 p-0 mt-3">
             <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white text-center">
                     <col>
-                    <colgroup span="1"></colgroup>
-                    <colgroup span="1"></colgroup>
+                    <col>
+                    <col>
                     <colgroup span="{{$epeMaxLenght}}"></colgroup>
                     <colgroup span="{{$participMaxLenght}}"></colgroup>
                     <colgroup span="{{$devMaxLenght}}"></colgroup>
                     <colgroup span="3"></colgroup>
-                    <colgroup span="1"></colgroup>
-                    <colgroup span="1"></colgroup>
+                    <col>
+                    <col>
                     <tr class="text-center">
                         <th rowspan="2" scope="colgroup">No</th>
                         <th rowspan="2" scope="colgroup">Les matières</th>
@@ -33,8 +26,10 @@
                         <th colspan="{{$participMaxLenght}}" scope="colgroup">Les Participations</th>
                         <th colspan="{{$devMaxLenght}}" scope="colgroup">Les devoirs</th>
                         <th colspan="3" scope="colgroup">Les Moyennes</th>
-                        <th colspan="1" scope="colgroup">Le rang</th>
-                        <th colspan="1" scope="colgroup">Action</th>
+                        <td rowspan="2">Rang</td>
+                        <td rowspan="2">
+                            <span class="bi-tools"></span>
+                        </td>
                     </tr>
                     <tr class="text-center">
                         @for ($e = 1; $e <= $epeMaxLenght; $e++)
@@ -49,15 +44,27 @@
                         <th scope="col">Moy. Int</th>
                         <th scope="col">Moy</th>
                         <th scope="col">Moy. Coef</th>
-                        <th scope="col">Rang</th>
-                        <th scope="col"></th>
-                        
                     </tr>
-                    @foreach($marks as $k => $subject)
+                    @foreach($marks as $subject_id => $subject)
                         <tr class="text-left">
                             <th scope="row" class="text-center border-right">{{ $loop->iteration }}</th>
                             <th class="text-capitalize pl-2 p-0 m-0">
                                 {{ $subject['name'] }}
+
+                                @if($pupil->getCurrentClasse())
+                                <span class="float-right text-right mr-2">
+                                    <span class="mt-5">
+                                        <small class="text-success">
+                                            ({{ $pupil->getRelatedMarksCounter($pupil->getCurrentClasse()->id, $subject_id, session('semestre_selected'), session('school_year_selected'), 'bonus', true) }}) 
+                                        </small>
+                                            <small>  </small>
+                                         <small class="text-danger">
+                                             ({{ $pupil->getRelatedMarksCounter($pupil->getCurrentClasse()->id, $subject_id, session('semestre_selected'), session('school_year_selected'), 'minus', true) }})
+                                        </small>
+
+                                    </span>
+                                </span>
+                                @endif
                             </th>
                             @if($subject)
                                 {{-- LES EPE --}}
@@ -111,11 +118,27 @@
                                         <td class="text-center cursor-pointer"> - </td>
                                     @endfor
                                 @endif
-                                <td class=" text-center moy-epe-note"> - </td>
-                                <td class=" text-center moy-note"> - </td>
-                                <td class=" text-center moy-coef-note"> - </td>
-                                <td class=" text-center rank-note"> - </td>
-                                <td class="text-center">actions</td>
+                                <td class=" text-center moy-epe-note {{$averageEPETabs[$subject_id] !== null ? ($averageEPETabs[$subject_id] >= 10 ? 'text-success' : 'text-danger') : 'text-warning'}}">
+                                    {{ $averageEPETabs[$subject_id] !== null ? ($averageEPETabs[$subject_id] >= 10 ? $averageEPETabs[$subject_id] : '0'.$averageEPETabs[$subject_id]) : ' - ' }} 
+                                </td>
+                                <td class=" text-center moy-note {{$averageTabs[$subject_id] !== null ? ($averageTabs[$subject_id] >= 10 ? 'bg-success' : 'bg-danger') : 'bg-secondary'}}"> 
+                                    
+                                    {{ $averageTabs[$subject_id] !== null ? ($averageTabs[$subject_id] >= 10 ? $averageTabs[$subject_id] : '0'.$averageTabs[$subject_id]) : ' - ' }}
+                                </td>
+                                <td class=" text-center moy-coef-note"> 
+                                    {{ $averageTabs[$subject_id] !== null ? ($averageTabs[$subject_id] >= 10 ? ($averageTabs[$subject_id] * $classeCoefTabs[$subject_id]) : '0'.($averageTabs[$subject_id] * $classeCoefTabs[$subject_id])) : ' - ' }}
+                                </td>
+                                <td class=" text-center rank-note">  
+                                    @if($ranksTabs[$subject_id])
+                                        <span>{{ $ranksTabs[$subject_id]['rank']}}</span><sup>{{ $ranksTabs[$subject_id]['exp']}}</sup>
+                                        <small> {{ $ranksTabs[$subject_id]['base'] }} </small>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    <span class="bi-shield-check"></span>
+                                </td>
                             @else
                                 @for ($ev=1; $ev <= $epeMaxLenght; $ev++)
                                     <td class="text-center cursor-pointer"> - </td>
@@ -130,7 +153,9 @@
                                 <td class=" text-center moy-note"> - </td>
                                 <td class=" text-center moy-coef-note"> - </td>
                                 <td class=" text-center rank-note"> - </td>
-                                <td class="text-center"> - </td>
+                                <td class="text-center"> 
+                                    <span class="bi-shield-check"></span>
+                                </td>
                             @endif
                         </tr>
                     @endforeach

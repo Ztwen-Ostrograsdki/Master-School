@@ -18,6 +18,7 @@ class CreatePupilsTable extends Migration
             $table->id();
             $table->string('firstName');
             $table->string('lastName');
+            $table->string('matricule')->unique();
             $table->string('last_school_from')->nullable()->default(null);
             $table->string('contacts')->nullable()->default(null);
             $table->date('birth_day')->nullable()->default(null);

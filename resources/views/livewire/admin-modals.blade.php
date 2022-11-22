@@ -1,6 +1,7 @@
 <div>
     @livewire('manage-classe-subjects')
     @livewire('add-new-pupil')
+    @livewire('multiple-pupil-insertion')
     @livewire('edit-pupil-perso-data')
     @livewire('create-new-classe')
     @livewire('create-new-classe-group')
@@ -8,6 +9,7 @@
     @livewire('classe-group-manage')
     @livewire('manage-classe-modalities')
     @livewire('edit-classe-group')
+    @livewire('edit-classe-group-data')
     @livewire('create-level')
     @livewire('create-subject')
     @livewire('insert-pupil-marks')

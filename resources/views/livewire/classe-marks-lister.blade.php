@@ -1,4 +1,4 @@
-<div x-data="{editing_mark: @entangle('editing_mark'), edit_key: @entangle('edit_key'), mark_key: @entangle('mark_key'), olders: null};">
+<div>
     <div class="w-100 my-1">
         <select id="classe_subject_selected" wire:model="classe_subject_selected" wire:change="changeSubject" class="form-select">
             <option value="{{null}}">Veuillez sélectionner une matière</option>
@@ -202,7 +202,7 @@
                                     {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? ($averageTab[$p->id] * $classe_subject_coef) : '0'.($averageTab[$p->id] * $classe_subject_coef)) : ' - ' }}
                                 </td>
                                 <td class=" text-center rank-note text-warning"> 
-                                    @if($ranksTab[$p->id])
+                                    @isset($ranksTab[$p->id])
                                         <span>{{ $ranksTab[$p->id]['rank']}}</span><sup>{{ $ranksTab[$p->id]['exp']}}</sup>
                                         <small> {{ $ranksTab[$p->id]['base'] }} </small>
                                     @else

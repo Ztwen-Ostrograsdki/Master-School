@@ -26,6 +26,7 @@ class PupilMarksListing extends Component
     public $edit_mark_value = 0;
     public $edit_mark_type = 'epe';
     public $editing_mark = false;
+    public $subject_selected;
     public $invalid_mark = false;
     public $edit_key;
     public $mark_key;
@@ -43,6 +44,10 @@ class PupilMarksListing extends Component
         $epeMaxLenght = 2;
         $participMaxLenght = 2;
         $noMarks = false;
+        $averageEPETabs = [];
+        $averageTabs = [];
+        $ranksTabs = [];
+        $classeCoefTabs = [];
 
         if(session()->has('semestre_selected') && session('semestre_selected')){
             $semestre = intval(session('semestre_selected'));
@@ -59,6 +64,38 @@ class PupilMarksListing extends Component
             if($pupil){
 
                 $marks = $pupil->getMarks(null, $semestre, $school_year_model->school_year);
+                $classe = $pupil->getCurrentClasse($school_year_model->id);
+
+                if($classe){
+                    $subjects = $classe->subjects;
+
+                    if($subjects){
+                        foreach ($subjects as $subject) {
+                            $averageEPETabs[$subject->id] = $classe->getMarksAverage($subject->id, $this->semestre_selected, $school_year_model->school_year, 'epe')[$pupil->id];
+
+                            $averageTabs[$subject->id] = $classe->getAverage($subject->id, $this->semestre_selected, $school_year_model->school_year)[$pupil->id];
+
+                            $ranks = $classe->getClasseRank($subject->id, $this->semestre_selected, $school_year_model->school_year);
+                            
+                            if(isset($ranks[$pupil->id])){
+                                $ranksTabs[$subject->id] = $ranks[$pupil->id];
+                            }
+                            else{
+                                $ranksTabs[$subject->id] = null;
+                            }
+
+                            $classeCoefTabs[$subject->id] = $classe->get_coefs($subject->id, $school_year_model->id, true);
+                        }
+
+                    }
+                }
+
+
+
+                
+
+
+                
 
                 $devMaxLenght = $pupil->getMarksTypeLenght(null, $semestre, $school_year_model->school_year, 'devoir') + 1;
 
@@ -90,7 +127,7 @@ class PupilMarksListing extends Component
         }
 
 
-        return view('livewire.pupil-marks-listing', compact('pupil', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks'));
+        return view('livewire.pupil-marks-listing', compact('pupil', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'classeCoefTabs', 'averageEPETabs', 'averageTabs', 'ranksTabs'));
     }
 
     public function addNewPupil()

@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Classe;
 use App\Models\School;
 use Livewire\Component;
 
@@ -14,13 +15,9 @@ class AdminHeaderComponent extends Component
     ];
 
     public $counter = 0;
-
-    public function mount()
-    {
-        
-    }
-
-
+    public $search;
+    public $hasData = false;
+    public $data;
 
     public function render()
     {
@@ -30,7 +27,28 @@ class AdminHeaderComponent extends Component
         if($school_years > 0 && $school > 0){
             $school_year = session('school_year_selected');
         }
+
+        if($this->search){
+            $search = '%' . $this->search . '%';
+            $classes = Classe::where('name', 'like', $search)->orWhere('slug', 'like', $search)->get();
+            if(count($classes)){
+                // $this->hasData = true;
+                $this->data = $classes;
+            }
+            else{
+                $this->reset('hasData', 'data');
+
+            }
+        }
+
+
+
         return view('livewire.admin-header-component', compact('school_year'));
+    }
+
+    public function updatedSearch($value)
+    {
+        $this->search = $value;
     }
 
 

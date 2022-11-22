@@ -4,8 +4,9 @@ namespace App\Http\Livewire;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Pupil;
-use Livewire\Component;
 use App\Models\SchoolYear;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class ClassePupilsLister extends Component
 {
@@ -76,30 +77,40 @@ class ClassePupilsLister extends Component
 
     public function forceDeletePupil($pupil_id)
     {
-        $school_year_model = $this->getSchoolYear();
         $pupil = Pupil::find($pupil_id);
         if($pupil){
-            $marks = $pupil->marks;
-            $classes = $pupil->classes;
-            if(count($marks) > 0){
-                foreach($marks as $mark){
+            DB::transaction(function($e) use ($pupil){
+                $school_year_model = $this->getSchoolYear();
+                $marks = $pupil->marks;
+                $classes = $pupil->classes;
+
+                $pupil->marks()->each(function($mark) use ($school_year_model){
                     $school_year_model->marks()->detach($mark->id);
                     $mark->delete();
-                }
-            }
-            if(count($classes) > 0){
-                foreach($classes as $classe){
-                    $classe->pupils()->detach($pupil->id);
-                }
-            }
-            $pupil->absences()->delete();
-            $pupil->lates()->delete();
-            $school_year_model->pupils()->detach($pupil->id);
-            $pupil->forceDelete();
+                });
+
+
+                $pupil->classes()->each(function($classe) use ($pupil){
+                    $classe->classePupils()->detach($pupil->id);
+                });
+
+                $pupil->related_marks()->each(function($r){
+                    $r->delete();
+                });
+
+                $pupil->absences()->delete();
+                $pupil->lates()->delete();
+                $school_year_model->pupils()->detach($pupil->id);
+                $pupil->forceDelete();
+
+            });
+            DB::afterCommit(function() use ($pupil){
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "l'apprenant $pupil->name a été supprimé définitivement!", 'type' => 'success']);
+                $this->emit('classeUpdated');
+                $this->emit('classePupilListUpdated');
+            });
         }
-        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "l'apprenant $pupil->name a été supprimé définitivement!", 'type' => 'success']);
-        $this->emit('classeUpdated');
-        $this->emit('classePupilListUpdated');
+        
     }
 
     public function editClasseSubjects($classe_id = null)
@@ -137,6 +148,20 @@ class ClassePupilsLister extends Component
         $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
         if($classe){
             $this->emit('addNewPupilToClasseLiveEvent', $classe->id);
+        }
+        else{
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
+        }
+
+    } 
+
+    public function multiplePupilInsertions()
+    {
+        $school_year = session('school_year_selected');
+        $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+        $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+        if($classe){
+            $this->emit('insertMultiplePupils', $classe->id);
         }
         else{
             $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
@@ -183,6 +208,16 @@ class ClassePupilsLister extends Component
         else{
             $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Opération de mise à jour a échoué!", 'type' => 'error']);
         }
+    }
+
+
+
+    public function printClasseList()
+    {
+
+        
+
+
     }
 
 

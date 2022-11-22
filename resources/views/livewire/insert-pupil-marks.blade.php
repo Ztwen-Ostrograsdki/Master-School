@@ -3,6 +3,15 @@
     <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submitMarks">
         <div class="row justify-between">
             <div class="mt-0 mb-2 col-11 mx-auto">
+                <div class="d-flex col-12 m-0 p-0 mx-auto justify-center">
+                    <blockquote class="text-info w-100 m-0 my-2">
+                        <span class="fa bi-person-check"></span>
+                        Apprenant (e) : 
+                        <span class="text-warning">
+                            {{$pupil->getName()}}
+                        </span>
+                    </blockquote>
+                </div>
                <div class="d-flex row">
                     <div class="col-12 d-flex justify-content-between row m-0 p-0">
                         <div class="col-4 m-0 p-0">
@@ -41,9 +50,16 @@
                                 <small class="py-1 z-text-orange">{{$message}}</small>
                             @enderror
                         </div>
-                        <div class="col-12 d-flex justify-content-between row m-0 p-0">
-                            <div class="col-7 m-0 p-0 ">
-                                <x-z-input :type="'text'" :error="$errors->first('marks')" :modelName="'marks'" :labelTitle="'Notes au format 17-11-08-...'" ></x-z-input>
+
+                        <div class="col-12 d-flex justify-content-between row m-0 p-0 mt-3">
+                            <div class="col-7 m-0 p-0">
+                                <div class="p-0 m-0 mt-0 mb-2 row">
+                                    <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Notes au format 17-11-08-...</label>
+                                    <input autofocus="autofocus" placeholder="Notes au format 17-11-08-..." class="text-white form-control bg-transparent border border-white px-2 z-focus @error('marks') text-danger border-danger @enderror" wire:model.defer="marks" type="text" name="marks">
+                                    @error('marks')
+                                        <small class="py-1 z-text-orange">{{$message}}</small>
+                                    @enderror
+                                </div>
                             </div>
                             <div class="col-4 m-0 p-0">
                                 <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Choisissez le type de note </label>

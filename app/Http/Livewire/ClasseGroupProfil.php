@@ -103,9 +103,9 @@ class ClasseGroupProfil extends Component
 
     }
 
-    public function editClasseGroupName($classe_group_id)
+    public function editClasseGroupData($classe_group_id)
     {
-        $this->editingClasseGroupeName = true;
+        $this->emit('editClasseGroupDataLiveEvent', $classe_group_id);
     }
 
 

@@ -1,4 +1,4 @@
-<x-z-modal-generator :hasHeader="true" :modalHeaderTitle="'Création de nouvelle classe'" :width="6" :icon="'fa fa-filter'" :modalName="'createNewClasseGroup'" :modalBodyTitle="'Création de nouvelle promotion de classes'">
+<x-z-modal-generator :hasHeader="true" :modalHeaderTitle="'Création de nouvelle promotion'" :width="6" :icon="'fa fa-filter'" :modalName="'createNewClasseGroup'" :modalBodyTitle="'Création de nouvelle promotion de classes'">
     <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submit">
         <div class="row justify-between">
             <div class="mt-0 mb-2 col-11 mx-auto">

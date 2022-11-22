@@ -21,6 +21,7 @@ class InsertPupilMarks extends Component
     public $type = 'epe';
     public $semestre_id = 1;
     public $pupil;
+    public $pupilName = 'Elève';
     public $classe;
     public $semestre_type = 'Semestre';
     public $school_year;
@@ -61,6 +62,7 @@ class InsertPupilMarks extends Component
 
             if($pupil && $subject && $classe && $semestre){
                 $this->pupil = $pupil;
+                $this->pupilName = $pupil->getName();
                 $this->semestre_id = $semestre;
                 $this->subject_id = $subject_id;
                 $this->classe_id = $classe_id;
@@ -132,8 +134,9 @@ class InsertPupilMarks extends Component
                         $this->emit('pupilUpdated');
                         $this->emit('classeUpdated');
                         $this->dispatchBrowserEvent('hide-form');
+                        $this->reset('marks');
                         $this->resetErrorBag();
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour réussie', 'message' => "la note a été inséré avec succès!", 'type' => 'success']);
+                        // $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour réussie', 'message' => "la note a été inséré avec succès!", 'type' => 'success']);
 
                     });
 

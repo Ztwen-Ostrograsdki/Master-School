@@ -58,6 +58,7 @@ trait PupilTraits{
                                            ->orderBy('id', 'asc')->get();
                     
                     $allMarks[$subject->id] = [
+                        'id' => $subject->id,
                         'name' => $subject->name,
                         'epe' => $epes,
                         'participation' => $parts,
@@ -67,6 +68,59 @@ trait PupilTraits{
             }
         }
         return $allMarks;
+    }
+
+    public function getBestMark(int $semestre, $type = null, $school_year = null)
+    {
+        $bestMark = null;
+
+        if(!$school_year){
+            $school_year_model = $this->getSchoolYear();
+        }
+        else{
+            if(is_numeric($school_year)){
+                $school_year_model = SchoolYear::where('id', $school_year)->first();
+            }
+            else{
+                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+            }
+        }
+
+        if($school_year_model){
+            $marks = $school_year_model->marks()->where('pupil_id', $this->id)
+                                                ->where('semestre', $semestre)
+                                                ->orderBy('value', 'desc')
+                                                ->get();
+
+        }
+
+    }
+    
+
+    public function getBadMark(int $semestre, $type = null, $school_year = null)
+    {
+        $bestMark = null;
+
+        if(!$school_year){
+            $school_year_model = $this->getSchoolYear();
+        }
+        else{
+            if(is_numeric($school_year)){
+                $school_year_model = SchoolYear::where('id', $school_year)->first();
+            }
+            else{
+                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+            }
+        }
+
+        if($school_year_model){
+            $marks = $school_year_model->marks()->where('pupil_id', $this->id)
+                                                ->where('semestre', $semestre)
+                                                ->orderBy('value', 'asc')
+                                                ->get();
+
+        }
+
     }
 
 

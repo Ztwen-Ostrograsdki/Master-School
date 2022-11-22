@@ -15,6 +15,9 @@ window.addEventListener('modal-manageClasseSubjects', function(e) {
 window.addEventListener('modal-addNewPupilToClasse', function(e) {
     $('#addNewPupil').modal('show');
 });
+window.addEventListener('modal-insertMultiplePupils', function(e) {
+    $('#insertMultiplePupilsModal').modal('show');
+});
 window.addEventListener('modal-editPupilPersoData', function(e) {
     $('#pupilPersoData').modal('show');
 });
@@ -23,6 +26,9 @@ window.addEventListener('modal-createNewClasse', function(e) {
 });
 window.addEventListener('modal-createNewClasseGroup', function(e) {
     $('#createNewClasseGroup').modal('show');
+});
+window.addEventListener('modal-editClasseGroupData', function(e) {
+    $('#editClasseGroupDataModal').modal('show');
 });
 window.addEventListener('modal-manageClasseGroup', function(e) {
     $('#classeGroupManageModal').modal('show');
@@ -44,7 +50,9 @@ window.addEventListener('modal-insertPupilRelatedMark', function(e) {
 });
 
 window.addEventListener('modal-insertPupilMarks', function(e) {
-    $('#insertPupilMarks').modal('show');
+    $('#insertPupilMarks').modal('show', function(ex) {
+        $(this).find('.z-focus').focus();
+    });
 });
 
 window.addEventListener('modal-markManager', function(e) {
@@ -71,10 +79,11 @@ window.addEventListener('modal-adminAuthenticationModal', function(e) {
 
 $(function() {
     $(".z-modal-closer").click(function() {
-        console.log('cliked');
         $('.modal').modal('hide');
     });
 });
+
+
 
 $(function() {
     $("#focus_photo_prf").click(function() {

@@ -7,7 +7,7 @@
             <tr>
                 <td rowspan="2">Matières</td>
                 <th scope="colgroup"  colspan="{{count($classe_group->classes)}}">Les Groupes Pédagogiques</th>
-                <th scope="colgroup" colspan="2">Actions</th>
+                <th scope="colgroup" colspan="2" rowspan="2">Actions</th>
             </tr>
             <tr>
                 @foreach($classe_group->classes as $classe)
@@ -18,12 +18,9 @@
                         </a>
                     </th>
                 @endforeach
-                    <th>A1</th>
-                    <th>A2</th>
             </tr>
             @foreach($classe_group->subjects as $subject)
                 <tr>
-                
                     <th scope="row">{{ $subject->name }}</th>
                     @foreach($classe_group->classes as $c)
                         <td title="Cliquer pour éditer">
@@ -44,10 +41,6 @@
                     </td>
                 </tr>
             @endforeach
-
-            
-            
-                
         </table>            
     @else
         <div>

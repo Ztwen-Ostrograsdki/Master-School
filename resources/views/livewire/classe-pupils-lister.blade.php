@@ -1,7 +1,11 @@
 <div>
     @if($classe)
         <div class="w-100 my-1">
-            <span wire:click="addNewPupilTo" class="btn btn-primary border border-white" title="Ajouter un appreant à cette classe">
+            <span wire:click="multiplePupilInsertions" class="btn bg-orange border border-white" title="Ajouter des aprrenants à cette classe">
+                <span class="fa fa-user-plus"></span>
+                <span>Multiple Ajout</span>
+            </span> 
+            <span wire:click="addNewPupilTo" class="btn btn-primary border border-white" title="Ajouter un aprrenant à cette classe">
                 <span class="fa fa-user-plus"></span>
                 <span>Ajouter</span>
             </span>
@@ -9,6 +13,11 @@
                 <span class="fa fa-edit"></span>
                 <span>Editer</span>
             </span>
+            <span wire:click="printClasseList"  class="btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de cette classe...">
+                <span class="fa fa-print"></span>
+                <span>Impr.</span>
+            </span>
+
         </div>
         <div class="w-100 m-0 p-0 mt-3">
         @if($pupils && count($pupils) > 0)
@@ -17,6 +26,7 @@
                 <th class="py-2 text-center">#ID</th>
                 <th class="">Nom et Prénoms</th>
                 <th class="">Sexe</th>
+                <th>Matricule</th>
                 <th>Inscrit depuis</th>
                 <th>Action</th>
             </thead>
@@ -31,10 +41,7 @@
                                     <span class="d-flex">
                                         <img width="23" class="border rounded-circle my-1" src="{{$p->__profil(110)}}" alt="photo de profil">
                                         <span class="mx-2 d-none d-lg-inline d-xl-inline text-small">
-                                            {{$p->firstName}}
-                                        </span>
-                                        <span class="">
-                                            {{ $p->lastName }}
+                                            {{$p->getName()}}
                                         </span>
                                     </span>
                                 </a>
@@ -65,6 +72,9 @@
                         </td>
                         <td class="text-center">
                             {{ $p->getSexe() }}
+                        </td>
+                        <td class="text-center">
+                            {{ $p->matricule }}
                         </td>
                         <td class="text-center">
                             {{ str_ireplace("Il y a ", '', $p->getDateAgoFormated(true)) }}

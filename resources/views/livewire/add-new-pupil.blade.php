@@ -1,4 +1,4 @@
-<x-z-modal-generator :topPosition="-200" :hasHeader="true" :modalHeaderTitle="'Inscription de nouvel apprenant(e)'" :width="6" :icon="'fa fa-user-plus'" :modalName="'addNewPupil'" :modalBodyTitle="'Inscription de nouvel apprenant à la classe'">
+<x-z-modal-generator :hasHeader="true" :modalHeaderTitle="'Inscription de nouvel apprenant(e)'" :width="6" :icon="'fa fa-user-plus'" :modalName="'addNewPupil'" :modalBodyTitle="'Inscription de nouvel apprenant à la classe'">
     @if($classes)
     <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submit">
         <div class="row justify-between">

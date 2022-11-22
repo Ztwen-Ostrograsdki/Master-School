@@ -64,7 +64,7 @@
 
 
                         <div class="col-4">
-                            <div class="card card-info m-0 p-0">
+                            <div class="card card-info m-0 p-0 border border-primary">
                                 <div class="card-header m-0">
                                     <h3 class="card-title">Infos personnelles</h3>
                                     <div class="card-tools">
@@ -85,16 +85,16 @@
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    <x-ztitle-liner :title="'Nom : '" :value="$pupil->firstName"></x-ztitle-liner>
-                                    <x-ztitle-liner :title="'Prénoms : '" :value="$pupil->lastName"></x-ztitle-liner>
-                                    <x-ztitle-liner classe="text-capitalize" :title="'Date de naissance : '" :value="$pupil->__getDateAsString($pupil->birth_day, null)"></x-ztitle-liner>
-                                    <x-ztitle-liner :title="'Lieu de naissance : '" :value="$pupil->birth_city"></x-ztitle-liner>
-                                    <x-ztitle-liner :title="'Domicile : '" :value="$pupil->residence"></x-ztitle-liner>
+                                    <x-ztitle-liner :title="'Classe : '" :value="$pupil->classe->name"></x-ztitle-liner>
+                                    <x-ztitle-liner :icon="'bi-person'" :useIcon="true" :value="$pupil->getName()" :smallTitle="'('. $pupil->matricule . ')'" ></x-ztitle-liner>
+                                    <x-ztitle-liner :smallTitle=" '(à ' . $pupil->birth_city . ')'" classe="text-capitalize" :icon="'bi-calendar'" :useIcon="true" :value="$pupil->__getDateAsString($pupil->birth_day, null)"></x-ztitle-liner>
+                                    <x-ztitle-liner :icon="'bi-phone'" :useIcon="true" :value="$pupil->contacts"></x-ztitle-liner>
+                                    <x-ztitle-liner :icon="'bi-house'" :useIcon="true" :value="$pupil->residence"></x-ztitle-liner>
                                 </div>
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="card card-warning m-0 p-0">
+                            <div class="card card-warning m-0 p-0 border border-warning">
                                 <div class="card-header m-0">
                                     <h3 class="card-title">Détails classe</h3>
                                     <div class="card-tools">
@@ -113,9 +113,9 @@
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                   <x-ztitle-liner :title="'Classe : '" :value="$pupil->classe->name"></x-ztitle-liner>
-                                   <x-ztitle-liner :smallTitle="'(PCT)'" :title="'Meilleur note : '" :value="'14'"></x-ztitle-liner>
-                                   <x-ztitle-liner :smallTitle="'(Maths)'" :title="'Faible note : '" :value="'08'"></x-ztitle-liner>
+                                   <x-ztitle-liner :smallTitle="'08 réussies'" :title="'Nbre de notes : '" :value="'14'"></x-ztitle-liner>
+                                   <x-ztitle-liner :smallTitle="' / Meilleur : 18 - Faible : 14'" :title="'Matière phare : '" :value="'Anglais'"></x-ztitle-liner>
+                                   <x-ztitle-liner :smallTitle="' / Meilleur : 11 - Faible : 01'" :title="'Matière archilles : '" :value="'PCT'"></x-ztitle-liner>
                                 </div>
                             </div>
                         </div>
