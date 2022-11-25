@@ -1,5 +1,5 @@
 <div>
-    <div class="w-100 my-1">
+    <div x-data={key: null} class="w-100 my-1">
         <select id="classe_subject_selected" wire:model="classe_subject_selected" wire:change="changeSubject" class="form-select">
             <option value="{{null}}">Veuillez sélectionner une matière</option>
             @foreach ($classe_subjects as $subject)
@@ -106,7 +106,7 @@
                             <th class="text-capitalize p-0 m-0 row justify-between">
                                 <a class="text-white m-0 p-0 py-1" href="{{route('pupil_profil', ['id' => $p->id])}}">
                                     <span class="d-flex justify-content-between">
-                                        <span class="mx-2 d-none d-lg-inline d-xl-inline text-small">
+                                        <span class="mx-2 d-none d-lg-inline d-xl-inline text-small @if($p->sexe == 'female') text-orange  @endif ">
                                             {{$p->getName()}}
                                         </span>
                                     </span>
@@ -129,7 +129,7 @@
                                 {{-- LES EPE --}}
                                 @if($marks[$p->id]['epe'])
                                     @foreach ($marks[$p->id]['epe'] as $m => $epe)
-                                        <td x-on:dblclick="@this.call('setTargetedMark', {{$p->id}}, {{$epe->id}})" class="text-center cursor-pointer">
+                                        <td wire:click="setTargetedMark({{$epe->id}})" class="text-center cursor-pointer">
                                             <span class="w-100 cursor-pointer"> {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
                                         </td>
                                     @endforeach
@@ -151,7 +151,7 @@
                                 {{-- LES PARTICIPATIONS --}}
                                 @if($marks[$p->id]['participation'])
                                     @foreach ($marks[$p->id]['participation'] as $l => $part)
-                                        <td x-on:dblclick="@this.call('setTargetedMark', {{$p->id}}, {{$part->id}})" class="text-center cursor-pointer">
+                                        <td wire:click="setTargetedMark({{$part->id}})" class="text-center cursor-pointer">
                                             <span class="w-100 cursor-pointer"> {{ $part->value >= 10 ? $part->value : '0'.$part->value }} </span>
                                         </td>
                                     @endforeach
@@ -173,7 +173,7 @@
                                 {{-- LES DEVOIRS --}}
                                 @if ($marks[$p->id]['dev'])
                                     @foreach ($marks[$p->id]['dev'] as $q => $dev)
-                                        <td x-on:dblclick="@this.call('setTargetedMark', {{$p->id}}, {{$dev->id}})" class="text-center cursor-pointer">
+                                        <td wire:click="setTargetedMark({{$dev->id}})" class="text-center cursor-pointer">
                                             <span class="w-100 cursor-pointer"> {{ $dev->value >= 10 ? $dev->value : '0'.$dev->value }} </span>
                                         </td>
                                     @endforeach
@@ -199,7 +199,7 @@
                                     {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? $averageTab[$p->id] : '0'.$averageTab[$p->id]) : ' - ' }} 
                                 </td>
                                 <td class=" text-center moy-coef-note"> 
-                                    {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? ($averageTab[$p->id] * $classe_subject_coef) : '0'.($averageTab[$p->id] * $classe_subject_coef)) : ' - ' }}
+                                    {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] * $classe_subject_coef >= 10 ? ($averageTab[$p->id] * $classe_subject_coef) : '0'.($averageTab[$p->id] * $classe_subject_coef)) : ' - ' }}
                                 </td>
                                 <td class=" text-center rank-note text-warning"> 
                                     @isset($ranksTab[$p->id])

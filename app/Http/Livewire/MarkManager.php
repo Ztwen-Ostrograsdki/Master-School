@@ -48,12 +48,12 @@ class MarkManager extends Component
     }
 
 
-    public function editPupilMark(int $pupil_id, int $mark_id)
+    public function editPupilMark(int $mark_id)
     {
-        if($mark_id && $pupil_id){
+        if($mark_id){
             
-            $pupil = Pupil::find($pupil_id);
             $mark = Mark::find($mark_id);
+            $pupil = $mark->pupil;
 
             if($pupil && $mark){
                 $this->pupil = $pupil;
@@ -92,7 +92,7 @@ class MarkManager extends Component
                 $this->emit('classeUpdated');
                 $this->dispatchBrowserEvent('hide-form');
                 $this->resetErrorBag();
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Suupression terminée', 'message' => "La note a été suuprimée", 'type' => 'success']);
+                // $this->dispatchBrowserEvent('Toast', ['title' => 'Suupression terminée', 'message' => "La note a été suuprimée", 'type' => 'success']);
             });
 
 
@@ -125,7 +125,7 @@ class MarkManager extends Component
                     $this->emit('classeUpdated');
                     $this->dispatchBrowserEvent('hide-form');
                     $this->resetErrorBag();
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "La note a été mise à jour avec succès!", 'type' => 'success']);
+                    // $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "La note a été mise à jour avec succès!", 'type' => 'success']);
                 });
 
             });

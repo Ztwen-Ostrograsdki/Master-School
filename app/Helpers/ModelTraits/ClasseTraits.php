@@ -449,6 +449,8 @@ trait ClasseTraits{
                 $weakBoy = null;
                 $bestBoy = null;
                 $boyFaileds_number = 0;
+                $boySucceeds_number = 0;
+                $boySucceeds_percentage = 0;
                 $boyFaileds_percentage = 0;
                 $boyFaileds_number = 0;
                 $boyFaileds_percentage = 0;
@@ -571,8 +573,8 @@ trait ClasseTraits{
                     $boy_moy = floatval(number_format((array_sum($boy_moys) / count($boy_moys)), 2));
                 } 
 
-                if($boy_moys !== []){
-                    $boy_moy = floatval(number_format((array_sum($boy_moys) / count($boy_moys)), 2));
+                if($girl_moys !== []){
+                    $girl_moy = floatval(number_format((array_sum($girl_moys) / count($girl_moys)), 2));
                 }
 
                 $moy_size = count($girl_moys) + count($boy_moys);
@@ -605,8 +607,10 @@ trait ClasseTraits{
 
                 $total = $totalFaileds_number + $totalSucceeds_number;
 
-                $totalSucceeds_percentage = floatval(number_format(($totalSucceeds_number / $total) * 100, 2));
-                $totalFaileds_percentage = floatval(number_format(($totalFaileds_number / $total) * 100, 2));
+                if($total !== 0){
+                    $totalSucceeds_percentage = floatval(number_format(($totalSucceeds_number / $total) * 100, 2));
+                    $totalFaileds_percentage = floatval(number_format(($totalFaileds_number / $total) * 100, 2));
+                }
 
                 $data[$subject->id] = [
                     'subject_name' => $subject->name,

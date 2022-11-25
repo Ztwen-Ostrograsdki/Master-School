@@ -72,15 +72,20 @@
                             @if(isset($subject_stats) && $subject_stats)
                                 @if($subject_stats['effectif']['T'] > 0)
 
+                                    @php
+                                        $effectif = $subject_stats['effectif'];
+
+                                    @endphp
+
                                     {{-- Efectif ayant de notes --}}
                                     <th scope="row"> 
-                                        {{ $subject_stats['effectif'] ? $subject_stats['effectif']['G'] : ' - '}}  
+                                        {{ $effectif ? $effectif['G'] : ' - '}}  
                                     </th>
                                     <th scope="row"> 
-                                        {{ $subject_stats['effectif'] ? $subject_stats['effectif']['F'] : ' - '}}  
+                                        {{ $effectif ? $effectif['F'] : ' - '}}  
                                     </th>
                                     <th scope="row"> 
-                                        {{ $subject_stats['effectif'] ? $subject_stats['effectif']['T'] : ' - '}}  
+                                        {{ $effectif ? $effectif['T'] : ' - '}}  
                                     </th>
 
                                     {{-- fortes moyennes --}}
@@ -95,7 +100,7 @@
                                         {{ $subject_stats['weakBoy'] ? $subject_stats['weakBoy']['moy'] : ' - '}}  
                                     </th>
                                     <th scope="row"> 
-                                        {{ $subject_stats['weakGirl'] ? $subject_stats['weakBoy']['moy'] : ' - '}}  
+                                        {{ $subject_stats['weakGirl'] ? $subject_stats['weakGirl']['moy'] : ' - '}}  
                                     </th>
                                     {{-- stats en nombre--}}
                                     <th scope="row"> 

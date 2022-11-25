@@ -92,11 +92,8 @@
                         <a class="text-white w-100 m-0 p-0" href="{{route('pupil_profil', ['id' => $p->id])}}">
                             <span class="d-flex">
                                 <img width="23" class="border rounded-circle my-1" src="{{$p->__profil(110)}}" alt="photo de profil">
-                                <span class="mx-2 d-none d-lg-inline d-xl-inline text-small">
-                                    {{$p->firstName}}
-                                </span>
-                                <span class="">
-                                    {{ $p->lastName }}
+                                <span class="mx-2 d-none d-lg-inline d-xl-inline text-small @if($p->sexe == 'female') text-orange  @endif ">
+                                    {{$p->getName()}}
                                 </span>
                             </span>
                         </a>

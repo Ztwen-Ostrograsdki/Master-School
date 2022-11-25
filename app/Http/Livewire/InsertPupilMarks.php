@@ -21,6 +21,7 @@ class InsertPupilMarks extends Component
     public $type = 'epe';
     public $semestre_id = 1;
     public $pupil;
+    public $subject;
     public $pupilName = 'Elève';
     public $classe;
     public $semestre_type = 'Semestre';
@@ -58,18 +59,16 @@ class InsertPupilMarks extends Component
             
             $pupil = Pupil::find($pupil_id);
             $subject = Subject::find($subject_id);
-            $classe = Classe::find($classe_id);
+            // $classe = Classe::find($classe_id);
 
-            if($pupil && $subject && $classe && $semestre){
+            if($pupil && $semestre && $subject){
                 $this->pupil = $pupil;
+                $this->subject = $subject;
                 $this->pupilName = $pupil->getName();
                 $this->semestre_id = $semestre;
                 $this->subject_id = $subject_id;
                 $this->classe_id = $classe_id;
                 $this->school_year = $school_year;
-
-                $this->classe = $classe;
-                $this->subjects = $pupil->classe->subjects;
 
                 $this->dispatchBrowserEvent('modal-insertPupilMarks');
             }

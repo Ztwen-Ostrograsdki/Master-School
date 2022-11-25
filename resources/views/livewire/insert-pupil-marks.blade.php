@@ -1,5 +1,5 @@
 <x-z-modal-generator :topPosition="300" :hasHeader="true" :modalHeaderTitle="'Insertion de notes'" :width="6" :icon="'fa fa-bookmark'" :modalName="'insertPupilMarks'" :modalBodyTitle="'Insertion de nouvelles notes'">
-    @if($pupil && $classe && $subjects && count($subjects) > 0)
+    @if($pupil && $subject)
     <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submitMarks">
         <div class="row justify-between">
             <div class="mt-0 mb-2 col-11 mx-auto">
@@ -8,24 +8,13 @@
                         <span class="fa bi-person-check"></span>
                         Apprenant (e) : 
                         <span class="text-warning">
-                            {{$pupil->getName()}}
+                            {{$pupil->getName()}} 
                         </span>
+                        en <span class="text-white">{{$subject->name}}</span>
                     </blockquote>
                 </div>
                <div class="d-flex row">
                     <div class="col-12 d-flex justify-content-between row m-0 p-0">
-                        <div class="col-4 m-0 p-0">
-                            <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Choisissez la matière </label>
-                            <select class="px-2 form-select text-white z-bg-secondary w-100 @error('subject_id') text-danger border border-danger @enderror" wire:model.defer="subject_id" name="subject_id">
-                                <option disabled class="" value="{{null}}">Choisissez la matière</option>
-                                @foreach ($subjects as $subject)
-                                    <option value="{{$subject->id}}">{{$subject->name}}</option>
-                                @endforeach
-                            </select>
-                            @error('subject_id')
-                                <small class="py-1 z-text-orange">{{$message}}</small>
-                            @enderror
-                        </div>
                         <div class="col-4 m-0 p-0">
                             <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Choisissez le semestre </label>
                             <select class="px-2 form-select text-white z-bg-secondary w-100 @error('semestre_id') text-danger border border-danger @enderror" wire:model.defer="semestre_id" name="semestre_id">

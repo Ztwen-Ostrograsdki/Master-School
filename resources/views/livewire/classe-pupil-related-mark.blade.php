@@ -39,7 +39,7 @@
                 @foreach($pupils as $p)
                     <tr class="">
                         <td class="text-center border-right">{{ $loop->iteration }}</td>
-                        <td class="text-capitalize pl-2" >
+                        <td class="text-capitalize pl-2 @if($p->sexe == 'female') text-orange  @endif " >
                             {{ $p->getName() }}
                         </td>
                         

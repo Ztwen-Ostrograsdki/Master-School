@@ -155,6 +155,25 @@ class ClassePupilsLister extends Component
 
     } 
 
+    public function changePupilSexe($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+        if($pupil){
+            $sexe = $pupil->sexe;
+            if($pupil->sexe == 'male'){
+                $pupil->update(['sexe' => 'female']);
+            }
+            else{
+                $pupil->update(['sexe' => 'male']);
+            }
+            $this->emit('classeUpdated');
+            $this->emit('classePupilListUpdated');
+        }
+        else{
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Une ereure est survenue!", 'type' => 'error']);
+        }
+    } 
+
     public function multiplePupilInsertions()
     {
         $school_year = session('school_year_selected');

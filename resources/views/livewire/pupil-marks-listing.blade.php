@@ -126,7 +126,7 @@
                                     {{ $averageTabs[$subject_id] !== null ? ($averageTabs[$subject_id] >= 10 ? $averageTabs[$subject_id] : '0'.$averageTabs[$subject_id]) : ' - ' }}
                                 </td>
                                 <td class=" text-center moy-coef-note"> 
-                                    {{ $averageTabs[$subject_id] !== null ? ($averageTabs[$subject_id] >= 10 ? ($averageTabs[$subject_id] * $classeCoefTabs[$subject_id]) : '0'.($averageTabs[$subject_id] * $classeCoefTabs[$subject_id])) : ' - ' }}
+                                    {{ $averageTabs[$subject_id] !== null ? (($averageTabs[$subject_id] * $classeCoefTabs[$subject_id]) >= 10 ? ($averageTabs[$subject_id] * $classeCoefTabs[$subject_id]) : '0'.($averageTabs[$subject_id] * $classeCoefTabs[$subject_id])) : ' - ' }}
                                 </td>
                                 <td class=" text-center rank-note">  
                                     @if($ranksTabs[$subject_id])

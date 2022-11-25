@@ -145,10 +145,10 @@ class ClasseMarksLister extends Component
     }
 
 
-    public function setTargetedMark($pupil_id, $mark_id)
+    public function setTargetedMark($mark_id)
     {
-        if ($mark_id && $pupil_id) {
-            $this->emit('editPupilMarkLiveEvent', $pupil_id, $mark_id);
+        if ($mark_id) {
+            $this->emit('editPupilMarkLiveEvent', $mark_id);
         }
         else{
             $this->dispatchBrowserEvent('Toast', ['title' => "Une erreure s'est produite", 'message' => "La note est introuvable", 'type' => 'error']);
@@ -229,9 +229,8 @@ class ClasseMarksLister extends Component
         $subject_id = session('classe_subject_selected');
         if($subject_id){
             $semestre = session('semestre_selected');
-            $classe_id = $this->classe_id;
             $school_year_model = $this->getSchoolYear();
-            $this->emit('addNewsMarksLiveEvent', $pupil_id, $classe_id, $subject_id, $semestre, $school_year_model->id);
+            $this->emit('addNewsMarksLiveEvent', $pupil_id, $this->classe_id, $subject_id, $semestre, $school_year_model->id);
         }
         else{
             $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une matière en premier!", 'type' => 'error']);
