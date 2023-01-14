@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BlockTemporaryMyAccount;
+use App\Http\Controllers\ClasseListDownload;
 use App\Http\Livewire\Admin;
 use App\Http\Livewire\AdminAuthorization;
 use App\Http\Livewire\AuthRedirections;
@@ -43,6 +44,8 @@ Route::group(['prefix' => '/administration'], function(){
 });
 Route::post('/inscription', RegisteringNewUser::class)->middleware('guest')->name('inscription');
 
+Route::get('/classe/{classe_id}', [ClasseListDownload::class, 'index'])->name('classe_pdf');
+Route::get('/classe/{classe_id}/pdf', [ClasseListDownload::class, 'createPDF'])->name('classe_pdf_print');
 
 Route::get('/connexion', AuthRedirections::class)->name('login')->middleware('guest');
 Route::get('/inscription', AuthRedirections::class)->name('registration')->middleware('guest');

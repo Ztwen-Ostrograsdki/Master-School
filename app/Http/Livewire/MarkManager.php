@@ -44,7 +44,15 @@ class MarkManager extends Component
             }
         }
         $school_years = SchoolYear::all();
-        return view('livewire.mark-manager', compact('semestres', 'school_years', 'types_of_marks'));
+        $subject_selected = session('classe_subject_selected');
+        if($subject_selected){
+            $subject_selected = Subject::find($subject_selected)->name;
+        }
+        else{
+            $subject_selected  = "matière inconnue";
+        }
+
+        return view('livewire.mark-manager', compact('semestres', 'school_years', 'types_of_marks', 'subject_selected'));
     }
 
 
@@ -76,6 +84,27 @@ class MarkManager extends Component
     }
 
 
+    public function toUnforcedMark()
+    {
+        $this->markModel->update(['forced_mark' => false]);
+        $this->emit('pupilUpdated');
+        $this->emit('classeUpdated');
+        $this->dispatchBrowserEvent('hide-form');
+        $this->resetErrorBag();
+
+    }
+
+    public function toForcedMark()
+    {
+        $this->markModel->update(['forced_mark' => true]);
+        $this->emit('pupilUpdated');
+        $this->emit('classeUpdated');
+        $this->dispatchBrowserEvent('hide-form');
+        $this->resetErrorBag();
+
+    }
+
+
     public function delete()
     {
         $mark = $this->markModel;
@@ -95,11 +124,7 @@ class MarkManager extends Component
                 // $this->dispatchBrowserEvent('Toast', ['title' => 'Suupression terminée', 'message' => "La note a été suuprimée", 'type' => 'success']);
             });
 
-
         });
-
-
-
     }
 
 

@@ -89,7 +89,31 @@
                                             @isRoute('admin')
                                                 <li class="breadcrumb-item"><a href="{{route('admin')}}">Administration</a></li>
                                                 <li class="breadcrumb-item active">Tableau de bord</li>
+                                                <li class="breadcrumb-item active">
+                                                    <span class="bi-calendar"></span>
+                                                    {{ \Illuminate\Support\Carbon::now()->format('D') }}
+                                                    {{ \Illuminate\Support\Carbon::now()->format('d') }}
+                                                    {{ \Illuminate\Support\Carbon::now()->format('M') }}
+                                                    <span>
+                                                        |
+                                                        <span class="bi-clock mx-1"></span>
+                                                        {{ \Illuminate\Support\Carbon::now()->format('H') . 'H' }}
+                                                        {{ \Illuminate\Support\Carbon::now()->format('i') . "'" }}
+                                                    </span>
+                                                </li>
                                             @else
+                                                <li class="breadcrumb-item active text-warning">
+                                                    <span class="bi-calendar"></span>
+                                                    {{ \Illuminate\Support\Carbon::now()->format('D') }}
+                                                    {{ \Illuminate\Support\Carbon::now()->format('d') }}
+                                                    {{ \Illuminate\Support\Carbon::now()->format('M') }}
+                                                    <span>
+                                                        |
+                                                        <span class="bi-clock mx-1"></span>
+                                                        {{ \Illuminate\Support\Carbon::now()->format('H') . 'H' }}
+                                                        {{ \Illuminate\Support\Carbon::now()->format('i') . "'" }}
+                                                    </span>
+                                                </li>
                                                 @isRoute('classe_profil')
                                                     @if(session()->has('classe_selected') && session('classe_selected'))
                                                         <li class="breadcrumb-item active">{{session('classe_selected')}}</li>

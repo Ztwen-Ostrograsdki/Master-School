@@ -13,10 +13,10 @@
                 <span class="fa fa-edit"></span>
                 <span>Editer</span>
             </span>
-            <span wire:click="printClasseList"  class="btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de cette classe...">
+            <a href="{{route('classe_pdf', $classe->id)}}"  class="btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de cette classe...">
                 <span class="fa fa-print"></span>
                 <span>Impr.</span>
-            </span>
+            </a>
 
         </div>
         <div class="w-100 m-0 p-0 mt-3">
@@ -48,15 +48,15 @@
                                 @endif
                                 @if($editingPupilName && $p->id == $pupil_id)
                                     <form wire:submit.prevent="updatePupilName" autocomplete="off" class="my-0 d-flex p-1 cursor-pointer w-100 shadow border border-secondary">
-                                    <div class="d-flex justify-between w-100 row">
-                                        <div class="col-9 d-flex row m-0 p-0">
-                                            <x-z-input :width="'col-6'" :hideLabel="'d-none'" :type="'text'" :error="$errors->first('pupilFirstName')" :modelName="'pupilFirstName'" :labelTitle="'Le Nom de la classe'" ></x-z-input>
+                                    <div class="d-flex justify-between px-1 w-100 row">
+                                        <div class="col-9 d-flex justify-content-between row m-0 p-0 px-1">
+                                            <x-z-input :width="'col-5'" :hideLabel="'d-none'" :type="'text'" :error="$errors->first('pupilFirstName')" :modelName="'pupilFirstName'" :labelTitle="'Le Nom de la classe'" ></x-z-input>
                                             <x-z-input :width="'col-6'" :hideLabel="'d-none'" :type="'text'" :error="$errors->first('pupilLastName')" :modelName="'pupilLastName'" :labelTitle="'Le Nom de la classe'" ></x-z-input>
                                         </div>
 
-                                        <div class="col-3 m-0 p-0 d-flex row">
-                                            <span wire:click="updatePupilName" class="btn w-100 d-inline-block btn-primary border cursor-pointer">
-                                                Valider
+                                        <div class="col-2 m-0 p-0 d-flex row">
+                                            <span wire:click="updatePupilName" class="btn w-100 d-inline-block btn-primary border p-0 cursor-pointer">
+                                                OK
                                             </span>
                                         </div>
                                     </div>

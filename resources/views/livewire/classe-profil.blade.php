@@ -93,6 +93,54 @@
                             </div>
                         </div>
                     </div>
+                    <div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
+            <div class="card-header bg-dark"> 
+                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Effectuer uen recherche...</h5>
+              <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                  <i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-tool" data-card-widget="remove">
+                  <i class="fa fa-times"></i>
+                </button>
+              </div>
+                <div class="card-tools">
+                    
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="container-fluid m-0 p-0 w-100">
+                    <div class="card-deck w-100 p-0 m-0">
+                        <div class="card active" href="#tab_1" data-toggle="tab">
+                            <div class="info-box m-0 p-0 bg-info">
+                                <span class="info-box-icon"><i class="fa fa-user-friends"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Effectif 
+                                         (<b class="text-warning">
+                                            {{ count($classe->getPupils(session('school_year_selected')))}}
+                                        </b>)
+                                    </span>
+                                    <span class="info-box-number">
+
+                                        {{ $classe ? 
+                                            'G: ' . count($classe->getClassePupilsOnGender('male', session('school_year_selected'))) . ' 
+                                            - F: '. count($classe->getClassePupilsOnGender('female', session('school_year_selected'))) : ' vide'
+                                        }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
                 </div>
             </div>
         </div>

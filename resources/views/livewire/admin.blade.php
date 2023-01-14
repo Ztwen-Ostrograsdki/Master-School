@@ -10,8 +10,14 @@
                         Votre école a été créé! <br>
                     </h5>
                     <small class="text-white-50 text-center">Continuer la personalisation de votre école selon votre goût et vos conditions internes!</small>
-
                 </div>
+                <hr class="bg-secondary my-1 p-0 w-100">
+                <div class="p-0 px-2 mx-auto justify-between row w-75 my-2">
+                    <span wire:click="setActiveSection" class="btn btn-primary border border-white col-5">Tableau de bord standard</span>
+                    <span wire:click="setActiveSection({{1}})" class="btn btn-primary border border-white col-5">Tableau de bord interractif</span>
+                </div>
+                <hr class="bg-secondary my-1 p-0 w-100">
+                @if($active_section == 'standard_section')
                 <div class="w-100">
                     <blockquote>
                         <div class="d-flex justify-between m-0 px-2">
@@ -57,6 +63,11 @@
                         <span>Créer une promotion de classes</span>
                     </span>
                 </div>
+                @else
+
+
+
+                @endif
             </div>
         @endif
     @else

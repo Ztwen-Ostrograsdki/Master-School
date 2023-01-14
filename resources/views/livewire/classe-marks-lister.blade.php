@@ -123,14 +123,14 @@
 
                                     </span>
                                 </span>
-                                <span wire:click="insertMarks({{$p->id}})" class="float-right col-1 cursor-pointer text-white-50 py-1 fa fa-edit" title="Insérer des notes"></span>
+                                <span wire:click="insertMarks({{$p->id}})" class="float-right col-1 cursor-pointer text-white-50 py-1 pr-1 fa fa-edit" title="Insérer des notes"></span>
                             </th>
                             @if($marks[$p->id])
                                 {{-- LES EPE --}}
                                 @if($marks[$p->id]['epe'])
                                     @foreach ($marks[$p->id]['epe'] as $m => $epe)
                                         <td wire:click="setTargetedMark({{$epe->id}})" class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer"> {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
+                                            <span class="w-100 cursor-pointer @if($epe->forced_mark) text-muted @endif" @if($epe->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne" @endif> {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['epe'] && count($marks[$p->id]['epe']) < $epeMaxLenght)
@@ -152,7 +152,7 @@
                                 @if($marks[$p->id]['participation'])
                                     @foreach ($marks[$p->id]['participation'] as $l => $part)
                                         <td wire:click="setTargetedMark({{$part->id}})" class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer"> {{ $part->value >= 10 ? $part->value : '0'.$part->value }} </span>
+                                            <span class="w-100 cursor-pointer @if($part->forced_mark) text-muted @endif" @if($part->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne" @endif> {{ $part->value >= 10 ? $part->value : '0'.$part->value }} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['participation'] && count($marks[$p->id]['participation']) < $participMaxLenght)
@@ -174,7 +174,7 @@
                                 @if ($marks[$p->id]['dev'])
                                     @foreach ($marks[$p->id]['dev'] as $q => $dev)
                                         <td wire:click="setTargetedMark({{$dev->id}})" class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer"> {{ $dev->value >= 10 ? $dev->value : '0'.$dev->value }} </span>
+                                            <span class="w-100 cursor-pointer @if($dev && $dev->value && $dev->value < 10) text-danger  @else text-primary @endif b"> {{ $dev->value >= 10 ? $dev->value : '0'.$dev->value }} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['dev'] && count($marks[$p->id]['dev']) < $devMaxLenght)

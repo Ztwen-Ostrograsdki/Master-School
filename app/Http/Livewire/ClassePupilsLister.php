@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Pupil;
 use App\Models\SchoolYear;
+use Barryvdh\DomPDF\PDF;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -26,6 +27,7 @@ class ClassePupilsLister extends Component
     public $checkeds = [];
     public $selecteds = [];
     public $activeData = [];
+    public $download_pdf_z = false;
 
     public $pupilFirstName;
     public $pupilLastName;
@@ -61,6 +63,12 @@ class ClassePupilsLister extends Component
         }
 
         return view('livewire.classe-pupils-lister', compact('classe', 'pupils', 'classe_subject_selected'));
+    }
+
+
+    public function downloadPDF()
+    {
+        
     }
 
 

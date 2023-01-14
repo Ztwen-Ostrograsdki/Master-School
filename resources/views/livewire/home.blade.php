@@ -2,14 +2,15 @@
     <!-- Page Content -->
 <!-- Banner Starts Here -->
     <div class="banner header-text">
+
         <div class="owl-banner owl-carousel">
         <div class="banner-item-01">
             <div class="text-content">
-            <h4>
-                <span class="fa fa-cart-shopping"></span>
-                Des enseignants, des acteurs de qualité
-            </h4>
-            <h2>Un enseignement cinq étoiles</h2>
+                <h4>
+                    <span class="fa fa-cart-shopping"></span>
+                    Des enseignants, des acteurs de qualité
+                </h4>
+                <h2>Un enseignement cinq étoiles</h2>
             </div>
         </div>
         <div class="banner-item-02">

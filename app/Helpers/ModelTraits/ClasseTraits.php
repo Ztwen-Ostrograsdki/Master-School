@@ -104,6 +104,8 @@ trait ClasseTraits{
                 $epes = [];
                 $parts = [];
                 $devs = [];
+                $forced_marks = [];
+                $not_forced_marks = [];
 
                 $epes = $school_year_model->marks()
                                           ->where('semestre', $semestre)
@@ -112,6 +114,23 @@ trait ClasseTraits{
                                           ->where('classe_id', $pupil->classe_id)
                                           ->where('type', 'epe')
                                           ->orderBy('id', 'asc')->get();
+                $forced_marks = $school_year_model->marks()
+                                          ->where('semestre', $semestre)
+                                          ->where('subject_id', $subject_id)
+                                          ->where('pupil_id', $pupil->id)
+                                          ->where('classe_id', $pupil->classe_id)
+                                          ->where('type', 'epe')
+                                          ->where('forced_mark', true)
+                                          ->orderBy('id', 'asc')->get();
+
+                $not_forced_marks = $school_year_model->marks()
+                                                  ->where('semestre', $semestre)
+                                                  ->where('subject_id', $subject_id)
+                                                  ->where('pupil_id', $pupil->id)
+                                                  ->where('classe_id', $pupil->classe_id)
+                                                  ->where('type', 'epe')
+                                                  ->where('forced_mark', false)
+                                                  ->orderBy('id', 'asc')->get();
 
                 $devs = $school_year_model->marks()
                                           ->where('semestre', $semestre)
@@ -131,6 +150,8 @@ trait ClasseTraits{
                 
                 $allMarks[$pupil->id] = [
                     'epe' => $epes,
+                    'forced_marks' => $forced_marks,
+                    'not_forced_marks' => $not_forced_marks,
                     'participation' => $parts,
                     'dev' => $devs
                 ];
@@ -146,6 +167,8 @@ trait ClasseTraits{
         $marksEPEs = [];
         $marksPARTs = [];
         $averageTab = [];
+        $not_forced_marks = [];
+        $forced_marks = [];
 
         if(!$subject_id){
 
@@ -154,12 +177,13 @@ trait ClasseTraits{
 
         $allMarks = $this->getMarks($subject_id, $semestre, $school_year);
 
-        
 
         foreach ($allMarks as $pupil_id => $markTab1) {
-            $marksEPEs[$pupil_id] = $markTab1[$type];
-            $marksPARTs[$pupil_id] = $markTab1['participation'];
+            // $marksEPEs[$pupil_id] = $markTab1[$type];
+            $marksEPEs[$pupil_id] = $markTab1['not_forced_marks'];
         }
+
+
         if(!$school_year){
             $school_year_model = $this->getSchoolYear();
         }
@@ -177,6 +201,7 @@ trait ClasseTraits{
         foreach ($marksEPEs as $pupil_id => $epeMarks) {
             $epeSom = 0;
             $partSom = 0;
+            $forcedSom = 0;
             $total = 0;
 
             $pupilMaxMarksCount = count($epeMarks);
@@ -215,18 +240,22 @@ trait ClasseTraits{
 
 
 
-            $partsMarks = $marksPARTs[$pupil_id];
+            $partsMarks = $allMarks[$pupil_id]['participation'];
+            $forced_marks = $allMarks[$pupil_id]['forced_marks'];
 
-            $max  = $max + count($partsMarks);
-
-
+            $max  = $max + count($partsMarks) + count($forced_marks);
 
             foreach ($partsMarks as $part) {
                 $partSom = $partSom + $part->value;
             }
 
+            foreach ($forced_marks as $forced_m) {
+                $forcedSom = $forcedSom + $forced_m->value;
+            }
 
-            $total = $total + $epeSom + $partSom;
+
+
+            $total = $total + $epeSom + $partSom + $forcedSom;
 
             if($type == 'epe'){
 
@@ -250,6 +279,7 @@ trait ClasseTraits{
             }
 
         }
+
 
         return $averageTab;
 

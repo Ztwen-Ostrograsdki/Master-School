@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Helpers\ZtwenAssert;
 use App\Models\Classe;
 use App\Models\Level;
@@ -16,6 +17,7 @@ use Livewire\Component;
 class Admin extends Component
 {
     use ZtwenAssert;
+    use ModelQueryTrait;
 
     protected $listeners = [
         'throwSchoolBuiding' => 'throwSchoolBuiding',
@@ -42,6 +44,7 @@ class Admin extends Component
     public $school_year_start;
     public $counter = 0;
     public $semestre_selected = 1;
+    public $active_section = 'standard_section';
 
 
     public function mount()
@@ -58,14 +61,6 @@ class Admin extends Component
             }
         }
 
-        $school_year = date('Y') . ' - ' . intval(date('Y') + 1);
-        if(session()->has('school_year_selected') && session('school_year_selected')){
-            $school_year = session('school_year_selected');
-            session()->put('school_year_selected', $school_year);
-        }
-        else{
-            session()->put('school_year_selected', $school_year);
-        }
 
         if(session()->has('semestre_selected') && session('semestre_selected')){
             $semestre = intval(session('semestre_selected'));
@@ -77,6 +72,12 @@ class Admin extends Component
             session()->put('semestre_selected', $this->semestre_selected);
         }
        
+    }
+
+
+    public function setActiveSection($section = null)
+    {
+        $this->active_section = $section ? 'listing_section' : 'standard_section';
     }
    
 
