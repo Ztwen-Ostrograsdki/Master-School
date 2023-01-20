@@ -50,6 +50,8 @@ class Pupil extends Model
         'last_related_mark',
     ];
 
+    public $imagesFolder = 'pupilsPhotos';
+
     public function classesSchoolYears()
     {
         return $this->hasMany(ClassePupilSchoolYear::class);
@@ -289,6 +291,73 @@ class Pupil extends Model
 
         return $classe;
 
+
+    }
+
+
+    public function getMarksCounter($semestre_id = 1, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        $counter = $school_year_model->marks()->where('pupil_id', $this->id)->where('semestre', $semestre_id)->count();
+        
+        return $counter;
+
+    }
+
+    public function getSucceedsMarksCounter($semestre_id = 1, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        $counter = $school_year_model->marks()->where('pupil_id', $this->id)->where('semestre', $semestre_id)->where('value', '>=', 10)->count();
+        return $counter;
+
+    } 
+
+
+    public function getBestSubject($semestre_id = 1, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        $subjects = $this->classe->subjects;
+        $subjects_tab = [];
+        $targets = [];
+
+        $best_mark = null;
+        $best_mark = null;
+
+        foreach($subjects as $subject){
+            $average = 0;
+            $marks = $school_year_model->marks()->where('pupil_id', $this->id)->where('semestre',$semestre_id)->where('type', '<>', 'participation')->where('subject_id', $subject->id)->pluck('value')->toArray();
+            if(count($marks) > 0){
+                $average = array_sum($marks) / count($marks);
+            }
+            else{
+                $average = -1;
+            }
+            if($average !== -1){
+                $subjects_tab[$subject->name] = $average;
+            }
+        }
+
+        $best_mark = max($subjects_tab);
+        $best_mark_suject_name = array_search($best_mark, $subjects_tab);
+
+        $weak_mark = max($subjects_tab);
+        $weak_mark_subject_name = array_search($weak_mark, $subjects_tab);
+
+        $targets = [$best_mark_suject_name => $best_mark, $weak_mark_subject_name => $weak_mark];
+
+        if($targets !== []){
+            if(count($targets) <= 1){
+                $targets['Aucune'] = null;
+            }
+        }
+        else{
+            $targets = ['Aucune' => null, 'Aucune' => null];
+        }
+
+        return $targets;
 
     }
 

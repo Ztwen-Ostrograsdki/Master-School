@@ -9,6 +9,9 @@ window.addEventListener('reloadPage', function(e) {
 window.addEventListener('modal-startAdvancedRequests', function(e) {
     $('#advancedrequestsModal').modal();
 });
+window.addEventListener('modal-updateProfilImage', function(e) {
+    $('#updateProfilImageModal').modal('show');
+});
 window.addEventListener('modal-manageClasseSubjects', function(e) {
     $('#classeSubjectManageModal').modal('show');
 });

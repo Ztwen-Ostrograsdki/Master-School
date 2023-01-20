@@ -28,6 +28,8 @@ class Classe extends Model
     use SoftDeletes;
     use ClasseTraits;
 
+    public $imagesFolder = 'classesPhotos';
+
     protected $fillable = [
         'name',
         'slug',
@@ -58,7 +60,7 @@ class Classe extends Model
     }
 
 
-    public function getPupils($school_year)
+    public function getPupils($school_year, $search = null)
     {
         $pupils = [];
         if(is_numeric($school_year)){
@@ -70,10 +72,20 @@ class Classe extends Model
         $c_p_s_ys = $this->classePupilSchoolYear()->where('school_year_id', $school_year_model->id);
         if($c_p_s_ys->get() && count($c_p_s_ys->get()) > 0){
             $pupils_ids = $c_p_s_ys->pluck('pupil_id')->toArray();
-            $pupils = Pupil::whereIn('id', $pupils_ids)
+            if($search && strlen($search) > 2){
+                $pupils = Pupil::whereIn('id', $pupils_ids)
+                             ->where('firstName', 'like', '%' . $search . '%')
+                             ->orWhere('lastName', 'like', '%' . $search . '%')
                              ->orderBy('firstName', 'asc')
                              ->orderBy('lastName', 'asc')
                              ->get();
+            }
+            else{
+                $pupils = Pupil::whereIn('id', $pupils_ids)
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->get();
+            }
         }
         return $pupils;
     }

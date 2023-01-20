@@ -65,11 +65,11 @@ class ZtwenImageManager {
         if($class == "App\Models\User"){
             return $image->user()->attach($this->model->id);
         }
-        elseif($class == "App\Models\Product"){
-            return $image->product()->attach($this->model->id);
+        elseif($class == "App\Models\Pupil"){
+            return $image->pupil()->attach($this->model->id);
         }
-        elseif($class == "App\Models\Category"){
-            return $image->category()->attach($this->model->id);
+        elseif($class == "App\Models\Teacher"){
+            return $image->teacher()->attach($this->model->id);
         }
         else{
             return false;

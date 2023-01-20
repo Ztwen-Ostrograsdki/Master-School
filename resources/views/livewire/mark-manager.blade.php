@@ -15,7 +15,7 @@
                         </blockquote>
                     </div>
                     <div class="col-12 d-flex justify-content-between row m-0 p-0">
-                        <div class="col-10 mx-auto justify-content-center m-0 p-0 my-1">
+                        <div class="col-12 mx-auto justify-content-center m-0 p-0 my-1">
                             <span wire:click="delete" title="Supprimer définitivement cette note" class="cursor-pointer btn btn-danger w-100 border py-2 text-center">
                                 <span class="bi-trash mx-2"></span>
                                 <span class="text-uppercase">supprimer la note</span>
@@ -34,16 +34,31 @@
                                     <small class="py-1 z-text-orange">{{$message}}</small>
                                 @enderror
                             </div>
-                            <div class="col-6 m-0 p-0 mt-4">
+                            <div class="col-3 m-0 p-0 mt-4">
                                 @if($markModel->forced_mark)
                                     <span wire:click="toUnforcedMark" title="Convertir en note standard" class="cursor-pointer btn btn-success w-100 border py-2 text-center">
                                         <span class="bi-unlock mx-2"></span>
-                                        <span >Standardiser la note</span>
+                                        <span >Standardiser</span>
                                     </span>
                                 @else
                                     <span wire:click="toForcedMark" title="Rendre cette note obligatoire pour le calcule des moyennes" class="cursor-pointer btn btn-warning w-100 border py-2 text-center">
                                         <span class="bi-lock mx-2"></span>
-                                        <span >Rendre la note obligatoire</span>
+                                        <span >Note obligatoire</span>
+                                    </span>
+                                @endif
+
+                            </div>
+
+                            <div class="col-3 m-0 p-0 mt-4">
+                                @if($markModel->forget)
+                                    <span wire:click="toUnforgetMark" title="Ne plus oublier cette note" class="cursor-pointer btn btn-primary w-100 border py-2 text-center">
+                                        <span class="bi-eye mx-2"></span>
+                                        <span >Ne plus oublier</span>
+                                    </span>
+                                @else
+                                    <span wire:click="toForgetMark" title="Oublier cette note pour le calcule des moyennes" class="cursor-pointer btn btn-info w-100 border py-2 text-center">
+                                        <span class="bi-eye-slash mx-2"></span>
+                                        <span >Oublier cette note</span>
                                     </span>
                                 @endif
                             </div>

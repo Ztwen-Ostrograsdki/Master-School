@@ -3,14 +3,14 @@
         <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
             <div class="card-header bg-dark"> 
                 <h5 class="card-title cursor-pointer" data-card-widget="collapse">Informations Générales {{ $classe ? 'de la ' . $classe->name : "" }}</h5>
-              <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                  <i class="fa fa-minus"></i>
-                </button>
-                <button type="button" class="btn btn-tool" data-card-widget="remove">
-                  <i class="fa fa-times"></i>
-                </button>
-              </div>
+                  <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                      <i class="fa fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove">
+                      <i class="fa fa-times"></i>
+                    </button>
+                  </div>
                   <div class="card-tools">
                     <ul class="nav nav-pills ml-auto mr-3">
                         <li class="nav-item dropdown">
@@ -103,7 +103,7 @@
 
         <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
             <div class="card-header bg-dark"> 
-                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Effectuer uen recherche...</h5>
+                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Effectuer une recherche...</h5>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fa fa-minus"></i>
@@ -120,21 +120,17 @@
                 <div class="container-fluid m-0 p-0 w-100">
                     <div class="card-deck w-100 p-0 m-0">
                         <div class="card active" href="#tab_1" data-toggle="tab">
-                            <div class="info-box m-0 p-0 bg-info">
-                                <span class="info-box-icon"><i class="fa fa-user-friends"></i></span>
+                            <div class="info-box m-0 p-0 bg-transparent">
+                                <span class="info-box-icon"><i class="fa bi-search"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Effectif 
-                                         (<b class="text-warning">
-                                            {{ count($classe->getPupils(session('school_year_selected')))}}
-                                        </b>)
-                                    </span>
-                                    <span class="info-box-number">
-
-                                        {{ $classe ? 
-                                            'G: ' . count($classe->getClassePupilsOnGender('male', session('school_year_selected'))) . ' 
-                                            - F: '. count($classe->getClassePupilsOnGender('female', session('school_year_selected'))) : ' vide'
-                                        }}
-                                    </span>
+                                    <div class="d-flex justify-content-between">
+                                        <form action="" class="col-8">
+                                            <input placeholder="Veuillez entrer le nom ou le prénom de l'apprenant à retrouver ..." class="form-control bg-transparent py-1" type="text" name="search" wire:model="search">
+                                        </form>
+                                        <div x-on:click="@this.call('resetSearch')" data-card-widget="collapse" class="btn-secondary rounded text-center p-1 cursor-pointer border border-white col-4">
+                                            <span>Annuler</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

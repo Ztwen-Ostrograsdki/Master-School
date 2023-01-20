@@ -30,6 +30,7 @@ class ClasseProfil extends Component
     public $classe_subject_selected;
     public $semestre_selected = 1;
     public $classe_subjects = [];
+    public $search = null;
 
     public function mount($slug = null)
     {
@@ -43,6 +44,23 @@ class ClasseProfil extends Component
     }
 
 
+    public function updatedSearch($value)
+    {
+        $this->search = $value;
+        if(strlen($value) > 2){
+            $this->emit('UpdatedClasseListOnSearch', $value);
+        }
+        else{
+            $this->emit('UpdatedClasseListOnSearch', null);
+        }
+    }
+
+
+    public function resetSearch()
+    {
+        $this->reset('search');
+        $this->emit('UpdatedClasseListOnSearch', null);
+    }
 
     public function render()
     {

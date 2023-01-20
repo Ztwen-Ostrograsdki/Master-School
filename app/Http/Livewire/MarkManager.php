@@ -104,6 +104,26 @@ class MarkManager extends Component
 
     }
 
+    public function toForgetMark()
+    {
+        $this->markModel->update(['forget' => true]);
+        $this->emit('pupilUpdated');
+        $this->emit('classeUpdated');
+        $this->dispatchBrowserEvent('hide-form');
+        $this->resetErrorBag();
+
+    }
+
+    public function toUnforgetMark()
+    {
+        $this->markModel->update(['forget' => false]);
+        $this->emit('pupilUpdated');
+        $this->emit('classeUpdated');
+        $this->dispatchBrowserEvent('hide-form');
+        $this->resetErrorBag();
+
+    }
+
 
     public function delete()
     {

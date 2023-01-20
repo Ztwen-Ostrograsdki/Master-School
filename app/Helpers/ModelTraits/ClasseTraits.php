@@ -84,7 +84,7 @@ trait ClasseTraits{
     }
 
 
-    public function getMarks($subject_id, $semestre = 1, $school_year = null)
+    public function getMarks($subject_id, $semestre = 1, $take_forget = true, $school_year = null)
     {
         $allMarks = [];
         if(!$school_year){
@@ -107,19 +107,35 @@ trait ClasseTraits{
                 $forced_marks = [];
                 $not_forced_marks = [];
 
-                $epes = $school_year_model->marks()
+                if($take_forget == 2){
+                    $epes = $school_year_model->marks()
                                           ->where('semestre', $semestre)
                                           ->where('subject_id', $subject_id)
                                           ->where('pupil_id', $pupil->id)
                                           ->where('classe_id', $pupil->classe_id)
                                           ->where('type', 'epe')
                                           ->orderBy('id', 'asc')->get();
+                }
+                else{
+
+                    $epes = $school_year_model->marks()
+                                          ->where('semestre', $semestre)
+                                          ->where('subject_id', $subject_id)
+                                          ->where('pupil_id', $pupil->id)
+                                          ->where('classe_id', $pupil->classe_id)
+                                          ->where('type', 'epe')
+                                          ->where('forget', !$take_forget)
+                                          ->orderBy('id', 'asc')->get();
+
+                }
+
                 $forced_marks = $school_year_model->marks()
                                           ->where('semestre', $semestre)
                                           ->where('subject_id', $subject_id)
                                           ->where('pupil_id', $pupil->id)
                                           ->where('classe_id', $pupil->classe_id)
                                           ->where('type', 'epe')
+                                          ->where('forget', !$take_forget)
                                           ->where('forced_mark', true)
                                           ->orderBy('id', 'asc')->get();
 
@@ -129,6 +145,7 @@ trait ClasseTraits{
                                                   ->where('pupil_id', $pupil->id)
                                                   ->where('classe_id', $pupil->classe_id)
                                                   ->where('type', 'epe')
+                                                  ->where('forget', !$take_forget)
                                                   ->where('forced_mark', false)
                                                   ->orderBy('id', 'asc')->get();
 
@@ -138,6 +155,7 @@ trait ClasseTraits{
                                           ->where('pupil_id', $pupil->id)
                                           ->where('classe_id', $pupil->classe_id)
                                           ->where('type', 'devoir')
+                                          ->where('forget', !$take_forget)
                                           ->orderBy('id', 'asc')->get();
 
                 $parts = $school_year_model->marks()
@@ -145,6 +163,7 @@ trait ClasseTraits{
                                            ->where('subject_id', $subject_id)
                                            ->where('pupil_id', $pupil->id)
                                            ->where('classe_id', $pupil->classe_id)
+                                           ->where('forget', !$take_forget)
                                            ->where('type', 'participation')
                                            ->orderBy('id', 'asc')->get();
                 
@@ -175,7 +194,7 @@ trait ClasseTraits{
             return $averageTab;
         }
 
-        $allMarks = $this->getMarks($subject_id, $semestre, $school_year);
+        $allMarks = $this->getMarks($subject_id, $semestre, $school_year, false);
 
 
         foreach ($allMarks as $pupil_id => $markTab1) {
@@ -291,7 +310,6 @@ trait ClasseTraits{
      */
     public function getAverage($subject_id, $semestre = 1, $school_year = null, $takeBonus = true, $takeSanctions = true)
     {
-
         $epeAperages = $this->getMarksAverage($subject_id, $semestre, $school_year, 'epe', $takeBonus, $takeSanctions);
 
         $allMarks = $this->getMarks($subject_id, $semestre, $school_year);

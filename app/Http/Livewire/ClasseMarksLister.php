@@ -20,6 +20,7 @@ class ClasseMarksLister extends Component
         'classePupilListUpdated' => 'reloadData',
         'classeUpdated' => 'reloadData',
         'semestreWasChanged',
+        'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
     ];
     public $classe_id;
     public $pupil_id;
@@ -39,10 +40,21 @@ class ClasseMarksLister extends Component
     public $mark_key;
     public $targetedMark;
     public $count = 0;
+    public $search = null;
 
     public function mount()
     {
 
+    }
+
+    public function reloadClasseDataOnSearch($value)
+    {
+        $this->search = $value;
+    }
+
+    public function updatedSearch($value)
+    {
+        $this->search = $value;
     }
 
     public function render()
@@ -84,10 +96,10 @@ class ClasseMarksLister extends Component
         }
 
         if($classe){
-            $pupils = $classe->getPupils($school_year_model->id);
+            $pupils = $classe->getPupils($school_year_model->id, $this->search);
         }
 
-        $marks = $this->classe->getMarks($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
+        $marks = $this->classe->getMarks($this->classe_subject_selected, $this->semestre_selected, 2, $school_year_model->school_year);
 
         $averageEPETab = $this->classe->getMarksAverage($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year, 'epe');
 

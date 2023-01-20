@@ -31,6 +31,7 @@ class Mark extends Model
         'creator', 
         'editor', 
         'authorized',
+        'forget',
         'blocked',
         'forced_mark',
     ];

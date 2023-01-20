@@ -46,6 +46,21 @@ return [
             'root' => public_path().('/usersPhotos'),
             'visibility' => 'public',
         ],
+        'pupilsPhotos' => [
+            'driver' => 'local',
+            'root' => public_path().('/pupilsPhotos'),
+            'visibility' => 'public',
+        ],
+        'classesPhotos' => [
+            'driver' => 'local',
+            'root' => public_path().('/classesPhotos'),
+            'visibility' => 'public',
+        ],
+        'teachersPhotos' => [
+            'driver' => 'local',
+            'root' => public_path().('/teachersPhotos'),
+            'visibility' => 'public',
+        ],
 
         's3' => [
             'driver' => 's3',
@@ -74,6 +89,9 @@ return [
     'links' => [
         public_path('storage') => storage_path('app/public'),
         public_path('storage/usersPhotos') => storage_path('app/usersPhotos'),
+        public_path('storage/pupilsPhotos') => storage_path('app/pupilsPhotos'),
+        public_path('storage/classesPhotos') => storage_path('app/classesPhotos'),
+        public_path('storage/teachersPhotos') => storage_path('app/teachersPhotos'),
 
     ],
 

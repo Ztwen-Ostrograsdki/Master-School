@@ -125,12 +125,12 @@
                                 </span>
                                 <span wire:click="insertMarks({{$p->id}})" class="float-right col-1 cursor-pointer text-white-50 py-1 pr-1 fa fa-edit" title="Insérer des notes"></span>
                             </th>
-                            @if($marks[$p->id])
+                            @if(isset($marks[$p->id]) && $marks[$p->id])
                                 {{-- LES EPE --}}
                                 @if($marks[$p->id]['epe'])
                                     @foreach ($marks[$p->id]['epe'] as $m => $epe)
                                         <td wire:click="setTargetedMark({{$epe->id}})" class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer @if($epe->forced_mark) text-muted @endif" @if($epe->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne" @endif> {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
+                                            <span class="w-100 cursor-pointer @if($epe->forget) text-muted @endif  @if($epe->forced_mark) text-white-50 @endif" @if($epe->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($epe->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['epe'] && count($marks[$p->id]['epe']) < $epeMaxLenght)

@@ -47,7 +47,7 @@ Route::post('/inscription', RegisteringNewUser::class)->middleware('guest')->nam
 Route::get('/classe/{classe_id}', [ClasseListDownload::class, 'index'])->name('classe_pdf');
 Route::get('/classe/{classe_id}/pdf', [ClasseListDownload::class, 'createPDF'])->name('classe_pdf_print');
 
-Route::get('/connexion', AuthRedirections::class)->name('login')->middleware('guest');
+Route::get('/connexion', AuthRedirections::class)->name('conexion')->middleware('guest');
 Route::get('/inscription', AuthRedirections::class)->name('registration')->middleware('guest');
 Route::get('/authentification', AdminAuthorization::class)->name('get-admin-authorization')->middleware(['auth', 'admin', 'verifiedUser']);
 Route::get('/mot-de-passe-oublie', AuthRedirections::class)->name('password-forgot')->middleware('guest');
@@ -58,8 +58,8 @@ Route::get('/verrouillage-de-mon-compte/protection=1/id={id}/token={token}/hash=
 Route::get('/deconnection', function () {
     Auth::guard('web')->logout();
     session()->flush();
-    return redirect()->route('login');
-})->name('logout');
+    return redirect()->route('conexion');
+})->name('deconexion');
 
 Route::get('/about', function () {
     return view('layouts/app');

@@ -32,6 +32,8 @@ class Teacher extends Model
     ];
 
 
+    public $imagesFolder = 'teachersPhotos';
+
     public function school_years()
     {
         return $this->morphToMany(SchoolYear::class, 'schoolable');

@@ -10,7 +10,6 @@ class ZGaleryManagerComponent extends Component
     public $theModel;
     public $modalHeaderTitle = '';
     public $modelName;
-    public $inputId;
     public $labelTitle = '';
     public $submitMethodName;
     public $error = null;
@@ -19,7 +18,7 @@ class ZGaleryManagerComponent extends Component
      *
      * @return void
      */
-    public function __construct($modalName, $submitMethodName, $modalHeaderTitle = '',$labelTitle = "L'image à télécharger ...", $theModel, $modelName, $error = false)
+    public function __construct($modalName, $submitMethodName = 'submit', $modalHeaderTitle = '',$labelTitle = "L'image à télécharger ...", $theModel = 'profil_image', $modelName = 'profil_image', $error = false)
     {
         $this->modalName = $modalName;
         $this->modalHeaderTitle = $modalHeaderTitle;

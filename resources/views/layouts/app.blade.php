@@ -97,7 +97,7 @@
                                                     <span>
                                                         |
                                                         <span class="bi-clock mx-1"></span>
-                                                        {{ \Illuminate\Support\Carbon::now()->format('H') . 'H' }}
+                                                        {{ \Illuminate\Support\Carbon::now()->format('H') + 1 . 'H' }}
                                                         {{ \Illuminate\Support\Carbon::now()->format('i') . "'" }}
                                                     </span>
                                                 </li>
@@ -110,7 +110,7 @@
                                                     <span>
                                                         |
                                                         <span class="bi-clock mx-1"></span>
-                                                        {{ \Illuminate\Support\Carbon::now()->format('H') . 'H' }}
+                                                        {{ \Illuminate\Support\Carbon::now()->format('H') + 1 . 'H' }}
                                                         {{ \Illuminate\Support\Carbon::now()->format('i') . "'" }}
                                                     </span>
                                                 </li>

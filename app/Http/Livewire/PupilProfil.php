@@ -85,20 +85,24 @@ class PupilProfil extends Component
         if($pupil_id){
             $pupil = Pupil::find($pupil_id);
             if($pupil){
+                $best = $pupil->getBestSubject($this->semestre_selected);
+                $marks_counter = $pupil->getMarksCounter($this->semestre_selected);
+                $succeeds_marks_counter = $pupil->getSucceedsMarksCounter($this->semestre_selected);
                 $joined = $pupil->school_years()->where('school_years.id', $school_year_model->id)->first();
-                    $classes = Classe::where('classes.level_id', $pupil->level_id)->get();
+                $classes = Classe::where('classes.level_id', $pupil->level_id)->get();
                 if($joined){
                     $this->joinedToThisYear = true;
                 }
                 else{
                     $this->joinedToThisYear = false;
                 }
+
             }
             else{
                 $pupil = null;
             }
         }
-        return view('livewire.pupil-profil', compact('semestres', 'pupil', 'classes'));
+        return view('livewire.pupil-profil', compact('semestres', 'pupil', 'classes', 'marks_counter', 'succeeds_marks_counter', 'best'));
     }
 
     
@@ -281,6 +285,11 @@ class PupilProfil extends Component
     public function editPupilPersoData()
     {
         $this->emit('editPupilPersoDataLiveEvent', $this->pupil_id);
+    }
+    
+    public function editPupilProfilImage()
+    {
+        $this->emit('editImageEvent', $this->pupil_id);
     }
 
 

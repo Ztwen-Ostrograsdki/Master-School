@@ -40,6 +40,9 @@
                                 <div class="card-header m-0">
                                     <h3 class="card-title m-0 p-0">Profil</h3>
                                     <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" wire:click="editPupilProfilImage" title="Editer la photo de profil de {{ $pupil->getName() }}">
+                                        <i class="fas fa-edit"></i>
+                                        </button>
                                         <button type="button" class="btn btn-tool" data-card-widget="card-refresh" data-source="{{route('pupil_profil', ['id' => $pupil->id])}}" data-source-selector="#card-refresh-content" data-load-on-init="false">
                                         <i class="fas fa-sync-alt"></i>
                                         </button>
@@ -56,7 +59,7 @@
                                 </div>
                                 <div class="card-body m-0 p-0">
                                     <div class="m-0 p-0 rounded-bottom">
-                                        <img width="600" class="border m-0 p-0 my-1" src="{{$pupil->__profil(500)}}" alt="photo de profil">
+                                        <img style="height: 192px;" class="border m-0 p-0 my-1 w-100" src="{{$pupil->__profil(500)}}" alt="photo de profil">
                                     </div>
                                 </div>
                             </div>
@@ -70,7 +73,8 @@
                                     <div class="card-tools">
                                         <button type="button" class="btn btn-tool" wire:click="editPupilPersoData">
                                         <i class="fas fa-edit"></i>
-                                        </button><button type="button" class="btn btn-tool" data-card-widget="card-refresh" data-source="{{route('pupil_profil', ['id' => $pupil->id])}}" data-source-selector="#card-refresh-content" data-load-on-init="false">
+                                        </button>
+                                        <button type="button" class="btn btn-tool" data-card-widget="card-refresh" data-source="{{route('pupil_profil', ['id' => $pupil->id])}}" data-source-selector="#card-refresh-content" data-load-on-init="false">
                                         <i class="fas fa-sync-alt"></i>
                                         </button>
                                         <button type="button" class="btn btn-tool" data-card-widget="maximize">
@@ -113,7 +117,7 @@
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                   <x-ztitle-liner :smallTitle="'08 réussies'" :title="'Nbre de notes : '" :value="'14'"></x-ztitle-liner>
+                                   <x-ztitle-liner :smallTitle=" $succeeds_marks_counter > 9 ? $succeeds_marks_counter . ' réussies' : '0' . $succeeds_marks_counter . ' réussies' " :title="'Nbre de notes : '" :value="$marks_counter > 9 ? $marks_counter : '0' . $marks_counter"></x-ztitle-liner>
                                    <x-ztitle-liner :smallTitle="' / Meilleur : 18 - Faible : 14'" :title="'Matière phare : '" :value="'Anglais'"></x-ztitle-liner>
                                    <x-ztitle-liner :smallTitle="' / Meilleur : 11 - Faible : 01'" :title="'Matière archilles : '" :value="'PCT'"></x-ztitle-liner>
                                 </div>
@@ -124,7 +128,6 @@
             </div>
         </div>
     </div>
-
 
     <div class="row w-100 mx-auto mt-1 p-2">
         <div class="col-12">
@@ -246,5 +249,6 @@
         </div>
         <!-- /.col -->
       </div>
+    }
 
 </div>

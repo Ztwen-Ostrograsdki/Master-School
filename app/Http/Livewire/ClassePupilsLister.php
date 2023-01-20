@@ -16,6 +16,7 @@ class ClassePupilsLister extends Component
         'schoolYearChangedLiveEvent' => 'reloadClasseData',
         'classePupilListUpdated' => 'reloadClasseData',
         'classeUpdated' => 'reloadClasseData',
+        'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
     ];
     
     
@@ -28,6 +29,7 @@ class ClassePupilsLister extends Component
     public $selecteds = [];
     public $activeData = [];
     public $download_pdf_z = false;
+    public $search = null;
 
     public $pupilFirstName;
     public $pupilLastName;
@@ -59,7 +61,7 @@ class ClassePupilsLister extends Component
         }
 
         if($classe){
-            $pupils = $classe->getPupils($school_year_model->id);
+            $pupils = $classe->getPupils($school_year_model->id, $this->search);
         }
 
         return view('livewire.classe-pupils-lister', compact('classe', 'pupils', 'classe_subject_selected'));
@@ -81,6 +83,17 @@ class ClassePupilsLister extends Component
         $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "l'apprenant $pupil->name envoyé dans la corbeille!", 'type' => 'success']);
         $this->emit('classeUpdated');
         $this->emit('classePupilListUpdated');
+    }
+
+
+    public function reloadClasseDataOnSearch($value)
+    {
+        $this->search = $value;
+    }
+
+    public function updatedSearch($value)
+    {
+        $this->search = $value;
     }
 
     public function forceDeletePupil($pupil_id)
