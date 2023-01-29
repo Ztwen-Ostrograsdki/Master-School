@@ -17,7 +17,9 @@ class MarkManager extends Component
     protected $listeners = ['editPupilMarkLiveEvent' => 'editPupilMark'];
     public $pupil_id;
     public $mark_id;
+    public $mark;
     public $type = 'epe';
+    public $mark_index;
     public $semestre_id = 1;
     public $pupil;
     public $semestre_type = 'Semestre';
@@ -70,6 +72,8 @@ class MarkManager extends Component
                 $this->mark = $mark->value;
 
                 $this->type = $mark->type;
+                $this->mark_index = $mark->mark_index;
+
                 $this->semestre_id = $mark->semestre;
                 $this->dispatchBrowserEvent('modal-markManager');
             }
@@ -154,15 +158,24 @@ class MarkManager extends Component
         $type = $this->type;
         $mark = $this->mark;
         $pupil = $this->pupil;
+        $mark_index = $this->mark_index;
 
+        $mark_index_was_existed = $pupil->marks()->where('classe_id', $this->markModel->classe_id)->where('subject_id', $this->markModel->subject_id)->where('semestre', $this->markModel->semestre)->where('type', $type)->where('mark_index', $this->mark_index)->where('id', '<>', $this->markModel->id)->first();
+
+        if($mark_index_was_existed){
+            if($mark_index_was_existed->school_years()->first()->id == $this->markModel->school_years()->first()->id){
+                return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "L'index $this->mark_index de la note est déjà existante!", 'type' => 'warning']);
+            }
+
+        }
 
         if($semestre && $type && $mark && $pupil){
-            DB::transaction(function($e) use ($mark, $pupil, $semestre, $type){
+            DB::transaction(function($e) use ($mark, $pupil, $semestre, $type, $mark_index){
                 $this->markModel->update([
                     'value' => $mark,
                     'semestre' => $semestre,
-                    'type' => $type
-
+                    'type' => $type,
+                    'mark_index' => $mark_index,
                 ]);
 
                 DB::afterCommit(function(){
@@ -170,7 +183,6 @@ class MarkManager extends Component
                     $this->emit('classeUpdated');
                     $this->dispatchBrowserEvent('hide-form');
                     $this->resetErrorBag();
-                    // $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "La note a été mise à jour avec succès!", 'type' => 'success']);
                 });
 
             });

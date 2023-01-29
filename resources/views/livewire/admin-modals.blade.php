@@ -16,4 +16,5 @@
     @livewire('insert-pupil-related-mark')
     @livewire('mark-manager')
     @livewire('profil-image-editor')
+    @livewire('marks-settings-modal')
 </div>

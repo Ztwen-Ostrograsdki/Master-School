@@ -14,6 +14,20 @@
                 <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, toutes les notes seront prises en comptes!
             @endif
         </small>
+        <span class="text-dark float-right btn btn-secondary border mx-1">
+            @if(!$computedRank)
+                <span wire:click="displayRank" title="Afficher les rangs" class="d-inline-block w-100 cursor-pointer">
+                    <small>Le rang</small>
+                    <span class="bi-eye text-dark"></span>
+
+                </span>
+            @else
+                <span wire:click="hideRank" title="Masquer les rangs" class="d-inline-block w-100 cursor-pointer">
+                    <small>Masquer rang</small>
+                    <span class="bi-eye-slash  text-black-50"></span>
+                </span>
+            @endif
+        </span>
         @if($hasModalities)
         <span class="text-warning float-right btn btn-secondary border">
             @if($modalitiesActivated)
@@ -129,20 +143,20 @@
                                 {{-- LES EPE --}}
                                 @if($marks[$p->id]['epe'])
                                     @foreach ($marks[$p->id]['epe'] as $m => $epe)
-                                        <td wire:click="setTargetedMark({{$epe->id}})" class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer @if($epe->forget) text-muted @endif  @if($epe->forced_mark) text-white-50 @endif" @if($epe->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($epe->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
+                                        <td title="interrogation No {{$epe->mark_index}}" wire:click="setTargetedMark({{$epe->id}})" class="text-center cursor-pointer">
+                                            <span class="w-100 cursor-pointer @if($epe->forget) text-dark @endif  @if($epe->forced_mark) text-white-50 @endif" @if($epe->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($epe->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['epe'] && count($marks[$p->id]['epe']) < $epeMaxLenght)
                                         @for ($e = (count($marks[$p->id]['epe']) + 1); $e <= $epeMaxLenght; $e++)
-                                            <td class="text-center cursor-pointer">
+                                            <td wire:click="insertMarks({{$p->id}})" class="text-center cursor-pointer">
                                                 <span class="w-100 cursor-pointer"> - </span>
                                             </td>
                                         @endfor
                                     @endif
                                 @else
                                     @for ($epev=1; $epev <= $epeMaxLenght; $epev++)
-                                        <td class="text-center cursor-pointer">
+                                        <td wire:click="insertMarks({{$p->id}})" class="text-center cursor-pointer">
                                             <span class="w-100 cursor-pointer"> - </span>
                                         </td>
                                     @endfor
@@ -152,19 +166,19 @@
                                 @if($marks[$p->id]['participation'])
                                     @foreach ($marks[$p->id]['participation'] as $l => $part)
                                         <td wire:click="setTargetedMark({{$part->id}})" class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer @if($part->forced_mark) text-muted @endif" @if($part->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne" @endif> {{ $part->value >= 10 ? $part->value : '0'.$part->value }} </span>
+                                            <span class="w-100 cursor-pointer @if($part->forget) text-black-50  @endif  @if($part->forced_mark) text-white-50 @endif" @if($part->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($part->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $part->value >= 10 ? $part->value : '0'.$part->value}} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['participation'] && count($marks[$p->id]['participation']) < $participMaxLenght)
                                         @for ($part=(count($marks[$p->id]['participation']) + 1); $part <= $participMaxLenght; $part++)
-                                            <td class="text-center cursor-pointer">
+                                            <td wire:click="insertMarks({{$p->id}}, 'participation')" class="text-center cursor-pointer">
                                                 <span class="w-100 cursor-pointer"> - </span>
                                             </td>
                                         @endfor
                                     @endif
                                 @else
                                     @for ($part_v=1; $part_v <= $participMaxLenght; $part_v++)
-                                        <td class="text-center cursor-pointer">
+                                        <td wire:click="insertMarks({{$p->id}}, 'participation')" class="text-center cursor-pointer">
                                             <span class="w-100 cursor-pointer"> - </span>
                                         </td>
                                     @endfor
@@ -173,13 +187,13 @@
                                 {{-- LES DEVOIRS --}}
                                 @if ($marks[$p->id]['dev'])
                                     @foreach ($marks[$p->id]['dev'] as $q => $dev)
-                                        <td wire:click="setTargetedMark({{$dev->id}})" class="text-center cursor-pointer">
+                                        <td title="Devoir No {{$dev->mark_index}}" wire:click="setTargetedMark({{$dev->id}}, 'devoir')" class="text-center cursor-pointer">
                                             <span class="w-100 cursor-pointer @if($dev && $dev->value && $dev->value < 10) text-danger  @else text-primary @endif b"> {{ $dev->value >= 10 ? $dev->value : '0'.$dev->value }} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['dev'] && count($marks[$p->id]['dev']) < $devMaxLenght)
                                         @for ($d=(count($marks[$p->id]['dev']) + 1); $d <= $devMaxLenght; $d++)
-                                            <td class="text-center cursor-pointer">
+                                            <td wire:click="insertMarks({{$p->id}}, 'devoir')" class="text-center cursor-pointer">
                                                 <span  class="w-100 cursor-pointer"> - </span>
                                             </td>
                                         @endfor
@@ -187,26 +201,42 @@
 
                                 @else
                                     @for ($dvv=1; $dvv <= $devMaxLenght; $dvv++)
-                                        <td class="text-center cursor-pointer">
-                                        <span  class="w-100 cursor-pointer"> - </span>
-                                    </td>
+                                        <td  wire:click="insertMarks({{$p->id}}, 'devoir')" class="text-center cursor-pointer">
+                                            <span  class="w-100 cursor-pointer"> - </span>
+                                        </td>
                                     @endfor
                                 @endif
-                                <td class=" text-center moy-epe-note {{$averageEPETab[$p->id] !== null ? ($averageEPETab[$p->id] >= 10 ? 'text-success' : 'text-danger') : 'text-warning'}} "> 
-                                    {{ $averageEPETab[$p->id] !== null ? ($averageEPETab[$p->id] >= 10 ? $averageEPETab[$p->id] : '0'.$averageEPETab[$p->id]) : ' - ' }} 
+                                <td class=" text-center moy-epe-note {{$averageEPETab[$p->id] !== null ? ($averageEPETab[$p->id] >= 10 ? 'text-success' : 'text-danger') : 'text-warning' }} "> 
+                                    @if($averageEPETab)
+                                        {{ $averageEPETab[$p->id] !== null ? ($averageEPETab[$p->id] >= 10 ? $averageEPETab[$p->id] : '0'.$averageEPETab[$p->id]) : ' - ' }} 
+                                    @else
+                                        {{ ' - ' }}
+                                    @endif
                                 </td>
-                                <td class=" text-center moy-note text-white-50 z-hover  {{$averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? 'bg-success' : 'bg-danger') : 'bg-secondary'}} "> 
-                                    {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? $averageTab[$p->id] : '0'.$averageTab[$p->id]) : ' - ' }} 
+                                <td class=" text-center moy-note text-white-50 z-hover {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? 'bg-success' : 'bg-danger') : 'bg-secondary' }} "> 
+                                    @if($averageTab)
+                                        {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? $averageTab[$p->id] : '0'.$averageTab[$p->id]) : ' - ' }} 
+                                    @else
+                                       {{ ' - ' }}
+                                    @endif
                                 </td>
-                                <td class=" text-center moy-coef-note"> 
-                                    {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] * $classe_subject_coef >= 10 ? ($averageTab[$p->id] * $classe_subject_coef) : '0'.($averageTab[$p->id] * $classe_subject_coef)) : ' - ' }}
+                                <td class=" text-center moy-coef-note">
+                                    @if($averageTab) 
+                                        {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] * $classe_subject_coef >= 10 ? ($averageTab[$p->id] * $classe_subject_coef) : '0'.($averageTab[$p->id] * $classe_subject_coef)) : ' - ' }}
+                                    @else
+                                        {{ ' - ' }}
+                                    @endif
                                 </td>
                                 <td class=" text-center rank-note text-warning"> 
-                                    @isset($ranksTab[$p->id])
-                                        <span>{{ $ranksTab[$p->id]['rank']}}</span><sup>{{ $ranksTab[$p->id]['exp']}}</sup>
-                                        <small> {{ $ranksTab[$p->id]['base'] }} </small>
+                                    @if($ranksTab)
+                                        @isset($ranksTab[$p->id])
+                                            <span>{{ $ranksTab[$p->id]['rank']}}</span><sup>{{ $ranksTab[$p->id]['exp']}}</sup>
+                                            <small> {{ $ranksTab[$p->id]['base'] }} </small>
+                                        @else
+                                            {{ ' - ' }}
+                                        @endif
                                     @else
-                                        -
+                                        {{ ' - ' }}
                                     @endif
                                 </td>
                                 <td class="text-center">

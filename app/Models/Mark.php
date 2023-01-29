@@ -34,6 +34,7 @@ class Mark extends Model
         'forget',
         'blocked',
         'forced_mark',
+        'mark_index',
     ];
 
     public function school_years()

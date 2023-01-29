@@ -27,6 +27,7 @@ class ClasseGeneralsStats extends Component
     public $semestre_type = 'Semestre';
     public $semestre_selected = 1;
     public $count = 0;
+    public $openDynamicStats = true;
 
     public function mount()
     {

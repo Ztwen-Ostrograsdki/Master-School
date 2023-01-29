@@ -27,6 +27,18 @@
                                 <small class="py-1 z-text-orange">{{$message}}</small>
                             @enderror
                         </div>
+                        <div class="col-2 m-0 p-0">
+                            <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Index de la note</label>
+                            <select class="px-2 form-select text-white z-bg-secondary w-100 @error('mark_index') text-danger border border-danger @enderror" wire:model.defer="mark_index" name="mark_index">
+                                <option class="" value="{{null}}">Retirer l'index temporairement</option>
+                                @for ($mi = 1; $mi <= 15; $mi++)
+                                    <option value="{{$mi}}">{{$mi}}</option>
+                                @endfor
+                            </select>
+                            @error('mark_index')
+                                <small class="py-1 z-text-orange">{{$message}}</small>
+                            @enderror
+                        </div>
                         <div class="col-3 m-0 p-0">
                             <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Choisissez l'année </label>
                             <select class="px-2 form-select text-white z-bg-secondary w-100 @error('school_year') text-danger border border-danger @enderror" wire:model.defer="school_year" name="school_year">

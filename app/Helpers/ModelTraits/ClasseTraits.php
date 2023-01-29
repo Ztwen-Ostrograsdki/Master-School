@@ -115,6 +115,14 @@ trait ClasseTraits{
                                           ->where('classe_id', $pupil->classe_id)
                                           ->where('type', 'epe')
                                           ->orderBy('id', 'asc')->get();
+
+                    $parts = $school_year_model->marks()
+                                           ->where('semestre', $semestre)
+                                           ->where('subject_id', $subject_id)
+                                           ->where('pupil_id', $pupil->id)
+                                           ->where('classe_id', $pupil->classe_id)
+                                           ->where('type', 'participation')
+                                           ->orderBy('id', 'asc')->get();
                 }
                 else{
 
@@ -126,6 +134,15 @@ trait ClasseTraits{
                                           ->where('type', 'epe')
                                           ->where('forget', !$take_forget)
                                           ->orderBy('id', 'asc')->get();
+
+                    $parts = $school_year_model->marks()
+                                           ->where('semestre', $semestre)
+                                           ->where('subject_id', $subject_id)
+                                           ->where('pupil_id', $pupil->id)
+                                           ->where('classe_id', $pupil->classe_id)
+                                           ->where('forget', !$take_forget)
+                                           ->where('type', 'participation')
+                                           ->orderBy('id', 'asc')->get();
 
                 }
 
@@ -158,14 +175,7 @@ trait ClasseTraits{
                                           ->where('forget', !$take_forget)
                                           ->orderBy('id', 'asc')->get();
 
-                $parts = $school_year_model->marks()
-                                           ->where('semestre', $semestre)
-                                           ->where('subject_id', $subject_id)
-                                           ->where('pupil_id', $pupil->id)
-                                           ->where('classe_id', $pupil->classe_id)
-                                           ->where('forget', !$take_forget)
-                                           ->where('type', 'participation')
-                                           ->orderBy('id', 'asc')->get();
+                
                 
                 $allMarks[$pupil->id] = [
                     'epe' => $epes,

@@ -41,6 +41,8 @@ class ClasseMarksLister extends Component
     public $targetedMark;
     public $count = 0;
     public $search = null;
+    public $computedRank = false;
+
 
     public function mount()
     {
@@ -64,6 +66,10 @@ class ClasseMarksLister extends Component
         $modality = null;
         $modalitiesActivated = null;
         $hasModalities = false;
+
+        $averageEPETab = [];
+        $averageTab = [];
+        $ranksTab = [];
 
 
         $school_year_model = $this->getSchoolYear();
@@ -105,7 +111,13 @@ class ClasseMarksLister extends Component
 
         $averageTab = $this->classe->getAverage($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
         
-        $ranksTab = $this->classe->getClasseRank($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
+        if($this->computedRank){
+            $ranksTab = $this->classe->getClasseRank($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
+        }
+        else{
+            $ranksTab = [];
+
+        }
 
         $classe_subject_coef = $this->classe->get_coefs($this->classe_subject_selected, $school_year_model->id, true);
 
@@ -154,6 +166,18 @@ class ClasseMarksLister extends Component
                         'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'marks_lenght', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab'
                     )
                 );
+    }
+
+
+
+    public function displayRank()
+    {
+        $this->computedRank = true;
+    }
+
+    public function hideRank()
+    {
+        $this->computedRank = false;
     }
 
 
@@ -236,13 +260,13 @@ class ClasseMarksLister extends Component
 
     }
 
-    public function insertMarks($pupil_id)
+    public function insertMarks($pupil_id, $type = 'epe')
     {
         $subject_id = session('classe_subject_selected');
         if($subject_id){
             $semestre = session('semestre_selected');
             $school_year_model = $this->getSchoolYear();
-            $this->emit('addNewsMarksLiveEvent', $pupil_id, $this->classe_id, $subject_id, $semestre, $school_year_model->id);
+            $this->emit('addNewsMarksLiveEvent', $pupil_id, $this->classe_id, $subject_id, $semestre, $school_year_model->id, $type);
         }
         else{
             $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une matière en premier!", 'type' => 'error']);

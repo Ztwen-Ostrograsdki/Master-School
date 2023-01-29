@@ -1,7 +1,8 @@
 <div>
     <div class="px-2">
         <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
-            <div class="card-header bg-dark"> 
+            @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') !== 'classe_general_stats')
+            <div class="card-header bg-dark "> 
                 <h5 class="card-title cursor-pointer" data-card-widget="collapse">Informations Générales {{ $classe ? 'de la ' . $classe->name : "" }}</h5>
                   <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -12,6 +13,7 @@
                     </button>
                   </div>
                   <div class="card-tools">
+                    @if($classe)
                     <ul class="nav nav-pills ml-auto mr-3">
                         <li class="nav-item dropdown">
                           <a class="nav-link text-white dropdown-toggle border border-warning" data-toggle="dropdown" href="#">
@@ -19,19 +21,21 @@
                           </a>
                           <div class="dropdown-menu">
                             <a class="dropdown-item" wire:click="deleteAllPupil({{$classe->id}})" tabindex="-1" href="#">Rafraichir la classe</a>
-                            <a class="dropdown-item" tabindex="-1" wire:click="refreshAllMarks" href="#">Vider toutes les notes</a>
-                            <a class="dropdown-item" tabindex="-1" wire:click="resetMarks" href="#">Rafraichir les notes</a>
+                            <a class="dropdown-item" tabindex="-1" wire:click="refreshAllMarks" href="#">Vider toutes les notes de cette classe</a>
+                            <a class="dropdown-item @if(session()->has('classe_subject_selected') && session('classe_subject_selected')) d-none @endif " tabindex="-1" wire:click="resetMarks" href="#">Rafraichir les notes de cette matière</a>
                             <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
                             <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Rafraichir les retards</a>
-                            <a class="dropdown-item" tabindex="-1" href="#">Mettre à jour</a>
+                            <a class="dropdown-item" tabindex="-1" href="#">Créer une nouvelle classe</a>
                             <a class="dropdown-item" wire:click="createNewClasse" tabindex="-1" href="#">Créer une classe</a>
                             <a class="dropdown-item" wire:click="editClasseGroup({{$classe->id}})" tabindex="-1" href="#">Modifier la promotion</a>
                             <a wire:click="editClasseSubjects({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Définir les matières</a>
+                            <a wire:click="settingsOnMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Effectuer une opération sur les notes</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
                           </div>
                         </li>
                     </ul>
+                    @endif
                 </div>
             </div>
             <div class="card-body">
@@ -42,8 +46,8 @@
                                 <span class="info-box-icon"><i class="fa fa-user-friends"></i></span>
                                 <div class="info-box-content">
                                     <span class="info-box-text">Effectif 
-                                         (<b class="text-warning">
-                                            {{ count($classe->getPupils(session('school_year_selected')))}}
+                                        (<b class="text-warning">
+                                            {{ $classe ? count($classe->getPupils(session('school_year_selected'))) : 'vide'}}
                                         </b>)
                                     </span>
                                     <span class="info-box-number">
@@ -99,8 +103,6 @@
                 </div>
             </div>
         </div>
-
-
         <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
             <div class="card-header bg-dark"> 
                 <h5 class="card-title cursor-pointer" data-card-widget="collapse">Effectuer une recherche...</h5>
@@ -140,6 +142,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
 
@@ -186,7 +189,7 @@
                 </li>
                 <li wire:click="setClasseProfilActiveSection('lates_absences')" class="nav-item"><a class="nav-link @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'lates_absences') active @endif border border-white mx-1" href="#tab_4" data-toggle="tab">Absence</a>
                 </li>
-                <li wire:click="setClasseProfilActiveSection('all_marks')" class="nav-item"><a class="nav-link @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'all_marks') active @endif border border-white mx-1" href="#tab_5" data-toggle="tab">
+                <li wire:click="setClasseProfilActiveSection('classe_general_stats')" class="nav-item"><a class="nav-link @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'classe_general_stats') active @endif border border-white mx-1" href="#tab_5" data-toggle="tab">
                     Stats Gles
                     <span class="bi-graph-up"></span>
                 </a>
@@ -228,7 +231,7 @@
                 <div class="tab-pane les-absences-de-la-classe @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'lates_absences') active @endif" id="tab_4">
                     @livewire('classe-presence-absence', ['classe_id' => $classe->id])
                 </div>
-                <div class="tab-pane les-notes-générales-de-la-classe @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'all_marks') active @endif" id="tab_4">
+                <div class="tab-pane les-notes-générales-de-la-classe @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') == 'classe_general_stats') active @endif" id="tab_4">
                     @livewire('classe-generals-stats', ['classe_id' => $classe->id])
                 </div>
                 @endif

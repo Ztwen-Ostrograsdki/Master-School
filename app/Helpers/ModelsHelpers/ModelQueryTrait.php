@@ -35,7 +35,48 @@ trait ModelQueryTrait{
             session()->put('school_year_selected', $school_year);
         }
 
+        $this->__setSemestreIndex();
+
         return SchoolYear::where('school_year', $school_year)->first();
+    }
+
+
+
+    public function __setSemestreIndex()
+    {
+        $semestre_type = 'Semestre';
+
+        if(session()->has('semestre_type') && session('semestre_type')){
+            $semestre_type = session('semestre_type');
+            session()->put('semestre_type', $semestre_type);
+        }
+        else{
+            session()->put('semestre_type', $semestre_type);
+        }
+
+        $current_month_index = intval(date('m'));
+
+        if ($semestre_type == 'Semestre') {
+            if(in_array($current_month_index, [10, 11, 12, 1, 2]) ){
+                $semestre = 1;
+            }
+            else{
+                $semestre = 2;
+            }
+        }
+        else{
+            if(in_array($current_month_index, [10, 11, 12, 1]) ){
+                $semestre = 1;
+            }
+            elseif (in_array($current_month_index, [2, 3, 4])) {
+                $semestre = 2;
+            }
+            else{
+                $semestre = 3;
+            }
+            
+        }
+        session()->put('semestre_selected', $semestre);
     }
 
 

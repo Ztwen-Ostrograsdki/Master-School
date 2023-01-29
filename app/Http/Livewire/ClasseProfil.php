@@ -160,6 +160,18 @@ class ClasseProfil extends Component
                 return redirect()->route('classe_profil', [urlencode($classe->slug)]);
             }
         }
+    }    
+
+
+    public function settingsOnMarks($classe_id = null)
+    {
+        if($classe_id == null){
+            $classe_id = $this->classe_id;
+        }
+        $classe = Classe::where('id', $this->classe_id)->first();
+        if($classe){
+            $this->dispatchBrowserEvent('modal-marksSettings');
+        }
     }
 
 

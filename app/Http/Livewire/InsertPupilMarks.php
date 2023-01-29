@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Mark;
 use App\Models\Pupil;
@@ -19,6 +20,7 @@ class InsertPupilMarks extends Component
     public $subject_id;
     public $marks;
     public $type = 'epe';
+    public $mark_index;
     public $semestre_id = 1;
     public $pupil;
     public $subject;
@@ -28,6 +30,8 @@ class InsertPupilMarks extends Component
     public $school_year;
     public $subjects = [];
     public $classe_subject_selected;
+
+    use ModelQueryTrait;
 
     public function render()
     {
@@ -53,15 +57,26 @@ class InsertPupilMarks extends Component
     }
 
 
-    public function addNewMarks(int $pupil_id, int $classe_id, int $subject_id, int $semestre, int $school_year)
+    public function addNewMarks(int $pupil_id, int $classe_id, int $subject_id, int $semestre, int $school_year, $type = 'epe')
     {
         if($subject_id && $pupil_id && $classe_id){
             
             $pupil = Pupil::find($pupil_id);
             $subject = Subject::find($subject_id);
-            // $classe = Classe::find($classe_id);
+
+            $school_year_model = SchoolYear::find($school_year);
 
             if($pupil && $semestre && $subject){
+
+                $has_marks_index = $school_year_model->marks()->where('pupil_id', $pupil_id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', $type)->pluck('mark_index')->toArray();
+
+                if(count($has_marks_index) > 0){
+                    $mark_index = max($has_marks_index) + 1;
+                }
+                else{
+                    $mark_index = 1;
+                }
+
                 $this->pupil = $pupil;
                 $this->subject = $subject;
                 $this->pupilName = $pupil->getName();
@@ -69,7 +84,8 @@ class InsertPupilMarks extends Component
                 $this->subject_id = $subject_id;
                 $this->classe_id = $classe_id;
                 $this->school_year = $school_year;
-
+                $this->mark_index = $mark_index;
+                $this->type = $type;
                 $this->dispatchBrowserEvent('modal-insertPupilMarks');
             }
             else{
@@ -92,6 +108,7 @@ class InsertPupilMarks extends Component
         $type = $this->type;
         $marks = $this->marks;
         $pupil = $this->pupil;
+        $mark_index = $this->mark_index;
 
         if($school_year && $subject_id && $classe_id && $semestre && $type && $marks){
             $marks = explode('-', $marks);
@@ -99,20 +116,35 @@ class InsertPupilMarks extends Component
 
             $school_year_model = SchoolYear::find($school_year);
 
+            $key_index = $this->mark_index;
             foreach($marks as $mark){
-                $tabs[] = floatval($mark);
-                if(!is_numeric($mark)){
-                    return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres!", 'type' => 'error']);
+                $mark_index_was_existed = $pupil->marks()->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', $type)->where('mark_index', $key_index)->first();
+
+                if($mark_index_was_existed){
+                    if($mark_index_was_existed->school_years()->first()->id == $school_year_model->id){
+                        return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "L'index $key_index de la note est déjà existante!", 'type' => 'warning']);
+                    }
+
                 }
-                elseif(floatval($mark) > 20 || floatval($mark) < 0){
-                    return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres compris entre 00 et 20!", 'type' => 'error']);
+                else{
+                    $tabs[$key_index] = floatval($mark);
+                    if(!is_numeric($mark)){
+                        return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres!", 'type' => 'error']);
+                    }
+                    elseif(floatval($mark) > 20 || floatval($mark) < 0){
+                        return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres compris entre 00 et 20!", 'type' => 'error']);
+                    }
+                    $key_index++;
                 }
+                
             }
 
             if($tabs !== []){
                 $make = DB::transaction(function($e) use ($tabs, $pupil, $subject_id, $semestre, $classe_id, $type, $school_year_model){
-                    foreach($tabs as $validMark){
-                        DB::transaction(function($e) use ($validMark, $pupil, $subject_id, $semestre, $classe_id, $type, $school_year_model){
+                    
+                    foreach($tabs as $k_index => $validMark){
+
+                        DB::transaction(function($e) use ($validMark, $pupil, $subject_id, $semestre, $classe_id, $type, $school_year_model, $k_index){
                             $mark = Mark::create([
                                 'value' => $validMark, 
                                 'pupil_id' => $pupil->id, 
@@ -120,6 +152,7 @@ class InsertPupilMarks extends Component
                                 'classe_id' => $classe_id, 
                                 'semestre' => $semestre, 
                                 'type' => $type, 
+                                'mark_index' => $k_index, 
                                 'level_id' => $pupil->level_id, 
                             ]);
                             if ($mark) {

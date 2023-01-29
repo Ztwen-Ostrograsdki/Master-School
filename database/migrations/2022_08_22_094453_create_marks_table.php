@@ -20,6 +20,7 @@ class CreateMarksTable extends Migration
             $table->string('editor')->nullable()->default(null);
             $table->boolean('authorized')->default(false);
             $table->boolean('forget')->default(false);
+            $table->unsignedBigInteger('mark_index')->nullable()->default(null);
             $table->boolean('blocked')->default(false);
             $table->boolean('edited')->default(false);
             $table->boolean('forced_mark')->default(false);
