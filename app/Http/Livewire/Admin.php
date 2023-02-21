@@ -49,6 +49,7 @@ class Admin extends Component
 
     public function mount()
     {
+        date_default_timezone_set('UTC');
         $school = School::first();
         $semestres = [1, 2];
         if($school){
@@ -273,6 +274,11 @@ class Admin extends Component
     public function addNewClasseGroup()
     {
         $this->emit('createNewClasseGroupLiveEvent');
+    }
+
+    public function definedSemestrePeriod()
+    {
+        $this->emit('definedSemestresPeriodsLiveEvent');
     }
 
     

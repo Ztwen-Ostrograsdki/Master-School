@@ -34,6 +34,10 @@
                     </blockquote>
                 </div>
                 <div class="w-100 p-2 mx-auto d-flex row">
+                    <span wire:click="definedSemestrePeriod" class="btn btn-primary text-left p-2 my-1 col-12 border border-white">
+                        <span class="bi-calendar"></span>
+                        <span>Définir la période des semestres/trimestres</span>
+                    </span>
                     <span wire:click="createNewLevel" class="btn btn-success text-left p-2 my-1 col-12 border border-white">
                         <span class="bi-house"></span>
                         <span>Créer un cycle</span>

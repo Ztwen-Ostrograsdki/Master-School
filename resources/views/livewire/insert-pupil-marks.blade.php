@@ -74,7 +74,6 @@
                                     <small class="py-1 z-text-orange">{{$message}}</small>
                                 @enderror
                             </div>
-
                         </div>
                     </div>
                </div>

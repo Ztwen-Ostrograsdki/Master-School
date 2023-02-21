@@ -56,6 +56,10 @@ window.addEventListener('modal-marksSettings', function(e) {
     $('#marksSettingsModal').modal('show');
 });
 
+window.addEventListener('modal-definedSemestresPeriods', function(e) {
+    $('#definedSemestrePeriodModal').modal('show');
+});
+
 window.addEventListener('modal-insertPupilMarks', function(e) {
     $('#insertPupilMarks').modal('show', function(ex) {
         $(this).find('.z-focus').focus();

@@ -76,6 +76,9 @@ trait ModelQueryTrait{
             }
             
         }
+        if(session()->has('semestre_selected') && session('semestre_selected')){
+            $semestre = session('semestre_selected');
+        }
         session()->put('semestre_selected', $semestre);
     }
 

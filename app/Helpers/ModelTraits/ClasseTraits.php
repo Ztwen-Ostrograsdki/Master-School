@@ -864,4 +864,20 @@ trait ClasseTraits{
     }
 
 
+    public function getClasseMarksIndexes($subject_id, $semestre = 1, $school_year = null, $type = 'epe')
+    {
+        $indexes = [];
+        $school_year_model = $this->getSchoolYear();
+        if($school_year_model){
+            $marks = $school_year_model->marks()->where('marks.subject_id', $subject_id)->where('semestre', $semestre)->where('marks.classe_id', $this->id)->where('type', $type)->pluck('mark_index')->toArray();
+            if($marks && count($marks) > 0){
+                $indexes = array_unique($marks);
+            }
+            
+        }
+        return $indexes;
+    }
+
+
+
 }

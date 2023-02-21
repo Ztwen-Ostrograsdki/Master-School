@@ -169,9 +169,7 @@ class ClasseProfil extends Component
             $classe_id = $this->classe_id;
         }
         $classe = Classe::where('id', $this->classe_id)->first();
-        if($classe){
-            $this->dispatchBrowserEvent('modal-marksSettings');
-        }
+        $this->emit('onMarksSettingsEvent', $classe_id, session('semestre_selected'), session('classe_subject_selected'));
     }
 
 

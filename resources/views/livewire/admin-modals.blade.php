@@ -17,4 +17,5 @@
     @livewire('mark-manager')
     @livewire('profil-image-editor')
     @livewire('marks-settings-modal')
+    @livewire('defined-semestres-periods')
 </div>

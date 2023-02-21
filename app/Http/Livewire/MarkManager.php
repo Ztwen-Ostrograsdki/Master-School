@@ -90,7 +90,7 @@ class MarkManager extends Component
 
     public function toUnforcedMark()
     {
-        $this->markModel->update(['forced_mark' => false]);
+        $this->markModel->update(['forced_mark' => false, 'forget' => false]);
         $this->emit('pupilUpdated');
         $this->emit('classeUpdated');
         $this->dispatchBrowserEvent('hide-form');
@@ -110,7 +110,7 @@ class MarkManager extends Component
 
     public function toForgetMark()
     {
-        $this->markModel->update(['forget' => true]);
+        $this->markModel->update(['forget' => true, 'forced_mark' => false]);
         $this->emit('pupilUpdated');
         $this->emit('classeUpdated');
         $this->dispatchBrowserEvent('hide-form');
