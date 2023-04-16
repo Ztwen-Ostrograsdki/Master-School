@@ -519,3 +519,16 @@ th{
     border: thin solid yellow !important;
 
 }
+
+form.authentication-form input:active{
+    background-color: #334 !important;
+
+}
+form.authentication-form input:focus{
+    background-color: #334 !important;
+
+}
+
+.text-underline{
+    text-decoration: underline !important;
+}

@@ -1,4 +1,4 @@
-<x-z-modal-generator :hasHeader="true" :modalHeaderTitle="'Définition de la période des semestres ou trimestres'" :width="6" :icon="'fa fa-calendar'" :modalName="'definedSemestrePeriodModal'" :modalBodyTitle="'Période des semestres ou trimestres'">
+<x-z-modal-generator :hasHeader="true" :modalHeaderTitle="$creationAction ? 'Définition ' : ' Edition ' . 'de la période des semestres ou trimestres'" :width="6" :icon="'fa fa-calendar'" :modalName="'definedSemestrePeriodModal'" :modalBodyTitle="'Période des semestres ou trimestres'">
     <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent" wire:submit.prevent="submit">
         <div class="row justify-between">
             <div class="mt-0 mb-2 col-11 mx-auto">

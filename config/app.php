@@ -24,6 +24,47 @@ return [
     'related_marks_type' => ['bonus', 'minus'],
     
     'admin_key' => 'ah07Xw68ee',
+    'local_events' => [
+        'devoir' => 'Devoirs',
+        'examen-bepc' => 'Examens BEPC',
+        'examen-cap' => 'Examens CAP',
+        'examen-dti' => 'Examens DTI',
+        'examen-dt' => 'Examens DT',
+        'examen-bac' => 'Examens BAC',
+        'conge' => 'Congé',
+        'ferie' => 'Jours Fériés',
+        'vacances' => 'Vacances',
+        'fete' => 'Fêtes',
+        'conseil' => 'Conseil',
+        'autres' => 'Autres',
+    ],
+
+    'local_roles' => [
+        'Default',
+        'Fondateur',
+        'Directeur',
+        'Directeur Adjoint',
+        'Censeur',
+        'Censeur Adjoint',
+        'Surveillant Général',
+        'Surveillant Général Adjoint',
+        'Teacher',
+        'Secretaire',
+        'Secretaire Adjoint',
+        'Agent de maintenance informatique',
+        'Délégué',
+        'Délégué Adjoint',
+        'Assistant',
+        'Agent entretien',
+        "Agent d'entretien",
+        "Agent de garde matinal",
+        "Agent de garde nocturne",
+        "Aide",
+        "Parents",
+        "Conseiller Pédagogique",
+        "Autres",
+    ],
+    
 
     /*
     |--------------------------------------------------------------------------

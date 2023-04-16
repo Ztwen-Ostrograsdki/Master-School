@@ -12,6 +12,8 @@ use App\Http\Livewire\MultiplePupilInsertion;
 use App\Http\Livewire\PupilProfil;
 use App\Http\Livewire\RegisteringNewUser;
 use App\Http\Livewire\ResetPassword;
+use App\Http\Livewire\SchoolCalendar;
+use App\Http\Livewire\UserProfil;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -37,17 +39,23 @@ Route::get('/', Home::class)->name('home');
 
 Route::group(['prefix' => '/administration'], function(){
     Route::get('/', Admin::class)->name('admin');
+    Route::get('/calendrier-scolaire/{school_year}', SchoolCalendar::class)->name('school_calendar');
     Route::get('/classe/{slug}', ClasseProfil::class)->name('classe_profil');
     Route::get('/promotion/{slug}', ClasseGroupProfil::class)->name('classe_group_profil');
     Route::get('/élève/{id}', PupilProfil::class)->name('pupil_profil');
     Route::get('/inscription-élèves/inscription-multiple', MultiplePupilInsertion::class)->name('multiple_pupil_insertion');
 });
+Route::group(['prefix' => '/mon-profil'], function(){
+    Route::get('/{id}', UserProfil::class)->name('user-profil');
+
+});
+
 Route::post('/inscription', RegisteringNewUser::class)->middleware('guest')->name('inscription');
 
 Route::get('/classe/{classe_id}', [ClasseListDownload::class, 'index'])->name('classe_pdf');
 Route::get('/classe/{classe_id}/pdf', [ClasseListDownload::class, 'createPDF'])->name('classe_pdf_print');
 
-Route::get('/connexion', AuthRedirections::class)->name('conexion')->middleware('guest');
+Route::get('/connexion', AuthRedirections::class)->name('connexion')->middleware('guest');
 Route::get('/inscription', AuthRedirections::class)->name('registration')->middleware('guest');
 Route::get('/authentification', AdminAuthorization::class)->name('get-admin-authorization')->middleware(['auth', 'admin', 'verifiedUser']);
 Route::get('/mot-de-passe-oublie', AuthRedirections::class)->name('password-forgot')->middleware('guest');
@@ -58,7 +66,7 @@ Route::get('/verrouillage-de-mon-compte/protection=1/id={id}/token={token}/hash=
 Route::get('/deconnection', function () {
     Auth::guard('web')->logout();
     session()->flush();
-    return redirect()->route('conexion');
+    return redirect()->route('connexion');
 })->name('deconexion');
 
 Route::get('/about', function () {

@@ -13,7 +13,7 @@ use Livewire\Component;
 
 class DefinedSemestresPeriods extends Component
 {
-    protected $listeners = ['definedSemestresPeriodsLiveEvent' => 'openModal'];
+    protected $listeners = ['definedSemestresPeriodsLiveEvent' => 'openModal', 'editSemestrePeriodsLiveEvent' => 'openUpdate'];
 
     use ModelQueryTrait;
     use DateFormattor;
@@ -21,6 +21,7 @@ class DefinedSemestresPeriods extends Component
     public $semestres = [1, 2];
     public $semestre_type = 'Semestre';
     public $hasErrorsHere = false;
+    public $creationAction = true;
     public $years;
     public $school_year;
     public $period11;
@@ -53,7 +54,7 @@ class DefinedSemestresPeriods extends Component
             }
             else{
                 $this->period3 = false;
-                $semestres = [1, 2];
+                $this->semestres = [1, 2];
             }
 
             if($this->period11 && $this->period12){
@@ -88,15 +89,11 @@ class DefinedSemestresPeriods extends Component
 
 
         }
-        return view('livewire.defined-semestres-periods', compact('semestres', 'school', 'period1_string', 'period1_weeks', 'period2_string', 'period2_weeks', 'period3_string', 'period3_weeks'));
+        return view('livewire.defined-semestres-periods', compact('school', 'period1_string', 'period1_weeks', 'period2_string', 'period2_weeks', 'period3_string', 'period3_weeks'));
     }
-
 
     public function openModal()
     {
-        dd(Period::all());
-
-        
         $school_year = session('school_year_selected');
         if(!$school_year){
             $current_month_index = intval(date('m'));
@@ -110,9 +107,54 @@ class DefinedSemestresPeriods extends Component
 
         $years = explode(' - ', $school_year);
         $this->years = $years;
+        $this->creationAction = true;
 
         $this->dispatchBrowserEvent('modal-definedSemestresPeriods');
     }
+
+
+    public function openUpdate($school_year = null)
+    {
+        $calendars = [];
+        if($school_year){
+            if(is_numeric($school_year)){
+                $school_year_model = SchoolYear::find($school_year);
+            }
+            else{
+                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+            }
+        }
+        else{
+            $school_year_model = $this->getSchoolYear();
+        }
+
+
+        $semestre_calendars = $school_year_model->periods()->where('target', 'semestre-trimestre')->orderBy('object')->get();
+
+        foreach($semestre_calendars as $key => $calendar){
+            $calendars[] = $calendar;
+        }
+
+        if($calendars !== []){
+            $this->period11 = $calendars[0]->start;
+            $this->period12 = $calendars[0]->end;
+            $this->period21 = $calendars[1]->start;
+            $this->period22 = $calendars[1]->end;
+
+            if(count($calendars) == 3){
+                $this->period31 = $calendars[2]->start;
+                $this->period32 = $calendars[2]->end;
+            }
+
+            $years = explode(' - ', $school_year_model->school_year);
+            $this->years = $years;
+            $this->creationAction = false;
+
+            $this->dispatchBrowserEvent('modal-definedSemestresPeriods');
+        }
+    }
+
+
 
     public function updatedPeriod11($period11)
     {
@@ -199,8 +241,6 @@ class DefinedSemestresPeriods extends Component
 
     public function submit()
     {
-        // dd(Period::all());
-
         $this->reset('hasErrorsHere');
         $errors = $this->getErrorBag();
         $school_year = session('school_year_selected');
@@ -237,7 +277,9 @@ class DefinedSemestresPeriods extends Component
                         $semestre1 = Period::create([
                             'start' => $this->period11,
                             'end' => $this->period12,
-                            'object' => 'Semestre 1',
+                            'target' => 'semestre-trimestre',
+                            'object' => $this->semestre_type . ' 1',
+                            'semestre' => 1,
                             'school_year_id' => $this->school_year_model->id,
                         ]);
                         if($semestre1){
@@ -245,7 +287,9 @@ class DefinedSemestresPeriods extends Component
                                 $semestre2 = Period::create([
                                     'start' => $this->period21,
                                     'end' => $this->period22,
-                                    'object' => 'Semestre 2',
+                                    'target' => 'semestre-trimestre',
+                                    'object' => $this->semestre_type . ' 2',
+                                    'semestre' => 2,
                                     'school_year_id' => $this->school_year_model->id,
                                 ]);
 
@@ -255,7 +299,9 @@ class DefinedSemestresPeriods extends Component
                                             $semestre3 = Period::create([
                                                 'start' => $this->period31,
                                                 'end' => $this->period32,
-                                                'object' => 'Semestre 3',
+                                                'target' => 'semestre-trimestre',
+                                                'object' => $this->semestre_type . ' 3',
+                                                'semestre' => 3,
                                                 'school_year_id' => $this->school_year_model->id,
                                             ]);
                                             
@@ -281,6 +327,7 @@ class DefinedSemestresPeriods extends Component
 
                 DB::afterCommit(function(){
                     $this->dispatchBrowserEvent('hide-form');
+                    $this->emit('relaodCalendars');
                     $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour réussie!', 'message' => "Le calendrier scolaire a été défini avec succès", 'type' => 'success']);
                 });
 

@@ -56,6 +56,10 @@ window.addEventListener('modal-marksSettings', function(e) {
     $('#marksSettingsModal').modal('show');
 });
 
+window.addEventListener('modal-eventPeriodManager', function(e) {
+    $('#eventPeriodManagerModal').modal('show');
+});
+
 window.addEventListener('modal-definedSemestresPeriods', function(e) {
     $('#definedSemestrePeriodModal').modal('show');
 });

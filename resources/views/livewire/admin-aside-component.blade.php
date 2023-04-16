@@ -462,7 +462,7 @@
               </li>
               <li class="nav-header text-uppercase">Outils</li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{{route('school_calendar', ['school_year' => str_replace(' - ', '-', session('school_year_selected'))])}}" class="nav-link">
                   <i class="nav-icon fas fa-calendar-alt"></i>
                   <p>
                     Calendrier

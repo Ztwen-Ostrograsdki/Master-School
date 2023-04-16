@@ -1,5 +1,5 @@
 <div>
-    @if($target == 'login')
+@if($target == 'login')
 <div class="zw-90 row mx-auto" style="position: relative; top:200px;">
     <div class="col-12 col-lg-6 col-xl-6 col-md-6 mx-auto z-bg-secondary-light-opac border rounded z-border-orange" style="opacity: 0.8;">
         <div class="w-100 mx-auto p-3">
@@ -11,7 +11,7 @@
                 <hr class="w-100 z-border-orange mx-auto my-2">
             </div>
             <div class="w-100">
-                <form autocomplete="false" method="post" class="mt-3 mx-auto" wire:submit.prevent="login" >
+                <form autocomplete="false" method="post" class="mt-3 mx-auto authentication-form" wire:submit.prevent="login" >
                     @csrf
                     <div class="w-100">
                         <div class="w-100 d-flex justify-content-between border rounded">
@@ -69,14 +69,14 @@
                 <hr class="w-100 z-border-orange mx-auto my-2">
             </div>
             <div class="w-100">
-                <form autocomplete="false" method="post" class="mt-3 mx-auto" wire:submit.prevent="register" >
+                <form autocomplete="false" class="mt-3 mx-auto authentication-form" wire:submit.prevent="register" >
                     @csrf
                     <div class="w-100">
                         <div class="w-100 d-flex justify-content-between border rounded">
                             <strong class="bi-person zw-15 text-center z-color-orange" style="font-size: 1.5rem"></strong>
-                            <input name="name" wire:model.defer="name"  type="text" class="form-control  @error('name') text-danger border border-danger @enderror text-white zw-85 p-3 z-bg-secondary-dark border-left" placeholder="Veuillez renseigner votre nom...">
+                            <input name="pseudo" wire:model.defer="pseudo"  type="text" class="form-control  @error('pseudo') text-danger border border-danger @enderror text-white zw-85 p-3 z-bg-secondary-dark border-left" placeholder="Veuillez renseigner votre pseudo...">
                         </div>
-                        @error('name')
+                        @error('pseudo')
                             <span class="py-1 mb-3 z-color-orange">{{$message}}</span>
                         @enderror
                     </div>  
@@ -125,7 +125,7 @@
                         <button type="submit" class="z-bg-orange border rounded px-3 py-2 w-75">S'inscrire</button>
                     </div>
                     <div class="w-100 mt-3 d-flex justify-center">
-                        <a class="text-white text-center px-3 py-2 w-75" href="{{route('login')}}">
+                        <a class="text-white text-center px-3 py-2 w-75" href="{{route('connexion')}}">
                             <span class="bi-user mx-2"></span>
                             <strong class="text-warning text-center w-100">J'ai déjà un compte</strong>
                         </a>
@@ -150,7 +150,7 @@
                 <hr class="w-100 z-border-orange mx-auto my-2">
             </div>
             <div class="w-100">
-                <form autocomplete="false" method="post" class="mt-3 mx-auto" wire:submit.prevent="sendCode" >
+                <form autocomplete="false" method="post" class="mt-3 mx-auto authentication-form" wire:submit.prevent="sendCode" >
                     @csrf
                     <div class="w-100">
                         <div class="w-100 d-flex justify-content-between border rounded">

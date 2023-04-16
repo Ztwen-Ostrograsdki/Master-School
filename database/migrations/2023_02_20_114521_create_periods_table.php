@@ -18,6 +18,7 @@ class CreatePeriodsTable extends Migration
             $table->date('start');
             $table->date('end');
             $table->string('object');
+            $table->string('target')->nullable()->default('semestre-trimestre');
             $table->string('description')->nullable()->default(null);
             $table->unsignedBigInteger('school_year_id')->nullable();
             $table->foreign('school_year_id')

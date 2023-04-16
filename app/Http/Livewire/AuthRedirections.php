@@ -2,16 +2,17 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\NewUserConnectedEvent;
+use App\Events\NewUserRegistredEvent;
+use App\Models\Role;
 use App\Models\User;
-use Livewire\Component;
-use Illuminate\Support\Str;
+use App\Providers\RouteServiceProvider;
 use App\Rules\StrongPassword;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Events\NewUserConnectedEvent;
-use App\Events\NewUserRegistredEvent;
 use Illuminate\Support\Facades\Route;
-use App\Providers\RouteServiceProvider;
+use Illuminate\Support\Str;
+use Livewire\Component;
 
 class AuthRedirections extends Component
 {
@@ -21,7 +22,7 @@ class AuthRedirections extends Component
     public $email_for_reset;
     public $password_auth;
     public $email;
-    public $name;
+    public $pseudo;
     public $password;
     public $new_password;
     public $password_confirmation;
@@ -33,14 +34,13 @@ class AuthRedirections extends Component
     public $reset_password_final_step = false;
 
     protected $rules = [
-        'name' => 'required|string|between:2,255',
+        'pseudo' => 'required|string|between:2,255',
         'email' => 'required|email',
         'email_auth' => 'required|email',
         'password' => 'required|string|min:4',
         'password_confirmation' => 'required|string|min:4',
         'new_password' => 'required|string|min:4',
         'new_password_confirmation' => 'required|string|min:5',
-        'password' => 'required|string',
 
     ];
 
@@ -59,7 +59,7 @@ class AuthRedirections extends Component
     public function mount()
     {
         $target = Route::currentRouteName();
-        if($target == 'login'){
+        if($target == 'login' || $target == 'connexion'){
             $this->target = 'login';
         }
         elseif($target == 'registration'){
@@ -99,8 +99,8 @@ class AuthRedirections extends Component
                     $this->user->__generateAdminKey();
                 }
                 $this->dispatchBrowserEvent('Login');
-                $event = new NewUserConnectedEvent($this->user);
-                broadcast($event);
+                // $event = new NewUserConnectedEvent($this->user);
+                // broadcast($event);
                 $this->user->__backToUserProfilRoute();
             }
             else{
@@ -123,7 +123,7 @@ class AuthRedirections extends Component
             $this->password_confirmation = '00000';
         }
         $v = $this->validate([
-            'name' => 'required|string|unique:users|between:5, 50',
+            'pseudo' => 'required|string|unique:users|between:5, 50',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|confirmed|min:4',
             'password_confirmation' => 'required|string|min:4'
@@ -132,13 +132,14 @@ class AuthRedirections extends Component
             $v = $this->validate(['password' => new StrongPassword(false, false, false, 4)]);
             if($v){
                 $this->user = User::create([
-                    'name' => $this->name,
+                    'pseudo' => $this->pseudo,
                     'email' => $this->email,
                     'password' => Hash::make($this->password),
                     'token' => Str::random(6),
+                    'role_id' => Role::first()->id,
                     'email_verified_token' => Hash::make(Str::random(16)),
                 ]);
-                if($this->user->id == 1){
+                if($this->user->id == 1 || true){
                     $this->user->markEmailAsVerified();
                 }
                 else{
@@ -155,15 +156,15 @@ class AuthRedirections extends Component
                     $this->resetErrorBag();
                     $this->dispatchBrowserEvent('hide-form');
                     // $this->user->sendEmailVerificationNotification();
-                    $event = new NewUserRegistredEvent($this->user);
-                    broadcast($event);
+                    // $event = new NewUserRegistredEvent($this->user);
+                    // broadcast($event);
                     session()->put('user_email_to_verify', $this->user->id);
                     return redirect()->route('email-verification-notify', ['id' => $this->user->id]);
                 }
                 $this->resetErrorBag();
                 $this->dispatchBrowserEvent('RegistredNewUser', ['username' => $this->name]);
                 $this->emit("refreshUsersList");
-                if($this->user->role == 'admin'){
+                if($this->user->id == 1){
                     return redirect(RouteServiceProvider::ADMIN);
                 }
                 else{

@@ -7,6 +7,7 @@ use App\Models\Classe;
 use App\Models\ClasseHistory;
 use App\Models\Level;
 use App\Models\Mark;
+use App\Models\Period;
 use App\Models\Pupil;
 use App\Models\PupilAbsences;
 use App\Models\PupilCursus;
@@ -31,6 +32,13 @@ class SchoolYear extends Model
     public function levels()
 	{
 		return $this->morphedByMany(Level::class, 'schoolable');
+	}
+
+
+	public function periods()
+	{
+		return $this->hasMany(Period::class);
+
 	}
 
 	public function classes()

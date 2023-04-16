@@ -53,16 +53,25 @@
                         </div>
 
                         <div class="col-12 d-flex justify-content-between row m-0 p-0 mt-3">
-                            <div class="col-7 m-0 p-0">
+                            <div class="col-6 m-0 p-0">
                                 <div class="p-0 m-0 mt-0 mb-2 row">
-                                    <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Notes au format 17-11-08-...</label>
-                                    <input autofocus="autofocus" placeholder="Notes au format 17-11-08-..." class="text-white form-control bg-transparent border border-white px-2 z-focus @error('marks') text-danger border-danger @enderror" wire:model.defer="marks" type="text" name="marks">
-                                    @error('marks')
+                                    <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Notes Interro</label>
+                                    <input autofocus="autofocus" placeholder="Notes au format 17-11-08-..." class="text-white form-control bg-transparent border border-white px-2 z-focus @error('epe_marks') text-danger border-danger @enderror" wire:model.defer="epe_marks" type="text" name="epe_marks">
+                                    @error('epe_marks')
                                         <small class="py-1 z-text-orange">{{$message}}</small>
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-4 m-0 p-0">
+                            <div class="col-5 m-0 p-0">
+                                <div class="p-0 m-0 mt-0 mb-2 row">
+                                    <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Notes Devoirs</label>
+                                    <input autofocus="autofocus" placeholder="Notes au format 17-11-08-..." class="text-white form-control bg-transparent border border-white px-2 z-focus @error('dev_marks') text-danger border-danger @enderror" wire:model.defer="dev_marks" type="text" name="dev_marks">
+                                    @error('dev_marks')
+                                        <small class="py-1 z-text-orange">{{$message}}</small>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-4 m-0 p-0 d-none">
                                 <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Choisissez le type de note </label>
                                 <select class="px-2 form-select text-white z-bg-secondary w-100 @error('type') text-danger border border-danger @enderror" wire:model.defer="type" name="type">
                                     <option disabled class="" value="{{null}}">Choisissez l'année</option>

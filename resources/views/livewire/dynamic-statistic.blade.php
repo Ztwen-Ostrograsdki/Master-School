@@ -144,7 +144,18 @@
                     </span>
 
                     <span class="text-white">
-                        {{ $mark_index . ' note des ' . $type . ' du ' . $semestre_selected . ' ' . $semestre_type . ' en ' . $subject}}
+                        Note 
+                        <span class="text-warning">
+                            {{ 'N°' . $mark_index . ' '}}
+                        </span> 
+                        des
+                        <span class="text-black-50"> {{ $type }} </span> du
+                        <span class="">
+                            {{  $semestre_type . ' ' . $semestre_selected }} en
+                        </span>
+                        <span class="text-warning"> 
+                            {{ $subject }}
+                        </span>
                     </span>
                 </h5>
 
@@ -206,7 +217,7 @@
             <colgroup span="2"></colgroup>
             <colgroup span="2"></colgroup>
             <tr class="text-center">
-                <th rowspan="3" scope="colgroup">Statistiques
+                <th rowspan="3" scope="colgroup">Statistiques Globales
 
 
                 </th>
@@ -222,9 +233,55 @@
             @isset($stats['global_stats'])
                 <tr class="text-left text-center">
                     <th> {{ $stats['global_stats']['failed_number'] }} </th>
-                    <th> {{ $stats['global_stats']['failed_percentage'] }} </th>
+                    <th> {{ $stats['global_stats']['failed_percentage'] }} % </th>
                     <th> {{ $stats['global_stats']['succeed_number'] }} </th>
-                    <th> {{ $stats['global_stats']['succeed_percentage'] }} </th>
+                    <th> {{ $stats['global_stats']['succeed_percentage'] }} % </th>
+                </tr>
+            @endif
+        </table>
+    </div>
+    <div class="w-100 m-0 p-0 mt-3">
+        <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white text-center">
+            <col>
+            <colgroup span="2"></colgroup>
+            <colgroup span="2"></colgroup>
+            <tr class="text-center">
+                <th rowspan="3" scope="colgroup">Statistiques particulières
+
+
+                </th>
+                <th colspan="2" scope="colgroup">Meilleurs Notes </th>
+                <th colspan="2" scope="colgroup">Faibles Notes </th>
+            </tr>
+            <tr class="text-center">
+                <th scope="col">Note</th>
+                <th scope="col">Apprenants</th>
+                <th scope="col">Note</th>
+                <th scope="col">Apprenants</th>
+            </tr>
+            @isset($stats['b_w_stats'])
+                @php
+                    $best_mark = $stats['b_w_stats']['best_stats'];
+                    $weak_mark = $stats['b_w_stats']['weak_stats'];
+                @endphp
+                <tr class="text-left text-center">
+                    <th>
+                        {{ $best_mark['mark'] > 9 ? $best_mark['mark'] : '0' . $best_mark['mark'] }} / 20
+                    </th>
+                    <th>
+                        @foreach($best_mark['pupils'] as $p)
+                            <li class="ml-1 list-unstyled text-left">{{ $p->getName() }}</li>
+                        @endforeach
+                    </th>
+
+                    <th>
+                        {{ $weak_mark['mark'] > 9 ? $weak_mark['mark'] : '0' . $weak_mark['mark'] }} / 20
+                    </th>
+                    <th>
+                        @foreach($weak_mark['pupils'] as $p)
+                            <li class="ml-1 list-unstyled text-left">{{ $p->getName() }}</li>
+                        @endforeach
+                    </th>
                 </tr>
             @endif
         </table>

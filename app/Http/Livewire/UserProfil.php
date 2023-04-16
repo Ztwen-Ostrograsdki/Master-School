@@ -4,7 +4,6 @@ namespace App\Http\Livewire;
 
 use App\Models\User;
 use App\Models\Image;
-use App\Models\Product;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Helpers\ProfilManager;
@@ -62,7 +61,6 @@ class UserProfil extends Component
         $user = User::find(auth()->user()->id);
         $myFollowers = $this->getMyFollowers();
         $myFriends = $user->getMyFriends();
-        $this->getUserCart();
         $demandes = $this->getDemandes();
 
         return view('livewire.user-profil', compact('demandes', 'myFollowers', 'myFriends', 'user'));
@@ -128,16 +126,7 @@ class UserProfil extends Component
         return $user->__destroyAdminKey();
     }
 
-    public function getUserCart()
-    {
-        $data = Auth::user()->shoppingBags->pluck('product_id')->toArray();
-        $this->carts_counter = count($data);
-    }
 
-    public function refreshCartsCounter()
-    {
-        $this->carts_counter = count(auth()->user()->shoppingBags->pluck('product_id')->toArray());
-    }
 
     public function getMyFollowers()
     {
@@ -218,19 +207,7 @@ class UserProfil extends Component
         }
     }
 
-    public function liked($product_id)
-    {
-        $product = Product::find($product_id);
-        if($product && Auth::user()){
-            $user = User::find(auth()->user()->id);
-            if($user->likedThis('product', $product->id, $user->id)){
-                $this->getUserCart();
-            }
-        }
-        else{
-            return abort(403, "Votre requête ne peut aboutir");
-        }
-    }
+    
 
 
     public function openSingleChat($receiver_id)

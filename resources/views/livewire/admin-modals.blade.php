@@ -18,4 +18,5 @@
     @livewire('profil-image-editor')
     @livewire('marks-settings-modal')
     @livewire('defined-semestres-periods')
+    @livewire('event-periods-manager')
 </div>

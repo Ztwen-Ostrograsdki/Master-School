@@ -235,9 +235,6 @@ class Pupil extends Model
 
     }
 
-
-
-
     public function getArchives()
     {
         $all_classes = [];
@@ -340,25 +337,28 @@ class Pupil extends Model
             }
         }
 
-        $best_mark = max($subjects_tab);
-        $best_mark_suject_name = array_search($best_mark, $subjects_tab);
+        if($subjects_tab !== []){
+            $best_mark = max($subjects_tab);
+            $best_mark_suject_name = array_search($best_mark, $subjects_tab);
 
-        $weak_mark = max($subjects_tab);
-        $weak_mark_subject_name = array_search($weak_mark, $subjects_tab);
+            $weak_mark = max($subjects_tab);
+            $weak_mark_subject_name = array_search($weak_mark, $subjects_tab);
 
-        $targets = [$best_mark_suject_name => $best_mark, $weak_mark_subject_name => $weak_mark];
+            $targets = [$best_mark_suject_name => $best_mark, $weak_mark_subject_name => $weak_mark];
 
-        if($targets !== []){
-            if(count($targets) <= 1){
-                $targets['Aucune'] = null;
+            if($targets !== []){
+                if(count($targets) <= 1){
+                    $targets['Aucune'] = null;
+                }
+            }
+            else{
+                $targets = ['Aucune' => null, 'Aucune' => null];
             }
         }
         else{
             $targets = ['Aucune' => null, 'Aucune' => null];
         }
-
         return $targets;
-
     }
 
 

@@ -27,47 +27,59 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
 
+        $roles = config('app.local_roles');
 
-      $school_years = SchoolYear::all();
-      if(count($school_years) < 1){
-          $date = intval(date('Y'));
-          for ($i=2018; $i <= $date; $i++) { 
-              $y = $i . ' - ' . ($i+1);
-              SchoolYear::create([
-                  'school_year' => $y,
-              ]);
-          }
-
-          $school_years = SchoolYear::all();
-
-          School::create([
-              'name' => 'Ecole Ztwen'
+        foreach ($roles as $role) {
+            Role::create([
+              'name' => $role
           ]);
-      }
+
+
+
+            
+        }
+
+
+      // $school_years = SchoolYear::all();
+      // if(count($school_years) < 1){
+      //     $date = intval(date('Y'));
+      //     for ($i=2018; $i <= $date; $i++) { 
+      //         $y = $i . ' - ' . ($i+1);
+      //         SchoolYear::create([
+      //             'school_year' => $y,
+      //         ]);
+      //     }
+
+      //     $school_years = SchoolYear::all();
+
+      //     School::create([
+      //         'name' => 'Ecole Ztwen'
+      //     ]);
+      // }
        
 
 
-        $faker = Factory::create();
-        Seeders::run(true);
+      //   $faker = Factory::create();
+      //   Seeders::run(true);
 
-        $roles = Tools::roles();
-        foreach ($roles as $role) {
-            Role::create([
-                'name' => $role,
-            ]);
-        }
+      //   $roles = Tools::roles();
+      //   foreach ($roles as $role) {
+      //       Role::create([
+      //           'name' => $role,
+      //       ]);
+      //   }
 
-        for ($i=0; $i < 10; $i++) { 
-            $role = Role::all()->pluck('id')->shuffle()->first();
-            User::create([
-                'pseudo' => $faker->name(),
-                'email' => $faker->unique()->safeEmail(),
-                'email_verified_at' => now(),
-                'role_id' => $role,
-                'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-                'remember_token' => Str::random(10),
-            ]);
-        }
+      //   for ($i=0; $i < 10; $i++) { 
+      //       $role = Role::all()->pluck('id')->shuffle()->first();
+      //       User::create([
+      //           'pseudo' => $faker->name(),
+      //           'email' => $faker->unique()->safeEmail(),
+      //           'email_verified_at' => now(),
+      //           'role_id' => $role,
+      //           'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+      //           'remember_token' => Str::random(10),
+      //       ]);
+      //   }
         
         // $classes = Classe::all();
 
