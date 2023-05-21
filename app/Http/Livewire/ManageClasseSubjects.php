@@ -189,13 +189,6 @@ class ManageClasseSubjects extends Component
     }
 
 
-
-
-
-
-
-
-
     public function hideForm()
     {
         $this->dispatchBrowserEvent('hide-form');

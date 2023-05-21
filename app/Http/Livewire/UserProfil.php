@@ -6,13 +6,13 @@ use App\Models\User;
 use App\Models\Image;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Helpers\ProfilManager;
 use App\Events\NewFollowerEvent;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserProfil extends Component
 {
+    public $user_id;
     public $haveNewFollower = false;
     public $hasNewData = false;
     public $edit_name = false;
@@ -30,16 +30,17 @@ class UserProfil extends Component
     public $code;
     public $email;
     public $new_email;
-    public $user_id;
     public $carts_counter;
     public $activeTagName;
     public $activeTagTitle;
+    public $counter = 0;
 
     protected $listeners = [
         'userProfilUpdate', 
         'myCartWasUpdated', 
         'updateRequests', 
         'notifyMeWhenNewFollower',
+        'updatedImages' => 'reloadData',
         'IsendNewFriendRequest_L_Event' => 'notifyMeWhenNewFollower',
     ];
     protected $rules = [
@@ -58,20 +59,25 @@ class UserProfil extends Component
     public function render()
     {
         $this->hasNewData = true;
-        $user = User::find(auth()->user()->id);
+        $user = User::find($this->user_id);
         $myFollowers = $this->getMyFollowers();
-        $myFriends = $user->getMyFriends();
+        $myFriends = [];
+        // $myFriends = $user->getMyFriends();
         $demandes = $this->getDemandes();
 
         return view('livewire.user-profil', compact('demandes', 'myFollowers', 'myFriends', 'user'));
     }
 
+
+    public function reloadData()
+    {
+        $this->counter = 1;
+    }
+
     public function mount(int $id)
     {
-        if(Auth::user() && Auth::user()->id !== $id){
-            return abort(403, "Vous n'êtes pas authorisé à cette page");
-        }
         if($id){
+            $this->user_id = $id;
             $user = User::find($id);
             if($user){
                 $this->user_id = $id;
@@ -86,25 +92,13 @@ class UserProfil extends Component
         else{
             return abort(404, "La page que vous rechercher est introuvable!");
         }
-        if(session()->has('userProfilTagName') && session()->has('userProfilTagTitle')){
-            $this->activeTagName = session('userProfilTagName');
-            $this->activeTagTitle = session('userProfilTagTitle');
-        }
-        else{
-            $this->activeTagName = (new ProfilManager('editing', "Edition de profil"))->name;
-            $this->activeTagTitle = (new ProfilManager('editing', "Edition de profil"))->title;
-        }
-
+       
     }
 
-    public function booted()
-    {
-        return $this->mount(Auth::user()->id);
-    }
-
+   
     public function regenerateAdminKey()
     {
-        $user = User::find(auth()->user()->id);
+        $user = User::find($this->user_id);
         $make = $user->__regenerateAdminKey();
         if($make){
             $this->dispatchBrowserEvent('Toast', ['type' => 'success', 'title' => 'CLE MODIFIEE AVEC SUCCES',  'message' => "La clé a été générée avec succès"]);
@@ -116,13 +110,13 @@ class UserProfil extends Component
 
     public function displayAdminSessionKey()
     {
-        $user = User::find(auth()->user()->id);
-        $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'info', 'title' => "LA CLE", 'message' => $user->__getKeyNotification()]);
+        $user = User::find($this->user_id);
+        $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'info', 'title' => "LA CLE", 'message' => $user->__getKeyNotification(true)]);
     }
 
     public function destroyAdminSessionKey()
     {
-        $user = User::find(auth()->user()->id);
+        $user = User::find($this->user_id);
         return $user->__destroyAdminKey();
     }
 
@@ -130,8 +124,9 @@ class UserProfil extends Component
 
     public function getMyFollowers()
     {
-        $user = User::find(auth()->user()->id);
-        return  $user->getMyFollowers();
+        return [];
+        // $user = User::find($this->user_id);
+        // return  $user->getMyFollowers();
     }
 
     public function updateRequests()
@@ -144,19 +139,17 @@ class UserProfil extends Component
 
     public function setActiveTag($name, $title)
     {
-        $this->activeTagName = (new ProfilManager($name, $title))->name;
-        $this->activeTagTitle = (new ProfilManager($name, $title))->title;
-        session()->put('userProfilTagName', $name);
-        session()->put('userProfilTagTitle', $title);
+        
     }
 
 
     public function getDemandes()
     {
         $demandes = [];
-        $user = Auth::user();
+        // $user = Auth::user();
+        $user = User::find($this->user_id);
         if($user){
-            $demandes = User::find($user->id)->myFriendsRequestsSent();
+            // $demandes = User::find($this->user_id)->myFriendsRequestsSent();
         }
         else{
             $demandes = [];
@@ -167,8 +160,8 @@ class UserProfil extends Component
 
     public function requestManager($user_id, $action)
     {
-        $auth = Auth::user()->id;
-        $made = User::find($auth)->__followRequestManager($user_id, $action);
+        // $auth = Auth::user()->id;
+        $made = User::find($this->user_id)->__followRequestManager($user_id, $action);
         if($made){
             $this->emit('updateRequests');
         }
@@ -248,7 +241,7 @@ class UserProfil extends Component
             $this->addError('name', "Ce nom est déjà existant !");
         }
         else{
-            $user = User::find(auth()->user()->id);
+            $user = User::find($this->user_id);
             $user->update(['name' => $this->name]);
             $this->emit('userDataEdited', Auth::user()->id);
             $this->dispatchBrowserEvent('FireAlertDoNotClose', ['type' => 'success', 'message' => "La mise à jour de votre nom s'est bien déroulée!"]);
@@ -333,7 +326,7 @@ class UserProfil extends Component
             $this->addError('new_password_confirmation', "Vous ne pouvez pas utiliser ce mot de passe");
         }
         else{
-            $user = User::find(auth()->user()->id);
+            $user = User::find($this->user_id);
             $user->forceFill([
                 'password' => Hash::make($this->new_password),
             ])->save();

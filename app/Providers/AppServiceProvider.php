@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
                 if($user == null){
                     $user = Auth::user();
                 }
-                if($user->role == 'admin' || $user->role == 'master' || $user->id == 1){
+                if($user->isAdmin() || $user->id == 1){
                     return true;
                 }
                 return false;
@@ -47,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
                 if($user == null){
                     $user = Auth::user();
                 }
-                if($user->role == 'admin' || $user->role == 'master' || $user->id == 1){
+                if(!$user->isAdmin()){
                     return false;
                 }
                 return true;
@@ -60,7 +60,7 @@ class AppServiceProvider extends ServiceProvider
                 if($user == null){
                     $user = Auth::user();
                 }
-                if($user->role !== 'master' && $user->id !== 1){
+                if($user->isAdmin() && !$user->isAdminAs('master') && $user->id !== 1){
                     return true;
                 }
                 return false;
@@ -73,7 +73,7 @@ class AppServiceProvider extends ServiceProvider
                 if($user == null){
                     $user = Auth::user();
                 }
-                if($user->role == 'master' || $user->id == 1){
+                if($user->isAdmin() && $user->isAdminAs('master')){
                     return true;
                 }
                 return false;
@@ -84,6 +84,13 @@ class AppServiceProvider extends ServiceProvider
 
         Blade::if('isMySelf', function($user){
             if($user->id == Auth::user()->id){
+                return true;
+            }
+            return false;
+
+        });
+        Blade::if('isNotMySelf', function($user){
+            if($user->id !== Auth::user()->id){
                 return true;
             }
             return false;

@@ -13,7 +13,7 @@ class MyNotifications extends Model
     use HasFactory;
     use DateFormattor;
     use ModelActionTrait;
-    protected $fillable = ['content', 'user_id', 'seen', 'target', 'target_id'];
+    protected $fillable = ['content', 'user_id', 'seen', 'target', 'target_id', 'hide'];
 
     public function user()
     {

@@ -16,7 +16,7 @@ class Master
      */
     public function handle(Request $request, Closure $next)
     {
-        if($request->user()->role == 'master' || $request->user()->id == 1){
+        if($request->user()->isAdmin() && ($request->user()->isAdminAs('master') || $request->user()->id == 1)){
             return $next($request);
         }
         return abort(403, "Vous n'êtes pas authorisé!");

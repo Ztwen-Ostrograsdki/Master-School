@@ -62,6 +62,7 @@ class ManageClasseModalities extends Component
 
     public function openModal($classe_id, $subject_id, $school_year_id, $semestre_id, $modality_id = null)
     {
+        // dd($classe_id, $subject_id, $school_year_id, $semestre_id, $modality_id);
         if($classe_id && $school_year_id && $subject_id && $semestre_id){
             $school_year_model = SchoolYear::find($school_year_id);
             if($school_year_model){
@@ -82,7 +83,7 @@ class ManageClasseModalities extends Component
                                 $this->value = $modality->modality;
                             }
                             else{
-                                return $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Il semble que votre requête est corrompue!", 'type' => 'question']);
+                                return $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Il semble que votre requête soit corrompue, la modalité n'est pas précisée ou précise!", 'type' => 'question']);
                             }
 
                         }
@@ -104,7 +105,7 @@ class ManageClasseModalities extends Component
             }
         }
         else{
-            return $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Votre requête ne peut aboutir!", 'type' => 'warning']);
+            return $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Votre requête ne peut aboutir, le formulaire est incomplet!", 'type' => 'warning']);
         }   
     }
 

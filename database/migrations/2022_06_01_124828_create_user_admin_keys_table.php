@@ -19,6 +19,7 @@ class CreateUserAdminKeysTable extends Migration
             $table->unsignedBigInteger('user_id')->nullable()->default(null);
             $table->string('key');
             $table->boolean('advanced')->default(false);
+            $table->boolean('hide')->default(false);
             $table->foreign('user_id')
                   ->references('id')
                   ->on('users')

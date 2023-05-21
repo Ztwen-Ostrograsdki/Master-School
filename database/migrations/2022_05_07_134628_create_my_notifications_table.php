@@ -27,6 +27,7 @@ class CreateMyNotificationsTable extends Migration
                   ->onDelete('cascade')
                   ->onUpdate('cascade');    
             $table->boolean('seen')->default(false);
+            $table->boolean('hide')->default(false);
         });
     }
 

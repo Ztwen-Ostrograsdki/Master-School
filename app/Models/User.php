@@ -2,29 +2,30 @@
 
 namespace App\Models;
 
-use App\Models\Role;
-use App\Models\Admin;
-use App\Models\Image;
-use App\Models\Teacher;
-use App\Models\UserAdminKey;
-use App\Helpers\DateFormattor;
-use App\Models\MyNotifications;
-use Laravel\Sanctum\HasApiTokens;
-use App\Models\User as ModelsUser;
-use App\Helpers\UserTraits\UserTrait;
-use App\Models\ResetEmailConfirmation;
-use Laravel\Jetstream\HasProfilePhoto;
-use App\Helpers\AdminTraits\AdminTrait;
-use Illuminate\Notifications\Notifiable;
-use App\Helpers\ZtwenManagers\GaleryManager;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Fortify\TwoFactorAuthenticatable;
 use App\Helpers\ActionsTraits\ModelActionTrait;
+use App\Helpers\AdminTraits\AdminTrait;
+use App\Helpers\DateFormattor;
 use App\Helpers\UserTraits\MustVerifyEmailTrait;
 use App\Helpers\UserTraits\UserPasswordManagerTrait;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Helpers\UserTraits\UserTrait;
+use App\Helpers\ZtwenManagers\GaleryManager;
+use App\Models\Admin;
+use App\Models\Administrator;
+use App\Models\Image;
+use App\Models\MyNotifications;
 use App\Models\Parentable;
+use App\Models\ResetEmailConfirmation;
+use App\Models\Role;
+use App\Models\Teacher;
+use App\Models\User as ModelsUser;
+use App\Models\UserAdminKey;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Jetstream\HasProfilePhoto;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 
@@ -98,15 +99,36 @@ class User extends Authenticatable
     public $imagesFolder = 'usersPhotos';
 
     
-    public function userRoles()
+    public function role()
     {
-        return $this->hasMany(Role::class);
+        return $this->hasOne(Role::class);
+    }
+
+
+    public function getRole()
+    {
+        
+        if($this->role_id){
+            $role = Role::whereId($this->role_id)->first();
+            return $role ? $role : null;
+        }
+        else{
+            return null;
+
+        }
     }
 
     public function admin()
     {
         return $this->hasOne(Admin::class);
     }
+
+
+    public function administrator()
+    {
+        return $this->hasOne(Administrator::class);
+    }
+
 
 
     public function parent()
@@ -129,6 +151,17 @@ class User extends Authenticatable
     public function images()
     {
         return $this->morphToMany(Image::class, 'imageable');
+    }
+
+
+    public function isAdmin()
+    {
+        return $this->administrator !== null;
+    }
+
+    public function isAdminAs($status)
+    {
+        return $this->isAdmin() && ($this->administrator && $this->administrator->status == $status);
     }
 
 
@@ -168,6 +201,12 @@ class User extends Authenticatable
     public function emailConfirmation()
     {
         return $this->hasOne(ResetEmailConfirmation::class);
+    }
+
+
+    public function hasConfirmedEmail()
+    {
+        return !$this->email_verified_at == null;
     }
 
 }

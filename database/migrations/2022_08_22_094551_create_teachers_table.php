@@ -16,7 +16,8 @@ class CreateTeachersTable extends Migration
         Schema::disableForeignKeyConstraints();
         Schema::create('teachers', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('name');
+            $table->string('name')->nullable()->default(null);
+            $table->string('surname')->nullable()->default(null);
             $table->string('contacts')->nullable()->default(null);
             $table->string('nationality')->nullable()->default(null);
             $table->string('marital_status')->nullable()->default(null);

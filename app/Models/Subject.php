@@ -32,7 +32,7 @@ class Subject extends Model
 
     public function teachers()
     {
-        return $this->morphByMany(Teacher::class, 'subjectable');
+        return $this->morphedByMany(Teacher::class, 'subjectable');
     }
 
     public function school_years()

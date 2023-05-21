@@ -17,6 +17,7 @@ class ProfilImageEditor extends Component
 
     use WithFileUploads;
     public $the_model;
+    public $classMapping;
     public $profil_image = null;
     protected $listeners = ['editImageEvent' => 'openEditorModal'];
     protected $rules = [
@@ -31,7 +32,7 @@ class ProfilImageEditor extends Component
         $make = (new ZtwenImageManager($this->the_model, $this->profil_image))->storer($this->the_model->imagesFolder);
         if ($make) {
             $this->dispatchBrowserEvent('hide-form');
-            $this->emit('pupilUpdated', $this->the_model->id);
+            $this->emit('updatedImages');
             $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour réussie', 'message' => "La photo de profil a été mis à jour avec succès", 'type' => 'success']);
         }
         else{
@@ -41,11 +42,15 @@ class ProfilImageEditor extends Component
     }
 
 
-    public function openEditorModal($the_model_id)
+    public function openEditorModal($the_model_id, $classMapping = null)
     {
-        $the_model = Pupil::find($the_model_id);
+        $the_model = $classMapping::find($the_model_id);
         $this->the_model = $the_model;
+        $this->classMapping = $classMapping;
         $this->dispatchBrowserEvent('modal-updateProfilImage');
     }
+
+
+
 
 }

@@ -1,23 +1,26 @@
 <div>
     @if($classe)
         <div class="w-100 my-1">
-            <span wire:click="multiplePupilInsertions" class="btn bg-orange border border-white" title="Ajouter des aprrenants à cette classe">
-                <span class="fa fa-user-plus"></span>
-                <span>Multiple Ajout</span>
-            </span> 
-            <span wire:click="addNewPupilTo" class="btn btn-primary border border-white" title="Ajouter un aprrenant à cette classe">
-                <span class="fa fa-user-plus"></span>
-                <span>Ajouter</span>
-            </span>
-            <span wire:click="editClasseSubjects"  class="btn mx-2 btn-secondary border border-white" title="Editer les matières de cette classe">
-                <span class="fa fa-edit"></span>
-                <span>Editer</span>
-            </span>
+            @isRoute('classe_profil')
+                <span wire:click="multiplePupilInsertions" class="btn bg-orange border border-white" title="Ajouter des aprrenants à cette classe">
+                    <span class="fa fa-user-plus"></span>
+                    <span>Multiple Ajout</span>
+                </span> 
+                <span wire:click="addNewPupilTo" class="btn btn-primary border border-white" title="Ajouter un aprrenant à cette classe">
+                    <span class="fa fa-user-plus"></span>
+                    <span>Ajouter</span>
+                </span>
+                <span wire:click="editClasseSubjects"  class="btn mx-2 btn-secondary border border-white" title="Editer les matières de cette classe">
+                    <span class="fa fa-edit"></span>
+                    <span>Editer</span>
+                </span>
+            @endisRoute
+            @if($pupils && count($pupils))
             <a href="{{route('classe_pdf', $classe->id)}}"  class="btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de cette classe...">
                 <span class="fa fa-print"></span>
                 <span>Impr.</span>
             </a>
-
+            @endif
         </div>
         <div class="w-100 m-0 p-0 mt-3">
         @if($pupils && count($pupils) > 0)
@@ -112,13 +115,13 @@
         </table>   
         @endif
         @if(!$pupils)
-            <div class="my-2 p-2 text-center border rounded">
-                <h6 class="mx-auto p-3">
+            <div class="my-2 p-2 text-center border rounded text-white-50">
+                <h6 class="mx-auto p-3 text-white-50">
                     <h1 class="m-0 p-0">
                         <span class="bi-exclamation-triangle text-warning text-center p-2"></span>
                     </h1>
                     Il parait qu'aucune donnée n'est disponible pour cette classe de 
-                    <span class="text-warning">{{ session('classe_selected') }}</span> 
+                    <span class="text-warning">{{ $classe ? $classe->name : 'inconnue' }}</span> 
                     pour le compte de l'année scolaire <span class="text-orange">{{ session('school_year_selected') }}</span> 
                     
 

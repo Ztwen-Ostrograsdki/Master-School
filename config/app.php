@@ -64,7 +64,11 @@ return [
         "Conseiller Pédagogique",
         "Autres",
     ],
-    
+    'admin_abilities' => [
+        'admin' => 'Administrateur standart',
+        'master' => 'Administrateur master',
+        'default' => 'Administrateur'
+    ],
 
     /*
     |--------------------------------------------------------------------------

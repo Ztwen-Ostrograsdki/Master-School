@@ -218,7 +218,7 @@ class ClasseMarksLister extends Component
         $mod = $this->subject_selected->getAverageModalityOf($classe_id, $school_year_model->school_year, $semestre);
         $modality = $mod ? $mod->id : null;
 
-        $this->emit('manageClasseModalitiesLiveEvent', $classe_id, $subject_id, $school_year_model->id, $semestre, $modality);
+        $this->emit('manageClasseModalitiesLiveEvent', $classe_id, $this->subject_selected->id, $school_year_model->id, $semestre, $modality);
 
     }
 

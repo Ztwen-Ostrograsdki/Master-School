@@ -17,13 +17,10 @@
                     <x-z-linker :routeName="'parents'" :isActive="request()->routeIs('parents')">
                         {{ __('Parents') }}
                     </x-z-linker>
-                    <x-z-linker :routeName="'admin'" :isActive="request()->routeIs('admin')">
-                        {{ __('Administration') }}
-                    </x-z-linker>
                     @auth
                         @isAdmin(Auth::user())
                         <x-z-linker :routeName="'admin'" :isActive="request()->routeIs('admin')">
-                            {{ __('Admin') }}
+                            {{ __('Administration') }}
                         </x-z-linker>
                         @endisAdmin
                         <li class="nav-item cursor-pointer">
@@ -35,14 +32,14 @@
                 @guest
                     @routeHas('registration')
                         <li class="nav-item cursor-pointer">
-                            <a class="nav-link registerModalOpen @isRoute('registration') active @endisRoute " data-toggle="modal" data-dismiss="modal" data-target="#registerModal">S'inscrire
+                            <a class="nav-link registerModalOpen @isRoute('registration') active disabled @endisRoute " data-toggle="modal" data-dismiss="modal" data-target="#registerModal">S'inscrire
                             <span class="sr-only">(current)</span>
                             </a>
                         </li> 
                     @endrouteHas
-                    @routeHas('login')
+                    @routeHas('connexion')
                         <li class="nav-item cursor-pointer">
-                            <a class="nav-link loginOpen @isRoute('login') active @endisRoute " data-toggle="modal" data-dismiss="modal" data-target="#loginModal">Connexion
+                            <a class="nav-link loginOpen @isRoute('connexion') active disabled @endisRoute " data-toggle="modal" data-dismiss="modal" data-target="#loginModal">Connexion
                                 <span class="sr-only">(current)</span>
                             </a>
                         </li> 

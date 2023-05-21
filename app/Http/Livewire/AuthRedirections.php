@@ -95,10 +95,10 @@ class AuthRedirections extends Component
         else{
             if(Auth::attempt($credentials)){
                 $this->user = User::find(auth()->user()->id);
-                if($this->user->id == 1 || $this->user->role == 'admin' || $this->user->role == 'master'){
-                    $this->user->__generateAdminKey();
+                if($this->user->isAdmin()){
+                    // $this->user->__generateAdminKey();
                 }
-                $this->dispatchBrowserEvent('Login');
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Connexion réussie!!!', 'message' => "Vous serez redirigé vers votre profil!", 'type' => 'success']);
                 // $event = new NewUserConnectedEvent($this->user);
                 // broadcast($event);
                 $this->user->__backToUserProfilRoute();

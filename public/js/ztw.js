@@ -6,6 +6,16 @@ window.addEventListener('reloadPage', function(e) {
     location.reload(true);
 });
 
+window.addEventListener('modal-manageAdminStatus', function(e) {
+    $('#adminManagerModal').modal('show');
+});
+window.addEventListener('modal-manageTeacherClasses', function(e) {
+    $('#manageTeacherClasses').modal('show');
+});
+
+window.addEventListener('modal-addNewTeacher', function(e) {
+    $('#addNewTeacherModal').modal('show');
+});
 window.addEventListener('modal-startAdvancedRequests', function(e) {
     $('#advancedrequestsModal').modal();
 });

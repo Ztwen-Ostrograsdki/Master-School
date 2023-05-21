@@ -14,7 +14,7 @@ trait Computator{
 
 		use ModelQueryTrait;
 
-		public function getClasseStats($intervalles_tabs, $classe_id, $type, $mark_index, $semestre, $subject, $marks_values = [])
+		public function getClasseStats($intervalles_tabs, $classe_id, $type, $mark_index, $semestre, $subject, $marks_values = [], $withList = false)
 		{
 			$matches = [];
 			$intervallesWithStatsOnly = [];
@@ -50,8 +50,6 @@ trait Computator{
 			}
 
 			foreach($intervalles_tabs as $intervalle){
-	           //  preg_match_all('/=/', $intervalle, $matchesEquals);
-	           //  $matchedEquals = count($matchesEquals[0]);
 
 				$equal = preg_match('/\=\d+/', $intervalle, $m_equal);
 				if($equal){
@@ -146,6 +144,10 @@ trait Computator{
 	        $school_year_model = $this->getSchoolYear();
 
 	        foreach ($matches as $intervalle => $data) {
+	        	$pupils = [];
+	        	$pupils_names = [];
+	        	$pupils_as_string = '';
+
 	        	$sup_sign = $data['sup_sign'];
 	        	$sup_value = $data['sup_value'];
 	        	$average = 0;
@@ -154,28 +156,71 @@ trait Computator{
 	        	$inf_value = $data['inf_value'];
 	        	$equal_value = $data['equal_value'];
 
-
 	        	if($equal_value !== null){
-	        		$marks = $school_year_model->marks()->where('classe_id', $classe_id)->where('type', $type)->where('mark_index', $mark_index)->where('semestre', $semestre)->where('subject_id', $subject)->where('value', $equal_value)->pluck('value')->toArray();
-	        		$intervallesWithMarks[$intervalle] = $marks;
+	        		$data = $school_year_model->marks()->where('classe_id', $classe_id)->where('type', $type)->where('mark_index', $mark_index)->where('semestre', $semestre)->where('subject_id', $subject)->where('value', $equal_value)->with('pupil');
+	        		if(count($data->get()) >= 0){
+	        			foreach ($data->get() as $pup) {
+	        				$pupils[] = $pup->pupil;
+	        				$pupils_names[] = $pup->pupil->getName();
+	        				$pupils_as_string = implode(' || ', $pupils_names);
+	        			}
+
+	        			$marks = $data->get()->pluck('value')->toArray();
+	        			$intervallesWithMarks[$intervalle] = ['marks' => $marks, 'pupils' => $pupils, 'liste' => $pupils_as_string];
+	        		}
+
 	        	}
 	        	if($sup_sign !== null && $inf_sign !== null){
-	        		$marks = $school_year_model->marks()->where('classe_id', $classe_id)->where('type', $type)->where('mark_index', $mark_index)->where('semestre', $semestre)->where('subject_id', $subject)->where('value', $sup_sign, $sup_value)->where('value', $inf_sign, $inf_value)->pluck('value')->toArray();
-	        		$intervallesWithMarks[$intervalle] = $marks;
+	        		$data = $school_year_model->marks()->where('classe_id', $classe_id)->where('type', $type)->where('mark_index', $mark_index)->where('semestre', $semestre)->where('subject_id', $subject)->where('value', $sup_sign, $sup_value)->where('value', $inf_sign, $inf_value)->with('pupil');
+	        		if(count($data->get()) >= 0){
+	        			foreach ($data->get() as $pup) {
+	        				$pupils[] = $pup->pupil;
+	        				$pupils_names[] = $pup->pupil->getName();
+	        				$pupils_as_string = implode(' || ', $pupils_names);
+	        			}
+
+	        			$marks = $data->get()->pluck('value')->toArray();
+	        			$intervallesWithMarks[$intervalle] = ['marks' => $marks, 'pupils' => $pupils, 'liste' => $pupils_as_string];
+	        		}
+
 	        	}
 	        	elseif($sup_sign && $inf_sign == null){
-	        		$marks = $school_year_model->marks()->where('classe_id', $classe_id)->where('type', $type)->where('mark_index', $mark_index)->where('semestre', $semestre)->where('subject_id', $subject)->where('value', $sup_sign, $sup_value)->pluck('value')->toArray();
-	        		$intervallesWithMarks[$intervalle] = $marks;
+	        		$data = $school_year_model->marks()->where('classe_id', $classe_id)->where('type', $type)->where('mark_index', $mark_index)->where('semestre', $semestre)->where('subject_id', $subject)->where('value', $sup_sign, $sup_value)->with('pupil');
+	        		if(count($data->get()) >= 0){
+	        			foreach ($data->get() as $pup) {
+	        				$pupils[] = $pup->pupil;
+	        				$pupils_names[] = $pup->pupil->getName();
+	        				$pupils_as_string = implode(' || ', $pupils_names);
+	        			}
+
+
+	        			$marks = $data->get()->pluck('value')->toArray();
+	        			$intervallesWithMarks[$intervalle] = ['marks' => $marks, 'pupils' => $pupils, 'liste' => $pupils_as_string];
+	        		}
+
 
 	        	}
 	        	elseif($inf_sign && $sup_sign == null){
-	        		$marks = $school_year_model->marks()->where('classe_id', $classe_id)->where('type', $type)->where('mark_index', $mark_index)->where('semestre', $semestre)->where('subject_id', $subject)->where('value', $inf_sign, $inf_value)->pluck('value')->toArray();
-	        		$intervallesWithMarks[$intervalle] = $marks;
+	        		$data = $school_year_model->marks()->where('classe_id', $classe_id)->where('type', $type)->where('mark_index', $mark_index)->where('semestre', $semestre)->where('subject_id', $subject)->where('value', $inf_sign, $inf_value)->with('pupil');
+	        		if(count($data->get()) >= 0){
+	        			foreach ($data->get() as $pup) {
+	        				$pupils[] = $pup->pupil;
+	        				$pupils_names[] = $pup->pupil->getName();
+	        				$pupils_as_string = implode(' || ', $pupils_names);
+	        			}
+
+	        			$marks = $data->get()->pluck('value')->toArray();
+	        			$intervallesWithMarks[$intervalle] = ['marks' => $marks, 'pupils' => $pupils, 'liste' => $pupils_as_string];
+	        		}
+
 	        	}
 	        }
 
 	        if($size > 0){
-        		foreach ($intervallesWithMarks as $intval => $intervalle_marks) {
+        		foreach ($intervallesWithMarks as $intval => $interval_data) {
+        			$intervalle_marks = $interval_data['marks'];
+        			$pupils = $interval_data['pupils'];
+        			$liste = $interval_data['liste'];
 	        		$marks_size = count($intervalle_marks);
 	        		if($marks_size > 0){
 	        			$total = $marks_size;
@@ -187,7 +232,7 @@ trait Computator{
 	        			$percentage = 0;
 	        		}
 
-	        		$intervallesWithStatsOnly[$intval] = ['total' => $total, 'percentage' => $percentage, 'moy' => $average];
+	        		$intervallesWithStatsOnly[$intval] = ['total' => $total, 'percentage' => $percentage, 'moy' => $average, 'pupils' => $pupils, 'liste' => $liste];
 	        	}
 
 	        	$succeed_marks = $school_year_model->marks()->where('classe_id', $classe_id)->where('type', $type)->where('mark_index', $mark_index)->where('semestre', $semestre)->where('subject_id', $subject)->where('value', '>=', 10)->pluck('value')->toArray();
@@ -239,7 +284,7 @@ trait Computator{
         	}
         	else{
         		foreach ($intervallesWithMarks as $intval => $intervalle_marks) {
-	        		$intervallesWithStatsOnly[$intval] = ['total' => 0, 'percentage' => 0];
+	        		$intervallesWithStatsOnly[$intval] = ['total' => 0, 'percentage' => 0, 'pupils' => [], 'liste' => 'La liste est vide'];
 	        	}
         	}
 

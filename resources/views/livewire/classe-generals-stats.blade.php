@@ -22,6 +22,7 @@
                     <blockquote class="text-primary">
                         <h5 class="m-0 p-0 text-white-50 h6 w-100 d-flex justify-content-between">
                             <span>Statisitiques générales de la classe de la {{ $classe->name }}</span>
+                            @isRoute('classe_profil')
                             <span class="d-flex justify-content-between">
                                 @if($classe && $classe->classe_group)
                                     <a title="charger le profil de la promotion" class="text-success mx-1" href="{{route('classe_group_profil', ['slug' => $classe->classe_group->name])}}">
@@ -33,6 +34,7 @@
                                     </span>
                                 @endif
                             </span>
+                            @endisRoute
                         </h5>
                     </blockquote>
                     {{-- {{dd($stats);}} --}}
@@ -193,19 +195,19 @@
                     </div>
                 </div>
             @else
-                @livewire('dynamic-statistic', ['classe_id' => $classe->id])
+                @livewire('dynamic-statistic', ['classe_id' => $classe->id, 'teacher_id' => $teacher_id])
             @endif
         @endif
         @if($subjects == [] || $stats == [])
-        <div class="my-2 p-2 text-center border rounded">
-            <h6 class="mx-auto p-3">
+        <div class="my-2 p-2 text-center border rounded text-white-50">
+            <h6 class="mx-auto p-3 text-white-50">
                 <h1 class="m-0 p-0">
                     <span class="bi-exclamation-triangle text-warning text-center p-2"></span>
                 </h1>
                 Il parait qu'aucune donnée n'est disponible pour cette classe de 
-                <span class="text-warning">{{ session('classe_selected') }}</span> 
+                <span class="text-warning">{{ $classe ? $classe->name : 'inconnue' }}</span> 
                 pour le compte de l'année scolaire <span class="text-orange">{{ session('school_year_selected') }}</span> 
-                pour le <span class="text-warning">{{ $semestre_type . ' ' . session('semestre_selected')}}</span>
+                pour le <span class="text-warning">{{ $semestre_type . ' ' . session('semestre_selected')}} : CETTE CLASSE DOIT ETRE VIDE!</span>
 
                 <blockquote class="text-info">
                     Veuillez sectionner un autre {{ $semestre_type }} ou une autre année scolaire

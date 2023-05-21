@@ -1,11 +1,13 @@
 <div>
     <div x-data={key: null} class="w-100 my-1">
+        @isRoute('classe_profil')
         <select id="classe_subject_selected" wire:model="classe_subject_selected" wire:change="changeSubject" class="form-select">
             <option value="{{null}}">Veuillez sélectionner une matière</option>
             @foreach ($classe_subjects as $subject)
             <option value="{{$subject->id}}">{{$subject->name}}</option>
             @endforeach
         </select>
+        @endisRoute
         @if($subject_selected)
         <small class="text-warning m-2">
             @if($modality)
@@ -50,11 +52,14 @@
             <span>Editer</span>
         </span>
         @endif
-        <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right" title="Ajouter une matière à cette classe">
-            <span class="fa fa-bookmark"></span>
-            <span>Ajouter</span>
-        </span>
-
+        @isMaster(auth()->user())
+            @isRoute('classe_profil')
+                <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right" title="Ajouter une matière à cette classe">
+                    <span class="fa fa-bookmark"></span>
+                    <span>Ajouter</span>
+                </span>
+            @endisRoute
+        @endisMaster
     </div>
     <div class="my-2">
         @if($pupils && $classe_subject_selected && count($pupils) > 0)
@@ -63,16 +68,18 @@
                 <h5 class="m-0 p-0 text-white-50 h6 w-100 d-flex justify-content-between">
                     <span>Les détails sur les notes</span>
                     <span class="d-flex justify-content-between">
-                        @if($classe && $classe->classe_group)
-                            <a title="charger le profil de la promotion" class="text-success mx-1" href="{{route('classe_group_profil', ['slug' => $classe->classe_group->name])}}">
-                                Promotion {{ $classe->classe_group->name }}
-                            </a>
-                        @else
-                            <span wire:click="editClasseGroup({{$classe->id}})" title="Cette classe n'est pas encore liée à une promotion, veuillez cliquer afin de le faire et d'avoir accès aux coéfiscients des différentes matières" class="mx-1 p-0 px-2 btn btn-success border border-white">
-                                Promouvoir maintenant
-                            </span>
-                        @endif
-                        <span class="ml-3">Coef:  {{ $classe_subject_coef }}</span>
+                        @isRoute('classe_profil')
+                            @if($classe && $classe->classe_group)
+                                <a title="charger le profil de la promotion" class="text-success mx-1" href="{{route('classe_group_profil', ['slug' => $classe->classe_group->name])}}">
+                                    Promotion {{ $classe->classe_group->name }}
+                                </a>
+                            @else
+                                <span wire:click="editClasseGroup({{$classe->id}})" title="Cette classe n'est pas encore liée à une promotion, veuillez cliquer afin de le faire et d'avoir accès aux coéfiscients des différentes matières" class="mx-1 p-0 px-2 btn btn-success border border-white">
+                                    Promouvoir maintenant
+                                </span>
+                            @endif
+                            <span class="ml-3">Coef:  {{ $classe_subject_coef }}</span>
+                        @endisRoute
                     </span>
                 </h5>
             </blockquote>
@@ -117,27 +124,34 @@
                     @foreach($pupils as $k => $p)
                         <tr class="text-left">
                             <th scope="row" class="text-center">{{ $loop->iteration }}</th>
-                            <th class="text-capitalize p-0 m-0 row justify-between">
+                            <th class="text-capitalize p-0 m-0 d-flex justify-content-between">
+                                @isMaster(auth()->user())
                                 <a class="text-white m-0 p-0 py-1" href="{{route('pupil_profil', ['id' => $p->id])}}">
-                                    <span class="d-flex justify-content-between">
+                                    <span class="">
                                         <span class="mx-2 d-none d-lg-inline d-xl-inline text-small @if($p->sexe == 'female') text-orange  @endif ">
                                             {{$p->getName()}}
                                         </span>
                                     </span>
                                 </a>
+                                @else
+                                <span class="text-white m-0 p-0 py-1">
+                                    <span class="">
+                                        <span class="mx-2 d-none d-lg-inline d-xl-inline text-small @if($p->sexe == 'female') text-orange  @endif ">
+                                            {{$p->getName()}}
+                                        </span>
+                                    </span>
+                                </span>
+                                @endisMaster
                                 <span class="float-right text-right">
-                                    <span class="mt-5">
+                                    <small class="mx-1">
                                         <small class="text-success">
                                             ({{ $p->getRelatedMarksCounter($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), 'bonus', true) }}) 
                                         </small>
-                                            <small>  </small>
                                          <small class="text-danger">
                                              ({{ $p->getRelatedMarksCounter($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), 'minus', true) }})
                                         </small>
-
-                                    </span>
+                                    </small>
                                 </span>
-                                <span wire:click="insertMarks({{$p->id}})" class="float-right col-1 cursor-pointer text-white-50 py-1 pr-1 fa fa-edit" title="Insérer des notes"></span>
                             </th>
                             @if(isset($marks[$p->id]) && $marks[$p->id])
                                 {{-- LES EPE --}}
@@ -273,13 +287,13 @@
             </div>
         @endif
         @if($noMarks || !$pupils)
-        <div class="my-2 p-2 text-center border rounded">
-            <h6 class="mx-auto p-3">
+        <div class="my-2 p-2 text-center border rounded text-white-50">
+            <h6 class="mx-auto p-3 text-white-50">
                 <h1 class="m-0 p-0">
                     <span class="bi-exclamation-triangle text-warning text-center p-2"></span>
                 </h1>
                 Il parait qu'aucune donnée n'est disponible pour cette classe de 
-                <span class="text-warning">{{ session('classe_selected') }}</span> 
+                <span class="text-warning">{{ $classe ? $classe->name : 'inconnue' }}</span> 
                 pour le compte de l'année scolaire <span class="text-orange">{{ session('school_year_selected') }}</span> 
                 pour le <span class="text-warning">{{ $semestre_type . ' ' . session('semestre_selected')}}</span>
 

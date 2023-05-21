@@ -4,6 +4,7 @@ namespace App\Helpers\ModelTraits;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Pupil;
 use App\Models\SchoolYear;
+use App\Models\Subject;
 use Illuminate\Support\Facades\DB;
 
 
@@ -485,10 +486,18 @@ trait ClasseTraits{
 
     }
 
-    public function getClasseStats($semestre = 1, $school_year = null, $takeBonus = true, $takeSanctions = true)
+    public function getClasseStats($semestre = 1, $school_year = null, $subject_id_selected = null, $takeBonus = true, $takeSanctions = true)
     {
         $data = [];
-        $subjects = $this->subjects;
+        $subjects = [];
+
+        if($subject_id_selected){
+            $subject = Subject::find($subject_id_selected);
+            $subjects[] = $subject;
+        }
+        else{
+            $subjects = $this->subjects;
+        }
 
         if(count($subjects) > 0){
             foreach ($subjects as $subject) {

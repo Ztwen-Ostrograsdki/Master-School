@@ -69,6 +69,7 @@ trait ModelQueryTrait{
             }
             else{
                 if($semestre_calendars){
+
                     foreach($semestre_calendars as $calendar){
                         $is_current = $this->thisDateIsBetween($calendar->start, $calendar->end);
                         if($is_current){

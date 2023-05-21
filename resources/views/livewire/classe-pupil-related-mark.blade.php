@@ -67,13 +67,18 @@
             </tbody>
         </table>            
     @else
-        <div>
-            <blockquote class="">
-                <h6 class="h6 text-white-50">
-                    La fiche des notes relatives de <span class="text-warning">{{ $classe->name }} </span> au cours de l'année scolaire {{ session('school_year_selected')}} est viège. <br>
-                    
-                </h6>
-            </blockquote>
+        <div class="my-2 p-2 text-center border rounded text-white-50">
+            <h6 class="mx-auto p-3 text-white-50">
+                <h1 class="m-0 p-0">
+                    <span class="bi-exclamation-triangle text-warning text-center p-2"></span>
+                </h1>
+                Il parait qu'aucune donnée n'est disponible pour cette classe de 
+                <span class="text-warning">{{ $classe ? $classe->name : 'inconnue' }}</span> 
+                pour le compte de l'année scolaire <span class="text-orange">{{ session('school_year_selected') }}</span> en ce qui concerne <span class="text-warning">LES NOTES RELATIVES : BONUS ET OU SANCTIONS</span>!
+                <blockquote class="text-info">
+                    Veuillez sectionner une autre année scolaire!
+                </blockquote>
+            </h6>
         </div>
     @endif                                         
     </div>

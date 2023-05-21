@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\Classe;
 use App\Models\ClasseGroup;
 use App\Models\Level;
 use App\Models\SchoolYear;
@@ -54,8 +55,8 @@ class CreateNewClasseGroup extends Component
             if($level_existed){
                     $classe_group = ClasseGroup::create(
                     [
-                        'name' => $this->name,
-                        'category' => $this->category,
+                        'name' => ucfirst($this->name),
+                        'category' => ucwords($this->category),
                         'slug' => str_replace(' ', '-', $this->name),
                         'level_id' => $level_id,
                     ]

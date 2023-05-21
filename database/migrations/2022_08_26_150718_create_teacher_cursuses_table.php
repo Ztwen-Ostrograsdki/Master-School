@@ -18,6 +18,7 @@ class CreateTeacherCursusesTable extends Migration
             $table->id();
 
             $table->string('start')->nullable()->default(null);
+            $table->boolean('teacher_has_worked')->default(false)->nullable();
             $table->string('end')->nullable()->default(null);
             $table->boolean('fullTime')->default(1);
             $table->unsignedBigInteger('level_id')->nullable()->default(null);

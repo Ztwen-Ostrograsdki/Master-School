@@ -4,6 +4,7 @@ use App\Http\Controllers\BlockTemporaryMyAccount;
 use App\Http\Controllers\ClasseListDownload;
 use App\Http\Livewire\Admin;
 use App\Http\Livewire\AdminAuthorization;
+use App\Http\Livewire\AdminTeacherSecurityActions;
 use App\Http\Livewire\AuthRedirections;
 use App\Http\Livewire\ClasseGroupProfil;
 use App\Http\Livewire\ClasseProfil;
@@ -13,6 +14,9 @@ use App\Http\Livewire\PupilProfil;
 use App\Http\Livewire\RegisteringNewUser;
 use App\Http\Livewire\ResetPassword;
 use App\Http\Livewire\SchoolCalendar;
+use App\Http\Livewire\TeacherListing;
+use App\Http\Livewire\TeacherProfilAsUser;
+use App\Http\Livewire\UserListing;
 use App\Http\Livewire\UserProfil;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -37,18 +41,21 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', Home::class)->name('home');
 
-Route::group(['prefix' => '/administration'], function(){
-    Route::get('/', Admin::class)->name('admin');
+Route::group(['prefix' => '/administration', 'middleware' => ['auth']], function(){
+    Route::get('/', Admin::class)->middleware('auth')->name('admin');
+    Route::get('/utilisateurs', UserListing::class)->name('user_listing');
+    Route::get('/enseignants', TeacherListing::class)->name('teacher_listing');
+    Route::get('/securisation/enseignants', AdminTeacherSecurityActions::class)->name('admin_teacher_security_actions');
     Route::get('/calendrier-scolaire/{school_year}', SchoolCalendar::class)->name('school_calendar');
     Route::get('/classe/{slug}', ClasseProfil::class)->name('classe_profil');
     Route::get('/promotion/{slug}', ClasseGroupProfil::class)->name('classe_group_profil');
     Route::get('/élève/{id}', PupilProfil::class)->name('pupil_profil');
     Route::get('/inscription-élèves/inscription-multiple', MultiplePupilInsertion::class)->name('multiple_pupil_insertion');
 });
-Route::group(['prefix' => '/mon-profil'], function(){
-    Route::get('/{id}', UserProfil::class)->name('user-profil');
 
-});
+Route::get('/compte/mon-compte/{id}', UserProfil::class)->name('user_profil')->middleware('user.self');
+Route::get('/mon-compte/enseignant/{id}/{slug}', TeacherProfilAsUser::class)->name('teacher_profil_as_user')->middleware(['user.self', 'user.teacher']);
+
 
 Route::post('/inscription', RegisteringNewUser::class)->middleware('guest')->name('inscription');
 

@@ -18,6 +18,7 @@ class PupilProfil extends Component
         'schoolYearChangedLiveEvent' => 'reloadPupilData',
         'classePupilListUpdated' => 'reloadPupilData',
         'pupilUpdated' => 'reloadPupilData',
+        'updatedImages' => 'reloadPupilData',
     ];
 
     public $slug;
@@ -274,7 +275,6 @@ class PupilProfil extends Component
 
     public function changeSchoolYear($school_year_selected)
     {
-        dd($school_year_selected);
         $this->emit("schoolYearChangedLiveEvent", $school_year_selected);
         $this->emit("schoolYearChangedExternallyLiveEvent", $school_year_selected);
         $this->reloadPupilData();
@@ -289,7 +289,8 @@ class PupilProfil extends Component
     
     public function editPupilProfilImage()
     {
-        $this->emit('editImageEvent', $this->pupil_id);
+        $class = "App\Models\Pupil";
+        $this->emit('editImageEvent', $this->pupil_id, $class);
     }
 
 

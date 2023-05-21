@@ -14,6 +14,8 @@ class DynamicStatistic extends Component
     protected $listeners = ['getNewDataDynamicStatisic' => 'getData'];
 
     public $classe_id;
+    public $teacher_id;
+    public $showList = true|false;
     public $school_year_model;
     public $semestre_type = 'Semestre';
     public $school_year;
@@ -58,19 +60,32 @@ class DynamicStatistic extends Component
         }
 
 
-        $classe = Classe::find($this->classe_id);
+        $classe = $this->school_year_model->classes()->where('classes.id', $this->classe_id)->first();
         if($classe){
-
-            $classes = Classe::all();
-
-            if(session()->has('classe_subject_selected') && session('classe_subject_selected')){
-                $subject_id = intval(session('classe_subject_selected'));
+            if($this->teacher_id){
+                $teacher = $this->school_year_model->teachers()->where('teachers.id', $this->teacher_id)->first();
+                $classes = $teacher->getTeachersCurrentClasses();
+                $subjects[] = $teacher->speciality();
+                $subject_id = $teacher->speciality()->id;
+                
                 if(in_array($subject_id, $classe->subjects()->pluck('subjects.id')->toArray())){
                     session()->put('classe_subject_selected', $subject_id);
                     $this->subject_selected = $subject_id;
                 }
             }
-            $subjects = $classe->subjects;
+            else{
+                $classes = $this->school_year_model->classes;
+                if(session()->has('classe_subject_selected') && session('classe_subject_selected')){
+                    $subject_id = intval(session('classe_subject_selected'));
+                    if(in_array($subject_id, $classe->subjects()->pluck('subjects.id')->toArray())){
+                        session()->put('classe_subject_selected', $subject_id);
+                        $this->subject_selected = $subject_id;
+                    }
+                }
+                $subjects = $classe->subjects;
+            }
+            
+
 
             if($this->subject_selected && $this->semestre_selected){
                 if($this->type == 'devoir'){
@@ -102,6 +117,11 @@ class DynamicStatistic extends Component
         }
 
         return view('livewire.dynamic-statistic', compact('classes', 'classe', 'subjects', 'semestres', 'types_of_marks', 'maxLenght'));
+    }
+
+    public function toggleListing()
+    {
+        $this->showList = !$this->showList;
     }
 
 
@@ -145,7 +165,9 @@ class DynamicStatistic extends Component
 
         $intervalles_tabs = explode(';', $this->intervalles);
 
-        $stats = $this->getClasseStats($intervalles_tabs, $this->classe_id, $this->type, $this->mark_index, $this->semestre_selected, $this->subject_selected, $marks_values);
+        $withList = $this->showList;
+
+        $stats = $this->getClasseStats($intervalles_tabs, $this->classe_id, $this->type, $this->mark_index, $this->semestre_selected, $this->subject_selected, $marks_values, $withList);
 
         $this->stats = $stats;
 

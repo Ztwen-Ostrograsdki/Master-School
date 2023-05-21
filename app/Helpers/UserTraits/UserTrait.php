@@ -20,17 +20,27 @@ trait UserTrait{
 
     public function __backToUserProfilRoute()
     {
-        return redirect()->route('user-profil', ['id' => $this->id]);
+        return redirect()->route('user_profil', ['id' => $this->id]);
     }
 
 
-    public function __getKeyNotification()
+    public function __getKeyNotification($getAndHide = false)
     {
         $notification = MyNotifications::where('user_id', $this->id)->where('target', 'Admin-Key')->first();
+        $message = "Aucune clé n'a été généré!";
         if($notification){
-            return $notification->content;
+            if(!$notification->hide){
+                $message = $notification->content;
+                if($getAndHide){
+                    $notification->update(['hide' => true]);
+                }
+            }
+            else{
+                $message = "Désolé, vous n'y avez plus accès!";
+            }
         }
-        return "Aucune clé n'a été généré!";
+
+        return $message;
     }
 
     public function __getAdvancedKeyNotification()
@@ -44,28 +54,7 @@ trait UserTrait{
 
 
 
-    /**
-     * Determine if a product was added into the user's cart
-     *
-     * @param int $product_id
-     * @return bool
-     */
-    public function __alreadyIntoMyCart($product_id)
-    {
-        $product = Product::find($product_id);
-        if($product){
-            $alreadyIntoCart = ShoppingBag::where('user_id', $this->id)->where('product_id', $product->id)->get();
-            if($alreadyIntoCart->count() > 0){
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-        else{
-            return abort(403, "Votre requête ne peut aboutir");
-        }
-    }
+    
     /**
      * Determine if a product was liked by the user
      *

@@ -27,9 +27,9 @@ class Logout extends Component
         Auth::guard('web')->logout();
         $this->emit("newUserConnected");
         $this->dispatchBrowserEvent('hide-form');
-        $this->dispatchBrowserEvent('Logout');
+        $this->dispatchBrowserEvent('Toast', ['title' => 'Deconnexion réussie!!!', 'message' => "Vous serez redirigé !", 'type' => 'success']);
         Session::flush();
-        return redirect()->route('login');
+        return redirect()->route('connexion');
     }
 
     public function cancel()

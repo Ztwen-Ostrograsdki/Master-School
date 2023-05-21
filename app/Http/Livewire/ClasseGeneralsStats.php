@@ -23,9 +23,11 @@ class ClasseGeneralsStats extends Component
     ];
     public $classe_id;
     public $pupil_id;
+    public $teacher_id;
     public $classe;
     public $semestre_type = 'Semestre';
     public $semestre_selected = 1;
+    public $subject_selected = null;
     public $count = 0;
     public $openDynamicStats = true;
 
@@ -60,9 +62,15 @@ class ClasseGeneralsStats extends Component
 
         if($classe){
             $this->classe = $classe;
-            $subjects = $classe->subjects;
+            if($this->subject_selected){
+                $subject = Subject::find($this->subject_selected);
+                $subjects[] = $subject;
+            }
+            else{
+                $subjects = $classe->subjects;
+            }
             $pupils = $classe->getPupils($school_year_model->id);
-            $stats = $classe->getClasseStats($this->semestre_selected, $school_year_model->school_year);
+            $stats = $classe->getClasseStats($this->semestre_selected, $school_year_model->school_year, $this->subject_selected);
         }
         return view('livewire.classe-generals-stats',compact('stats', 'subjects'));
     }

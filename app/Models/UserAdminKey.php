@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class UserAdminKey extends Model
 {
     use HasFactory;
-    protected $fillable = ['key', 'user_id', 'advanced'];
+    protected $fillable = ['key', 'user_id', 'advanced', 'hide'];
 
     public function user()
     {

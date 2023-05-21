@@ -27,12 +27,25 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
 
-        $roles = config('app.local_roles');
+        // for ($i=0; $i < 10; $i++) { 
+        //     $faker = Factory::create();
+        //     $role = Role::all()->pluck('id')->shuffle()->first();
+        //     User::create([
+        //         'pseudo' => $faker->name(),
+        //         'email' => $faker->unique()->safeEmail(),
+        //         'email_verified_at' => now(),
+        //         'role_id' => $role,
+        //         'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+        //         'remember_token' => Str::random(10),
+        //     ]);
+        // }
 
-        foreach ($roles as $role) {
-            Role::create([
-              'name' => $role
-          ]);
+        // $roles = config('app.local_roles');
+
+        // foreach ($roles as $role) {
+        //     Role::create([
+        //       'name' => $role
+        //   ]);
 
 
 
@@ -179,5 +192,4 @@ class DatabaseSeeder extends Seeder
 
         // }
 
-    }
 }

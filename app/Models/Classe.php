@@ -262,13 +262,22 @@ class Classe extends Model
                 
             }
             else{
-                return ['root' => $name, 'sup' => "", 'idc' => "", 'id' => $this->id, 'root' => $name];
+                return ['sup' => "", 'idc' => "", 'id' => $this->id, 'root' => $name];
+            }
+
+            $parts = explode(' ', $this->name);
+            if(count($parts) > 1){
+                $idcs = explode('-', $parts[1]);
+                if(count($idcs) > 1){
+                    $idc = $idcs[1];
+                    $card['idc'] = $idc;
+                }
             }
 
             return $card;
         }
         else{
-            return ['root' => $name, 'sup' => "", 'idc' => "", 'id' => $this->id, 'root' => $name];
+            return ['sup' => "", 'idc' => "", 'id' => $this->id, 'root' => $name];
         }
 
     }

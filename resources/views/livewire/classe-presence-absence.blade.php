@@ -1,5 +1,5 @@
 <div>
-    @if($classe)
+@if($classe)
     @if($makePresence)
     <blockquote class="text-info d-flex border bg-success" style="position: fixed; right: 10px; top: 200px; z-index: 3000 !important; opacity: 0.96;">
         <h5 class="w-100 m-0 p-0">
@@ -72,80 +72,97 @@
         <span class="bi-clock"></span>
     </span>
     @endif
-    <div class="w-100 m-0 p-0 mt-3">
-    <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white">
-        <thead class="text-white text-center">
-            <th class="py-2 text-center">#ID</th>
-            <th class="">Nom et Prénoms</th>
-            @if ($makePresence)
-            <th>Aujourd'hui</th>
-            @endif
-            <th>Absences</th>
-            <th>Retards</th>
-            <th>Action</th>
-        </thead>
-        <tbody>
-            @foreach($pupils as $k => $p)
-                <tr class="">
-                    <td class="text-center border-right">{{ $loop->iteration }}</td>
-                    <td class="text-capitalize pl-2" title="charger le profil de {{$p->getName()}}">
-                        <a class="text-white w-100 m-0 p-0" href="{{route('pupil_profil', ['id' => $p->id])}}">
-                            <span class="d-flex">
-                                <img width="23" class="border rounded-circle my-1" src="{{$p->__profil(110)}}" alt="photo de profil">
-                                <span class="mx-2 d-none d-lg-inline d-xl-inline text-small @if($p->sexe == 'female') text-orange  @endif ">
-                                    {{$p->getName()}}
-                                </span>
-                            </span>
-                        </a>
-                    </td>
+
+    @if($pupils && count($pupils))
+        <div class="w-100 m-0 p-0 mt-3">
+            <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white">
+                <thead class="text-white text-center">
+                    <th class="py-2 text-center">#ID</th>
+                    <th class="">Nom et Prénoms</th>
                     @if ($makePresence)
-                        @if ($p->isAbsentThisDay($date, $school_year_model->id, $semestre_selected, $subject_selected->id))
-                        <td class="text-center">Absent</td>
-                        @elseif (($p->wasLateThisDayFor($date, $school_year_model->id, $semestre_selected, $subject_selected->id)))
-                        <td class="text-center text-warning">Retard de
-                            {{ ($p->wasLateThisDayFor($date, $school_year_model->id, $semestre_selected, $subject_selected->id))->duration }} min
-                        </td>
-                        @else
-                        <td class="text-center text-success">Présent
-                            <span class="fa bi-clock-history"></span>
-                        </td>
-                        @endif
+                    <th>Aujourd'hui</th>
                     @endif
-                    <td class="text-center">{{ $p->getAbsencesCounter() }}</td>
-                    <td class="text-center"> {{ $p->getLatesCounter() }}</td>
-                    <td class="text-center w-auto p-0">
-                        <span class="row w-100 m-0 p-0">
+                    <th>Absences</th>
+                    <th>Retards</th>
+                    <th>Action</th>
+                </thead>
+                <tbody>
+                    @foreach($pupils as $k => $p)
+                        <tr class="">
+                            <td class="text-center border-right">{{ $loop->iteration }}</td>
+                            <td class="text-capitalize pl-2" title="charger le profil de {{$p->getName()}}">
+                                <a class="text-white w-100 m-0 p-0" href="{{route('pupil_profil', ['id' => $p->id])}}">
+                                    <span class="d-flex">
+                                        <img width="23" class="border rounded-circle my-1" src="{{$p->__profil(110)}}" alt="photo de profil">
+                                        <span class="mx-2 d-none d-lg-inline d-xl-inline text-small @if($p->sexe == 'female') text-orange  @endif ">
+                                            {{$p->getName()}}
+                                        </span>
+                                    </span>
+                                </a>
+                            </td>
                             @if ($makePresence)
                                 @if ($p->isAbsentThisDay($date, $school_year_model->id, $semestre_selected, $subject_selected->id))
-                                <span title="Annuler l'absence d'aujourd'hui de {{$p->name}}" wire:click="cancelAbsence({{$p->id}})" class="text-info col-4 m-0 p-0 cursor-pointer">
-                                    <span class="fa fa-unlock py-2 px-2"></span>
-                                </span>
+                                <td class="text-center">Absent</td>
+                                @elseif (($p->wasLateThisDayFor($date, $school_year_model->id, $semestre_selected, $subject_selected->id)))
+                                <td class="text-center text-warning">Retard de
+                                    {{ ($p->wasLateThisDayFor($date, $school_year_model->id, $semestre_selected, $subject_selected->id))->duration }} min
+                                </td>
                                 @else
-                                <span title="Marquer absent {{$p->name}}" wire:click="absent({{$p->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
-                                    <span class="text-danger cursor-pointer fa bi-person-x py-2 px-2"></span>
-                                </span>
+                                <td class="text-center text-success">Présent
+                                    <span class="fa bi-clock-history"></span>
+                                </td>
                                 @endif
-                                @if ($p->wasLateThisDayFor($date, $school_year_model->id, $semestre_selected, $subject_selected->id))
-                                <span title="Annuler le retard d'aujourd'hui de {{$p->name}}" wire:click="cancelLate({{$p->id}})" class="text-info col-4 m-0 p-0 border-right border-left cursor-pointer">
-                                    <span class="fa bi-unlock py-2 px-2"></span>
-                                </span>
-                                @else
-                                <span title="Marquer comme retardataire {{$p->name}}" wire:click="late({{$p->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer border-right border-left">
-                                    <span class="fa bi-clock-history py-2 px-2"></span>
-                                </span>
-                                @endif
-                                <span title="Marquer {{$p->name}}" class="text-primary col-4 m-0 p-0 cursor-pointer border-right border-left">
-                                    <span class="fa bi-messenger py-2 px-2"></span>
-                                </span>
                             @endif
+                            <td class="text-center">{{ $p->getAbsencesCounter() }}</td>
+                            <td class="text-center"> {{ $p->getLatesCounter() }}</td>
+                            <td class="text-center w-auto p-0">
+                                <span class="row w-100 m-0 p-0">
+                                    @if ($makePresence)
+                                        @if ($p->isAbsentThisDay($date, $school_year_model->id, $semestre_selected, $subject_selected->id))
+                                        <span title="Annuler l'absence d'aujourd'hui de {{$p->name}}" wire:click="cancelAbsence({{$p->id}})" class="text-info col-4 m-0 p-0 cursor-pointer">
+                                            <span class="fa fa-unlock py-2 px-2"></span>
+                                        </span>
+                                        @else
+                                        <span title="Marquer absent {{$p->name}}" wire:click="absent({{$p->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                            <span class="text-danger cursor-pointer fa bi-person-x py-2 px-2"></span>
+                                        </span>
+                                        @endif
+                                        @if ($p->wasLateThisDayFor($date, $school_year_model->id, $semestre_selected, $subject_selected->id))
+                                        <span title="Annuler le retard d'aujourd'hui de {{$p->name}}" wire:click="cancelLate({{$p->id}})" class="text-info col-4 m-0 p-0 border-right border-left cursor-pointer">
+                                            <span class="fa bi-unlock py-2 px-2"></span>
+                                        </span>
+                                        @else
+                                        <span title="Marquer comme retardataire {{$p->name}}" wire:click="late({{$p->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer border-right border-left">
+                                            <span class="fa bi-clock-history py-2 px-2"></span>
+                                        </span>
+                                        @endif
+                                        <span title="Marquer {{$p->name}}" class="text-primary col-4 m-0 p-0 cursor-pointer border-right border-left">
+                                            <span class="fa bi-messenger py-2 px-2"></span>
+                                        </span>
+                                    @endif
 
-                        </span>
+                                </span>
 
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>                                                     
-    </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>                                                     
+        </div>
+    @else
+        <div class="my-2 p-2 text-center border rounded text-white-50">
+            <h6 class="mx-auto p-3 text-white-50">
+                <h1 class="m-0 p-0">
+                    <span class="bi-exclamation-triangle text-warning text-center p-2"></span>
+                </h1>
+                Il parait qu'aucune donnée n'est disponible pour cette classe de 
+                <span class="text-warning">{{ $classe ? $classe->name : 'inconnue' }}</span> 
+                pour le compte de l'année scolaire <span class="text-orange">{{ session('school_year_selected') }}</span> en ce qui concerne <span class="text-warning">LES ABSENCES: LA CLASSE EST VIDE</span>!
+                <blockquote class="text-info">
+                    Veuillez sectionner une autre année scolaire!
+                </blockquote>
+            </h6>
+        </div>
     @endif
+@endif
 </div>

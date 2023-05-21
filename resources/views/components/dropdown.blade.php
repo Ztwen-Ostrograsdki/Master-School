@@ -37,7 +37,7 @@ switch ($width) {
             style="display: none;"
             @click="open = false">
         <div class="rounded-md z-link-border ring-1 ring-black ring-opacity-5 {{ $contentClasses }}">
-            {{ $content }}
+            {{ isset($content) ?? $content }}
         </div>
     </div>
 </div>

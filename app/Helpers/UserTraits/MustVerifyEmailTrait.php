@@ -61,11 +61,26 @@ trait MustVerifyEmailTrait
     {
         $this->forceFill([
             'token' => Str::random(6),
+            'email_verified_at' => null,
             'email_verified_token' => Hash::make(Str::random(16)),
         ])->save();
         $this->notify(new SentEmailVerificationToUser);
         session()->put('user_email_to_verify', $this->id);
         return redirect()->route('email-verification-notify', ['id' => $this->id]);
+    } 
+
+       /**
+     * Mark the given user's email as verified.
+     *
+     * @return bool
+     */
+    public function markEmailAsOnlyUnverified()
+    {
+        $this->forceFill([
+            'token' => Str::random(6),
+            'email_verified_at' => null,
+            'email_verified_token' => Hash::make(Str::random(16)),
+        ])->save();
     }
 
     /**

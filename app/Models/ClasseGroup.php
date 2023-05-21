@@ -56,6 +56,14 @@ class ClasseGroup extends Model
     }
 
 
+    public function hasThisSubject($subject_id)
+    {
+        $subjects = $this->subjects()->pluck('subjects.id')->toArray();
+
+        return in_array($subject_id, $subjects);
+    }
+
+
 
 
 }

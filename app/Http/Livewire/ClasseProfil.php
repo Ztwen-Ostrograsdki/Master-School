@@ -78,7 +78,7 @@ class ClasseProfil extends Component
         $school_year_model = $this->getSchoolYear();
         $school_year = session('school_year_selected');
         $pupils = [];
-        $allClasses = Classe::where('slug', urldecode($this->slug))->get();
+        $allClasses = $school_year_model->classes()->where('slug', urldecode($this->slug))->get();
         
         $classe = $school_year_model->classes()->where('slug', urldecode($this->slug))->first();
 
@@ -111,7 +111,6 @@ class ClasseProfil extends Component
             }
                  
         }
-
         else{
             return abort(404, 'Cette classe est inexistante');
         }
@@ -249,11 +248,13 @@ class ClasseProfil extends Component
 
     public function resetLates($classe_id = null)
     {
+        $school_year_model = $this->getSchoolYear();
+
         if ($classe_id) {
-            $classe = Classe::find($classe_id);
+            $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
         }
         else{
-            $classe = Classe::whereSlug($this->slug)->first();
+            $classe = $school_year_model->classes()->whereSlug($this->slug)->first();
         }
         if ($classe) {
             $school_year_model = $this->getSchoolYear();

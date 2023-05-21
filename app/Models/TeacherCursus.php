@@ -20,7 +20,8 @@ class TeacherCursus extends Model
         'level_id',
         'start',
         'end',
-        'fullTime'
+        'fullTime',
+        'teacher_has_worked'
     ];
 
 

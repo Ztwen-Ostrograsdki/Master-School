@@ -31,35 +31,35 @@
         @livewire('login-user') 
         @livewire('logout') 
         @livewire('user-profil-manager') 
+        @livewire('default-modals') 
         
         {{-- chargement des modals --}}
     @if(!App\Helpers\RouteManager::hasUrl('administration'))
         <body class="font-sans antialiased" style="background-color: lightslategray;">
-        @include('components.mycomponents.loader') {{-- chargement du loader --}}
-        @livewire('header') {{-- chargement du header --}}
-        <div class=" bg-gray-100 border" style="background-color: rgb(167, 193, 219); min-height: 150vh !important;">
-            <!-- Page Content -->
-            <div class="">
-                @if (isset($slot))
-                    <div class="">
-                        {{ $slot }}
-                    </div>
-                @else
-                    {{abort(404, "La Page que vous rechercher n'existe pas!!!")}}
-                @endif
-                
+            @include('components.mycomponents.loader') {{-- chargement du loader --}}
+            @livewire('header') {{-- chargement du header --}}
+            <div class=" bg-gray-100 border" style="background-color: rgb(167, 193, 219); min-height: 150vh !important;">
+                <!-- Page Content -->
+                <div class="">
+                    @if (isset($slot))
+                        <div class="">
+                            {{ $slot }}
+                        </div>
+                    @else
+                        {{abort(404, "La Page que vous rechercher n'existe pas!!!")}}
+                    @endif
+                </div>
             </div>
-        </div>
-        @include('sweetalert::alert')
-        @if(Route::currentRouteName() !== 'email-verification-notify' && Route::currentRouteName() !== 'force-email-verification-notify' && Route::currentRouteName() !== 'messenger')
-            @livewire("footer") {{-- chargement du footer --}}
-        @endif
-        <script src="//{{Request::getHost()}}:6001/socket.io/socket.io.js" ></script>
-        <script src="{{ mix('js/app.js') }}" defer></script>
-        <script>
-        </script>
-        @include("components.mycomponents.scripts") {{-- chargement des scripts js --}}
-    </body>
+            @include('sweetalert::alert')
+            @if(Route::currentRouteName() !== 'email-verification-notify' && Route::currentRouteName() !== 'force-email-verification-notify' && Route::currentRouteName() !== 'messenger')
+                @livewire("footer") {{-- chargement du footer --}}
+            @endif
+            <script src="//{{Request::getHost()}}:6001/socket.io/socket.io.js" ></script>
+            <script src="{{ mix('js/app.js') }}" defer></script>
+            <script>
+            </script>
+            @include("components.mycomponents.scripts") {{-- chargement des scripts js --}}
+        </body>
     @else
         <body class="hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
         <div class=" bg-gray-100 border" style="background-color: rgb(167, 193, 219); min-height: 150vh !important;">
