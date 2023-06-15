@@ -118,7 +118,7 @@ class ClassePupilRelatedMark extends Component
             if($subject_id){
                 $semestre = session('semestre_selected');
                 $school_year_model = $this->getSchoolYear();
-                $pupil = Pupil::find($pupil_id);
+                $pupil = $school_year_model->pupils()->where('pupils.id', $pupil_id)->first();
                 if($pupil){
                     $del = $pupil->deleteAllPupilRelatedMarks($this->classe_id, $subject_id, $semestre, $school_year_model->id);
                     if($del){

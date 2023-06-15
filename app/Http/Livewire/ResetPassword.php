@@ -127,7 +127,7 @@ class ResetPassword extends Component
                 ])->save();
             }
         }
-        return redirect()->route('login');
+        return redirect()->route('connexion');
     }
 
 

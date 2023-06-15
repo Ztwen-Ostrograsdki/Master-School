@@ -6,7 +6,7 @@
             <div class="w-100 z-color-orange">
                 <h5 class="text-center w-100">
                     <span class="fa fa-user-secret fa-3x "></span>
-                    <h5 class="w-100 text-uppercase text-center">Authentification</h5>
+                    <h5 class="w-100 text-uppercase text-center">Authentification - Connexion</h5>
                 </h5>
                 <hr class="w-100 z-border-orange mx-auto my-2">
             </div>
@@ -16,13 +16,13 @@
                     <div class="w-100">
                         <div class="w-100 d-flex justify-content-between border rounded">
                             <strong class="bi-person zw-15 text-center z-color-orange" style="font-size: 1.5rem"></strong>
-                            <input name="email_auth" wire:model.defer="email_auth"  type="email" class="form-control  @error('email_auth') text-danger border border-danger @enderror text-white zw-85 p-3 z-bg-secondary-dark border-left" placeholder="Veuillez renseigner votre adresse mail...">
+                            <input name="email_auth" wire:model="email_auth"  type="email" class="form-control  @error('email_auth') text-danger border border-danger @enderror text-white zw-85 p-3 z-bg-secondary-dark border-left" placeholder="Veuillez renseigner votre adresse mail...">
                         </div>
                         @error('email_auth')
                             <span class="py-1 mb-3 z-color-orange">{{$message}}</span>
                         @enderror
                     </div>  
-
+                    @if((!$userNoConfirm && !$blockedUser) || ($user && !$blockedUser && !$user->unlock_token))
                     <div class="w-100 mt-2">
                         <div class="w-100 d-flex justify-content-between border rounded">
                             <strong class="bi-unlock zw-15 text-center z-color-orange" style="font-size: 1.5rem"></strong>
@@ -32,8 +32,9 @@
                             <span class="py-1 mb-3 z-color-orange">{{$message}}</span>
                         @enderror
                     </div>
+                    @endif
 
-                    @if(!$userNoConfirm)
+                    @if(!$userNoConfirm && !$blockedUser)
                     <div class="w-100 mt-3 d-flex justify-center">
                         <button type="submit" class="z-bg-orange border rounded px-3 py-2 w-75">Se connecter</button>
                     </div>
@@ -41,6 +42,46 @@
                         <a class="text-warning text-center px-3 py-2 w-75" href="{{route('password-forgot')}}">
                             <strong class="">Mot de passe oublié ?</strong>
                         </a>
+                    </div>
+                    @elseif($blockedUser)
+                    <div class="my-2 p-2 text-center border rounded text-white-50">
+                        <h6 class="mx-auto p-3 text-white-50">
+                            <span class="bi-exclamation-triangle h2 text-warning text-center p-0"> </span>
+                            <h6 class="m-0 p-0 my-2">
+                                Le compte  <span class="text-warning"> {{ $email }} </span> a été bloqué ou verrouillé <span class="fa bi-lock text-warning mx-2"></span> !
+                            </h6>
+
+                            @if($user && $user->lockedRequests)
+                                <blockquote class="text-info text-left">
+                                    Mr/Mme <b class="text-orange"> {{$user->pseudo}} </b>, vous avez déjà envoyé une demande de déblocage de votre compte  <span class="text-warning"> {{ $email }} </span> <br>
+                                    @if($user->unlock_token)
+                                        <span class="text-center text-warning">Veuillez renseigner la clé qui vous a été envoyez par mail!</span>
+                                    @else
+                                        <span class="text-center text-warning">Les administrateurs sont à pied d'oeuvre pour régler le problème!</span>
+                                    @endif
+                                </blockquote>
+                                @if($user->unlock_token)
+                                    <div class="col-10 mx-auto my-2">
+                                        <div class="w-100 d-flex justify-content-between border rounded">
+                                            <strong class="bi-unlock zw-15 text-center z-color-orange" style="font-size: 1.5rem"></strong>
+                                            <input name="unlock_token" wire:model="unlock_token"  type="password" class="form-control  @error('unlock_token') text-danger border border-danger @enderror text-white zw-85 p-3 z-bg-secondary-dark border-left" placeholder="Veuillez renseigner la clé...">
+                                        </div>
+                                        @error('unlock_token')
+                                            <span class="py-1 mb-2 z-color-orange text-left float-left">{{$message}}</span>
+                                        @enderror
+                                        <div class="d-flex justify-between my-0 py-0 mx-auto row col-11">
+                                            <span wire:click="validateToken" class="bg-primary border text-white btn rounded px-3 py-2 my-2 col-6"> <span class="fa bi-unlock mr-1"></span>Débloquer maintenant!</span>
+                                            <span wire:click="regenerateAndSendUnlockTokenToUser" class="bg-secondary border text-white btn rounded px-3 py-2 my-2 col-5"> <span class="fa bi-recycle mr-1"></span>Renvoyer la clé!</span>
+                                        </div>
+                                    </div>
+                                @endif
+                            @elseif($user && !$user->lockedRequests)
+                                <blockquote class="text-info text-left">
+                                    Mr/Mme <b class="text-orange"> {{$user->pseudo}} </b>, il se pourait que votre compte <span class="text-warning"> {{ $email }} </span> ait été temporairement bloqué ou verrouillé, veuillez cliquer sur le bouton <span class="text-warning">signaler</span> ci-dessous afin que les administrateurs puissent régler le problème!
+                                </blockquote>
+                                <span wire:click="sendLockedRequest" class="bg-primary border text-white btn rounded px-3 py-2 w-75">Signaler pour récupérer mon compte!</span>
+                            @endif
+                        </h6>
                     </div>
                     @else
                     <div class="w-100 mt-3 d-flex justify-center">

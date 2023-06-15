@@ -72,22 +72,7 @@ trait ModelActionTrait{
     }
 
 
-    public function __blockThisUser()
-    {
-        $action = $this->update(['blocked' => true]);
-        if($action){
-            return true;
-        }
-        return false;
-    }
-    public function __unblockThisUser()
-    {
-        $action = $this->update(['blocked' => false]);
-        if($action){
-            return true;
-        }
-        return false;
-    }
+   
 
 
 

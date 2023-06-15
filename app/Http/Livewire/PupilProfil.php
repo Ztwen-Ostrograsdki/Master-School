@@ -247,22 +247,35 @@ class PupilProfil extends Component
 
     public function resetMarks($allyears = false)
     {
-        $pupil = Pupil::find($this->pupil_id);
+        $school_year_model = $this->getSchoolYear();
+        $pupil = $school_year_model->pupils()->where('pupils.id', $this->pupil_id)->first();
         if ($pupil) {
-            $school_year_model = $this->getSchoolYear();
-            $semestre = $this->semestre_selected;
-            if (session()->has('semestre_selected') && session('semestre_selected')) {
-                $semestre = session('semestre_selected');
-            }
-            $subject_id = session('classe_subject_selected');
+            $classe = $pupil->getCurrentClasse($school_year_model->id);
+            if($classe){
+                $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe->id);
+                if($not_secure){
+                    $semestre = $this->semestre_selected;
+                    if (session()->has('semestre_selected') && session('semestre_selected')) {
+                        $semestre = session('semestre_selected');
+                    }
+                    $subject_id = session('classe_subject_selected');
 
-            $done = $pupil->resetAllMarks($school_year_model->id, $semestre, $subject_id, $type, $allyears);
-            if($done){
-                $this->emit('pupilUpdated', $pupil->id);
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "Les notes de $pupil->getName() ont été rafraîchies!", 'type' => 'success']);
+                    $done = $pupil->resetAllMarks($school_year_model->id, $semestre, $subject_id, $type, $allyears);
+                    if($done){
+                        $this->emit('pupilUpdated', $pupil->id);
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "Les notes de $pupil->getName() ont été rafraîchies!", 'type' => 'success']);
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Le rafraichissement des notes  $pupil->getName() a échoué. Veuillez réessayer!", 'type' => 'error']);
+                    }
+                }
+                else{
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE TEMPORAIREMENT', 'message' => "Vous ne pouvez pas supprimer les notes!", 'type' => 'warning']);
+                }
+
             }
             else{
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Le rafraichissement des notes  $pupil->getName() a échoué. Veuillez réessayer!", 'type' => 'error']);
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "La classe est introuvable!", 'type' => 'error']);
             }
         }
         else{

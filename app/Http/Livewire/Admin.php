@@ -6,6 +6,7 @@ use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Helpers\ZtwenAssert;
 use App\Models\Classe;
 use App\Models\Level;
+use App\Models\Mark;
 use App\Models\Pupil;
 use App\Models\School;
 use App\Models\SchoolYear;
@@ -219,6 +220,19 @@ class Admin extends Component
 
         return (($l + $c + $p + $s) / 4) * 100;
 
+
+
+    }
+
+
+
+    public function make()
+    {
+        $marks = Mark::where('id', '>', 2499)->get();
+        foreach($marks as $mark){
+            $mark->update(['creator' => auth()->user()->id, 'user_id' => auth()->user()->id]);
+
+        }
 
 
     }

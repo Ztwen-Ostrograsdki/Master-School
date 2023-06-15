@@ -12,6 +12,7 @@ use App\Helpers\ZtwenManagers\GaleryManager;
 use App\Models\Admin;
 use App\Models\Administrator;
 use App\Models\Image;
+use App\Models\LockedUsersRequest;
 use App\Models\MyNotifications;
 use App\Models\Parentable;
 use App\Models\ResetEmailConfirmation;
@@ -63,6 +64,7 @@ class User extends Authenticatable
         'blocked',
         'locked',
         'token',
+        'unlock_token',
     ];
 
     /**
@@ -102,6 +104,12 @@ class User extends Authenticatable
     public function role()
     {
         return $this->hasOne(Role::class);
+    } 
+
+
+    public function lockedRequests()
+    {
+        return $this->hasOne(LockedUsersRequest::class);
     }
 
 
@@ -163,6 +171,12 @@ class User extends Authenticatable
     {
         return $this->isAdmin() && ($this->administrator && $this->administrator->status == $status);
     }
+
+    public function isAuthorizedAdmin()
+    {
+        return $this->isAdmin() && ($this->administrator && $this->administrator->authorized && $this->administrator->canManage);
+    }
+
 
 
 

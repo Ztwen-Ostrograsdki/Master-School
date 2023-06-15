@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\School;
+use App\Models\Teacher;
 use App\Models\User;
 use Livewire\Component;
 
@@ -91,16 +92,10 @@ class TeacherProfilAsUser extends Component
     public function mount($id, $slug)
     {
         $auth = auth()->user();
-        $user = User::find($id);
+        $teacher = Teacher::find($id);
         $this->slug = $slug;
 
-        if(!$user || ($user && $user->id !== $auth->id) || ($user && !$user->teacher)){
-            return abort(403, "Vous n'êtes pas authorisé à accéder à une telle page, Vous n'êtes pas enseignant!");
-        }
-        else{
-            $this->user = $user;
-
-        }
+        $this->user = $teacher->user;
     }
 
 

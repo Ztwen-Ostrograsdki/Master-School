@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\AE;
 use App\Models\Classe;
 use App\Models\ClasseHistory;
+use App\Models\ClassesSecurity;
 use App\Models\Level;
 use App\Models\Mark;
 use App\Models\Period;
@@ -18,6 +19,7 @@ use App\Models\Teacher;
 use App\Models\TeacherAbsences;
 use App\Models\TeacherCursus;
 use App\Models\TeacherLates;
+use App\Models\TimePlan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -39,6 +41,11 @@ class SchoolYear extends Model
 	{
 		return $this->hasMany(Period::class);
 
+	}
+
+	public function timePlans()
+	{
+		return $this->morphedByMany(TimePlan::class, 'schoolable');
 	}
 
 	public function classes()
@@ -108,6 +115,13 @@ class SchoolYear extends Model
 	{
 		return $this->morphedByMany(PupilAbsences::class, 'schoolable');
 	}
+
+
+	public function securities()
+    {
+        return $this->hasMany(ClassesSecurity::class);
+    }
+
 
 
 

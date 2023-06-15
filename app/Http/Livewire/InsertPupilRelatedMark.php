@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Pupil;
 use App\Models\RelatedMark;
@@ -14,6 +15,8 @@ use Livewire\Component;
 
 class InsertPupilRelatedMark extends Component
 {
+    use ModelQueryTrait;
+    
     protected $listeners = ['insertRelatedMarkLiveEvent' => 'addNewMark'];
     public $classe_id;
     public $pupil_id;
@@ -60,57 +63,77 @@ class InsertPupilRelatedMark extends Component
     public function addNewMark(int $target_id, int $subject_id, int $semestre, int $school_year, $together = false)
     {
         $this->together = $together;
+
         if($subject_id && $target_id && $semestre && $school_year){
+            $school_year_model = $this->getSchoolYear();
+
             if(!$together) {
+
                 $pupil_id = $target_id;
-                $pupil = Pupil::find($pupil_id);
+                $pupil = $school_year_model->pupils()->where('pupils.id', $pupil_id)->first();
                 $subject = Subject::find($subject_id);
 
                 if($pupil && $subject){
-                    $this->pupil = $pupil;
-                    $this->target = $pupil;
-                    $this->pupil_id = $pupil->id;
-                    
-                    if($semestre){
-                        $this->semestre_id = $semestre;
-                    }
-                    $this->date = (new \DateTime(Carbon::today()))->format('Y-m-d');
-                    $this->start = intval(date('H')) + 1;
-                    $this->end = intval(date('H')) + 2;
-                    $this->subject_id = $subject_id;
-                    $this->classe_id = $pupil->classe_id;
-                    $this->school_year = $school_year;
+                    $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($pupil->classe_id);
+                    if($not_secure){
+                        $this->pupil = $pupil;
+                        $this->target = $pupil;
+                        $this->pupil_id = $pupil->id;
+                        
+                        if($semestre){
+                            $this->semestre_id = $semestre;
+                        }
+                        $this->date = (new \DateTime(Carbon::today()))->format('Y-m-d');
+                        $this->start = intval(date('H')) + 1;
+                        $this->end = intval(date('H')) + 2;
+                        $this->subject_id = $subject_id;
+                        $this->classe_id = $pupil->classe_id;
+                        $this->school_year = $school_year;
 
-                    $this->subjects = $pupil->classe->subjects;
-                    $this->dispatchBrowserEvent('modal-insertPupilRelatedMark');
+                        $this->subjects = $pupil->classe->subjects;
+                        $this->dispatchBrowserEvent('modal-insertPupilRelatedMark');
+
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE', 'message' => "Vous ne pouvez pas insérer de notes pour le moment!", 'type' => 'warning']);
+
+                    }
                 }
                 else{
                     $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "Vos données sont ambigües, nous n'avons trouvé aucun apprenant et ou la matière correspondant(e)!", 'type' => 'error']);
                 }
             }
             else{
-
                 $classe_id = $target_id;
-                $classe = Classe::find($classe_id);
+                $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
                 $subject = Subject::find($subject_id);
 
                 if($classe && $subject){
-                    $this->classe = $classe;
-                    $this->target = $classe;
-                    $this->classe_id = $classe->id;
-                    
-                    if($semestre){
-                        $this->semestre_id = $semestre;
-                    }
-                    $this->date = (new \DateTime(Carbon::today()))->format('Y-m-d');
-                    $this->start = intval(date('H')) + 1;
-                    $this->end = intval(date('H')) + 2;
-                    $this->subject_id = $subject_id;
-                    $this->classe_id = $classe_id;
-                    $this->school_year = $school_year;
 
-                    $this->subjects = $classe->subjects;
-                    $this->dispatchBrowserEvent('modal-insertPupilRelatedMark');
+                    $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe_id);
+
+                    if($not_secure){
+                        $this->classe = $classe;
+                        $this->target = $classe;
+                        $this->classe_id = $classe->id;
+                        
+                        if($semestre){
+                            $this->semestre_id = $semestre;
+                        }
+                        $this->date = (new \DateTime(Carbon::today()))->format('Y-m-d');
+                        $this->start = intval(date('H')) + 1;
+                        $this->end = intval(date('H')) + 2;
+                        $this->subject_id = $subject_id;
+                        $this->classe_id = $classe_id;
+                        $this->school_year = $school_year;
+
+                        $this->subjects = $classe->subjects;
+                        $this->dispatchBrowserEvent('modal-insertPupilRelatedMark');
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE', 'message' => "Vous ne pouvez pas insérer de notes pour le moment!", 'type' => 'warning']);
+
+                    }
                 }
                 else{
                     $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "Vos données sont ambigües, nous n'avons trouvé aucune classe et ou la matière correspondant(e)!", 'type' => 'error']);
@@ -159,63 +182,71 @@ class InsertPupilRelatedMark extends Component
             }
 
             $this->tabsMark = $tabs;
-
             if($this->tabsMark !== []){
-                $make = DB::transaction(function($e){
-                    foreach($this->tabsMark as $validMark){
-                        DB::transaction(function($e) use ($validMark){
-                            if(!$this->together){
-                                $mark = RelatedMark::create([
-                                    'value' => $validMark, 
-                                    'pupil_id' => $this->pupil_id, 
-                                    'subject_id' => $this->subject_id, 
-                                    'classe_id' => $this->classe_id, 
-                                    'semestre' => $this->semestre_id, 
-                                    'type' => $this->type, 
-                                    'level_id' => $this->pupil->level_id, 
-                                    'horaire' => $this->horaire,
-                                    'motif' => $this->motif,
-                                    'date' => $this->date,
-                                ]);
-                                if ($mark) {
-                                    $this->school_year_model->related_marks()->attach($mark->id);
-                                }
-                            }
-                            elseif($this->together){
-                                $this->classe->getPupils($this->school_year_model->id)->each(function($pupil) use ($validMark){
+                $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe_id);
+
+                if($not_secure){
+                    $make = DB::transaction(function($e){
+                        foreach($this->tabsMark as $validMark){
+                            DB::transaction(function($e) use ($validMark){
+                                if(!$this->together){
                                     $mark = RelatedMark::create([
                                         'value' => $validMark, 
-                                        'pupil_id' => $pupil->id, 
+                                        'pupil_id' => $this->pupil_id, 
                                         'subject_id' => $this->subject_id, 
-                                        'classe_id' => $this->classe->id, 
+                                        'classe_id' => $this->classe_id, 
                                         'semestre' => $this->semestre_id, 
                                         'type' => $this->type, 
-                                        'level_id' => $this->classe->level_id, 
+                                        'level_id' => $this->pupil->level_id, 
                                         'horaire' => $this->horaire,
-                                        'motif' => 'Note collective' . $this->motif,
-                                        'date' => $this->date
+                                        'motif' => $this->motif,
+                                        'date' => $this->date,
                                     ]);
                                     if ($mark) {
                                         $this->school_year_model->related_marks()->attach($mark->id);
                                     }
+                                }
+                                elseif($this->together){
+                                    $this->classe->getPupils($this->school_year_model->id)->each(function($pupil) use ($validMark){
+                                        $mark = RelatedMark::create([
+                                            'value' => $validMark, 
+                                            'pupil_id' => $pupil->id, 
+                                            'subject_id' => $this->subject_id, 
+                                            'classe_id' => $this->classe->id, 
+                                            'semestre' => $this->semestre_id, 
+                                            'type' => $this->type, 
+                                            'level_id' => $this->classe->level_id, 
+                                            'horaire' => $this->horaire,
+                                            'motif' => 'Note collective' . $this->motif,
+                                            'date' => $this->date
+                                        ]);
+                                        if ($mark) {
+                                            $this->school_year_model->related_marks()->attach($mark->id);
+                                        }
 
-                                });
-                            }
-                            else{
-                                return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "Au moins les données de l'un des champs sont invalides. Veuillez bien renseigner tous les champs avec des données valides!", 'type' => 'warning']);
-                            }
+                                    });
+                                }
+                                else{
+                                    return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "Au moins les données de l'un des champs sont invalides. Veuillez bien renseigner tous les champs avec des données valides!", 'type' => 'warning']);
+                                }
+                            });
+                        }
+                        DB::afterCommit(function(){
+                            $this->emit('pupilUpdated');
+                            $this->emit('classeUpdated');
+                            $this->dispatchBrowserEvent('hide-form');
+                            $this->resetErrorBag();
+                            $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour réussie', 'message' => "la note a été inséré avec succès!", 'type' => 'success']);
+
                         });
-                    }
-                    DB::afterCommit(function(){
-                        $this->emit('pupilUpdated');
-                        $this->emit('classeUpdated');
-                        $this->dispatchBrowserEvent('hide-form');
-                        $this->resetErrorBag();
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour réussie', 'message' => "la note a été inséré avec succès!", 'type' => 'success']);
 
                     });
+                }
+                else{
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE', 'message' => "Vous ne pouvez pas insérer de notes pour le moment!", 'type' => 'warning']);
 
-                });
+                }
+
             }
         }
         else{

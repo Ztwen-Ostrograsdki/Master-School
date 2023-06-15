@@ -138,7 +138,7 @@ class AppServiceProvider extends ServiceProvider
 
         });
 
-        Blade::if('isRoutes', function($routesName){
+        Blade::if('isRoutes', function($routesName, $baseRoute = null){
             foreach($routesName as $routeName){
                 if(Route::has($routeName)){
                     if(in_array(Route::currentRouteName(), $routesName)){
@@ -151,7 +151,7 @@ class AppServiceProvider extends ServiceProvider
 
         });
 
-        Blade::if('isNotRoutes', function($routesName){
+        Blade::if('isNotRoutes', function($routesName, $baseRoute = null){
             foreach($routesName as $routeName){
                 if(Route::has($routeName)){
                     if(in_array(Route::currentRouteName(), $routesName)){
@@ -163,8 +163,6 @@ class AppServiceProvider extends ServiceProvider
             }
 
         });
-
-
 
     }
 }

@@ -61,39 +61,54 @@ class InsertPupilMarks extends Component
     }
 
 
-    public function addNewMarks(int $pupil_id, int $classe_id, int $subject_id, int $semestre, int $school_year, $type = 'epe')
+    public function addNewMarks(int $pupil_id, int $classe_id, int $subject_id, int $semestre, int $school_year = null, $type = 'epe')
     {
         if($subject_id && $pupil_id && $classe_id){
-            
-            $pupil = Pupil::find($pupil_id);
-            $subject = Subject::find($subject_id);
 
-            $school_year_model = SchoolYear::find($school_year);
+            $school_year_model = $this->getSchoolYear();
+            $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
+            if($classe){
+                $user = auth()->user();
+                $not_secure = $user->ensureThatTeacherCanAccessToClass($classe_id);
 
-            if($pupil && $semestre && $subject){
+                if($not_secure){
+                    $subject = Subject::find($subject_id);
+                    $pupil = $school_year_model->pupils()->where('pupils.id', $pupil_id)->first();
+                    if($pupil && $semestre && $subject){
+                        $has_marks_index = $school_year_model->marks()->where('pupil_id', $pupil_id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', $type)->pluck('mark_index')->toArray();
 
-                $has_marks_index = $school_year_model->marks()->where('pupil_id', $pupil_id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', $type)->pluck('mark_index')->toArray();
 
-                if(count($has_marks_index) > 0){
-                    $mark_index = max($has_marks_index) + 1;
+                        if(count($has_marks_index) > 0){
+                            $mark_index = max($has_marks_index) + 1;
+                        }
+                        else{
+                            $mark_index = 1;
+                        }
+
+                        $this->pupil = $pupil;
+                        $this->subject = $subject;
+                        $this->pupilName = $pupil->getName();
+                        $this->semestre_id = $semestre;
+                        $this->subject_id = $subject_id;
+                        $this->classe_id = $classe_id;
+                        $this->school_year = $school_year;
+                        $this->mark_index = $mark_index;
+                        $this->type = $type;
+                        $this->dispatchBrowserEvent('modal-insertPupilMarks');
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "Vos données sont ambigües, nous n'avons trouvé aucun apprenant et ou la matière correspondant(e)!", 'type' => 'error']);
+                    }
+
                 }
                 else{
-                    $mark_index = 1;
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE', 'message' => "Vous ne pouvez pas insérer de notes pour le moment!", 'type' => 'warning']);
+
                 }
 
-                $this->pupil = $pupil;
-                $this->subject = $subject;
-                $this->pupilName = $pupil->getName();
-                $this->semestre_id = $semestre;
-                $this->subject_id = $subject_id;
-                $this->classe_id = $classe_id;
-                $this->school_year = $school_year;
-                $this->mark_index = $mark_index;
-                $this->type = $type;
-                $this->dispatchBrowserEvent('modal-insertPupilMarks');
             }
             else{
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "Vos données sont ambigües, nous n'avons trouvé aucun apprenant et ou la matière correspondant(e)!", 'type' => 'error']);
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure classe', 'message' => "Vos données sont ambigües, la classe est introuvable!", 'type' => 'warning']);
             }
         }
         else{
@@ -115,143 +130,121 @@ class InsertPupilMarks extends Component
         $pupil = $this->pupil;
         $mark_index = $this->mark_index;
 
+        $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($mark->classe_id);
+        if($not_secure){
+            if($school_year && $subject_id && $classe_id && $semestre && $type && ($epe_marks || $dev_marks)){
+                $epes = [];
+                $devs = [];
 
-        if($school_year && $subject_id && $classe_id && $semestre && $type && ($epe_marks || $dev_marks)){
-            $epes = [];
-            $devs = [];
+                if($epe_marks){
+                    $epes = explode('-', $epe_marks);
+                } 
 
-            if($epe_marks){
-                $epes = explode('-', $epe_marks);
-            } 
-
-            if($dev_marks){
-                $devs = explode('-', $dev_marks);
-            }
-            
-            $tabs = [];
-            $epe_tabs = [];
-            $dev_tabs = [];
-
-            $school_year_model = SchoolYear::find($school_year);
-
-            $key_index = $this->mark_index;
-            $epe_key_index = 1;
-            $dev_key_index = 1;
-            
-            if($epes !== []){
-                $has_epe_marks_index = $school_year_model->marks()->where('pupil_id', $this->pupil->id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', 'epe')->pluck('mark_index')->toArray();
-
-                if(count($has_epe_marks_index) > 0){
-                    $this->epe_mark_index = max($has_epe_marks_index) + 1;
+                if($dev_marks){
+                    $devs = explode('-', $dev_marks);
                 }
-                else{
-                   $this->epe_mark_index = 1;
-                }
+                
+                $tabs = [];
+                $epe_tabs = [];
+                $dev_tabs = [];
 
-                $epe_key_index = $this->epe_mark_index;
+                $school_year_model = SchoolYear::find($school_year);
 
-                foreach($epes as $epe){
-                    $mark_index_was_existed = $pupil->marks()->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', "epe")->where('mark_index', $epe_key_index)->first();
+                $key_index = $this->mark_index;
+                $epe_key_index = 1;
+                $dev_key_index = 1;
+                
+                if($epes !== []){
+                    $has_epe_marks_index = $school_year_model->marks()->where('pupil_id', $this->pupil->id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', 'epe')->pluck('mark_index')->toArray();
 
-                    if($mark_index_was_existed){
-                        if($mark_index_was_existed->school_years()->first()->id == $school_year_model->id){
-                            return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "L'index $epe_key_index de la note est déjà existante!", 'type' => 'warning']);
-                        }
-
+                    if(count($has_epe_marks_index) > 0){
+                        $this->epe_mark_index = max($has_epe_marks_index) + 1;
                     }
                     else{
-                        $epe_tabs[$epe_key_index] = floatval($epe);
-                        if(!is_numeric($epe)){
-                            return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres!", 'type' => 'error']);
-                        }
-                        elseif(floatval($epe) > 20 || floatval($epe) < 0){
-                            return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres compris entre 00 et 20!", 'type' => 'error']);
-                        }
-                        $epe_key_index++;
+                       $this->epe_mark_index = 1;
                     }
-                    
-                }
 
-            }
+                    $epe_key_index = $this->epe_mark_index;
 
-            if($devs !== []){
-                $has_dev_marks_index = $school_year_model->marks()->where('pupil_id', $this->pupil->id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', 'devoir')->pluck('mark_index')->toArray();
+                    foreach($epes as $epe){
+                        $mark_index_was_existed = $pupil->marks()->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', "epe")->where('mark_index', $epe_key_index)->first();
 
-                if(count($has_dev_marks_index) > 0){
-                    $this->dev_mark_index = max($has_dev_marks_index) + 1;
-                }
-                else{
-                   $this->dev_mark_index = 1;
-                }
-
-                $dev_key_index = $this->dev_mark_index;
-
-                foreach($devs as $dev){
-                    $mark_index_was_existed = $pupil->marks()->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', "devoir")->where('mark_index', $dev_key_index)->first();
-
-                    if($mark_index_was_existed){
-                        if($mark_index_was_existed->school_years()->first()->id == $school_year_model->id){
-                            return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "L'index $dev_key_index de la note est déjà existante!", 'type' => 'warning']);
-                        }
-
-                    }
-                    else{
-                        $dev_tabs[$dev_key_index] = floatval($dev);
-                        if(!is_numeric($dev)){
-                            return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres!", 'type' => 'error']);
-                        }
-                        elseif(floatval($dev) > 20 || floatval($dev) < 0){
-                            return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres compris entre 00 et 20!", 'type' => 'error']);
-                        }
-                        $dev_key_index++;
-                    }
-                    
-                }
-            }
-
-            if($epe_tabs !== []){
-                $make = DB::transaction(function($e) use ($epe_tabs, $pupil, $subject_id, $semestre, $classe_id, $school_year_model){
-                    
-                    foreach($epe_tabs as $epe_k_index => $validEpe){
-
-                        DB::transaction(function($e) use ($validEpe, $pupil, $subject_id, $semestre, $classe_id, $school_year_model, $epe_k_index){
-                            $epe_mark = Mark::create([
-                                'value' => $validEpe, 
-                                'pupil_id' => $pupil->id, 
-                                'subject_id' => $subject_id, 
-                                'classe_id' => $classe_id, 
-                                'semestre' => $semestre, 
-                                'type' => 'epe', 
-                                'mark_index' => $epe_k_index, 
-                                'level_id' => $pupil->level_id, 
-                            ]);
-                            if ($epe_mark) {
-                                $school_year_model->marks()->attach($epe_mark->id);
+                        if($mark_index_was_existed){
+                            if($mark_index_was_existed->school_years()->first()->id == $school_year_model->id){
+                                return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "L'index $epe_key_index de la note est déjà existante!", 'type' => 'warning']);
                             }
 
-                        });
-                    }
-                });
-            }
-
-            if($dev_tabs !== []){
-                    $make = DB::transaction(function($e) use ($dev_tabs, $pupil, $subject_id, $semestre, $classe_id, $school_year_model){
+                        }
+                        else{
+                            $epe_tabs[$epe_key_index] = floatval($epe);
+                            if(!is_numeric($epe)){
+                                return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres!", 'type' => 'error']);
+                            }
+                            elseif(floatval($epe) > 20 || floatval($epe) < 0){
+                                return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres compris entre 00 et 20!", 'type' => 'error']);
+                            }
+                            $epe_key_index++;
+                        }
                         
-                        foreach($dev_tabs as $dev_k_index => $validDev){
+                    }
 
-                            DB::transaction(function($e) use ($validDev, $pupil, $subject_id, $semestre, $classe_id, $school_year_model, $dev_k_index){
-                                $dev_mark = Mark::create([
-                                    'value' => $validDev, 
+                }
+
+                if($devs !== []){
+                    $has_dev_marks_index = $school_year_model->marks()->where('pupil_id', $this->pupil->id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', 'devoir')->pluck('mark_index')->toArray();
+
+                    if(count($has_dev_marks_index) > 0){
+                        $this->dev_mark_index = max($has_dev_marks_index) + 1;
+                    }
+                    else{
+                       $this->dev_mark_index = 1;
+                    }
+
+                    $dev_key_index = $this->dev_mark_index;
+
+                    foreach($devs as $dev){
+                        $mark_index_was_existed = $pupil->marks()->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', "devoir")->where('mark_index', $dev_key_index)->first();
+
+                        if($mark_index_was_existed){
+                            if($mark_index_was_existed->school_years()->first()->id == $school_year_model->id){
+                                return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "L'index $dev_key_index de la note est déjà existante!", 'type' => 'warning']);
+                            }
+
+                        }
+                        else{
+                            $dev_tabs[$dev_key_index] = floatval($dev);
+                            if(!is_numeric($dev)){
+                                return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres!", 'type' => 'error']);
+                            }
+                            elseif(floatval($dev) > 20 || floatval($dev) < 0){
+                                return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les notes doivent être des nombres compris entre 00 et 20!", 'type' => 'error']);
+                            }
+                            $dev_key_index++;
+                        }
+                        
+                    }
+                }
+
+                if($epe_tabs !== []){
+                    $make = DB::transaction(function($e) use ($epe_tabs, $pupil, $subject_id, $semestre, $classe_id, $school_year_model){
+                        
+                        foreach($epe_tabs as $epe_k_index => $validEpe){
+
+                            DB::transaction(function($e) use ($validEpe, $pupil, $subject_id, $semestre, $classe_id, $school_year_model, $epe_k_index){
+                                $epe_mark = Mark::create([
+                                    'value' => $validEpe, 
                                     'pupil_id' => $pupil->id, 
+                                    'user_id' => auth()->user()->id, 
+                                    'creator' => auth()->user()->id, 
                                     'subject_id' => $subject_id, 
                                     'classe_id' => $classe_id, 
                                     'semestre' => $semestre, 
-                                    'type' => 'devoir', 
-                                    'mark_index' => $dev_k_index, 
+                                    'type' => 'epe', 
+                                    'mark_index' => $epe_k_index, 
                                     'level_id' => $pupil->level_id, 
                                 ]);
-                                if ($dev_mark) {
-                                    $school_year_model->marks()->attach($dev_mark->id);
+                                if ($epe_mark) {
+                                    $school_year_model->marks()->attach($epe_mark->id);
                                 }
 
                             });
@@ -259,17 +252,47 @@ class InsertPupilMarks extends Component
                     });
                 }
 
-            DB::afterCommit(function(){
-                $this->emit('pupilUpdated');
-                $this->emit('classeUpdated');
-                $this->dispatchBrowserEvent('hide-form');
-                $this->reset('epe_marks', 'dev_marks', 'epe_mark_index', 'dev_mark_index');
-                $this->resetErrorBag();
+                if($dev_tabs !== []){
+                        $make = DB::transaction(function($e) use ($dev_tabs, $pupil, $subject_id, $semestre, $classe_id, $school_year_model){
+                            
+                            foreach($dev_tabs as $dev_k_index => $validDev){
 
-            });
-        }
-        else{
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "Au moins les données de l'un des champs sont invalides. Veuillez bien renseigner tous les champs avec des données valides!", 'type' => 'warning']);
+                                DB::transaction(function($e) use ($validDev, $pupil, $subject_id, $semestre, $classe_id, $school_year_model, $dev_k_index){
+                                    $dev_mark = Mark::create([
+                                        'value' => $validDev, 
+                                        'pupil_id' => $pupil->id, 
+                                        'user_id' => auth()->user()->id, 
+                                        'creator' => auth()->user()->id, 
+                                        'subject_id' => $subject_id, 
+                                        'classe_id' => $classe_id, 
+                                        'semestre' => $semestre, 
+                                        'type' => 'devoir', 
+                                        'mark_index' => $dev_k_index, 
+                                        'level_id' => $pupil->level_id, 
+                                    ]);
+                                    if ($dev_mark) {
+                                        $school_year_model->marks()->attach($dev_mark->id);
+                                    }
+
+                                });
+                            }
+                        });
+                    }
+
+                DB::afterCommit(function(){
+                    $this->emit('pupilUpdated');
+                    $this->emit('classeUpdated');
+                    $this->dispatchBrowserEvent('hide-form');
+                    $this->reset('epe_marks', 'dev_marks', 'epe_mark_index', 'dev_mark_index');
+                    $this->resetErrorBag();
+
+                });
+            }
+            else{
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "Au moins les données de l'un des champs sont invalides. Veuillez bien renseigner tous les champs avec des données valides!", 'type' => 'warning']);
+            }
+
+
         }
 
 

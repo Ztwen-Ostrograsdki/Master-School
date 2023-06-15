@@ -10,9 +10,7 @@ class Administrator extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'status', 'abilities'];
-
-
+    protected $fillable = ['user_id', 'status', 'abilities', 'authorized', 'canManage'];
 
     public function users()
     {

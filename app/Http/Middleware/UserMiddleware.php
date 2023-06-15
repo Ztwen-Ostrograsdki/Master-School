@@ -16,9 +16,9 @@ class UserMiddleware
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next, $userID = null)
     {
-        if(Auth::user() && $request->user() && $request->user()->id == Auth::user()->id){
+        if(Auth::user() && $request->user()){
             return $next($request);
         }
         return abort(403, "Vous n'êtes pas authorisé");

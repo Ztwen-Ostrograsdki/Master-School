@@ -9,48 +9,50 @@
         </select>
         @endisRoute
         @if($subject_selected)
-        <small class="text-warning m-2">
-            @if($modality)
-                <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, <b class="text-success">0{{$modality}}</b> notes seront prises en comptes!
-            @else
-                <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, toutes les notes seront prises en comptes!
-            @endif
-        </small>
-        <span class="text-dark float-right btn btn-secondary border mx-1">
-            @if(!$computedRank)
-                <span wire:click="displayRank" title="Afficher les rangs" class="d-inline-block w-100 cursor-pointer">
-                    <small>Le rang</small>
-                    <span class="bi-eye text-dark"></span>
+            <small class="text-warning m-2">
+                @if($modality)
+                    <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, <b class="text-success">0{{$modality}}</b> notes seront prises en comptes!
+                @else
+                    <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, toutes les notes seront prises en comptes!
+                @endif
+            </small>
+            <span class="text-dark float-right btn btn-secondary border mx-1">
+                @if(!$computedRank)
+                    <span wire:click="displayRank" title="Afficher les rangs" class="d-inline-block w-100 cursor-pointer">
+                        <small>Le rang</small>
+                        <span class="bi-eye text-dark"></span>
 
-                </span>
-            @else
-                <span wire:click="hideRank" title="Masquer les rangs" class="d-inline-block w-100 cursor-pointer">
-                    <small>Masquer rang</small>
-                    <span class="bi-eye-slash  text-black-50"></span>
-                </span>
-            @endif
-        </span>
-        @if($hasModalities)
-        <span class="text-warning float-right btn btn-secondary border">
-            @if($modalitiesActivated)
-                <span wire:click="diseableModalities" title="Désactiver tamporairement les modalités" class="d-inline-block w-100 cursor-pointer">
-                    <small>Désactiver</small>
-                    <span class="bi-key text-warning"></span>
+                    </span>
+                @else
+                    <span wire:click="hideRank" title="Masquer les rangs" class="d-inline-block w-100 cursor-pointer">
+                        <small>Masquer rang</small>
+                        <span class="bi-eye-slash  text-black-50"></span>
+                    </span>
+                @endif
+            </span>
+            @if($classe && $classe->classeWasNotClosedForTeacher(auth()->user()->teacher->id) && $classe->classeWasNotLockedForTeacher(auth()->user()->teacher->id))
+                @if($hasModalities)
+                    <span class="text-warning float-right btn btn-secondary border">
+                        @if($modalitiesActivated)
+                            <span wire:click="diseableModalities" title="Désactiver tamporairement les modalités" class="d-inline-block w-100 cursor-pointer">
+                                <small>Désactiver</small>
+                                <span class="bi-key text-warning"></span>
 
-                </span>
-            @else
-                <span wire:click="activateModalities" title="Réactiver les modalités" class="d-inline-block w-100 cursor-pointer">
-                    <small>Activer</small>
-                    <span class="bi-unlock text-success"></span>
+                            </span>
+                        @else
+                            <span wire:click="activateModalities" title="Réactiver les modalités" class="d-inline-block w-100 cursor-pointer">
+                                <small>Activer</small>
+                                <span class="bi-unlock text-success"></span>
+                            </span>
+                        @endif
+                    </span>
+                @endif
+                <span wire:click="manageModality" class="btn btn-primary border border-white float-right mx-1" title="Editer les modalités de calcule de moyenne dans la matière sélectionnée dans cette classe">
+                    <span class="fa bi-pen"></span>
+                    <span class="fa bi-calculator"></span>
+                    <span>Editer</span>
                 </span>
             @endif
-        </span>
-        @endif
-        <span wire:click="manageModality" class="btn btn-primary border border-white float-right mx-1" title="Editer les modalités de calcule de moyenne dans la matière sélectionnée dans cette classe">
-            <span class="fa bi-pen"></span>
-            <span class="fa bi-calculator"></span>
-            <span>Editer</span>
-        </span>
         @endif
         @isMaster(auth()->user())
             @isRoute('classe_profil')

@@ -2,6 +2,7 @@
 namespace App\Helpers\ModelTraits;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\ClassesSecurity;
 use App\Models\Pupil;
 use App\Models\SchoolYear;
 use App\Models\Subject;
@@ -14,6 +15,48 @@ trait ClasseTraits{
 
 
     use ModelQueryTrait;
+
+
+
+    public function classeWasFreeInThisTime($start, $end, $day, $school_year_id = null)
+    {
+        if(!$school_year_id){
+            $school_year_id = $this->getSchoolYear()->id;
+        }
+
+        $times = $this->timePlans()->where('time_plans.school_year_id', $school_year_id)->where('time_plans.day', $day)->get();
+
+        if(count($times) > 0){
+            foreach($times as $time){
+                $time_start = $time->start;
+                $time_end = $time->end;
+
+                if($end >= $time_start && $end <= $time_end){
+                    return false ;
+                    break;
+                }
+                elseif($start >= $time_start && $end <= $time_end){
+                    return false;
+                    break;
+                }
+                elseif($start <= $time_end && $end >= $time_end){
+                    return false;
+                    break;
+                }
+                elseif($start <= $time_start && $end >= $time_end){
+                    return false;
+                    break;
+                }
+
+            }
+
+            return true;
+
+        }
+        return true;
+    }
+
+
 
     public function getClassePupils($school_year = null)
     {
@@ -888,5 +931,162 @@ trait ClasseTraits{
     }
 
 
+    public function generateClassesSecurity($secure_column, $teacher_id = null, $subject_id = null, $duration = 48)
+    {
+        $school_year_model = $this->getSchoolYear();
+        
+        if($teacher_id){
+            $already_secure = $this->classeWasNotSecureColumn($teacher_id, $secure_column);
+            if($already_secure){
+                $secure = ClassesSecurity::create([
+                    $secure_column => true,
+                    'duration' => $duration,
+                    'level_id' => $this->level_id,
+                    'classe_id' => $this->id,
+                    'teacher_id' => $teacher_id,
+                    'subject_id' => $subject_id,
+                    'school_year_id' => $school_year_model->id
+                ]);
+                return $secure;
+            }
+            return null;
+        }
+        else{
+            $already_secure = $this->hasSecurities(null, $secure_column);
+            if($already_secure){
+                $secure = ClassesSecurity::create([
+                    $secure_column => true,
+                    'duration' => $duration,
+                    'level_id' => $this->level_id,
+                    'classe_id' => $this->id,
+                    'school_year_id' => $school_year_model->id
+                ]);
+                return $secure;
+            }
+            return null;
+
+        }
+    }
+
+
+
+    public function hasSecurities($school_year = null, $secure_column = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        if($secure_column){
+            return $this->securities()->where('school_year_id', $school_year_model->id)->where($secure_column, true)->whereNull('teacher_id')->count() > 0;
+        }
+        $req1 = $this->securities()->where('school_year_id', $school_year_model->school_year)->where('closed', true)->whereNull('teacher_id')->count();
+        $req2 = $this->securities()->where('school_year_id', $school_year_model->school_year)->where('locked', true)->whereNull('teacher_id')->count();
+        $req3 = $this->securities()->where('school_year_id', $school_year_model->school_year)->where('locked_classe', true)->whereNull('teacher_id')->count();
+        $req4 = $this->securities()->where('school_year_id', $school_year_model->school_year)->where('closed_classe', true)->whereNull('teacher_id')->count();
+
+        return $req1 !== 0 || $req2 !== 0 || $req2 !== 0 || $req4 !== 0;
+
+    }
+
+    public function classeNotSecureFor($teacher_id, $protection = 'closed', $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+        $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($protection . '_classe', true)->count();
+        $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($protection, true)->count();
+        $req3 = $school_year_model->securities()->where('teacher_id', $teacher_id)->where($protection, true)->count();
+
+        return $req1 == 0 && $req2 == 0 && $req3 == 0;
+    }
+
+
+    public function classeWasNotSecureColumn($teacher_id, $secure_column = null, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+        if($secure_column){
+            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
+            return $req1 == 0;
+        }
+        else{
+            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed', true)->where('teacher_id', $teacher_id)->count();
+            $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked', true)->where('teacher_id', $teacher_id)->count();
+            $req3 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_classe', true)->where('teacher_id', $teacher_id)->count();
+            $req4 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed_classe', true)->where('teacher_id', $teacher_id)->count();
+            if($req1 == 0 && $req2 == 0 && $req3 == 0 && $req4 == 0){
+                return true;
+            }
+            return false;
+
+        }
+    }
+
+
+
+    public function classeWasNotSecureForTeacher($teacher_id, $secure_column = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+        $classe_id = $this->id;
+        $teacher = $school_year_model->teachers()->where('teachers.id', $teacher_id)->first();
+        $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
+
+        if($classe && $teacher){
+            $teacher_classes = auth()->user()->teacher->getTeachersCurrentClasses();
+
+            if(array_key_exists($classe->id, $teacher_classes)){
+                if(!$classe->hasSecurities()){
+                    if($classe->classeWasNotSecureColumn($teacher->id)){
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
+                }
+                else{
+                    return false;
+                }
+            }
+            else{
+                return false;
+            }
+        }
+        else{
+            return false;
+
+        }
+    }
+
+    public function classeWasNotClosedForTeacher($teacher_id, $secure_column = null, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+        if($secure_column){
+            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
+            return $req1 == 0;
+        }
+        else{
+            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed', true)->where('teacher_id', $teacher_id)->count();
+            $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed_classe', true)->where('teacher_id', $teacher_id)->count();
+            if($req1 == 0 && $req2 == 0){
+                return true;
+            }
+            return false;
+
+        }
+    }
+
+
+    public function classeWasNotLockedForTeacher($teacher_id, $secure_column = null, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+        if($secure_column){
+            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
+            return $req1 == 0;
+        }
+        else{
+            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked', true)->where('teacher_id', $teacher_id)->count();
+            $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_classe', true)->where('teacher_id', $teacher_id)->count();
+            if($req1 == 0 && $req2 == 0){
+                return true;
+            }
+            return false;
+
+        }
+    }
 
 }

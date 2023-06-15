@@ -24,10 +24,13 @@
                         </x-z-linker>
                         @endisAdmin
                         <li class="nav-item cursor-pointer">
-                        <div class=" sm:flex sm:items-center sm:ml-6">
-                            @include('livewire.components.user.user-dropdown-component')
-                        </div>
-                    </li>
+                                <x-z-linker :params="['id' => auth()->user()->id]" :routeName="'user_profil'" :isActive="request()->routeIs('user_profil')">
+                                    <span class="fa fa-user text-success"></span> {{  mb_substr(Auth::user()->pseudo, 0, 7) }}
+                                </x-z-linker>
+                            {{-- <div class=" sm:flex sm:items-center sm:ml-6">
+                                @include('livewire.components.user.user-dropdown-component')
+                            </div> --}}
+                        </li>
                 @endauth
                 @guest
                     @routeHas('registration')

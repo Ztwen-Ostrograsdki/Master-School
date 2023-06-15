@@ -441,7 +441,7 @@ trait DateAgoBuilder{
     }
 
 
-    public function __getDiff($date_created, $date_updated = null)
+    public function __getDiff(int $date_created, int $date_updated = null)
     {
         $dates = [];
         $dates['created_at'] = $this->__diffDateAgoManager($date_created);

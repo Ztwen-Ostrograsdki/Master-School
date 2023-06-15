@@ -24,6 +24,8 @@ return [
     'related_marks_type' => ['bonus', 'minus'],
     
     'admin_key' => 'ah07Xw68ee',
+    'min_weeks_to_consider_that_teacher_has_worked_in_classe' => 2,
+    'teacher_classes_limit' => 4,
     'local_events' => [
         'devoir' => 'Devoirs',
         'examen-bepc' => 'Examens BEPC',
@@ -68,6 +70,15 @@ return [
         'admin' => 'Administrateur standart',
         'master' => 'Administrateur master',
         'default' => 'Administrateur'
+    ],
+    'classes_by_number' => [
+        '6' => 'Sixième',
+        '5' => 'Cinquième',
+        '4' => 'Quatrième',
+        '3' => 'Troisième',
+        '2' => 'Seconde',
+        '1' => 'Première',
+        '7' => 'Terminale',
     ],
 
     /*

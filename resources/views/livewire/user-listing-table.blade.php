@@ -68,9 +68,15 @@
                                 <span wire:click="manageAdminStatus({{$u->id}})" title="Etendre entant que administrateur" class="text-danger border-right border-left col-3 m-0 p-0 cursor-pointer">
                                     <span class="text-secondary cursor-pointer fa fa-user-secret py-2 px-2"></span>
                                 </span>
-                                <span title="Editer" class="text-danger col-3 border-right border-left m-0 p-0 cursor-pointer">
-                                    <span class="text-primary cursor-pointer fa fa-edit py-2 px-2"></span>
-                                </span>
+                                @if(!$u->blocked && !$u->locked)
+                                    <span wire:click="blockerManager({{$u->id}})" title="Bloquer l'utilisateur {{$u->pseudo}}" class="text-danger col-3 border-right border-left m-0 p-0 cursor-pointer">
+                                        <span class="text-danger cursor-pointer fa fa-lock py-2 px-2"></span>
+                                    </span>
+                                @else
+                                    <span wire:click="blockerManager({{$u->id}})" title="Débloquer l'utilisateur {{$u->pseudo}}" class="text-danger col-3 border-right border-left m-0 p-0 cursor-pointer">
+                                        <span class="text-warning cursor-pointer fa fa-unlock py-2 px-2"></span>
+                                    </span>
+                                @endif
                             </span>
                         </td>
 
@@ -80,13 +86,15 @@
         </table>            
     @else
         <div>
-            <blockquote class="">
-                
+            <div class="d-flex justify-content-center mx-auto w-100">
+                <span class="fa fa-trash text-muted fa-8x"></span>
+            </div>
+            <blockquote class="text-warning">
                 <span class="float-right border-top border-white w-100 d-inline-block text-right">
                     <span class="fa fa-heart text-danger"></span>
                     <span class="fa fa-heart text-danger"></span>
                     <span class="fa fa-heart text-danger"></span>
-                    <i class="text-warning small">On a donc affaire à un apprenant ponctuel et exemplaire!!!</i>
+                    <i class="text-warning small">La liste est vide!!!!!</i>
                 </span>
             </blockquote>
         </div>

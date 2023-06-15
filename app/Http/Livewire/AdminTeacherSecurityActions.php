@@ -2,13 +2,17 @@
 
 namespace App\Http\Livewire;
 
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Level;
 use App\Models\Subject;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class AdminTeacherSecurityActions extends Component
 {
+    use ModelQueryTrait;
+
     protected $listeners = ['updatedTeachersSelectedsList' => 'getList'];
     public $level_id_selected = null;
     public $classe_id_selected = null;
@@ -16,6 +20,9 @@ class AdminTeacherSecurityActions extends Component
     public $counter = 0;
     public $start = false;
     public $teachers_selecteds = [];
+    public $teachers_table = [];
+
+
 
     public function render()
     {
@@ -64,14 +71,81 @@ class AdminTeacherSecurityActions extends Component
 
     public function startProcess()
     {
+        $school_year_model = $this->getSchoolYear();
+        $teachers = $school_year_model->teachers()->whereIn('teachers.id', $this->teachers_selecteds)->get();
+        $this->teachers_table = $teachers;
         $this->start = true;
 
+       
     } 
+
+    public function submit($teacher_id = null, $classe_id = null, $secure_column = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+        $table = $this->teachers_selecteds;
+        if(count($table) > 0){
+            if($secure_column){
+                if($classe_id){
+                    $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
+                    if($classe){
+                        DB::transaction(function($e) use ($teacher_id, $classe, $secure_column){
+                            try {
+                                $secure = $classe->generateClassesSecurity($secure_column, $teacher_id, null, 48);
+                            } catch (Exception $exception) {
+                                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'enseignant a échoué!", 'type' => 'error']);
+                            }
+                        });
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('Toast', ['Erreure' => 'Erreure requête', 'message' => "La classe est introuvable!", 'type' => 'error']);
+                    }
+                }
+                else{
+                    $teachers = $school_year_model->teachers()->whereIn('teachers.id', $tables)->get();
+
+                    foreach($teachers as $teacher){
+                        $classes = $teacher->getTeachersCurrentClasses();
+                        if(count($classes) > 0){
+                            foreach($classes as $classe){
+                                DB::transaction(function($e) use ($teacher, $classe, $secure_column){
+                                    try {
+                                        $classe->generateClassesSecurity($secure_column, $teacher->id, null, 48);
+                                    } catch (Exception $exception) {
+                                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'enseignant a échoué!", 'type' => 'error']);
+                                    }
+                                });
+
+                            }
+                        }
+                    }
+                }
+
+
+                DB::afterCommit(function() use ($table){
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Les données ont été mises à jour avec succès! ", 'type' => 'success']);
+                    $this->getList($table);
+                });
+            }
+        }
+    }
+
+
+
+
+
+
+    public function hide()
+    {
+        $this->emit('selectedsWasChanged', $this->teachers_selecteds);
+        $this->start = false;
+    }
+
 
     public function cancel()
     {
+        $this->reset('teachers_selecteds');
+        $this->emit('selectedsWasChanged', $this->teachers_selecteds);
         $this->start = false;
-
     }
 
    

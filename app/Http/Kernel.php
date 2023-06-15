@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\ClasseNotClosedForTeacher;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -58,6 +59,7 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
+        'classeNotClosedForTeacher' => \App\Http\Middleware\ClasseNotSecureForTeacher::class,
         'authorized.admin' => \App\Http\Middleware\AuthorizedToAdminRoutes::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'user.self' => \App\Http\Middleware\UserMiddleware::class,

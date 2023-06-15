@@ -232,19 +232,22 @@ hr {
     min-height: 300px !important;
 }
 
-.zw-10 {
+.zw-5, .w-5 {
+    width: 10% !important;
+}
+.zw-10, .w-10 {
     width: 10% !important;
 }
 
-.zw-15 {
+.zw-15, .w-15 {
     width: 15% !important;
 }
 
-.zw-20 {
+.zw-20, .w-20 {
     width: 20% !important;
 }
 
-.zw-30 {
+.zw-30, .w-30 {
     width: 30% !important;
 }
 
@@ -256,15 +259,15 @@ hr {
     width: 33% !important;
 }
 
-.zw-40 {
+.zw-40, .w-40 {
     width: 40% !important;
 }
 
-.zw-45 {
+.zw-45, .w-45 {
     width: 45% !important;
 }
 
-.zw-60 {
+.zw-60, .w-60 {
     width: 60% !important;
 }
 
@@ -272,7 +275,7 @@ hr {
     width: 65% !important;
 }
 
-.zw-70 {
+.zw-70, .w-70 {
     width: 70% !important;
 }
 
@@ -280,11 +283,11 @@ hr {
     width: 80% !important;
 }
 
-.zw-83 {
+.zw-83, .w-83 {
     width: 83% !important;
 }
 
-.zw-85 {
+.zw-85, .w-85 {
     width: 85% !important;
 }
 
@@ -292,27 +295,27 @@ hr {
     width: 90% !important;
 }
 
-.zw-95 {
+.zw-95, .w-95 {
     width: 95% !important;
 }
 
-.zw-96 {
+.zw-96, .w-96 {
     width: 96% !important;
 }
 
-.zw-97 {
+.zw-97, .w-97 {
     width: 97% !important;
 }
 
-.zw-98 {
+.zw-98, .w-98 {
     width: 98% !important;
 }
 
-.zw-98-5 {
+.zw-98-5, .w-98-5 {
     width: 98.5% !important;
 }
 
-.zw-99 {
+.zw-99, .w-99 {
     width: 99% !important;
 }
 

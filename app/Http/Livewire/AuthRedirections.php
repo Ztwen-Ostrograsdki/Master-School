@@ -4,10 +4,13 @@ namespace App\Http\Livewire;
 
 use App\Events\NewUserConnectedEvent;
 use App\Events\NewUserRegistredEvent;
+use App\Models\LockedUsersRequest;
 use App\Models\Role;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
+use App\Rules\PasswordChecked;
 use App\Rules\StrongPassword;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -16,12 +19,15 @@ use Livewire\Component;
 
 class AuthRedirections extends Component
 {
+    public $unlock_token_expires = false;
     public $showPassword = false;
     public $showNewPassword = false;
     public $email_auth;
+    public $counter = 0;
     public $email_for_reset;
     public $password_auth;
     public $email;
+    public $unlock_token;
     public $pseudo;
     public $password;
     public $new_password;
@@ -31,6 +37,7 @@ class AuthRedirections extends Component
     public $unverifiedUser = false;
     public $user;
     public $userNoConfirm = false;
+    public $blockedUser = false;
     public $reset_password_final_step = false;
 
     protected $rules = [
@@ -38,6 +45,7 @@ class AuthRedirections extends Component
         'email' => 'required|email',
         'email_auth' => 'required|email',
         'password' => 'required|string|min:4',
+        'unlock_token' => 'required|string|min:4',
         'password_confirmation' => 'required|string|min:4',
         'new_password' => 'required|string|min:4',
         'new_password_confirmation' => 'required|string|min:5',
@@ -75,9 +83,17 @@ class AuthRedirections extends Component
         return view('livewire.auth-redirections');
     }
 
+
+    public function updatedEmailAuth($email)
+    {
+        $this->resetErrorBag();
+        $this->reset('userNoConfirm', 'showPassword', 'showNewPassword', 'unverifiedUser', 'userNoConfirm', 'blockedUser', 'reset_password_final_step');
+    }
+
     public function login()
     {
         $this->reset('userNoConfirm');
+        $this->validateOnly('email_auth');
         $this->validate([
             'email_auth' => 'required|email',
             'password_auth' => 'required|string|min:4'
@@ -91,6 +107,13 @@ class AuthRedirections extends Component
             session()->put('email-to-confirm', $this->email);
             $this->addError('email_auth', "Ce compte n'a pas été confirmé!");
             $this->userNoConfirm = true;
+        }
+        elseif($u && ($u->blocked || $u->locked)){
+            $this->user = $u;
+            $this->email_auth = $u->email;
+            // $this->emit('newEmailToShouldBeConfirmed', $this->email);
+            $this->addError('email_auth', "Ce compte a été bloqué temporairement!");
+            $this->blockedUser = true;
         }
         else{
             if(Auth::attempt($credentials)){
@@ -139,7 +162,7 @@ class AuthRedirections extends Component
                     'role_id' => Role::first()->id,
                     'email_verified_token' => Hash::make(Str::random(16)),
                 ]);
-                if($this->user->id == 1 || true){
+                if($this->user->id == 1){
                     $this->user->markEmailAsVerified();
                 }
                 else{
@@ -207,6 +230,96 @@ class AuthRedirections extends Component
     {
         return redirect($this->user->__urlForEmailConfirmation(true));
     }
+
+    public function refreshData()
+    {
+        $this->counter = $this->counter++;
+    }
+
+
+
+
+
+    public function sendLockedRequest()
+    {
+        $u = $this->user;
+        $email = $this->email_auth;
+
+        if($u && $email){
+            $request = LockedUsersRequest::create(['user_id' => $u->id, "message" => "Demande de déblocage du compte $email"]);
+            if($request){
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'success', 'message' => "Votre demande a été soumis avec succès!",  'title' => 'DEMANDE ENVOYEE']);
+            }
+            else{
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'error', 'message' => "Votre demande n'a pas pu être soumise!",  'title' => 'Erreur']);
+            }
+
+        }
+        else{
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'error', 'message' => "Veuillez renseigner des données valides!",  'title' => 'Erreur']);
+        }
+
+    }
+
+
+
+    public function validateToken()
+    {
+        $this->validate(['unlock_token' => 'required|string|min:4']);
+        $this->validate(['unlock_token' => new PasswordChecked($this->user->unlock_token)]);
+        if($this->keyIsExpires()){
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'error', 'title' => 'Authentification échouée', 'message' => "Cette clé a déjà expiré. Veuillez renseigner la nouvelle clé."]);
+            $this->addError('unlock_token', "Cette clé n'est plus valable. Taper la nouvelle clé!");
+            $this->unlock_token_expires = true;
+        }
+        else{
+            $r = $this->user->__unlockOrLockThisUser();
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'success', 'title' => "VERIFICATION REUSSIE", "message" => "Vous pouvez à présent vous connecter à votre compte et accéder à vos données!"]);
+            $this->reset('unlock_token_expires', 'blockedUser', 'unlock_token');
+        }
+        
+    }
+
+
+    public function updatedUnlockToken($token)
+    {
+        $this->resetErrorBag('unlock_token');
+    }
+
+
+    public function keyIsExpires()
+    {
+        $now = Carbon::now();
+        $e = $this->user->updated_at;
+        $times = $now->diffInMinutes($e);
+        if($times > 15){
+            return true;
+        }
+        return false;
+    }
+
+    public function regenerateAndSendUnlockTokenToUser()
+    {
+        $user = $this->user;
+
+        if($user){
+            $request = $user->__generateUnlockedToken();
+            if($request){
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'success', 'message' => "Clé générée avec succès!",  'title' => 'CLE ENVOYEE']);
+            }
+            else{
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'error', 'message' => "La clé n'a pu être générée!",  'title' => 'Erreur']);
+            }
+
+        }
+        else{
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'error', 'message' => "Veuillez renseigner des données valides!",  'title' => 'Erreur']);
+        }
+
+        $this->refreshData();
+
+    }
+
 
 
 }

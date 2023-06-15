@@ -17,6 +17,7 @@
 <script src="{{asset('myassets/js/popper.min.js')}}"></script>
 <script src="{{asset('myassets/js/ztw-animate.js')}}"></script>
 <script src="{{asset('myassets/js/chat.js')}}"></script>
+<link rel="stylesheet" href="{{ asset('myassets/css/admin/sweetAlert.css')}}">
 
     @stack('modals')
 

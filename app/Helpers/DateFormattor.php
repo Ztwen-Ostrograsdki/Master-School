@@ -156,6 +156,41 @@ trait DateFormattor{
     }
 
 
+    /**
+     * Undocumented function
+     *
+     * @param int $start|$end  <timestamps>
+     * @return int difference between two dates into seconds
+     */
+    public function __getTimestampInSecondsBetweenDates(int $start, $end = null)
+    {
+        if(!$end){
+            $end = Carbon::now();
+        }
+        else{
+            $end = Carbon::parse($end);
+        }
+
+        $start = Carbon::parse((int)$start);
+
+        return $end->diffInSeconds($start);
+    }
+
+
+/**
+     * Undocumented function
+     *
+     * @param int $start|$end  <timestamps>
+     * @return int difference between two dates into weeks
+     */
+    public function __getTimestampInWeeksBetweenDates(int $start, $end = null, $full = true)
+    {
+        return !$full ?  
+                floor($this->__getTimestampInSecondsBetweenDates($start, $end) / (3600*24*7)) : 
+                $this->__getTimestampInSecondsBetweenDates($start, $end) / (3600*24*7);
+    }
+
+
 
 
 

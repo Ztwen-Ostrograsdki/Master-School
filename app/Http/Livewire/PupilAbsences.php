@@ -10,7 +10,7 @@ use Livewire\Component;
 
 class PupilAbsences extends Component
 {
-        use ModelQueryTrait;
+    use ModelQueryTrait;
 
     protected $listeners = [
         'schoolYearChangedLiveEvent' => 'reloadPupilData',
@@ -58,7 +58,7 @@ class PupilAbsences extends Component
         $pupil_id = $this->pupil_id;
         if($pupil_id){
 
-            $pupil = Pupil::find($pupil_id);
+            $pupil = $school_year_model->pupils()->where('pupils.id', $pupil_id)->first();
             if($pupil){
                 $absences = $pupil->absences()
                                   ->where('school_year_id', $school_year_model->id)

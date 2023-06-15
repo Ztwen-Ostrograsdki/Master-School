@@ -53,7 +53,7 @@
         </div>
     </div>
 
-    @if(!$start)
+    @if(!$start || $start)
     <div class="row w-100 mx-auto mt-1 p-2">
         <div class="col-12">
             <div class="card">
@@ -113,41 +113,141 @@
             @endif
         </div>
     </div>
-    @else
+    {{-- @else --}}
+    @if(count($teachers_selecteds) > 0)
     <div class="row w-100 mx-auto mt-1 p-2">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between p-0">
-                    <span class="ml-3 mt-2">
-                        <span title="Ajouter un enseignant" class="float-right text-white-50 border p-2 px-5 rounded cursor-pointer bg-orange" wire:click="cancel">
+                    <span class="ml-1 my-2">
+                        <span title="Fermer la fenêtre et afficher la page de sélections" class="float-right text-white-50 border p-2 px-5 rounded cursor-pointer bg-orange" wire:click="hide">
                             <span class="bi-eye-slash"></span>
                             <span>Fermer la fenêtre</span>
+                        </span>
+
+                        <span title="Annuler la procédure" class="float-right text-white-50 border p-2 px-5 rounded cursor-pointer bg-danger mx-2" wire:click="cancel">
+                            <span class="bi-reply-all"></span>
+                            <span>Annuler la Procédure</span>
                         </span>
                     </span>
                     <ul class="nav nav-pills ml-auto p-2">
                         <li class="nav-item">
                             
                         </li>
-
-                        
                     </ul>
                 </div><!-- /.card-header -->
-                <div class="card-body">
+                <div class="card-body p-2">
                     <div class="tab-content">
-                        
+                        <div class="">
+                            @foreach($teachers_table as $t)
+                                <div class="card border rounded">
+                                    <h6 class="d-flex justify-content-between p-2 m-0">
+                                        <span>
+                                            <span class="text-white-50">
+                                                <span class="bi-person mr-2 text-orange"></span>
+                                                Enseignant: 
+                                            </span>
+                                            <span class="text-white">{{ $t->name . ' ' . $t->surname }}</span>
+                                        </span>
+                                        <span>
+                                            <span class="text-white-50">Spécialité: </span>
+                                            <span class="text-white">{{ $t->speciality()->name }}</span>
+                                        </span>
+                                        <span>
+                                            <span class="text-white-50">Nombre de classes: </span>
+                                            <span class="text-white">{{ count($t->getTeachersCurrentClasses())}}</span>
+                                        </span>
+                                    </h6>
+                                    <hr class="bg-white w-100 p-0 m-0">
+
+                                    <div class="row p-2 m-2 justify-content-between">
+                                        @foreach($t->getTeachersCurrentClasses() as $cl)
+                                            <div class="card border border-secondary rounded shadow p-0 m-1 zw-45">
+                                                <h6 class="d-flex justify-content-between p-2 m-0">
+                                                    <span>
+                                                        <span class="bi-house mr-2"></span>
+                                                        <span class="text-white-50">Classe: </span>
+                                                        <span class="text-warning">{{ $cl->name }}</span>
+                                                    </span>
+                                                    <span>
+                                                        <span class="text-white-50">Effectif: </span>
+                                                        <span class="text-white">0{{ count($cl->getPupils(session('school_year_selected'))) }}</span>
+                                                    </span>
+                                                    <span>
+                                                        <span class="text-white-50">Prof Principal </span>
+                                                        <span class="text-white">{{ 'Non défini' }}</span>
+                                                    </span>
+                                                </h6>
+                                                <hr class="bg-orange w-100 p-0 m-0">
+
+                                                <div class="d-flex p-2">
+                                                    @if(!$t->teacherCanAccess($cl->id, 'closed'))
+                                                        <span class="btn btn-primary m-1">Ouvrir accès</span>
+                                                    @else
+                                                        <span wire:click="submit({{$t->id}},{{$cl->id}}, 'closed_classe')" class="btn btn-primary m-1">Bloquer Accès</span>
+                                                    @endif
+                                                    @if(!$t->teacherCanAccess($cl->id, 'locked'))
+                                                        <span class="btn btn-success m-1">Déverrouiller classe</span>
+                                                    @else
+                                                        <span wire:click="submit({{$t->id}},{{$cl->id}}, 'locked_classe')" class="btn btn-success m-1">Verrouiller classe</span>
+                                                    @endif
+                                                    @if(!$t->teacherCanAccessMarks($cl->id))
+                                                        <span class="btn btn-warning m-1">Déverrouiller notes</span>
+                                                    @else
+                                                        <span wire:click="submit({{$t->id}},{{$cl->id}}, 'locked_marks')" class="btn btn-warning m-1">Vérouiller notes</span>
+                                                    @endif
+                                                    <span class="btn btn-secondary m-1">Vider notes</span>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="d-flex p-2 z-bg-secondary justify-content-between">
+                                        <h6 class="small">Effectuer une action globale sur les classe de Mr/Mme <span class="text-orange">{{ $t->name . ' ' . $t->surname }}</span> </h6>
+                                        <div class="d-flex justify-content-end">
+                                            @if(!$t->teacherCanAccess($cl->id, 'closed'))
+                                                <span class="btn border-orange btn-primary m-1">Ouvrir accès</span>
+                                            @else
+                                                <span wire:click="submit({{$t->id,null}}, 'closed_classe')" class="btn border-orange btn-primary m-1">Bloquer Accès</span>
+                                            @endif
+                                            @if(!$t->teacherCanAccess($cl->id, 'locked'))
+                                                <span class="btn border-orange btn-success m-1">Déverrouiller classe</span>
+                                            @else
+                                                <span wire:click="submit({{$t->id,null}}, 'locked_classe')" class="btn border-orange btn-success m-1">Verrouiller classe</span>
+                                            @endif
+                                            @if(!$t->teacherCanAccessMarks($cl->id))
+                                                <span class="btn border-orange btn-warning m-1">Déverrouiller notes</span>
+                                            @else
+                                                <span wire:click="submit({{$t->id,null}}, 'locked_marks')" class="btn border-orange btn-warning m-1">Vérouiller notes</span>
+                                            @endif
+                                            <span class="btn border-orange btn-secondary m-1">Vider notes</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
+                    @if(count($teachers_selecteds) > 1)
+                    <div class="d-flex p-2 z-bg-secondary border rounded border-orange justify-content-between">
+                        <h6 class="small">Effectuer une action globale sur l'ensemble des enseignants sélectionés</h6>
+                        <div class="d-flex justify-content-end">
+                            <span class="btn border-dark btn-primary m-1">Fermer classes</span>
+                            <span class="btn border-dark btn-success m-1">Verrouiller classes</span>
+                            <span class="btn border-dark btn-warning m-1">Verrouiller notes</span>
+                            <span class="btn border-dark btn-secondary m-1">Vider notes</span>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
-            @if(count($teachers_selecteds) > 0)
             <div class="w-100 d-flex justify-content-center">
                 <span wire:click="startProcess" class="btn btn-success border py-2 w-50 d-flex flex-column">
                     <h6>Valider la procédure</h6>
                     <span class="text-dark"> {{ count($teachers_selecteds) > 0 ? count($teachers_selecteds) . ' enseignant(s) sélectionné(s) ' : ''}} </span>
                 </span>
             </div>
-            @endif
         </div>
     </div>
+    @endif
 
     @endif
 </div>

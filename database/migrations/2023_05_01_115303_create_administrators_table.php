@@ -17,6 +17,8 @@ class CreateAdministratorsTable extends Migration
             $table->id();
             $table->timestamps();
             $table->string('abilities')->nullable()->default(null);
+            $table->boolean('authorized')->default(true);
+            $table->boolean('canManage')->default(true);
             $table->string('status')->nullable()->default('admin');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')

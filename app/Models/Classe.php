@@ -7,6 +7,7 @@ use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\AverageModality;
 use App\Models\ClasseGroup;
 use App\Models\ClassePupilSchoolYear;
+use App\Models\ClassesSecurity;
 use App\Models\Coeficient;
 use App\Models\Image;
 use App\Models\Level;
@@ -17,6 +18,7 @@ use App\Models\Responsible;
 use App\Models\SchoolYear;
 use App\Models\Subject;
 use App\Models\Teacher;
+use App\Models\TimePlan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -42,6 +44,10 @@ class Classe extends Model
     ];
 
 
+    public function timePlans()
+    {
+        return $this->hasMany(TimePlan::class);
+    }
 
 
     public function classePupilSchoolYear()
@@ -105,12 +111,15 @@ class Classe extends Model
             }
 
         }
-
-
         return $pupils;
-
-
     }
+
+
+    public function securities()
+    {
+        return $this->hasMany(ClassesSecurity::class);
+    }
+
 
 
     public function classe_group()
@@ -151,6 +160,7 @@ class Classe extends Model
     {
         return $this->hasMany(Pupil::class);
     }
+    
     public function responsibles()
     {
         return $this->hasMany(Responsible::class);

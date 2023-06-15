@@ -1,5 +1,5 @@
 @extends('errors::illustrated-layout')
 
-@section('title', __('Unauthorized'))
+@section('title', __('Page à accès limité'))
 @section('code', '401')
-@section('message', __('Unauthorized'))
+@section('message', __($exception->getMessage() ?: 'Non authorisé'))

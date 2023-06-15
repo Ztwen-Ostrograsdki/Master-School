@@ -55,12 +55,26 @@ class CreateMarksTable extends Migration
                   ->onUpdate('cascade')
                   ->onDelete('cascade');
 
+            $table->unsignedBigInteger('teacher_id')->nullable();
+            $table->foreign('teacher_id')
+                  ->references('id')
+                  ->on('teachers')
+                  ->onUpdate('restrict')
+                  ->onDelete('restrict');
+
             $table->unsignedBigInteger('classe_id')->nullable();
             $table->foreign('classe_id')
                   ->references('id')
                   ->on('classes')
                   ->onUpdate('cascade')
                   ->onDelete('cascade');
+
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')
+                  ->references('id')
+                  ->on('users')
+                  ->onUpdate('restrict')
+                  ->onDelete('restrict');
 
             $table->timestamps();
             $table->softDeletes();
@@ -76,4 +90,7 @@ class CreateMarksTable extends Migration
     {
         Schema::dropIfExists('marks');
     }
+
+
+    
 }

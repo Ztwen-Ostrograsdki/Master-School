@@ -18,8 +18,17 @@
                             {{ __('Profil') }}
                         </span>
                     </span>
-                    
                 </x-dropdown-link>
+                @auth
+                    <x-dropdown-link class="nav-item text-left w-100 p-0 m-0 z-hover-secondary text-bold"  href="#">
+                        <span >
+                            <span class="fa bi-person-check mr-3"></span> 
+                            <span>
+                                Mon compte
+                            </span>
+                        </span>
+                    </x-dropdown-link>
+                @endauth
                 @endisNotRoute
             @endrouteHas
             <x-dropdown-link class="nav-item text-left w-100 p-0 m-0 z-hover-secondary text-bold"  href="#">

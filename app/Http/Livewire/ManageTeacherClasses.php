@@ -117,7 +117,7 @@ class ManageTeacherClasses extends Component
                         try {
 
                             try {
-                                $cursus = $this->school_year_model->teacherCursus()->where('teacher_id', $this->target->id)->where('classe_id', $classe_id)->whereNull('end')->first();
+                                $cursus = $this->school_year_model->teacherCursus()->where('teacher_id', $this->target->id)->where('classe_id', $classe->id)->whereNull('end')->first();
 
                                 if($cursus){
                                     $this->school_year_model->teacherCursus()->detach($cursus->id);
@@ -151,11 +151,9 @@ class ManageTeacherClasses extends Component
             else{
                 $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur', 'message' => "Votre requête ne peut être traiter car cette classe n'est pas compatible avec cette ce prof ! Vérifiez que la matière du prof est bien enseignée dans cette classe et réessayez!", 'type' => 'error']);
             }
-
         }
         
     }
-
 
     public function reloadData()
     {

@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Level;
 use App\Models\Classe;
+use App\Models\Level;
 use App\Models\SchoolYear;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Mark extends Model
 {
@@ -19,6 +20,7 @@ class Mark extends Model
         'pupil_id', 
         'subject_id', 
         'classe_id', 
+        'user_id',
         'trimestre', 
         'semestre', 
         'type', 
@@ -36,6 +38,11 @@ class Mark extends Model
         'forced_mark',
         'mark_index',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function school_years()
     {
@@ -69,6 +76,17 @@ class Mark extends Model
     public function level()
     {
         return $this->belongsTo(Level::class);
+    }
+
+
+    public function getCreator()
+    {
+        return $this->creator ? User::find($this->creator) : null;
+    }
+
+    public function getEditor()
+    {
+        return $this->editor ? User::find($this->editor) : null;
     }
 
 }

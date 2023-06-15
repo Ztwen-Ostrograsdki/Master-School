@@ -17,9 +17,11 @@ class AuthTeacherMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if(Auth::user() && $request->user() && $request->user()->id == Auth::user()->id && $request->user()->teacher){
+        if(Auth::user() && $request->user()->teacher){
             return $next($request);
         }
-        return abort(403, "Vous n'êtes pas authorisé à accéder à une telle page, Vous n'êtes pas enseignant!");
+        else{
+            return abort(403, "Vous n'êtes pas authorisé à accéder à une telle page, Vous n'êtes pas enseignant!");
+        }
     }
 }

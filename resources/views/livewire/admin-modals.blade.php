@@ -13,6 +13,7 @@
     @livewire('create-level')
     @livewire('create-subject')
     
+    @livewire('insert-time-plan')
     @livewire('defined-semestres-periods')
     @livewire('event-periods-manager')
     @livewire('admin-manager')

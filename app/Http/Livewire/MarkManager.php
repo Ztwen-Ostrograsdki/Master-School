@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Mark;
 use App\Models\Pupil;
@@ -14,6 +15,7 @@ use Livewire\Component;
 
 class MarkManager extends Component
 {
+    use ModelQueryTrait;
     protected $listeners = ['editPupilMarkLiveEvent' => 'editPupilMark'];
     public $pupil_id;
     public $mark_id;
@@ -61,21 +63,35 @@ class MarkManager extends Component
     public function editPupilMark(int $mark_id)
     {
         if($mark_id){
-            
+            $school_year_model = $this->getSchoolYear();
+            $user = auth()->user();
             $mark = Mark::find($mark_id);
-            $pupil = $mark->pupil;
 
-            if($pupil && $mark){
-                $this->pupil = $pupil;
-                
-                $this->markModel = $mark;
-                $this->mark = $mark->value;
+            if($mark){
+                $classe_id = $mark->classe_id;
+                $not_secure = $user->ensureThatTeacherCanAccessToClass($classe_id);
 
-                $this->type = $mark->type;
-                $this->mark_index = $mark->mark_index;
+                $pupil = $mark->pupil;
+            }
 
-                $this->semestre_id = $mark->semestre;
-                $this->dispatchBrowserEvent('modal-markManager');
+            if($pupil && $mark){ 
+
+                if($not_secure){
+                    $this->pupil = $pupil;
+                    
+                    $this->markModel = $mark;
+                    $this->mark = $mark->value;
+
+                    $this->type = $mark->type;
+                    $this->mark_index = $mark->mark_index;
+
+                    $this->semestre_id = $mark->semestre;
+                    $this->dispatchBrowserEvent('modal-markManager');
+                }
+                else{
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE', 'message' => "La mise à jour ou l'insertion des notes est temporairement indisponible pour cette classe!", 'type' => 'warning']);
+                }
+
             }
             else{
                 $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "Vos données sont ambigües, nous n'avons trouvé aucun apprenant et ou la matière correspondant(e)!", 'type' => 'error']);
@@ -169,29 +185,39 @@ class MarkManager extends Component
 
         }
 
-        if($semestre && $type && $mark && $pupil){
-            DB::transaction(function($e) use ($mark, $pupil, $semestre, $type, $mark_index){
-                $this->markModel->update([
-                    'value' => $mark,
-                    'semestre' => $semestre,
-                    'type' => $type,
-                    'mark_index' => $mark_index,
-                ]);
 
-                DB::afterCommit(function(){
-                    $this->emit('pupilUpdated');
-                    $this->emit('classeUpdated');
-                    $this->dispatchBrowserEvent('hide-form');
-                    $this->resetErrorBag();
+        $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($mark->classe_id);
+        if($not_secure){
+            if($semestre && $type && $mark && $pupil){
+                DB::transaction(function($e) use ($mark, $pupil, $semestre, $type, $mark_index){
+                    $this->markModel->update([
+                        'value' => $mark,
+                        'semestre' => $semestre,
+                        'type' => $type,
+                        'mark_index' => $mark_index,
+                        'editor' => auth()->user()->id, 
+                    ]);
+
+                    DB::afterCommit(function(){
+                        $this->emit('pupilUpdated');
+                        $this->emit('classeUpdated');
+                        $this->dispatchBrowserEvent('hide-form');
+                        $this->resetErrorBag();
+                    });
+
                 });
 
-            });
-
+            }
+            else{
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "Au moins les données de l'un des champs sont invalides. Veuillez bien renseigner tous les champs avec des données valides!", 'type' => 'warning']);
+            }
         }
         else{
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure de procédure', 'message' => "Au moins les données de l'un des champs sont invalides. Veuillez bien renseigner tous les champs avec des données valides!", 'type' => 'warning']);
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE', 'message' => "La mise à jour ou l'insertion des notes est temporairement indisponible pour cette classe!", 'type' => 'warning']);
         }
 
+
+       
 
     }
 }

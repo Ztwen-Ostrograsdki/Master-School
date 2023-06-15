@@ -32,6 +32,7 @@ return new class extends Migration
 
             $table->timestamp('email_verified_at')->nullable();
             $table->string('token')->nullable()->default(null);
+            $table->string('unlock_token')->nullable()->default(null);
             $table->boolean('blocked')->nullable()->default(false);
             $table->boolean('locked')->default(false);
             $table->string('school_year')->nullable()->default(null);

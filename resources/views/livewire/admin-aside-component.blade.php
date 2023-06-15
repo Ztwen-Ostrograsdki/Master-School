@@ -40,7 +40,7 @@
           <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
               <li class="nav-item">
-                <a href="{{route('admin')}}" class="nav-link active">
+                <a href="{{route('admin')}}" class="nav-link @isRoute('admin') active @endisRoute">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
                   <p>
                     Tableau de bord
@@ -48,7 +48,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link @isRoute('classe_profil') active @endisRoute">
                   <i class="nav-icon bi-people"></i>
                   <p class="text-bold">
                     Les Apprenants
@@ -121,7 +121,7 @@
                 </a>
                 <ul class="nav nav-treeview">
                     <li class="nav-item">
-                      <a href="{{route('teacher_listing')}}" class="nav-link">
+                      <a href="{{route('teacher_listing')}}" class="nav-link @isRoute('teacher_listing') active @endisRoute">
                         <i class="far fa-circle nav-icon"></i>
                         <p> Liste complète </p>
                       </a>
@@ -215,7 +215,7 @@
                 </ul>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link @isRoute('classe_group_profil') active @endisRoute">
                   <i class="nav-icon fa fa-filter"></i>
                   <p class="text-bold">
                     Les Promotions
@@ -292,7 +292,7 @@
                 </ul>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link @isRoutes(['user_listing', 'user_listing_by_target']) active @endisRoutes">
                   <i class="nav-icon fas fa-table"></i>
                   <p>
                     Utilisateurs
@@ -319,14 +319,118 @@
                     </a>
                   </li>
                   <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{route('user_listing_by_target', ['target' => 'bloques'])}}" class="nav-link @isRoute('user_listing_by_target') active @endisRoute">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Bloqués</p>
                     </a>
                   </li>
                 </ul>
               </li>
-              <li class="nav-header text-uppercase">Gestionnaire/Comptabilité</li>
+              <li class="nav-header text-uppercase text-warning">Archives et historiques</li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon fas fa-user-shield"></i>
+                  <p>
+                    Enseignants
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Liste complète</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Primaire</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Secondaire</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Superieure</p>
+                    </a>
+                  </li>
+                </ul>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon fas bi-house"></i>
+                  <p>
+                    Classes
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Liste complète</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Primaire</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Secondaire</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Superieure</p>
+                    </a>
+                  </li>
+                </ul>
+                <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon fas fa-user-friends"></i>
+                  <p>
+                    Apprenants
+                    <i class="fas fa-angle-left right"></i>
+                  </p>
+                </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Liste complète</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Primaire</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Secondaire</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Superieure</p>
+                    </a>
+                  </li>
+                </ul>
+
+              <li class="nav-header text-uppercase text-orange">Gestionnaire/Comptabilité</li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-tree"></i>
@@ -403,7 +507,7 @@
                   </li>
                 </ul>
               </li>
-              <li class="nav-header text-uppercase">Gestionnaire des notes</li>
+              <li class="nav-header text-uppercase text-primary">Gestionnaire des notes</li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
                   <i class="nav-icon fas fa-tree"></i>
@@ -482,7 +586,16 @@
               </li>
               <li class="nav-header text-uppercase">Outils</li>
               <li class="nav-item">
-                <a href="{{route('school_calendar', ['school_year' => str_replace(' - ', '-', session('school_year_selected'))])}}" class="nav-link">
+                <a href="{{route('time_plans', ['school_year' => str_replace(' - ', '-', session('school_year_selected'))])}}" class="nav-link @isRoute('time_plans') active @endisRoute">
+                  <i class="nav-icon fas fa-clock"></i>
+                  <p>
+                    Emplois du temps
+                    <span class="badge badge-info right"></span>
+                  </p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{route('school_calendar', ['school_year' => str_replace(' - ', '-', session('school_year_selected'))])}}" class="nav-link @isRoute('school_calendar') active @endisRoute">
                   <i class="nav-icon fas fa-calendar-alt"></i>
                   <p>
                     Calendrier
@@ -491,7 +604,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{{route('admin_teacher_security_actions')}}" class="nav-link">
+                <a href="{{route('admin_teacher_security_actions')}}" class="nav-link @isRoute('admin_teacher_security_actions') active @endisRoute">
                   <i class="nav-icon fas bi-tools"></i>
                   <p>
                     Securité

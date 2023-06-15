@@ -1,6 +1,6 @@
 <div class="m-0 p-0 w-100">
     <div class="z-justify-relative-top-80 w-100" style="width: 90%;" >
-        <div class="w-100 border m-0 p-0">
+        <div class="w-100 border m-0 p-0" @if($classe && !$classe->classeWasNotLockedForTeacher($user->teacher->id)) style="opacity: 0.9!important;" @endif>
             <div class="m-0 p-0 w-100"> 
                 <div class="row w-100 m-0 d-fex justify-content-between">
                    <div class="col-12 m-0 p-0 p-1 pt-0 float-right">
@@ -86,8 +86,15 @@
                                                         @php
                                                             $cl = $c->getNumericName();
                                                         @endphp
-                                                        <a class="text-white border rounded border-white btn-secondary py-1 px-2 mr-1 my-1" href="{{route('teacher_profil_as_user', ['id' => auth()->user()->id, 'slug' => $c->slug])}}">
-                                                            {{ $cl['root'] }}<sup>{{ $cl['sup'] }} </sup> {{ $cl['idc'] }}
+                                                        <a class="text-white border rounded @if(!$c->classeWasNotClosedForTeacher($user->teacher->id)) border-danger text-white-50 @elseif(!$c->classeWasNotLockedForTeacher($user->teacher->id)) border border-warning text-white @else  @endif py-1 px-2 mr-1 my-1 @if($classe->id == $c->id) btn-primary border-white @else btn-secondary @endif" href="{{route('teacher_profil_as_user', ['id' => auth()->user()->teacher->id, 'classe_id' => $c->id, 'slug' => $c->slug])}}">
+                                                            @if(!$c->classeWasNotClosedForTeacher($user->teacher->id))
+                                                                <span class="fa fa-lock" title="Cette classe est temporairement fermée"></span>
+                                                            @elseif(!$c->classeWasNotLockedForTeacher($user->teacher->id))
+                                                                <span class="fa fa-key text-warning" title="Cette classe est temporairement verrouillée "></span>
+                                                            @endif
+                                                            <span class="@if($classe->id == $c->id) text-dark @endif">
+                                                                {{ $cl['root'] }}<sup>{{ $cl['sup'] }} </sup> {{ $cl['idc'] }}
+                                                            </span>
                                                         </a>
                                                     @endforeach
                                                 @else

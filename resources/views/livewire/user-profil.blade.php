@@ -162,7 +162,7 @@
 
                             @if($user->teacher)
                                 <div class="row d-flex justify-content-end text-white w-100 ">
-                                    <div class="col-4 shadow border-orange border rounded float-right p-2 m-2">
+                                    <div class="col-6 shadow border-orange border rounded float-right p-2 m-2">
                                         <h5 class="text-white-50">
                                             <span class="fa fa-user"></span>
                                             <span>Mes infos personnelles</span>
@@ -202,13 +202,13 @@
 
                                             <h6 class="">
                                                 <span class="text-warning">Classes assignées:</span>
-                                                <span>
+                                                <span class="d-flex justify-content-around">
                                                     @if($user->teacher->hasClasses())
                                                         @foreach($user->teacher->getTeachersCurrentClasses() as $c)
                                                             @php
                                                                 $cl = $c->getNumericName();
                                                             @endphp
-                                                            <a class="text-white border rounded border-white btn-secondary py-1 px-2 mr-1 my-1" href="{{route('teacher_profil_as_user', ['id' => auth()->user()->id, 'slug' => $c->slug])}}">
+                                                            <a class="text-white border rounded border-white btn-secondary py-1 px-2 mr-1 my-1" href="{{route('teacher_profil_as_user', ['id' => auth()->user()->teacher->id, 'classe_id' => $c->id, 'slug' => $c->slug])}}">
                                                                 {{ $cl['root'] }}<sup>{{ $cl['sup'] }} </sup> {{ $cl['idc'] }}
                                                             </a>
 

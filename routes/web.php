@@ -8,6 +8,7 @@ use App\Http\Livewire\AdminTeacherSecurityActions;
 use App\Http\Livewire\AuthRedirections;
 use App\Http\Livewire\ClasseGroupProfil;
 use App\Http\Livewire\ClasseProfil;
+use App\Http\Livewire\ForceEmailVerifyNotification;
 use App\Http\Livewire\Home;
 use App\Http\Livewire\MultiplePupilInsertion;
 use App\Http\Livewire\PupilProfil;
@@ -16,8 +17,10 @@ use App\Http\Livewire\ResetPassword;
 use App\Http\Livewire\SchoolCalendar;
 use App\Http\Livewire\TeacherListing;
 use App\Http\Livewire\TeacherProfilAsUser;
+use App\Http\Livewire\TimePlansComponent;
 use App\Http\Livewire\UserListing;
 use App\Http\Livewire\UserProfil;
+use App\Http\Livewire\UsersListingByTarget;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -41,22 +44,25 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', Home::class)->name('home');
 
-Route::group(['prefix' => '/administration', 'middleware' => ['auth']], function(){
+Route::group(['prefix' => '/administration', 'middleware' => ['auth', 'admin']], function(){
     Route::get('/', Admin::class)->middleware('auth')->name('admin');
     Route::get('/utilisateurs', UserListing::class)->name('user_listing');
+    Route::get('/utilisateurs/{target}', UsersListingByTarget::class)->name('user_listing_by_target');
     Route::get('/enseignants', TeacherListing::class)->name('teacher_listing');
     Route::get('/securisation/enseignants', AdminTeacherSecurityActions::class)->name('admin_teacher_security_actions');
     Route::get('/calendrier-scolaire/{school_year}', SchoolCalendar::class)->name('school_calendar');
+    Route::get('/emploi-du-temps/{school_year}', TimePlansComponent::class)->name('time_plans');
     Route::get('/classe/{slug}', ClasseProfil::class)->name('classe_profil');
     Route::get('/promotion/{slug}', ClasseGroupProfil::class)->name('classe_group_profil');
     Route::get('/élève/{id}', PupilProfil::class)->name('pupil_profil');
     Route::get('/inscription-élèves/inscription-multiple', MultiplePupilInsertion::class)->name('multiple_pupil_insertion');
 });
 
-Route::get('/compte/mon-compte/{id}', UserProfil::class)->name('user_profil')->middleware('user.self');
-Route::get('/mon-compte/enseignant/{id}/{slug}', TeacherProfilAsUser::class)->name('teacher_profil_as_user')->middleware(['user.self', 'user.teacher']);
+Route::get('/compte/mon-compte/{id}', UserProfil::class)->name('user_profil')->middleware(['user.self', 'notBlockedUser']);
+Route::get('/mon-compte/enseignant/{id}/{classe_id}/{slug}', TeacherProfilAsUser::class)->name('teacher_profil_as_user')->middleware(['user.teacher', 'classeNotClosedForTeacher']);
 
 
+Route::get('/email-verification-notify', ForceEmailVerifyNotification::class)->name('email-verification-notify');
 Route::post('/inscription', RegisteringNewUser::class)->middleware('guest')->name('inscription');
 
 Route::get('/classe/{classe_id}', [ClasseListDownload::class, 'index'])->name('classe_pdf');

@@ -95,7 +95,7 @@
                 <div class="card-body">
                     <div class="tab-content">
                         <div class="tab-pane active">
-                            @livewire('teacher-table-list', ['classe_id' => $classe_id_selected, 'level_id' => $level_id_selected, 'subject_id' => $subject_id_selected])
+                            @livewire('teacher-table-list', ['classe_id' => $classe_id_selected, 'level_id' => $level_id_selected, 'subject_id' => $subject_id_selected, 'baseRoute' => $baseRoute])
                         </div>
                     </div>
                 </div>

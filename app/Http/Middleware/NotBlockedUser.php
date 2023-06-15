@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class NotBlockedUser
 {
@@ -17,7 +19,9 @@ class NotBlockedUser
     public function handle(Request $request, Closure $next)
     {
         if($request->user()->blocked){
-            return abort(403, "Votre compte a été bloqué!... Veuillez contacter un administrateur!");
+            Auth::guard('web')->logout();
+            Session::flush();
+            return redirect()->route('connexion');
         }
         return $next($request);
     }

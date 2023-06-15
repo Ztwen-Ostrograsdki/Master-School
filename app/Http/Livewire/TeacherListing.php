@@ -13,6 +13,7 @@ class TeacherListing extends Component
     public $classe_id_selected = null;
     public $subject_id_selected = null;
     public $counter = 0;
+    public $baseRoute = 'teacher_listing';
 
     public function render()
     {

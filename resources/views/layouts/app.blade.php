@@ -28,10 +28,12 @@
        {{-- chargement des modals --}}
         @livewire('registering-new-user')
         @livewire('forgot-password')
-        @livewire('login-user') 
-        @livewire('logout') 
-        @livewire('user-profil-manager') 
-        @livewire('default-modals') 
+        @livewire('login-user')
+        @auth 
+            @livewire('logout') 
+            @livewire('user-profil-manager') 
+            @livewire('default-modals') 
+        @endauth
         
         {{-- chargement des modals --}}
     @if(!App\Helpers\RouteManager::hasUrl('administration'))

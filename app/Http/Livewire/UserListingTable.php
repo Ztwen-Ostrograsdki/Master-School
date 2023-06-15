@@ -39,7 +39,7 @@ class UserListingTable extends Component
 
     public function markEmailAsUnverified($user_id)
     {
-        $user = user::find($user_id);
+        $user = User::find($user_id);
         $user->markEmailAsOnlyUnverified();
     }
 
@@ -47,6 +47,21 @@ class UserListingTable extends Component
     public function manageAdminStatus($user_id)
     {
         $this->emit('manageAdminStatus', $user_id);
+    }
+
+
+    public function blockerManager($user_id)
+    {
+        $user = User::find($user_id);
+        if($user){
+            if(!$user->blocked && !$user->locked){
+                $user->update(['locked' => true, 'blocked' => true]);
+            }
+            else{
+                $user->update(['locked' => false, 'blocked' => false]);
+            }
+        }
+        $this->refreshData();
     }
 
     public function refreshData()
