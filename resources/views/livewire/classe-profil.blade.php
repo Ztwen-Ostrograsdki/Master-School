@@ -126,10 +126,10 @@
                                 <span class="info-box-icon"><i class="fa bi-search"></i></span>
                                 <div class="info-box-content">
                                     <div class="d-flex justify-content-between">
-                                        <form action="" class="col-8">
+                                        <form action="" class="col-10">
                                             <input placeholder="Veuillez entrer le nom ou le prénom de l'apprenant à retrouver ..." class="form-control bg-transparent py-1" type="text" name="search" wire:model="search">
                                         </form>
-                                        <div x-on:click="@this.call('resetSearch')" data-card-widget="collapse" class="btn-secondary rounded text-center p-1 cursor-pointer border border-white col-4">
+                                        <div x-on:click="@this.call('resetSearch')" data-card-widget="collapse" class="btn-secondary rounded text-center p-1 cursor-pointer border border-white col-2">
                                             <span>Annuler</span>
                                         </div>
                                     </div>

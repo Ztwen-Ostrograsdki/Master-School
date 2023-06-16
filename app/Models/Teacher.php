@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Helpers\ModelTraits\TeachersTrait;
 use App\Models\Classe;
 use App\Models\ClassesSecurity;
 use App\Models\Level;
@@ -23,6 +24,7 @@ class Teacher extends Model
     use HasFactory;
     use SoftDeletes;
     use ModelQueryTrait;
+    use TeachersTrait;
 
     protected $fillable = [
         'name',

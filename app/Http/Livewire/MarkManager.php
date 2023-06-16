@@ -65,12 +65,17 @@ class MarkManager extends Component
         if($mark_id){
             $school_year_model = $this->getSchoolYear();
             $user = auth()->user();
-            $mark = Mark::find($mark_id);
 
+            $mark = Mark::find($mark_id);
             if($mark){
                 $classe_id = $mark->classe_id;
-                $not_secure = $user->ensureThatTeacherCanAccessToClass($classe_id);
 
+                if(!$user->teacher->teacherCanUpdateMarksInThisClasse($classe_id)){
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'EDITION DE NOTE VERROUILLEE', 'message' => "La mise à jour des notes est temporairement indisponible pour cette classe!", 'type' => 'warning']);
+                    return false;
+                }
+
+                $not_secure = $user->ensureThatTeacherCanAccessToClass($classe_id);
                 $pupil = $mark->pupil;
             }
 

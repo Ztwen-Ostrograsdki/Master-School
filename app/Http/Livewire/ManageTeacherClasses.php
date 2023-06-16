@@ -14,6 +14,7 @@ class ManageTeacherClasses extends Component
     protected $listeners = ['manageTeacherClasses' => 'openModal'];
     public $teacher;
     public $school_year_model;
+    public $classes_selecteds = [];
     public $target;
     public $title = 'Le prof...';
 
@@ -36,8 +37,8 @@ class ManageTeacherClasses extends Component
     {
         $classess_selecteds = [];
 
-        if($this->classess_selecteds){
-            foreach ($this->classess_selecteds as $classes) {
+        if($this->classes_selecteds){
+            foreach ($this->classes_selecteds as $classes) {
                 if(intval($classes) !== intval($classes_id)){
                     $classes_selecteds[] = $classes;
                 }

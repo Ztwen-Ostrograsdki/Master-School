@@ -13,12 +13,15 @@ class AdminTeacherSecurityActions extends Component
 {
     use ModelQueryTrait;
 
-    protected $listeners = ['updatedTeachersSelectedsList' => 'getList'];
+    protected $listeners = ['updatedTeachersSelectedsList' => 'getList', 'newTeacherHasBeenAdded' => 'reloadData' ];
+
     public $level_id_selected = null;
     public $classe_id_selected = null;
     public $subject_id_selected = null;
     public $counter = 0;
     public $start = false;
+    public $search = '';
+    public $search_target = '';
     public $teachers_selecteds = [];
     public $teachers_table = [];
 
@@ -143,9 +146,34 @@ class AdminTeacherSecurityActions extends Component
 
     public function cancel()
     {
-        $this->reset('teachers_selecteds');
+        $this->reset('teachers_selecteds', 'teachers_table');
         $this->emit('selectedsWasChanged', $this->teachers_selecteds);
         $this->start = false;
+    }
+
+    public function manageTeacherClasses($teacher_id)
+    {
+        $this->emit('manageTeacherClasses', $teacher_id);
+    }
+
+
+    public function updatedSearch($search)
+    {
+        if($search && mb_strlen($search) > 4){
+            $this->search_target = $search;
+            $this->emit('teacherTableListFetchOnSearch', $search);
+        }
+        else{
+            $this->reset('search_target');
+            $this->emit('teacherTableListFetchOnSearch', $search);
+        }
+        
+    }
+
+    public function resetSearch()
+    {
+        $this->reset('search');
+        $this->emit('teacherTableListFetchOnSearch', '');
     }
 
    

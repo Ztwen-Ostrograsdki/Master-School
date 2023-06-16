@@ -14,39 +14,57 @@ class TeacherTableList extends Component
 {
     use ModelQueryTrait;
 
-    protected $listeners = ['newTeacherHasBeenAdded' => 'reloadData', 'changeTeacherList' => 'reloadDataOnSection', 'userDataEdited' => 'reloadData', 'selectedsWasChanged' => 'reGetUpdatesOfSelecteds'];
+    protected $listeners = ['newTeacherHasBeenAdded' => 'reloadData', 'changeTeacherList' => 'reloadDataOnSection', 'userDataEdited' => 'reloadData', 'selectedsWasChanged' => 'reGetUpdatesOfSelecteds', 'teacherTableListFetchOnSearch' => 'updatedSearch'];
     public $counter = 0;
     public $classe_id = null;
     public $subject_id = null;
     public $level_id = null;
     public $selecteds = [];
     public $baseRoute;
+    public $search = '';
     public $title = 'Le prof...';
 
     public function render()
     {
-        if(!$this->level_id && session()->has('teacher_level_list_selected') && session('teacher_level_list_selected') !== null){
-            $this->level_id = session('teacher_level_list_selected');
+        $school_year_model = $this->getSchoolYear();
 
-        }
+        if($this->search && mb_strlen($this->search) > 2){
+            $target = '%' . $this->search . '%';
 
-        if(!$this->classe_id && session()->has('teacher_classe_list_selected') && session('teacher_classe_list_selected') !== null){
-            $this->classe_id = session('teacher_classe_list_selected');
+            $teachers = $school_year_model->teachers()->where('teachers.name', 'like', $target)->orWhere('teachers.surname', 'like', $target)->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
 
-        }
-
-        if(!$this->subject_id && session()->has('teacher_subject_list_selected') && session('teacher_subject_list_selected') !== null){
-            $this->subject_id = session('teacher_subject_list_selected');
-
-        }
-
-        if(!$this->classe_id && !$this->level_id && !$this->subject_id){
-            $teachers = Teacher::orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
         }
         else{
-            $teachers = $this->getData();
+            if(!$this->level_id && session()->has('teacher_level_list_selected') && session('teacher_level_list_selected') !== null){
+                $this->level_id = session('teacher_level_list_selected');
+
+            }
+
+            if(!$this->classe_id && session()->has('teacher_classe_list_selected') && session('teacher_classe_list_selected') !== null){
+                $this->classe_id = session('teacher_classe_list_selected');
+
+            }
+
+            if(!$this->subject_id && session()->has('teacher_subject_list_selected') && session('teacher_subject_list_selected') !== null){
+                $this->subject_id = session('teacher_subject_list_selected');
+
+            }
+
+            if(!$this->classe_id && !$this->level_id && !$this->subject_id){
+                $teachers = $school_year_model->teachers()->whereNotNull('teachers.id')->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
+            }
+            else{
+                $teachers = $this->getData();
+            }
+
         }
         return view('livewire.teacher-table-list', compact('teachers'));
+    }
+
+
+    public function updatedSearch($search)
+    {
+        $this->search = $search;
     }
 
 

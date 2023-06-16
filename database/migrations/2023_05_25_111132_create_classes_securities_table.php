@@ -20,6 +20,7 @@ class CreateClassesSecuritiesTable extends Migration
             $table->boolean('locked_classe')->default(0);
             $table->boolean('locked_marks')->default(0);
             $table->boolean('closed_classe')->default(0);
+            $table->boolean('locked_marks_updating')->default(0);
             $table->boolean('closed')->default(0);
             $table->boolean('locked')->default(0);
 

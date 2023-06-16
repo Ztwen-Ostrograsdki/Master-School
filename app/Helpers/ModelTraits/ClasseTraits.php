@@ -58,6 +58,25 @@ trait ClasseTraits{
 
 
 
+    public function lockMarksUpdatingForThisTeacher($teacher_id, $duration = 24)
+    {
+        $school_year_model = $this->getSchoolYear();
+        $locked_marks_updating = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_marks_updating', true)->where('teacher_id', $teacher_id)->get();
+        if(!$locked_marks_updating){
+            $locked = ClassesSecurity::create([
+                'teacher_id' => $teacher_id,
+                'classe_id' => $this->id,
+                'school_year_id' => $school_year_model->id,
+                'duration' => $duration,
+                'locked_marks_updating' => true,
+            ]);
+            return $locked ? $locked : false;
+        }
+        return false;
+    }
+
+
+
     public function getClassePupils($school_year = null)
     {
         if(!$school_year){
@@ -1016,6 +1035,8 @@ trait ClasseTraits{
 
         }
     }
+
+
 
 
 
