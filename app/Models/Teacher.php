@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Helpers\ModelTraits\TeachersTrait;
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\AE;
 use App\Models\Classe;
 use App\Models\ClassesSecurity;
 use App\Models\Level;
@@ -51,11 +52,15 @@ class Teacher extends Model
     {
         return $this->hasMany(TimePlan::class);
     }
-
-
+    
     public function cursus()
     {
         return $this->hasMany(TeacherCursus::class);
+    }
+
+    public function ae()
+    {
+        return $this->belongsTo(AE::class);
     }
 
     public function user()

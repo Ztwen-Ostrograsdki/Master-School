@@ -13,6 +13,7 @@ class CreateTimePlansTable extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
         Schema::create('time_plans', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('creator')->nullable()->default(null);
@@ -24,6 +25,7 @@ class CreateTimePlansTable extends Migration
             $table->unsignedBigInteger('duration');
             $table->string('description')->nullable()->default(null);
             $table->string('day');
+            $table->unsignedBigInteger('day_index');
             $table->unsignedBigInteger('school_year_id')->nullable()->default(null);
 
             $table->unsignedBigInteger('level_id')->nullable();

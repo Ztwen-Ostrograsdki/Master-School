@@ -19,6 +19,7 @@ class Mark extends Model
         'value', 
         'pupil_id', 
         'subject_id', 
+        'school_year_id', 
         'classe_id', 
         'user_id',
         'trimestre', 

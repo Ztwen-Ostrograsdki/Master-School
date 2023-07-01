@@ -60,6 +60,13 @@ class CreateRelatedMarksTable extends Migration
                   ->on('classes')
                   ->onUpdate('cascade')
                   ->onDelete('cascade');
+                  
+            $table->unsignedBigInteger('school_year_id')->nullable()->default(null);
+            $table->foreign('school_year_id')
+                  ->references('id')
+                  ->on('school_years')
+                  ->onUpdate('cascade')
+                  ->onDelete('cascade');
 
             $table->timestamps();
         });

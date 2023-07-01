@@ -62,6 +62,9 @@ class CreateNewClasseGroup extends Component
                     ]
                 );
                 if($classe_group){
+                    $school_year_model = $this->getSchoolYear();
+                    $school_year_model->classe_groups()->attach($classe_group->id);
+
                     if($this->joining){
                         $name = $this->name;
                         $target = '%' . $name . '%';

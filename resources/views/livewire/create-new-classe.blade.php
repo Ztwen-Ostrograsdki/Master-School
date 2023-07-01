@@ -8,9 +8,10 @@
                         <x-z-input :type="'text'" :error="$errors->first('name')" :modelName="'name'" :labelTitle="'Le Nom de la classe'" ></x-z-input>
                     </div>
                     <div class="col-4 m-0 p-0">
-                        <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">La promotion </label>
+                        <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">La Promotion </label>
                         <select class="px-2 form-select text-white z-bg-secondary w-100 @error('classe_group_id') text-danger border border-danger @enderror" wire:model.defer="classe_group_id">
                             <option class="" value="{{null}}">Choisissez la promotion</option>
+                            <option class="" value="polyvalente">Classe volante</option>
                             @foreach ($promotions as $p)
                                 <option  value="{{$p->id}}">{{$p->name}}</option>
                             @endforeach

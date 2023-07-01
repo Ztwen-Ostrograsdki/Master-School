@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\Classe;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -24,6 +25,7 @@ class ClasseNotSecureForTeacher
         $teacher_id = (int)$request->route('id');
         $teacher = $school_year_model->teachers()->where('teachers.id', $teacher_id)->first();
         $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
+        $classeSelf = Classe::find($classe_id);
 
         if($classe && $teacher){
             $teacher_classes = auth()->user()->teacher->getTeachersCurrentClasses();
@@ -32,12 +34,6 @@ class ClasseNotSecureForTeacher
                 if(!$classe->hasSecurities()){
                     if($classe->classeWasNotClosedForTeacher($teacher->id)){
                         return $next($request);
-                        // if($classe->classeWasNotLockedForTeacher($teacher->id)){
-                            
-                        // }
-                        // else{
-                        //     return abort(404, "Votre accès à cette classe est temporairement verrouillée. Contactez un administrateur");
-                        // }
                     }
                     else{
                         return abort(404, "Votre accès à cette classe est temporairement bloqué. Contactez un administrateur");
@@ -52,8 +48,10 @@ class ClasseNotSecureForTeacher
             }
         }
         else{
+            if($classeSelf && $teacher){
+                return $next($request);
+            }
             return abort(404);
-
         }
 
     }

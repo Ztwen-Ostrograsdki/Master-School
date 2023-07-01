@@ -145,12 +145,12 @@ class PupilRelatedMarks extends Component
                     else{
                         $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Mise à jour échouée!", 'type' => 'error']);
                     }
-                    DB::afterCommit(function(){
-                        $this->emit('pupilUpdated');
-                        $this->emit('classeUpdated');
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Mise à jour réussie avec succès!", 'type' => 'success']);
+                });
+                DB::afterCommit(function(){
+                    $this->emit('pupilUpdated');
+                    $this->emit('classeUpdated');
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Mise à jour réussie avec succès!", 'type' => 'success']);
 
-                    });
                 });
             }
         }

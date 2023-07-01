@@ -17,6 +17,7 @@ class CreateCoeficientsTable extends Migration
         Schema::create('coeficients', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('coef')->default(1);
+
             $table->unsignedBigInteger('school_year_id')->nullable()->default(null);
             $table->foreign('school_year_id')
                   ->references('id')
@@ -24,12 +25,13 @@ class CreateCoeficientsTable extends Migration
                   ->onUpdate('cascade')
                   ->onDelete('cascade');
             $table->unsignedBigInteger('classe_group_id');
-            $table->unsignedBigInteger('subject_id');
             $table->foreign('classe_group_id')
                   ->references('id')
                   ->on('classe_groups')
                   ->onDelete('cascade')
-                  ->onUpdate('cascade'); 
+                  ->onUpdate('cascade');
+                  
+            $table->unsignedBigInteger('subject_id'); 
             $table->foreign('subject_id')
                   ->references('id')
                   ->on('subjects')

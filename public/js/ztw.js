@@ -6,6 +6,9 @@ window.addEventListener('reloadPage', function(e) {
     location.reload(true);
 });
 
+window.addEventListener('modal-confirmation', function(e) {
+    $('#confirmatorModal').modal('show');
+});
 window.addEventListener('modal-manageAdminStatus', function(e) {
     $('#adminManagerModal').modal('show');
 });
@@ -45,6 +48,9 @@ window.addEventListener('modal-editClasseGroupData', function(e) {
 });
 window.addEventListener('modal-manageClasseGroup', function(e) {
     $('#classeGroupManageModal').modal('show');
+});
+window.addEventListener('modal-manageClasseReferees', function(e) {
+    $('#manageClasseReferees').modal('show');
 });
 window.addEventListener('modal-editClasseGroup', function(e) {
     $('#editClasseGroupModal').modal('show');

@@ -12,7 +12,7 @@ use Livewire\Component;
 
 class SchoolCalendar extends Component
 {
-    protected $listeners = ['relaodCalendars'];
+    protected $listeners = ['relaodCalendars', 'schoolYearChangedLiveEvent' => 'relaodCalendars'];
 
     public $school_year_model;
     public $counter = 0;

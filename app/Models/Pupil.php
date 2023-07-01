@@ -35,6 +35,7 @@ class Pupil extends Model
         'matricule',
         'classe_id',
         'contacts',
+        'abandonned',
         'sexe',
         'birth_day',
         'nationality',
@@ -53,6 +54,12 @@ class Pupil extends Model
     public $imagesFolder = 'pupilsPhotos';
 
     public function classesSchoolYears()
+    {
+        return $this->hasMany(ClassePupilSchoolYear::class);
+    }
+
+
+    public function pupilClassesHistoriesBySchoolYears()
     {
         return $this->hasMany(ClassePupilSchoolYear::class);
     }
@@ -268,18 +275,7 @@ class Pupil extends Model
     public function getCurrentClasse($school_year = null)
     {
         $classe = null;
-        if($school_year){
-            if(is_numeric($school_year)){
-                $school_year_model = SchoolYear::where('id', $school_year)->first();
-            }
-            else{
-                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-            }
-        }
-        else{
-            $school_year_model = $this->getSchoolYear();
-
-        }
+        $school_year_model = $this->getSchoolYear($school_year);
 
         $relation = $this->classesSchoolYears()->where('school_year_id', $school_year_model->id)->first();
         if($relation){

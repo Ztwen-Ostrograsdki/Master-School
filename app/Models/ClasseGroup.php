@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Classe;
 use App\Models\Coeficient;
 use App\Models\Level;
+use App\Models\SchoolYear;
 use App\Models\Subject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,6 +25,12 @@ class ClasseGroup extends Model
         'filial',
         'level_id',
     ];
+
+
+    public function school_years()
+    {
+        return $this->morphToMany(SchoolYear::class, 'schoolable');
+    }
 
 
     public function classes()

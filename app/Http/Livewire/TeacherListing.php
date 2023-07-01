@@ -9,6 +9,8 @@ use Livewire\Component;
 
 class TeacherListing extends Component
 {
+    protected $listeners = ['schoolYearChangedLiveEvent' => 'reloadData'];
+
     public $level_id_selected = null;
     public $classe_id_selected = null;
     public $subject_id_selected = null;
@@ -89,5 +91,11 @@ class TeacherListing extends Component
 
         return $subjects;
 
+    }
+
+
+    public function reloadData()
+    {
+        $this->counter = rand(0, 15);
     }
 }

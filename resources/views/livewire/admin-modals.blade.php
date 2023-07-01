@@ -13,10 +13,11 @@
     @livewire('create-level')
     @livewire('create-subject')
     
-    @livewire('insert-time-plan')
     @livewire('defined-semestres-periods')
     @livewire('event-periods-manager')
     @livewire('admin-manager')
-    @livewire('add-new-teacher')
     @livewire('manage-teacher-classes')
+    @livewire('manage-subject-data')
+    @livewire('manage-classe-referees')
+    @livewire('confirmation-component')
 </div>

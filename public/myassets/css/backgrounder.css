@@ -512,6 +512,43 @@ header .navbar {
 }
 
 
+.fx-9 {
+    font-size: 9px !important;
+}
+.fx-10 {
+    font-size: 10px !important;
+}
+.fx-11 {
+    font-size: 11px !important;
+}
+
+.fx-12 {
+    font-size: 12px !important;
+}
+.fx-13 {
+    font-size: 13px !important;
+}
+
+.fx-15 {
+    font-size: 15px !important;
+}
+
+.fx-17 {
+    font-size: 17px !important;
+}
+
+.fx-20 {
+    font-size: 20px !important;
+}
+
+.fx-25 {
+    font-size: 25px !important;
+}
+
+.fx-30 {
+    font-size: 30px !important;
+}
+
 th{
     font-size: inherit; !important;
     font-weight: 200 !important;

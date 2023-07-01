@@ -46,12 +46,12 @@ class AdminAsideComponent extends Component
         if($school_years > 0 && $has_school > 0){
             $this->has_school = true;
             $school_name = School::all()->first()->name;
-            $school_year = $this->getSchoolYear();
+            $school_year_model = $this->getSchoolYear();
             $levels = Level::all();
-            $classes = $school_year->classes;
-            $pupils = $school_year->pupils;
-            $classe_groups = ClasseGroup::all();
-            $teachers = $school_year->teachers;
+            $classes = $school_year_model->classes;
+            $pupils = $school_year_model->pupils;
+            $classe_groups = $school_year_model->classe_groups;
+            $teachers = $school_year_model->teachers;
         }
 
         
@@ -61,8 +61,7 @@ class AdminAsideComponent extends Component
 
     public function addNewPupil()
     {
-        $school_year = session('school_year_selected');
-        $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+        $school_year_model = $this->getSchoolYear();
         $classe = $school_year_model->classes()->first();
         if($classe){
             $this->emit('addNewPupilToClasseLiveEvent', $classe->id);

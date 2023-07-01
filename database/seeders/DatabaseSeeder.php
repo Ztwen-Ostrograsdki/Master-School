@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        
 
         // for ($i=0; $i < 10; $i++) { 
         //     $faker = Factory::create();
@@ -50,7 +51,7 @@ class DatabaseSeeder extends Seeder
 
 
             
-        }
+        // }
 
 
       // $school_years = SchoolYear::all();
@@ -191,5 +192,6 @@ class DatabaseSeeder extends Seeder
 
 
         // }
+    }
 
 }

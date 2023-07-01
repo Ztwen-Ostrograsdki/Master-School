@@ -21,14 +21,21 @@ class CreateAESTable extends Migration
             $table->foreign('teacher_id')
                   ->references('id')
                   ->on('teachers')
-                  ->onDelete('restrict')
-                  ->onUpdate('restrict');   
+                  ->onDelete('cascade')
+                  ->onUpdate('cascade');   
             $table->unsignedBigInteger('subject_id');
             $table->foreign('subject_id')
                   ->references('id')
                   ->on('subjects')
-                  ->onDelete('restrict')
-                  ->onUpdate('restrict');    
+                  ->onDelete('cascade')
+                  ->onUpdate('cascade');   
+
+            $table->unsignedBigInteger('school_year_id');
+            $table->foreign('school_year_id')
+                  ->references('id')
+                  ->on('school_years')
+                  ->onDelete('cascade')
+                  ->onUpdate('cascade');    
             $table->timestamps();
         });
     }

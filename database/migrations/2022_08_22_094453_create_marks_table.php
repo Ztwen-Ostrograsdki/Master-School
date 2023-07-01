@@ -76,6 +76,13 @@ class CreateMarksTable extends Migration
                   ->onUpdate('restrict')
                   ->onDelete('restrict');
 
+            $table->unsignedBigInteger('school_year_id')->nullable()->default(null);
+            $table->foreign('school_year_id')
+                  ->references('id')
+                  ->on('school_years')
+                  ->onUpdate('cascade')
+                  ->onDelete('cascade');
+
             $table->timestamps();
             $table->softDeletes();
         });

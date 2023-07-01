@@ -1,0 +1,22 @@
+detach => [
+	school_year,
+	teachers
+
+]
+
+
+delete => [
+	responsible
+	principalteacher
+	timeplans
+	average_modality
+	teacher_cursus
+	pupil_cursus
+	images
+	related_marks
+	marks
+	pupil_lates
+	pupil_absences and for teacher
+	presence
+
+]

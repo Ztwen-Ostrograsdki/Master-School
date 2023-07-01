@@ -2,10 +2,12 @@
 namespace App\Helpers\ModelTraits;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\ClassePupilSchoolYear;
 use App\Models\ClassesSecurity;
 use App\Models\Pupil;
 use App\Models\SchoolYear;
 use App\Models\Subject;
+use App\Models\Teacher;
 use Illuminate\Support\Facades\DB;
 
 
@@ -15,8 +17,6 @@ trait ClasseTraits{
 
 
     use ModelQueryTrait;
-
-
 
     public function classeWasFreeInThisTime($start, $end, $day, $school_year_id = null)
     {
@@ -79,43 +79,41 @@ trait ClasseTraits{
 
     public function getClassePupils($school_year = null)
     {
-        if(!$school_year){
-            $school_year = date('Y') . ' - ' . intval(date('Y') + 1);
-            if(session()->has('school_year_selected') && session('school_year_selected')){
-                $school_year = session('school_year_selected');
-                session()->put('school_year_selected', $school_year);
-            }
-            else{
-                session()->put('school_year_selected', $school_year);
-            }
-            $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-        }
-        else{
-            if(is_numeric($school_year)){
-                $school_year_model = SchoolYear::find($school_year);
-            }
-            else{
-                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-            }
-        }
+        $school_year_model = $this->getSchoolYear($school_year);
         
-
         if($school_year_model){
+            $allPupils = [];
             $pupils_of_this_year = $school_year_model->pupils()->where('level_id', $this->level_id)->get()->pluck('id')->toArray();
             $classe = $school_year_model->classes()->where('classes.id', $this->id)->first();
             if($pupils_of_this_year > 0 && $classe){
-                $allPupils = [];
+                
                 foreach($classe->pupils()->orderBy('firstName', 'asc')->get() as $p){
                     if(in_array($p->id, $pupils_of_this_year)){
                         $allPupils[] = $p;
                     }
                 }
-
                 return $allPupils;
             }
+
         }
         return [];
 
+    }
+
+
+    public function getClasseCurrentPupils($school_year_id)
+    {
+        $school_year_model = $this->getSchoolYear($school_year_id);
+        $pupils = [];
+
+        $data = $school_year_model->classeWithPupils()->where('classe_id', $this->id)->get();
+        if(count($data) > 0){
+            foreach($data as $datum){
+                $pupils = $school_year_model->pupils()->where('pupils.id', $datum->pupil_id)->orderBy('pupils.firstName', 'asc')->orderBy('pupils.lastName', 'asc')->get();
+            }
+        }
+
+        return $pupils;
     }
 
 
@@ -124,12 +122,7 @@ trait ClasseTraits{
         $action = false;
         if($subject_id && $semestre && $school_year){
             DB::transaction(function($e) use ($subject_id, $semestre, $school_year, $action){
-                if(is_numeric($school_year)){
-                    $school_year_model = SchoolYear::where('id', $school_year)->first();
-                }
-                else{
-                    $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-                }
+                $school_year_model = $this->getSchoolYear($school_year);
                 if($school_year_model){
                     $action = $school_year_model->related_marks()->where('classe_id', $this->id)->where('semestre', $semestre)->where('subject_id', $subject_id)->each(function($mark) use ($school_year_model){
                         $detach = $school_year_model->related_marks()->detach($mark->id);
@@ -150,17 +143,8 @@ trait ClasseTraits{
     public function getMarks($subject_id, $semestre = 1, $take_forget = true, $school_year = null)
     {
         $allMarks = [];
-        if(!$school_year){
-            $school_year_model = $this->getSchoolYear();
-        }
-        else{
-            if(is_numeric($school_year)){
-                $school_year_model = SchoolYear::where('id', $school_year)->first();
-            }
-            else{
-                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-            }
-        }
+        $school_year_model = $this->getSchoolYear($school_year);
+
         if($school_year_model){
             $pupils = $this->getPupils($school_year_model->id);
             foreach($pupils as $pupil){
@@ -171,72 +155,72 @@ trait ClasseTraits{
                 $not_forced_marks = [];
 
                 if($take_forget == 2){
-                    $epes = $school_year_model->marks()
-                                          ->where('semestre', $semestre)
-                                          ->where('subject_id', $subject_id)
-                                          ->where('pupil_id', $pupil->id)
-                                          ->where('classe_id', $pupil->classe_id)
-                                          ->where('type', 'epe')
-                                          ->orderBy('id', 'asc')->get();
+                    $epes = $this->marks()
+                                          ->where('marks.school_year_id', $school_year_model->id)
+                                 ->where('semestre', $semestre)
+                                 ->where('subject_id', $subject_id)
+                                 ->where('pupil_id', $pupil->id)
+                                 ->where('type', 'epe')
+                                 ->orderBy('id', 'asc')->get();
 
-                    $parts = $school_year_model->marks()
-                                           ->where('semestre', $semestre)
-                                           ->where('subject_id', $subject_id)
-                                           ->where('pupil_id', $pupil->id)
-                                           ->where('classe_id', $pupil->classe_id)
-                                           ->where('type', 'participation')
-                                           ->orderBy('id', 'asc')->get();
+                    $parts = $this->marks()
+                                  ->where('marks.school_year_id', $school_year_model->id)
+                                   ->where('semestre', $semestre)
+                                   ->where('subject_id', $subject_id)
+                                   ->where('pupil_id', $pupil->id)
+                                   ->where('type', 'participation')
+                                   ->orderBy('id', 'asc')->get();
                 }
                 else{
 
-                    $epes = $school_year_model->marks()
+                    $epes = $this->marks()
+                                          ->where('marks.school_year_id', $school_year_model->id)
                                           ->where('semestre', $semestre)
                                           ->where('subject_id', $subject_id)
                                           ->where('pupil_id', $pupil->id)
-                                          ->where('classe_id', $pupil->classe_id)
                                           ->where('type', 'epe')
                                           ->where('forget', !$take_forget)
                                           ->orderBy('id', 'asc')->get();
 
-                    $parts = $school_year_model->marks()
-                                           ->where('semestre', $semestre)
-                                           ->where('subject_id', $subject_id)
-                                           ->where('pupil_id', $pupil->id)
-                                           ->where('classe_id', $pupil->classe_id)
-                                           ->where('forget', !$take_forget)
-                                           ->where('type', 'participation')
-                                           ->orderBy('id', 'asc')->get();
+                    $parts = $this->marks()
+                                  ->where('marks.school_year_id', $school_year_model->id)
+                                   ->where('semestre', $semestre)
+                                   ->where('subject_id', $subject_id)
+                                   ->where('pupil_id', $pupil->id)
+                                   ->where('forget', !$take_forget)
+                                   ->where('type', 'participation')
+                                   ->orderBy('id', 'asc')->get();
 
                 }
 
-                $forced_marks = $school_year_model->marks()
+                $forced_marks = $this->marks()
+                                      ->where('marks.school_year_id', $school_year_model->id)
+                                      ->where('semestre', $semestre)
+                                      ->where('subject_id', $subject_id)
+                                      ->where('pupil_id', $pupil->id)
+                                      ->where('type', 'epe')
+                                      ->where('forget', !$take_forget)
+                                      ->where('forced_mark', true)
+                                      ->orderBy('id', 'asc')->get();
+
+                $not_forced_marks = $this->marks()
+                                          ->where('marks.school_year_id', $school_year_model->id)
                                           ->where('semestre', $semestre)
                                           ->where('subject_id', $subject_id)
                                           ->where('pupil_id', $pupil->id)
-                                          ->where('classe_id', $pupil->classe_id)
                                           ->where('type', 'epe')
                                           ->where('forget', !$take_forget)
-                                          ->where('forced_mark', true)
+                                          ->where('forced_mark', false)
                                           ->orderBy('id', 'asc')->get();
 
-                $not_forced_marks = $school_year_model->marks()
-                                                  ->where('semestre', $semestre)
-                                                  ->where('subject_id', $subject_id)
-                                                  ->where('pupil_id', $pupil->id)
-                                                  ->where('classe_id', $pupil->classe_id)
-                                                  ->where('type', 'epe')
-                                                  ->where('forget', !$take_forget)
-                                                  ->where('forced_mark', false)
-                                                  ->orderBy('id', 'asc')->get();
-
-                $devs = $school_year_model->marks()
-                                          ->where('semestre', $semestre)
-                                          ->where('subject_id', $subject_id)
-                                          ->where('pupil_id', $pupil->id)
-                                          ->where('classe_id', $pupil->classe_id)
-                                          ->where('type', 'devoir')
-                                          ->where('forget', !$take_forget)
-                                          ->orderBy('id', 'asc')->get();
+                $devs = $this->marks()
+                              ->where('marks.school_year_id', $school_year_model->id)
+                              ->where('semestre', $semestre)
+                              ->where('subject_id', $subject_id)
+                              ->where('pupil_id', $pupil->id)
+                              ->where('type', 'devoir')
+                              ->where('forget', !$take_forget)
+                              ->orderBy('id', 'asc')->get();
 
                 
                 
@@ -276,17 +260,7 @@ trait ClasseTraits{
         }
 
 
-        if(!$school_year){
-            $school_year_model = $this->getSchoolYear();
-        }
-        else{
-            if(is_numeric($school_year)){
-                $school_year_model = SchoolYear::where('id', $school_year)->first();
-            }
-            else{
-                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-            }
-        }
+        $school_year_model = $this->getSchoolYear($school_year);
 
         $modality = $this->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->where('subject_id', $subject_id)->first();
 
@@ -814,12 +788,8 @@ trait ClasseTraits{
     public function getMarksTypeLenght($subject_id, $semestre = 1, $school_year = null, $type = 'epe')
     {
         $max = 0;
-        if(!$school_year){
-            $school_year_model = $this->getSchoolYear();
-        }
-        else{
-            $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-        }
+        $school_year_model = $this->getSchoolYear($school_year);
+
         if($school_year_model){
             $pupils_of_this_year = $school_year_model->pupils()->where('level_id', $this->level_id)->get()->pluck('id')->toArray();
             $classe = $school_year_model->classes()->where('classes.id', $this->id)->first();
@@ -897,12 +867,8 @@ trait ClasseTraits{
     public function resetAllMarks($school_year = null, $semestre = null, $subject_id, $type = null)
     {
         if($school_year && $semestre && $subject_id){
-            if(is_numeric($school_year)){
-                $school_year_model = SchoolYear::where('id', $school_year)->first();
-            }
-            else{
-                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-            }
+            $school_year_model = $this->getSchoolYear($school_year);
+
             $marks = $school_year_model->marks()
                                        ->where('semestre', $semestre)
                                        ->where('classe_id', $this->id)
@@ -938,7 +904,7 @@ trait ClasseTraits{
     public function getClasseMarksIndexes($subject_id, $semestre = 1, $school_year = null, $type = 'epe')
     {
         $indexes = [];
-        $school_year_model = $this->getSchoolYear();
+        $school_year_model = $this->getSchoolYear($school_year);
         if($school_year_model){
             $marks = $school_year_model->marks()->where('marks.subject_id', $subject_id)->where('semestre', $semestre)->where('marks.classe_id', $this->id)->where('type', $type)->pluck('mark_index')->toArray();
             if($marks && count($marks) > 0){
@@ -988,26 +954,67 @@ trait ClasseTraits{
     }
 
 
+    public function lockClasseUpdatedMarks($teacher_id = null, $subject_id = null, $duration = 48)
+    {
+        $school_year_model = $this->getSchoolYear();
+        
+        if($teacher_id){
+            $already_secure = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_marks_updating', true)->where('teacher_id', $teacher_id)->count();
+
+            if($already_secure == 0){
+                $secure = ClassesSecurity::create([
+                    'locked_marks_updating' => true,
+                    'duration' => $duration,
+                    'level_id' => $this->level_id,
+                    'classe_id' => $this->id,
+                    'teacher_id' => $teacher_id,
+                    'subject_id' => $subject_id,
+                    'school_year_id' => $school_year_model->id
+                ]);
+                return $secure;
+            }
+            return null;
+        }
+        else{
+            $already_secure = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_marks_updating', true)->whereNull('teacher_id')->count();
+
+            if($already_secure == 0){
+                $secure = ClassesSecurity::create([
+                    'locked_marks_updating' => true,
+                    'duration' => $duration,
+                    'level_id' => $this->level_id,
+                    'classe_id' => $this->id,
+                    'school_year_id' => $school_year_model->id
+                ]);
+                return $secure;
+            }
+            return null;
+
+        }
+    }
+
+
 
     public function hasSecurities($school_year = null, $secure_column = null)
     {
-        $school_year_model = $this->getSchoolYear();
+        $school_year_model = $this->getSchoolYear($school_year);
 
         if($secure_column){
             return $this->securities()->where('school_year_id', $school_year_model->id)->where($secure_column, true)->whereNull('teacher_id')->count() > 0;
         }
-        $req1 = $this->securities()->where('school_year_id', $school_year_model->school_year)->where('closed', true)->whereNull('teacher_id')->count();
-        $req2 = $this->securities()->where('school_year_id', $school_year_model->school_year)->where('locked', true)->whereNull('teacher_id')->count();
-        $req3 = $this->securities()->where('school_year_id', $school_year_model->school_year)->where('locked_classe', true)->whereNull('teacher_id')->count();
-        $req4 = $this->securities()->where('school_year_id', $school_year_model->school_year)->where('closed_classe', true)->whereNull('teacher_id')->count();
+        $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed', true)->whereNull('teacher_id')->count();
+        $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked', true)->whereNull('teacher_id')->count();
+        $req3 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_classe', true)->whereNull('teacher_id')->count();
+        $req4 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed_classe', true)->whereNull('teacher_id')->count();
+        $req5 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_marks_updating', true)->whereNull('teacher_id')->count();
 
-        return $req1 !== 0 || $req2 !== 0 || $req2 !== 0 || $req4 !== 0;
+        return $req1 !== 0 || $req2 !== 0 || $req2 !== 0 || $req4 !== 0 || $req5 !== 0;
 
     }
 
     public function classeNotSecureFor($teacher_id, $protection = 'closed', $school_year = null)
     {
-        $school_year_model = $this->getSchoolYear();
+        $school_year_model = $this->getSchoolYear($school_year);
         $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($protection . '_classe', true)->count();
         $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($protection, true)->count();
         $req3 = $school_year_model->securities()->where('teacher_id', $teacher_id)->where($protection, true)->count();
@@ -1018,7 +1025,7 @@ trait ClasseTraits{
 
     public function classeWasNotSecureColumn($teacher_id, $secure_column = null, $school_year = null)
     {
-        $school_year_model = $this->getSchoolYear();
+        $school_year_model = $this->getSchoolYear($school_year);
         if($secure_column){
             $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
             return $req1 == 0;
@@ -1075,7 +1082,7 @@ trait ClasseTraits{
 
     public function classeWasNotClosedForTeacher($teacher_id, $secure_column = null, $school_year = null)
     {
-        $school_year_model = $this->getSchoolYear();
+        $school_year_model = $this->getSchoolYear($school_year);
         if($secure_column){
             $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
             return $req1 == 0;
@@ -1094,7 +1101,7 @@ trait ClasseTraits{
 
     public function classeWasNotLockedForTeacher($teacher_id, $secure_column = null, $school_year = null)
     {
-        $school_year_model = $this->getSchoolYear();
+        $school_year_model = $this->getSchoolYear($school_year);
         if($secure_column){
             $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
             return $req1 == 0;
@@ -1108,6 +1115,162 @@ trait ClasseTraits{
             return false;
 
         }
+    }
+
+
+
+
+    public function getTimePlan($day, $start, $end, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        return $this->timePlans()->where('time_plans.school_year_id', $school_year_model->id)->where('time_plans.day', $day)->where('time_plans.start', '<=', $start)->where('time_plans.end', '>=', $end)->first();
+    }
+
+
+    public function getclasseTimePlans($school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        return $this->timePlans()->where('time_plans.school_year_id', $school_year_model->id)->get();
+    } 
+
+
+    public function classeHasTimePlans($school_year = null)
+    {
+        return count($this->getclasseTimePlans($school_year)) > 0;
+    }
+
+
+    public function getTimePlanSubject($day, $start, $end, $school_year = null)
+    {
+        $time_plan = $this->getTimePlan($day, $start, $end, $school_year);
+        return $time_plan ? $time_plan->subject->getSimpleName() : ' - ';
+            
+    }
+
+
+    /**
+     * Use to delete all data or tables joined to a specific Classe::class
+     */
+    public function classeDeleter($school_year_id = null)
+    {
+        if(!$school_year_id){
+            $school_year_model = $this->getSchoolYear();
+        }
+        else{
+            $school_year_model = SchoolYear::find($school_year_id);
+        }
+
+        $classe = $this;
+        $classe_id = $classe->id;
+        // dd($classe, $classe_id, $school_year_model);
+
+        DB::transaction(function($e) use($classe, $classe_id, $school_year_model){
+            $a = 1;
+            $times_plans = $classe->timePlans()->where('school_year_id', $school_year_model->id)->get();
+            $marks = $school_year_model->marks()->where('classe_id', $classe_id)->get();
+            $related_marks = $school_year_model->related_marks()->where('classe_id', $classe->id)->get();
+            $teachers = $classe->getTeachersCurrentTeachers();
+
+            $principal = $classe->currentPrincipal();
+
+            $average_modalities = $classe->averageModalities()->where('school_year', $school_year_model->school_year)->get();
+            $pupils = $classe->getPupils($school_year_model->id);
+
+            
+            if(count($marks) > 0){
+                foreach($marks as $mark){
+                    $school_year_model->marks()->attach($mark->id);
+                    $mark->forceDelete();
+                }
+            }
+
+            if(count($related_marks) > 0){
+                foreach($related_marks as $r_m){
+                    $school_year_model->related_marks()->attach($r_m->id);
+                    $r_m->forceDelete();
+                }
+            }
+
+            if(count($teachers) > 0){
+                $teachers_ids = [];
+                if($principal){
+                    $principal->delete();
+                }
+                $classe->teacherCursus()->where('teacher_cursuses.school_year_id', $school_year_model->id)->each(function($cursus) use ($teachers_ids){
+                    $teachers_ids[] = $cursus->teacher_id;
+                    $cursus->delete();
+                });
+
+                if(count($teachers_ids) > 0){
+                    foreach($teachers_ids as $teacher_id){
+                        $teacher = Teacher::find($teacher_id);
+                        $teacher->lates()->where('teacher_lates.school_year_id', $school_year_model->id)->each(function($late){
+                            $late->delete();
+
+                        });
+                        $teacher->absences()->where('teacher_absences.school_year_id', $school_year_model->id)->each(function($abs){
+                            $abs->delete();
+                        });
+                    }
+                }
+
+            }
+
+
+            if(count($times_plans) > 0){
+                foreach($times_plans as $t){
+                    $t->delete();
+                }
+            }
+
+            if(count($average_modalities) > 0){
+                foreach($average_modalities as $av){
+                    $av->delete();
+                }
+            }
+
+            if(count($pupils) > 0){
+                foreach($pupils as $pupil){
+                    $pupil->lates()->where('pupil_lates.school_year_id', $school_year_model->id)->each(function($late){
+                        $late->delete();
+
+                    });
+                    $pupil->absences()->where('pupil_absences.school_year_id', $school_year_model->id)->each(function($abs){
+                        $abs->delete();
+                    });
+
+                    $pupil->pupilClassesHistoriesBySchoolYears()->where('classe_pupil_school_years.school_year_id', $school_year_model->id)
+                          ->where('classe_pupil_school_years.classe_id', $classe_id)
+                          ->first()
+                          ->delete();
+                    $classe->classePupils()->detach($pupil->id);
+
+                    $classeVolante = $this->polyvalenteClasse();
+
+                    if($classeVolante){
+                        ClassePupilSchoolYear::create(
+                            [
+                                'classe_id' => $classeVolante->id,
+                                'pupil_id' => $pupil->id,
+                                'school_year_id' => $school_year_model->id,
+                            ]
+                        );
+                        $pupil->update(['classe_id' => $classeVolante->id]);
+                        $classeVolante->classePupils()->attach($pupil->id);
+                    }
+                }
+
+                $responsibles = $classe->currentRespo();
+                $responsibles ? $responsibles->delete() : $a = null;
+            }
+
+
+            $school_year_model->classes()->detach($classe_id);
+
+        });
+        
     }
 
 }

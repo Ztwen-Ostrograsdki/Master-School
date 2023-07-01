@@ -34,6 +34,18 @@
                     </blockquote>
                 </div>
                 <div class="w-100 p-2 mx-auto d-flex row">
+                    <div class="d-flex justify-content-between col-12 p-0 m-0">
+                        <span wire:click="generateSchoolYear({{-1}})" class="btn btn-info text-left p-2 my-1 col-5 border border-white">
+                            <span class="mx-3">Générer l'année-scolaire basse</span>
+                            <span class="bi-calendar"></span>
+                            <span class="fa fa-arrow-left float-left mt-1"></span>
+                        </span>
+                        <span wire:click="generateSchoolYear({{1}})" class="btn btn-success text-left p-2 my-1 col-5 border border-white">
+                            <span class="bi-calendar"></span>
+                            <span class="mx-3">Générer l'année-scolaire suivante</span>
+                            <span class="fa fa-arrow-right float-right mt-1"></span>
+                        </span>
+                    </div>
                     <span wire:click="definedSemestrePeriod" class="btn btn-primary text-left p-2 my-1 col-12 border border-white">
                         <span class="bi-calendar"></span>
                         <span>Définir la période des semestres/trimestres</span>

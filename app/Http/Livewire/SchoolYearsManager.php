@@ -19,7 +19,6 @@ class SchoolYearsManager extends Component
     public $school_year_selected;
 
     public $counter = 0;
-    public $school_years;
     public $has_school = false;
 
 
@@ -27,7 +26,7 @@ class SchoolYearsManager extends Component
     {
         $school = count(School::all());
         if($school > 0){
-            $this->school_years = SchoolYear::all()->pluck('school_year');
+            $school_years = SchoolYear::orderBy('school_year', 'asc')->get();
             $this->has_school = true;
         }
         else{
@@ -40,11 +39,11 @@ class SchoolYearsManager extends Component
             $this->school_year_selected = $school_year_model->school_year;
         }
 
-        return view('livewire.school-years-manager');
+        return view('livewire.school-years-manager', compact('school_years'));
     }
 
 
-    public function changeSchoolYear()
+    public function updatedSchoolYearSelected($school_year)
     {
         session()->put('school_year_selected', $this->school_year_selected);
         $this->emit("schoolYearChangedLiveEvent", $this->school_year_selected);

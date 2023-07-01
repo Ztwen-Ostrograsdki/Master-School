@@ -21,6 +21,7 @@ class CreateClassesTable extends Migration
             $table->string('description')->nullable()->default(null);
             $table->boolean('closed')->default(false);
             $table->boolean('locked')->default(false);
+            $table->unsignedBigInteger('position')->nullable()->default(null);
 
             $table->unsignedBigInteger('level_id')->nullable();
             $table->foreign('level_id')

@@ -13,7 +13,15 @@ class Responsible extends Model
     use HasFactory;
 
     protected $fillable = [
-        'pupil_id',
+        'respo_1',
+        'respo_2',
+        'respo_3',
+        'respo_4',
+        'respo_5',
+        'respo_6',
+        'respo_7',
+        'respo_8',
+        'school_year_id',
         'classe_id',
         'rank',
     ];
@@ -27,14 +35,6 @@ class Responsible extends Model
     {
         return $this->morphToMany(SchoolYear::class, 'schoolable');
     }
-
-
-    
-    public function pupil()
-    {
-        return $this->belongsTo(Pupil::class);
-    }
-
 
 
 }

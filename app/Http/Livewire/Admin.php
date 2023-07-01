@@ -238,6 +238,67 @@ class Admin extends Component
     }
 
 
+    public function generateSchoolYear($direction = 1)
+    {
+        DB::transaction(function($e) use($direction){
+            if($direction == -1){
+                $school_years1 = SchoolYear::orderBy('school_year', 'asc')->pluck('school_year')->toArray();
+                if(count($school_years1) > 0){
+                    $min = $school_years1[0];
+                    $min_year = (int)trim(explode('-', $min)[0]);
+                    $school_year = ($min_year - 1) . ' - ' . $min_year;
+                    $school_year_was_exited = SchoolYear::where('school_year', $school_year)->first();
+
+                    if(!$school_year_was_exited){
+                        $school_year_model = SchoolYear::create(['school_year' => $school_year]);
+                        if($school_year_model){
+                            $this->emit('schoolHasBeenCreated');
+                            $this->reloadData();
+                            $this->dispatchBrowserEvent('Toast', ['title' => 'NOUVELLE ANNEE-SCOLIARE CREEE', 'message' => "L'année-scolaire $school_year a été créée!", 'type' => 'success']);
+                        }
+                        else{
+                            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'ERREURE SERVEUR', 'message' => "Une erreure est survenue lors de la création de la nouvelle année scolaire $school_year", 'type' => 'error']);
+                        }
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'ERREURE ANNEE-SCOLIARE EXISTENTE', 'message' => "L'année scolaire $school_year ne pourrait être créee de nouveau car, elle existe déjà!", 'type' => 'error']);
+
+                    }
+                }
+            }
+            elseif($direction == 1){
+                $school_years2 = SchoolYear::orderBy('school_year', 'desc')->pluck('school_year')->toArray();
+                if(count($school_years2) > 0){
+                    $max = $school_years2[0];
+                    $max_year = (int)trim(explode('-', $max)[1]);
+                    $school_year = $max_year . ' - ' . ($max_year + 1);
+                    $school_year_model = SchoolYear::create(['school_year' => $school_year]);
+                    $school_year_was_exited = SchoolYear::where('school_year', $school_year)->first();
+
+
+                    if(!$school_year_was_exited){
+                        $school_year_model = SchoolYear::create(['school_year' => $school_year]);
+                        if($school_year_model){
+                            $this->emit('schoolHasBeenCreated');
+                            $this->reloadData();
+                            $this->dispatchBrowserEvent('Toast', ['title' => 'NOUVELLE ANNEE-SCOLIARE CREEE', 'message' => "L'année-scolaire $school_year a été créée!", 'type' => 'success']);
+                        }
+                        else{
+                            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'ERREURE SERVEUR', 'message' => "Une erreure est survenue lors de la création de la nouvelle année scolaire $school_year", 'type' => 'error']);
+                        }
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'ERREURE ANNEE-SCOLIARE EXISTENTE', 'message' => "L'année scolaire $school_year ne pourrait être créee de nouveau car, elle existe déjà!", 'type' => 'error']);
+
+                    }
+                    
+                }
+
+            }
+        });
+    }
+
+
 
     public function throwSchoolBuiding()
     {

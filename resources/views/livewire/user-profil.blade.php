@@ -158,16 +158,73 @@
                            </h5>
                         </div>
                         <hr class="w-100 bg-white text-white mt-2">
-                        <div class="px-2" style="height: 360px; overflow: auto">
-
+                        <div class="px-2" style="height: 500px; overflow: auto">
                             @if($user->teacher)
                                 <div class="row d-flex justify-content-end text-white w-100 ">
-                                    <div class="col-6 shadow border-orange border rounded float-right p-2 m-2">
-                                        <h5 class="text-white-50">
+                                    <div class="col-3 shadow border-orange border rounded float-right p-2 m-2">
+                                        <h6 class="text-white-50">
+                                            <span class="fa fa-clock"></span>
+                                            <span>Emploi du temps ({{ $user->teacher->speciality()->name }}) </span>
+                                            @if(auth()->user()->isAdminAs('master'))
+                                                <span wire:click="insertTeachersTimePlan({{$user->teacher->id}})" class="float-right fa fa-edit text-primary cursor-pointer fx-20 mx-1" title="Insérer l'emploi du temps..."></span>
+                                                @if(count($user->teacher->getCurrentTimePlans(null, null))>0)
+                                                    <span wire:click="deleteTeacherTimePlans" class="fa fa-trash text-danger cursor-pointer fx-20 mx-1 float-right" title="Supprimer les Emplois du temps de cet enseignant..."></span>
+                                                @endif
+                                            @endif
+                                        </h6>
+                                        <hr class="m-0 p-0 bg-white text-white">
+                                        <div class="d-flex justify-content-between flex-column">
+                                            @if($user->teacher->hasClasses())
+                                                @foreach($user->teacher->getTeachersCurrentClasses() as $cll)
+                                                    @php
+                                                        $clll = $cll->getNumericName();
+                                                        $time_plans = $user->teacher->getCurrentTimePlans($cll->id);
+                                                    @endphp
+                                                    <div class="col-11 border rounded p-1 m-1">
+                                                        <div class="m-0 p-0">
+                                                            <h6 class="d-flex justify-content-between">
+                                                                <span class="col-4">
+                                                                    {{ $clll['root'] }}<sup>{{ $clll['sup'] }} </sup> {{ $clll['idc'] }}
+                                                                </span>
+                                                                @if(auth()->user()->isAdminAs('master'))
+                                                                    <span class="col-3 d-flex justify-content-around">
+                                                                        <span wire:click="insertTeachersTimePlan({{$user->teacher->id}}, {{$cll->id}})" class="float-right fa fa-edit text-primary cursor-pointer fx-20" title="Définir l'emploi du temps de cette classe..."></span>
+                                                                        @if(count($time_plans) > 0)
+                                                                            <span wire:click="deleteTeacherTimePlans({{$cll->id}})" class="fa fa-trash text-danger cursor-pointer fx-20" title="Supprimer l'emploi du temps de cette classe..."></span>
+                                                                        @endif
+                                                                    </span>
+                                                                @endif
+                                                            </h6>
+                                                            <hr class="m-0 p-0 bg-secondary text-secondary">
+                                                            <div class="m-0 p-0">
+                                                                @if(count($time_plans) > 0)
+                                                                    @foreach($time_plans as $tm)
+                                                                        <h6 class="">
+                                                                            <span class="text-warning"> {{$tm->day}} :</span>
+                                                                            <span>{{ $tm->start . 'H à ' . $tm->end . 'H' }}</span>
+                                                                        </h6>
+                                                                    @endforeach
+                                                                @else
+                                                                    <span class="text-white-50 font-italic">Pas encore défini!</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                Aucune classe assignée!
+                                            @endif
+                                        </div>
+
+                                    </div>
+                                    <div class="col-4 shadow border-orange border rounded float-right p-2 m-2">
+                                        <h6 class="text-white-50">
                                             <span class="fa fa-user"></span>
                                             <span>Mes infos personnelles</span>
-                                            <span class="float-right fa fa-edit text-primary cursor-pointer fa-1x" title="Editer mes infos..."></span>
-                                        </h5>
+                                            @if(auth()->user()->isAdminAs('master') || auth()->user->id == $user->id)
+                                                <span wire:click="updateTeacherPersoData({{$user->teacher->id}})" class="float-right fa fa-edit text-secondary cursor-pointer fx-20" title="Editer mes infos..."></span>
+                                            @endif
+                                        </h6>
                                         <hr class="m-0 p-0 bg-white text-white">
 
                                         <div class="">
@@ -177,8 +234,13 @@
                                             </h6>
 
                                             <h6 class="">
-                                                <span class="text-warning">Spécialité:</span>
-                                                <span>{{ $user->teacher->speciality()->name }}</span>
+                                                <span>
+                                                    <span class="text-warning">Spécialité:</span>
+                                                    <span>{{ $user->teacher->speciality()->name }}</span>
+                                                </span>
+                                                @if(auth()->user()->isAdminAs('master'))
+                                                    <span class="fa fa-edit ml-4 cursor-pointer fx-15 text-primary" title="Changer la matière ou la Spécialité de {{$user->teacher->getFormatedName()}}" wire:click="updateTeacherSubject({{$user->teacher->id}})"></span>
+                                                @endif
                                             </h6>
 
                                             <h6 class="">
@@ -202,7 +264,7 @@
 
                                             <h6 class="">
                                                 <span class="text-warning">Classes assignées:</span>
-                                                <span class="d-flex justify-content-around">
+                                                <small class="d-flex justify-content-around">
                                                     @if($user->teacher->hasClasses())
                                                         @foreach($user->teacher->getTeachersCurrentClasses() as $c)
                                                             @php
@@ -216,7 +278,7 @@
                                                     @else
                                                         Aucune classe assignée!
                                                     @endif
-                                                </span>
+                                                </small>
                                             </h6>
 
                                         </div>

@@ -12,6 +12,7 @@ use Livewire\Component;
 
 class SemestreCalendars extends Component
 {
+    protected $listeners = ['schoolYearChangedLiveEvent' => 'reloadData'];
     public $calendars;
     public $school_year;
     public $school_calendar;
@@ -182,6 +183,12 @@ class SemestreCalendars extends Component
     public function editPeriod($period_id)
     {
         $this->emit('editPeriodsLiveEvent', $period_id);
+    }
+
+
+    public function reloadData()
+    {
+        $this->counter = rand(1, 15);
     }
 
 }

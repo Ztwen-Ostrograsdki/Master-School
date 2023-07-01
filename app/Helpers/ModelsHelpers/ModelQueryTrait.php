@@ -18,8 +18,19 @@ trait ModelQueryTrait{
     /**
      * @return SchoolYear Model::class;
      */
-    public function getSchoolYear()
+    public function getSchoolYear($school_year = null)
     {
+        if($school_year){
+            if(is_numeric($school_year)){
+                $school_year_model = SchoolYear::where('id', $school_year)->first();
+            }
+            else{
+                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+            }
+
+            return $school_year_model;
+        }
+
         $school_year = null;
         $current_month_index = intval(date('m'));
         if($current_month_index >= 10){

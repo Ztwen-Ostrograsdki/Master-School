@@ -205,13 +205,13 @@
             <div class="card-body">
               <div class="tab-content">
                 @if (!$classe)
-                <div class="w-100 border rounded border-warning p-2 m-2">
+                <div class="w-100 border border-primary p-2 m-2">
                   <blockquote class="text-info">
                      <h5>
-                      <span>
+                      <span class="text-white-50">
                         Veuillez cliquer sur le bouton pour lier cette classe à l'année {{ session('school_year_selected') }}
                       </span>
-                      <span wire:click="joinClasseToSchoolYear" class="text-center btn-primary cursor-pointer border p-2 m-2 d-block">
+                      <span wire:click="joinClasseToSchoolYear({{$classeSelf->id}})" class="text-center rounded btn-primary cursor-pointer border p-2 m-2 d-block">
                         Générer {{ session('classe_selected') }} pour l'année scolaire {{ session('school_year_selected') }}
                       </span>
                      </h5>
@@ -219,6 +219,7 @@
                 </div>
                 @endif
                 @if($classe)
+                {{-- {{ dd($classe->classePupils) }} --}}
                 <div class="tab-pane la-liste-de-la-classe @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') == 'liste') active @elseif(!session()->has('classe_profil_section_selected')) active @endif" id="tab_1">
                     @livewire('classe-pupils-lister', ['classe_id' => $classe->id])
                 </div>

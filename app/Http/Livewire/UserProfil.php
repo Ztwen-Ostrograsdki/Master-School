@@ -2,13 +2,15 @@
 
 namespace App\Http\Livewire;
 
-use App\Models\User;
+use App\Events\NewFollowerEvent;
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Image;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Events\NewFollowerEvent;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class UserProfil extends Component
 {
@@ -41,7 +43,9 @@ class UserProfil extends Component
         'updateRequests', 
         'notifyMeWhenNewFollower',
         'updatedImages' => 'reloadData',
+        'timePlanTablesWasUpdatedLiveEvent' => 'reloadData',
         'IsendNewFriendRequest_L_Event' => 'notifyMeWhenNewFollower',
+        'schoolYearChangedLiveEvent' => 'reloadData'
     ];
     protected $rules = [
         'name' => 'required|string|between:5,50',
@@ -54,6 +58,7 @@ class UserProfil extends Component
     ];
 
     use WithFileUploads;
+    use ModelQueryTrait;
 
 
     public function render()
@@ -66,6 +71,57 @@ class UserProfil extends Component
         $demandes = $this->getDemandes();
 
         return view('livewire.user-profil', compact('demandes', 'myFollowers', 'myFriends', 'user'));
+    }
+
+
+    public function updateTeacherPersoData($teacher_id)
+    {
+        $this->emit('UpdateTeacherPersoData', $teacher_id);
+    }
+
+
+    public function updateTeacherSubject($teacher_id)
+    {
+        $this->emit('UpdateTeacherSubject', $teacher_id);
+    }
+
+
+    public function insertTeachersTimePlan($teacher_id, $classe_id = null)
+    {
+        $this->emit('InsertTeacherTimePlans', $teacher_id, $classe_id);
+    }
+
+
+    public function deleteTeacherTimePlans($classe_id = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+        $user = User::find($this->user_id);
+        $teacher = $user->teacher;
+        if($classe_id){
+            $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
+            DB::transaction(function($e) use($classe, $school_year_model, $teacher){
+                $times_plans = $classe->timePlans()->where('time_plans.school_year_id', $school_year_model->id)->where('time_plans.subject_id', $teacher->speciality()->id)->each(function($time_plan){
+                    $time_plan->delete();
+                });
+            });
+
+            DB::afterCommit(function(){
+                $this->dispatchBrowserEvent('Toast', ['type' => 'success', 'title' => 'SUPPRESSION REUSSIE',  'message' => "Les emplois du temps de cette classe ont été rafraîchies avec succès!"]);
+            });
+            
+        }
+        else{
+            DB::transaction(function($e) use($school_year_model, $teacher){
+                $times_plans = $teacher->timePlans()->where('time_plans.school_year_id', $school_year_model->id)->each(function($time_plan){
+                    $time_plan->delete();
+                });
+            });
+
+            DB::afterCommit(function(){
+                $this->dispatchBrowserEvent('Toast', ['type' => 'success', 'title' => 'SUPPRESSION REUSSIE',  'message' => "Les emplois du temps de cet enseignant ont été rafraîchies avec succès!"]);
+            });
+        }
+
     }
 
 

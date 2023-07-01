@@ -1,12 +1,15 @@
 <?php
 
 namespace App\Http\Livewire;
-use App\Models\Mark;
-use App\Models\Classe;
-use App\Models\Pupil;
-use App\Models\School;
-use Livewire\Component;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\Classe;
+use App\Models\ClassePupilSchoolYear;
+use App\Models\Mark;
+use App\Models\Pupil;
+use App\Models\Responsible;
+use App\Models\School;
+use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class ClasseProfil extends Component
 {
@@ -78,7 +81,7 @@ class ClasseProfil extends Component
         $school_year_model = $this->getSchoolYear();
         $school_year = session('school_year_selected');
         $pupils = [];
-        $allClasses = $school_year_model->classes()->where('slug', urldecode($this->slug))->get();
+        $classeSelf = Classe::where('slug', urldecode($this->slug))->first();
         
         $classe = $school_year_model->classes()->where('slug', urldecode($this->slug))->first();
 
@@ -103,18 +106,19 @@ class ClasseProfil extends Component
         }
 
 
-        if($allClasses->count() > 0){
-            $classe_name = $allClasses->first()->name;
+        if($classeSelf){
+            $classe_name = $classeSelf->name;
             session()->put('classe_selected', $classe_name);
             if($classe){
                 $pupils = $classe->getClassePupils();
             }
-                 
         }
         else{
-            return abort(404, 'Cette classe est inexistante');
+            $msg = "La classe " . urldecode($this->slug) . " est si possible inexistante ou a déjà été supprimée!";
+            return abort(404, $msg);
         }
-        return view('livewire.classe-profil', compact('classe', 'pupils', 'semestres'));
+
+        return view('livewire.classe-profil', compact('classe', 'pupils', 'semestres', 'classeSelf'));
     }
 
 
@@ -205,16 +209,26 @@ class ClasseProfil extends Component
         $this->emit('classeUpdated');
     }
 
-    public function joinClasseToSchoolYear($classe_name = null)
+    public function joinClasseToSchoolYear($classe_id)
     {
         $school_year_model = $this->getSchoolYear();
-        $classe = Classe::where('slug', urldecode($this->slug))->first();
-        $yet = $school_year_model->classes()->where('slug', urldecode($this->slug))->first();
-        if(!$yet && $classe){
-            $school_year_model->classes()->attach($classe->id);
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "la classe  $classe->name a été mise à jour avec succès! Elle est désormais disponible en $school_year_model->school_year !", 'type' => 'success']);
-            $this->emit('classeUpdated');
-        }
+        $classe = Classe::find($classe_id);
+        $yet = $school_year_model->classes()->where('classes.id', $classe_id)->first();
+        DB::transaction(function($e) use ($yet, $school_year_model, $classe){
+            if(!$yet && $classe){
+                $school_year_model->classes()->attach($classe->id);
+                Responsible::create(['school_year_id' => $school_year_model->id, 'classe_id' => $classe->id]);
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "la classe  $classe->name a été mise à jour avec succès! Elle est désormais disponible en $school_year_model->school_year !", 'type' => 'success']);
+                $this->emit('classeUpdated');
+            }
+            else{
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'ATTENTION', 'message' => "Cette  $classe->name semble déjà être liée à l'année-scolaire $school_year_model->school_year !", 'type' => 'warning']);
+                $this->emit('classeUpdated');
+            }
+
+
+        });
+
     }
 
 

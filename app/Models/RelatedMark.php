@@ -19,6 +19,7 @@ class RelatedMark extends Model
         'value', 
         'pupil_id', 
         'subject_id', 
+        'school_year_id', 
         'classe_id', 
         'motif', 
         'trimestre', 
@@ -44,10 +45,7 @@ class RelatedMark extends Model
 
     public function school_year()
     {
-        if($this->school_years && count($this->school_years) > 0){
-            return $this->school_years()->first();
-        }
-        return null;
+        return $this->belongsTo(SchoolYear::class);
     }
 
     public function pupil()

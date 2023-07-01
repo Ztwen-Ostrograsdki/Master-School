@@ -11,6 +11,7 @@ use App\Models\ClassesSecurity;
 use App\Models\Coeficient;
 use App\Models\Image;
 use App\Models\Level;
+use App\Models\PrincipalTeacher;
 use App\Models\Pupil;
 use App\Models\PupilCursus;
 use App\Models\RelatedMark;
@@ -18,6 +19,7 @@ use App\Models\Responsible;
 use App\Models\SchoolYear;
 use App\Models\Subject;
 use App\Models\Teacher;
+use App\Models\TeacherCursus;
 use App\Models\TimePlan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,11 +39,25 @@ class Classe extends Model
         'slug',
         'description',
         'level_id',
+        'position',
         'classe_group_id',
         'closed',
         'locked',
         'teacher_id'
     ];
+
+
+
+    public function teacherCursus()
+    {
+        return $this->hasMany(TeacherCursus::class);
+    }
+
+    public function polyvalenteClasse()
+    {
+        $target = '%' . 'polyvalente' . '%';
+        return Classe::where('name', 'like', $target)->first();
+    }
 
 
     public function timePlans()
@@ -60,58 +76,88 @@ class Classe extends Model
         return $this->hasMany(RelatedMark::class);
     }
 
+
+    public function marks()
+    {
+        return $this->hasMany(Mark::class);
+    }
+
     public function averageModalities()
     {
         return $this->hasMany(AverageModality::class);
     }
 
 
-    public function getPupils($school_year, $search = null)
+    public function getPupils($school_year = null, $search = null, $sexe = null, $onlyIds = false)
     {
         $pupils = [];
-        if(is_numeric($school_year)){
-            $school_year_model = SchoolYear::find($school_year);
-        }
-        else{
-            $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-        }
+        $school_year_model = $this->getSchoolYear($school_year);
+
         $c_p_s_ys = $this->classePupilSchoolYear()->where('school_year_id', $school_year_model->id);
         if($c_p_s_ys->get() && count($c_p_s_ys->get()) > 0){
             $pupils_ids = $c_p_s_ys->pluck('pupil_id')->toArray();
             if($search && strlen($search) > 2){
-                $pupils = Pupil::whereIn('id', $pupils_ids)
+                if($sexe){
+                    $pupils = Pupil::whereIn('id', $pupils_ids)
+                             ->where('sexe', $sexe)
                              ->where('firstName', 'like', '%' . $search . '%')
                              ->orWhere('lastName', 'like', '%' . $search . '%')
                              ->orderBy('firstName', 'asc')
-                             ->orderBy('lastName', 'asc')
-                             ->get();
+                             ->orderBy('lastName', 'asc');
+                }
+                else{
+                    $pupils = Pupil::whereIn('id', $pupils_ids)
+                             ->where('firstName', 'like', '%' . $search . '%')
+                             ->orWhere('lastName', 'like', '%' . $search . '%')
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc');
+                }
             }
             else{
-                $pupils = Pupil::whereIn('id', $pupils_ids)
+                if($sexe){
+                    $pupils = Pupil::whereIn('id', $pupils_ids)
+                            ->where('sexe', $sexe)
                              ->orderBy('firstName', 'asc')
-                             ->orderBy('lastName', 'asc')
-                             ->get();
+                             ->orderBy('lastName', 'asc');
+
+                }
+                else{
+                    $pupils = Pupil::whereIn('id', $pupils_ids)
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc');
+                }
+            }
+        }
+        return $pupils !== [] ? ($onlyIds ? $pupils->pluck('id')->toArray() : $pupils->get()) : [];
+    }
+
+
+    public function getClassePupilsOnGender(string $gender, $school_year = null)
+    {
+        $pupils = [];
+        if(!$school_year){
+            $school_year = $this->getSchoolYear()->id;
+        }
+        if ($gender) {
+            $pupils_all = $this->getPupils($school_year);
+            foreach($pupils_all as $pupil){
+                if($pupil->sexe == $gender){
+                    $pupils[] = $pupil;
+                }
             }
         }
         return $pupils;
     }
 
 
-    public function getClassePupilsOnGender(string $gender, $school_year)
+    public function getEffectif($gender = null, $school_year = null)
     {
-        $pupils = [];
-        if($school_year){
-            if ($gender) {
-                $pupils_all = $this->getPupils($school_year);
-                foreach($pupils_all as $pupil){
-                    if($pupil->sexe == $gender){
-                        $pupils[] = $pupil;
-                    }
-                }
-            }
-
+        if($gender){
+            return count($this->getClassePupilsOnGender($gender, $school_year));
         }
-        return $pupils;
+        else{
+            return count($this->getPupils($school_year, null));
+        }
     }
 
 
@@ -146,9 +192,29 @@ class Classe extends Model
 	}
     
 
-    public function pp()
+    public function principals()
     {
-        return $this->hasOne(Teacher::class);
+        return $this->hasMany(PrincipalTeacher::class);
+    }
+
+
+    public function currentPrincipal($school_year_id = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year_id);
+        return $school_year_model->principals()->where('principal_teachers.classe_id', $this->id)->first()->teacher;
+
+    }
+
+    public function hasPrincipal($school_year_id = null)
+    {
+        if($school_year_id){
+            $school_year_model = SchoolYear::find($school_year_id);
+        }
+        else{
+            $school_year_model = $this->getSchoolYear();
+        }
+        $principal = $school_year_model->principals()->where('principal_teachers.classe_id', $this->id)->first();
+        return $principal ? $principal : null;
     }
 
     public function cursus()
@@ -164,6 +230,63 @@ class Classe extends Model
     public function responsibles()
     {
         return $this->hasMany(Responsible::class);
+    }
+
+    public function currentRespo()
+    {
+        $school_year_model = $this->getSchoolYear();
+        return Responsible::where('school_year_id', $school_year_model->id)->where('classe_id', $this->id)->first();
+    }
+
+    public function hasRespo()
+    {
+        $school_year_model = $this->getSchoolYear();
+        $r = Responsible::where('school_year_id', $school_year_model->id)->where('classe_id', $this->id)
+            ->whereNotNull('respo_1' . $rank)
+            ->orWhere('respo_2', '<>', null)
+            ->orWhere('respo_3', '<>', null)
+            ->count();
+        return $r > 0 ? true : false;
+    }
+
+    public function getRespo($rank)
+    {
+        $school_year_model = $this->getSchoolYear();
+        return Responsible::where('school_year_id', $school_year_model->id)->where('classe_id', $this->id)->whereNotNull('respo_' . $rank)->first();
+    }
+
+
+    public function pupil_respo1()
+    {
+        $school_year_model = $this->getSchoolYear();
+        if($this->getRespo(1)){
+            return $school_year_model->pupils()->where('pupils.id', $this->getRespo(1)->respo_1)->first();
+        }
+        else{
+            return null;
+        }
+    }
+
+    public function pupil_respo2()
+    {
+        $school_year_model = $this->getSchoolYear();
+        if($this->getRespo(2)){
+            return $school_year_model->pupils()->where('pupils.id', $this->getRespo(2)->respo_2)->first();
+        }
+        else{
+            return null;
+        }
+    }
+
+    public function pupil_respo($rank)
+    {
+        $school_year_model = $this->getSchoolYear();
+        if($this->getRespo($rank)){
+            return $school_year_model->pupils()->where('pupils.id', $this->getRespo($rank)->respo_1)->first();
+        }
+        else{
+            return null;
+        }
     }
 
     public function images()
@@ -279,7 +402,11 @@ class Classe extends Model
             if(count($parts) > 1){
                 $idcs = explode('-', $parts[1]);
                 if(count($idcs) > 1){
-                    $idc = $idcs[1];
+                    $idc = $idcs[0] . '-' . $idcs[1];
+                    $card['idc'] = $idc;
+                }
+                else{
+                    $idc = $parts[1];
                     $card['idc'] = $idc;
                 }
             }
@@ -291,6 +418,94 @@ class Classe extends Model
         }
 
     }
+
+
+    public function getClassePosition()
+    {
+        $name = $this->name;
+        $level = null;
+
+        if ($this->level->name === "secondary") {
+            if (preg_match_all('/Sixi/', $name)) { 
+                $level = 1;
+            }
+            elseif (preg_match_all('/Cinqui/', $name)) {
+                $level = 2;
+            }
+            elseif (preg_match_all('/Quatriem/', $name)) {
+                $level = 3;
+            }
+            elseif (preg_match_all('/Troisie/', $name)) {
+                $level = 4;
+            }
+            elseif (preg_match_all('/Seconde/', $name)) {
+                $level = 5;
+            }
+            elseif (preg_match_all('/Premi/', $name)) {
+                $level = 6;
+            }
+            elseif (preg_match_all('/Terminale/', $name)) {
+                $level = 7;
+            }
+        }
+        elseif($this->level == 'primary'){
+            if (preg_match_all('/Maternelle 1/', $name)) { 
+                $level = 1;
+            }
+            elseif (preg_match_all('/Maternelle 2/', $name)) {
+                $level = 2;
+            }
+            elseif (preg_match_all('/CP/', $name)) {
+                $level = 3;
+            }
+            elseif (preg_match_all('/CE1/', $name)) {
+                $level = 4;
+            }
+            elseif (preg_match_all('/CE2/', $name)) {
+                $level = 5;
+            }
+            elseif (preg_match_all('/CM1/', $name)) {
+                $level = 6;
+            }
+            elseif (preg_match_all('/CM2/', $name)) {
+                $level = 7;
+                
+            }
+        }
+
+        return $level;
+
+    }
+
+    public function getTeachersCurrentTeachers($withDuration = false)
+    {
+        $school_year_model = $this->getSchoolYear();
+        $current_teachers = [];
+        
+        if($this->teachers){
+            if(!$withDuration){
+                $teachers_id = $school_year_model->teacherCursus()->where('classe_id', $this->id)->whereNull('end')->pluck('teacher_id')->toArray();
+
+                foreach($teachers_id as $teacher_id){
+                    $teacher = $school_year_model->teachers()->where('teachers.id', $teacher_id)->first();
+                    $current_teachers[$teacher_id] = $teacher;
+                }
+            }
+            else{
+                $cursuses = $school_year_model->teacherCursus()->where('classe_id', $this->id)->whereNull('end')->get();
+                foreach($cursuses as $cursus){
+                    $teacher = $school_year_model->teachers()->where('teachers.id', $cursus->classe_id)->first();
+                    $current_teachers[$cursus->teacher_id] = ['teacher' => $teacher, 'cursus' => $cursus, 'asWorkedDuration' => $cursus->canMarksAsWorkedForTeacher()];
+                }
+
+            }
+
+
+        }
+        return $current_teachers;
+
+    }
+
 
 
 }

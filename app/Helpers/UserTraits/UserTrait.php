@@ -30,6 +30,11 @@ trait UserTrait{
         return redirect()->route('user_profil', ['id' => $this->id]);
     }
 
+    public function ___backToAdminRoute()
+    {
+        return redirect()->route('admin');
+    }
+
 
     public function __getKeyNotification($getAndHide = false)
     {

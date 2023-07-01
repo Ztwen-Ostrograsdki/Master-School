@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\DateFormattor;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Pupil;
@@ -14,11 +15,22 @@ class ClassePupilSchoolYear extends Model
     use HasFactory;
     use ModelQueryTrait;
 
+    use DateFormattor;
+
     protected $fillable = [
         'classe_id',
         'pupil_id',
         'school_year_id',
     ];
+
+    public function getDateAgoFormated($created_at = false)
+    {
+        $this->__setDateAgo();
+        if($created_at){
+            return $this->dateAgoToString;
+        }
+        return $this->dateAgoToStringForUpdated;
+    }
 
 
     public function pupil()

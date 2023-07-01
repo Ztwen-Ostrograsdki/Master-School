@@ -1,7 +1,7 @@
 <div>
     @if($classe)
-        <div class="w-100 my-1">
-            @isRoute('classe_profil')
+        <div class="w-100 my-1 mt-2">
+            @if(auth()->user()->isAdminAs('master'))
                 <span wire:click="multiplePupilInsertions" class="btn bg-orange border border-white" title="Ajouter des aprrenants à cette classe">
                     <span class="fa fa-user-plus"></span>
                     <span>Multiple Ajout</span>
@@ -14,7 +14,7 @@
                     <span class="fa fa-edit"></span>
                     <span>Editer</span>
                 </span>
-            @endisRoute
+            @endif
             @if($pupils && count($pupils))
             <a href="{{route('classe_pdf', $classe->id)}}"  class="btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de cette classe...">
                 <span class="fa fa-print"></span>

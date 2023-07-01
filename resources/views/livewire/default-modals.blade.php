@@ -5,7 +5,10 @@
         @livewire('mark-manager')
         @livewire('marks-settings-modal')
         @livewire('manage-classe-modalities')
+        @livewire('add-new-teacher')
+        @livewire('insert-time-plan')
     @endif
     @livewire('profil-image-editor')
+    
     
 </div>

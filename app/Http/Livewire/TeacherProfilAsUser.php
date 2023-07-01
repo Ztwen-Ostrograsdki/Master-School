@@ -11,6 +11,7 @@ use Livewire\Component;
 
 class TeacherProfilAsUser extends Component
 {
+    protected $listeners = ['schoolYearChangedLiveEvent' => 'reloadData'];
     use ModelQueryTrait;
 
     public $user;
@@ -109,6 +110,12 @@ class TeacherProfilAsUser extends Component
     public function changeSection()
     {
         session()->put('teacher_user_active_section', $this->section_to_display);
+    }
+
+
+    public function reloadData()
+    {
+        $this->counter = rand(0, 21);
     }
 
 

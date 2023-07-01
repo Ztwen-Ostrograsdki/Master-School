@@ -14,6 +14,66 @@ trait PupilTraits{
     use ModelQueryTrait;
 
 
+    public function inPolyvalenceClasse()
+    {
+        $target = '%' . 'polyvalente' . '%';
+        
+        $polyvalence = Classe::where('name', 'like', $target)->where('level_id', $this->level_id)->first();
+        
+        return $polyvalence ? $this->classe_id == $polyvalence->id : false;
+    }
+
+    public function inPolyvalenceClasseSince()
+    {
+        if($this->inPolyvalenceClasse()){
+            
+            $target = '%' . 'polyvalente' . '%';
+            
+            $polyvalence = Classe::where('name', 'like', $target)->where('level_id', $this->level_id)->first();
+            $school_year_model = $this->getSchoolYear();
+            
+            $cursus = $this->classesSchoolYears()->where('classe_pupil_school_years.school_year_id', $school_year_model->id)->where('classe_pupil_school_years.classe_id', $polyvalence->id)->first();
+
+            if($cursus){
+                return $cursus->getDateAgoFormated(false);
+            }
+
+            return null;
+        }
+
+        return null;
+    }
+
+    public function getPupilPreclasse($school_year = null)
+    {
+        $data = ['classe' => null, 'school_year' => null];
+
+        $curent_school_year_model = $this->getSchoolYear($school_year);
+
+        $current_school_year = $curent_school_year_model->school_year;
+        
+        $min_year = (int)trim(explode('-', $current_school_year)[0]);
+
+        $next_school_year = ($min_year - 1) . ' - ' . $min_year;
+
+        $next_school_year_model = SchoolYear::where('school_year', $next_school_year)->first();
+
+        $data['school_year'] = $next_school_year; 
+
+        $next_cursus = $this->classesSchoolYears()->where('classe_pupil_school_years.school_year_id', $next_school_year)->first();
+        if($next_cursus){
+            $next_classe = Classe::find($next_cursus->classe_id);
+        }
+        else{
+            $next_classe = null;
+        }
+
+        $data['classe'] = $next_classe;
+
+        return $data;
+    }
+
+
 
     public function getMarks($subject_id = null, $semestre = 1, $school_year = null)
     {
@@ -36,22 +96,22 @@ trait PupilTraits{
             $subjects = $this->classe->subjects;
             if($subjects){
                 foreach ($subjects as $subject) {
-                    $epes = $school_year_model->marks()
-                                           ->where('pupil_id', $this->id)
+                    $epes = $this->marks()
+                                           ->where('school_year_id', $school_year_model->id)
                                            ->where('semestre', $semestre)
                                            ->where('subject_id', $subject->id)
                                            ->where('classe_id', $this->classe_id)
                                            ->where('type', 'epe')
                                            ->orderBy('id', 'asc')->get();
-                    $parts = $school_year_model->marks()
-                                           ->where('pupil_id', $this->id)
+                    $parts = $this->marks()
+                                           ->where('school_year_id', $school_year_model->id)
                                            ->where('semestre', $semestre)
                                            ->where('subject_id', $subject->id)
                                            ->where('classe_id', $this->classe_id)
                                            ->where('type', 'participation')
                                            ->orderBy('id', 'asc')->get();
-                    $devs = $school_year_model->marks()
-                                           ->where('pupil_id', $this->id)
+                    $devs = $this->marks()
+                                           ->where('school_year_id', $school_year_model->id)
                                            ->where('semestre', $semestre)
                                            ->where('subject_id', $subject->id)
                                            ->where('classe_id', $this->classe_id)
@@ -74,21 +134,11 @@ trait PupilTraits{
     public function getBestMark(int $semestre, $type = null, $school_year = null)
     {
         $bestMark = null;
-
-        if(!$school_year){
-            $school_year_model = $this->getSchoolYear();
-        }
-        else{
-            if(is_numeric($school_year)){
-                $school_year_model = SchoolYear::where('id', $school_year)->first();
-            }
-            else{
-                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-            }
-        }
+        $school_year_model = $this->getSchoolYear($school_year);
+        
 
         if($school_year_model){
-            $marks = $school_year_model->marks()->where('pupil_id', $this->id)
+            $marks = $this->marks()->where('school_year_id', $school_year_model->id)
                                                 ->where('semestre', $semestre)
                                                 ->orderBy('value', 'desc')
                                                 ->get();
@@ -102,20 +152,10 @@ trait PupilTraits{
     {
         $bestMark = null;
 
-        if(!$school_year){
-            $school_year_model = $this->getSchoolYear();
-        }
-        else{
-            if(is_numeric($school_year)){
-                $school_year_model = SchoolYear::where('id', $school_year)->first();
-            }
-            else{
-                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-            }
-        }
+        $school_year_model = $this->getSchoolYear($school_year);
 
         if($school_year_model){
-            $marks = $school_year_model->marks()->where('pupil_id', $this->id)
+            $marks = $this->marks()->where('school_year_id', $school_year_model->id)
                                                 ->where('semestre', $semestre)
                                                 ->orderBy('value', 'asc')
                                                 ->get();
@@ -131,23 +171,13 @@ trait PupilTraits{
         $subjectsMarksLenght = [];
         $max = 0;
 
-        if(!$school_year){
-            $school_year_model = $this->getSchoolYear();
-        }
-        else{
-            if(is_numeric($school_year)){
-                $school_year_model = SchoolYear::where('id', $school_year)->first();
-            }
-            else{
-                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-            }
-        }
+        $school_year_model = $this->getSchoolYear($school_year);
         if($school_year_model){
             $subjects = $this->classe->subjects;
             if($subjects){
                 foreach ($subjects as $subject) {
-                    $marksLenght = $school_year_model->marks()
-                                           ->where('pupil_id', $this->id)
+                    $marksLenght = $this->marks()
+                                           ->where('school_year_id', $school_year_model->id)
                                            ->where('semestre', $semestre)
                                            ->where('subject_id', $subject->id)
                                            ->where('type', $type)
@@ -329,17 +359,12 @@ trait PupilTraits{
 
                         }
                         else{
-                            if(is_numeric($school_year)){
-                                $school_year_model = SchoolYear::where('id', $school_year)->first();
-                            }
-                            else{
-                                $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-                            }
-                            $marks = $school_year_model->marks()
-                                                       ->where('semestre', $semestre)
-                                                       ->where('pupil_id', $this->id)
-                                                       ->where('classe_id', $this->classe_id)
-                                                       ->where('subject_id', $subject_id);
+                            $school_year_model = $this->getSchoolYear($school_year);
+                            $marks = $this->marks()
+                                           ->where('semestre', $semestre)
+                                           ->where('school_year_id', $school_year_model->id)
+                                           ->where('classe_id', $this->classe_id)
+                                           ->where('subject_id', $subject_id);
                             if($marks->get()->count()){
                                 foreach ($marks->get() as $mark) {
                                     $school_year_model->marks()->detach($mark->id);
@@ -365,14 +390,9 @@ trait PupilTraits{
         if ($not_secure) {
             if($subject_id && $semestre && $school_year){
                 DB::transaction(function($e) use ($subject_id, $semestre, $school_year, $classe_id){
-                    if(is_numeric($school_year)){
-                        $school_year_model = SchoolYear::where('id', $school_year)->first();
-                    }
-                    else{
-                        $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-                    }
+                    $school_year_model = $this->getSchoolYear($school_year);
                     if($school_year_model){
-                        $school_year_model->related_marks()->where('pupil_id', $this->id)->where('semestre', $semestre)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->each(function($mark) use ($school_year_model){
+                        $this->related_marks()->where('school_year_id', $school_year_model->id)->where('semestre', $semestre)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->each(function($mark) use ($school_year_model){
                             $detach = $school_year_model->related_marks()->detach($mark->id);
                             if($detach){
                                 $mark->delete();

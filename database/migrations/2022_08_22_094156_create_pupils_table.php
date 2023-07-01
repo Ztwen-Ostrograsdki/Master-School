@@ -28,6 +28,7 @@ class CreatePupilsTable extends Migration
             $table->string('nationality')->nullable()->default(null);
             $table->boolean('failed')->default(1);
             $table->boolean('authorized')->default(1);
+            $table->boolean('abandonned')->default(0);
             $table->boolean('blocked')->default(0);
             $table->unsignedBigInteger('level_id')->nullable();
             $table->foreign('level_id')

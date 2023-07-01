@@ -1,15 +1,6 @@
 <x-z-modal-generator :hasHeader="true" :modalHeaderTitle="'Définition des matières'" :width="6" :icon="'fa fa-filter'" :modalName="'classeSubjectManageModal'" :modalBodyTitle="$title">
 <form autocomplete="off" class="form-group pb-3 px-2 bg-transparent">
-    @if($onClasseGroup)
-        @if($classe_group)
-
-        @endif
-    @else
-        @if($classe)
-
-        @endif
-    @endif
-
+    @if(isset($subjects))
     <div class="row justify-between">
         <div class="mt-0 col-11 mx-auto">
             <div class="card w-100">
@@ -77,5 +68,6 @@
             Terminer
         </span>
     </div>
+    @endif
 </form>
 </x-z-modal-generator>

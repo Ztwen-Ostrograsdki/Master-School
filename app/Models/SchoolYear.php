@@ -4,16 +4,20 @@ namespace App\Models;
 
 use App\Models\AE;
 use App\Models\Classe;
+use App\Models\ClasseGroup;
 use App\Models\ClasseHistory;
+use App\Models\ClassePupilSchoolYear;
 use App\Models\ClassesSecurity;
 use App\Models\Level;
 use App\Models\Mark;
 use App\Models\Period;
+use App\Models\PrincipalTeacher;
 use App\Models\Pupil;
 use App\Models\PupilAbsences;
 use App\Models\PupilCursus;
 use App\Models\PupilLates;
 use App\Models\RelatedMark;
+use App\Models\Responsible;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeacherAbsences;
@@ -36,6 +40,18 @@ class SchoolYear extends Model
 		return $this->morphedByMany(Level::class, 'schoolable');
 	}
 
+	public function responsibles()
+	{
+		return $this->hasMany(Responsible::class);
+
+	}
+
+	public function principals()
+	{
+		return $this->hasMany(PrincipalTeacher::class);
+
+	}
+
 
 	public function periods()
 	{
@@ -45,12 +61,17 @@ class SchoolYear extends Model
 
 	public function timePlans()
 	{
-		return $this->morphedByMany(TimePlan::class, 'schoolable');
+		return $this->hasMany(TimePlan::class);
 	}
 
 	public function classes()
 	{
 		return $this->morphedByMany(Classe::class, 'schoolable');
+	}
+
+	public function classe_groups()
+	{
+		return $this->morphedByMany(ClasseGroup::class, 'schoolable');
 	}
 
 
@@ -74,10 +95,13 @@ class SchoolYear extends Model
 	{
 		return $this->morphedByMany(Teacher::class, 'schoolable');
 	}
+
     public function aes()
 	{
 		return $this->morphedByMany(AE::class, 'schoolable');
 	}
+
+
     public function teacherCursus()
 	{
 		return $this->morphedByMany(TeacherCursus::class, 'schoolable');
@@ -120,6 +144,27 @@ class SchoolYear extends Model
 	public function securities()
     {
         return $this->hasMany(ClassesSecurity::class);
+    }
+
+
+    public function classeWithPupils()
+    {
+    	return $this->hasMany(ClassePupilSchoolYear::class);
+    }
+
+
+    public function getClassePupils($classe_id)
+    {
+    	$pupils = [];
+
+    	$data = $this->classeWithPupils()->where('classe_id', $classe_id)->get();
+    	if(count($data) > 0){
+    		foreach($data as $datum){
+    			$pupils = $this->pupils()->where('pupils.id', $datum->pupil_id)->orderBy('pupils.firstName', 'asc')->orderBy('pupils.lastName', 'asc')->get();
+    		}
+    	}
+
+    	return $pupils;
     }
 
 

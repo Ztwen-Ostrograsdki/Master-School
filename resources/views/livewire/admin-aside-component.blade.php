@@ -6,7 +6,7 @@
           <img src="/myassets/images/product_02.jpg" alt="AdminLTE Logo" class="border border-white brand-image " style="opacity: .8;">
           <span class="brand-text font-weight-light">{{ $school_name ? $school_name : 'ZtweN-School' }}</span>
         </a>
-    
+
         <!-- Sidebar -->
         @auth
         <div class="sidebar">
@@ -56,6 +56,7 @@
                     <span class="badge badge-info right">{{$pupils->count()}}</span>
                   </p>
                 </a>
+
                 @foreach ($levels as $level)
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
@@ -70,6 +71,15 @@
                       </p>
                     </a>
                     <ul class="nav nav-treeview">
+                      <li class="nav-item">
+                        <a href="{{route('pupil_listing', ['level' => $level->name])}}" class="nav-link @isRoute('pupil_listing') active @endisRoute">
+                          <i class="far nav-icon"></i>
+                          <p> Liste complète </p>
+                          <span class="badge badge-info right">
+                            {{ count($level->getLevelPupils()) }}
+                          </span>
+                        </a>
+                      </li>
                       @foreach ($classes as $c)
                         @if($c->level_id == $level->id)
                         <li class="nav-item">
@@ -175,6 +185,14 @@
                     <span class="badge badge-warning right">{{$classes->count()}}</span>
                   </p>
                 </a>
+                <ul class="nav nav-treeview">
+                  <li class="nav-item">
+                    <a href="{{route('classe_listing')}}" class="nav-link @isRoute('classe_listing') active @endisRoute">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p> Liste complète </p>
+                    </a>
+                  </li>
+                </ul>
                 @foreach ($levels as $level)
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
@@ -585,6 +603,33 @@
                 </ul>
               </li>
               <li class="nav-header text-uppercase">Outils</li>
+              <li class="nav-item">
+                <a href="{{route('polyvalente_classe', ['level' => 'Primaire'])}}" class="nav-link @isRoute('polyvalente_classe') active @endisRoute">
+                  <i class="nav-icon fas fa-table"></i>
+                  <p>
+                    Polyvalente Primaire
+                    <span class="badge badge-info right"></span>
+                  </p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{route('polyvalente_classe', ['level' => 'Secondaire'])}}" class="nav-link @isRoute('polyvalente_classe') active @endisRoute">
+                  <i class="nav-icon fas fa-table"></i>
+                  <p>
+                    Polyvalente Secondaire
+                    <span class="badge badge-info right"></span>
+                  </p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{route('subject_listing')}}" class="nav-link @isRoute('subject_listing') active @endisRoute">
+                  <i class="nav-icon fas fa-book-open"></i>
+                  <p>
+                    Les matières
+                    <span class="badge badge-info right"></span>
+                  </p>
+                </a>
+              </li>
               <li class="nav-item">
                 <a href="{{route('time_plans', ['school_year' => str_replace(' - ', '-', session('school_year_selected'))])}}" class="nav-link @isRoute('time_plans') active @endisRoute">
                   <i class="nav-icon fas fa-clock"></i>

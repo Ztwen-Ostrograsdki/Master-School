@@ -1,13 +1,14 @@
 <div>
     @if($has_school)
-        <div class="w-100 d-flex" x-data>
+        <div class="w-100 d-flex">
             <h5 class="mt-2 mr-1">Année-Scolaire :</h5>
             <form action="">
                 {{csrf_field()}}
-                <select x-model="$wire.school_year_selected" x-on:change=" @this.call('changeSchoolYear');" class="form-select">
-                    <template x-for="school_year in $wire.school_years">
-                        <option :selected="school_year == $wire.school_year_selected" x-bind:value="school_year" x-text="school_year"></option>
-                    </template>
+                <select wire:model="school_year_selected" class="form-select custom-select">
+                    <option disabled value="{{null}}">Sélectionner une année scolaire</option>
+                    @foreach($school_years as $school_year)
+                        <option value="{{$school_year->school_year}}"> {{ $school_year->school_year }} </option>
+                    @endforeach
                 </select>
             </form>
         </div>

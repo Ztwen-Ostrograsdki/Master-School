@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use App\Events\NewUserConnectedEvent;
 use App\Events\NewUserRegistredEvent;
+use App\Helpers\AdminTraits\AdminTrait;
 use App\Models\LockedUsersRequest;
 use App\Models\Role;
 use App\Models\User;
@@ -52,7 +53,7 @@ class AuthRedirections extends Component
 
     ];
 
-    
+
 
     public function updated($property)
     {
@@ -124,7 +125,12 @@ class AuthRedirections extends Component
                 $this->dispatchBrowserEvent('Toast', ['title' => 'Connexion réussie!!!', 'message' => "Vous serez redirigé vers votre profil!", 'type' => 'success']);
                 // $event = new NewUserConnectedEvent($this->user);
                 // broadcast($event);
-                $this->user->__backToUserProfilRoute();
+                if($this->user->isAdminAs('master')){
+                    $this->user->___backToAdminRoute();
+                }
+                else{
+                    $this->user->__backToUserProfilRoute();
+                }
             }
             else{
                 session()->flash('message', 'Aucune correspondance trouvée');

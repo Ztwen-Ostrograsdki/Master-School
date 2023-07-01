@@ -14,12 +14,18 @@ class AE extends Model
     protected $fillable = [
         'teacher_id',
         'subject_id',
+        'school_year_id',
         'blocked',
     ];
 
     public function school_years()
     {
         return $this->morphToMany(SchoolYear::class, 'schoolable');
+    }
+
+    public function school_year()
+    {
+        return $this->belongsTo(SchoolYear::class);
     }
 
 

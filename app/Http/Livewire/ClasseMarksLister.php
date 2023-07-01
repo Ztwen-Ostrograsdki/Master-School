@@ -18,6 +18,7 @@ class ClasseMarksLister extends Component
     protected $listeners = [
         'classeSubjectUpdated' => 'reloadData',
         'classePupilListUpdated' => 'reloadData',
+        'schoolYearChangedLiveEvent' => 'reloadData',
         'classeUpdated' => 'reloadData',
         'semestreWasChanged',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',

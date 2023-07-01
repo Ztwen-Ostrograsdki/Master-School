@@ -191,6 +191,8 @@ trait AdminTrait{
         $this->__refreshNotifications();
         $this->__backToUserProfilRoute();
     }
+
+
     
     /**
      * Use to destroy all admin keys that aren't avanced keys

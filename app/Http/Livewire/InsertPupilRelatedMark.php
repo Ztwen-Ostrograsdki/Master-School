@@ -60,16 +60,16 @@ class InsertPupilRelatedMark extends Component
     }
 
 
-    public function addNewMark(int $target_id, int $subject_id, int $semestre, int $school_year, $together = false)
+    public function addNewMark(int $pupil_id, int $subject_id, int $semestre, int $school_year, $together = false)
     {
         $this->together = $together;
 
-        if($subject_id && $target_id && $semestre && $school_year){
+        if($subject_id && $pupil_id && $semestre && $school_year){
             $school_year_model = $this->getSchoolYear();
 
             if(!$together) {
 
-                $pupil_id = $target_id;
+                $pupil_id = $pupil_id;
                 $pupil = $school_year_model->pupils()->where('pupils.id', $pupil_id)->first();
                 $subject = Subject::find($subject_id);
 
