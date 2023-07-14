@@ -20,13 +20,13 @@
     </blockquote>
 </div>
 <div class="m-1 p-2 w-100">
-    <div class="w-100 d-flex justify-content-between">
+    <div class="w-100 d-flex justify-content-between flex-column">
         <span class="">
             <span wire:click="addNewEventPeriod" class="btn  btn-secondary">
                 <span class="fa fa-plus"></span>
                 <span class="">Un évènement</span>
             </span>
-            <span wire:click="resetAllSemestreCalendars" class="btn btn-warning cursor-pointer mx-1">
+            <span wire:click="resetAllCalendars" class="btn btn-warning cursor-pointer mx-1">
                 <span class="fa fa-trash"></span>
                 <span>Rafraichir</span>
             </span>
@@ -39,41 +39,57 @@
 
         @if($current_period)
             <span>
-                <small class="text-primary">Nous sommes dans le {{ $current_period['target'] }}</small>
-                <small class="text-danger">Il y a déjà {{ $current_period['passed'] }} qui se sont écoulés</small>
-                <small class="text-success">Il nous reste encore {{ $current_period['rest'] }}</small>
+                <small class="text-white-50">Nous sommes dans le {{ $current_period['target'] }}</small>
+                <small class="text-success">Il y a déjà {{ $current_period['passed'] }} qui se sont écoulés</small>
+                <small class="text-danger">Il nous reste encore {{ $current_period['rest'] }}</small>
+                <span class="mx-2 text-white-50">
+                    <small class="fa fa-warning text-danger"></small>
+                    <small>Après cete période, l'insertion des notes séra bloquée pour ce semestre!</small>
+                    <small class="fa fa-warning text-danger"></small>
+                </span>
             </span>
         @endif
     </div>
     <div class="my-2">
         @if(!$school_calendar || ($school_calendars == [] && $semestre_calendars !== []))
-            <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white">
-                <thead class="text-white text-center">
-                    <th class="py-2 text-center">#ID</th>
-                    <th class="">{{ $semestre_type }}</th>
-                    <th>Debut</th>
-                    <th>Fin</th>
-                    <th>Durée</th>
-                    <th>Actions</th>
-                </thead>
-                <tbody>
-                    @foreach($semestre_calendars as $k => $s_c)
-                        <tr class="text-capitalize" style="cursor:default; !important;">
-                            <td class="text-center border-right" >{{ $loop->iteration }}</td>
-                            </td>
-                            <td class="text-center">{{ $s_c['model']->object }}</td>
-                            <td class="text-center"> {{ $s_c['start'] }}</td>
-                            <td class="text-center"> {{  $s_c['end'] }}</td>
-                            <td class="text-center"> {{ $s_c['duration'] }}</td>
-                            <td class="text-center">
-                                <span class="d-flex justify-content-center">
-                                    <span wire:click="editSemestrePeriods" title="Editer ce calendrier" class="fa fa-edit text-primary cursor-pointer"></span>
-                                </span>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            @if($semestre_calendars !== [])
+                <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white">
+                    <thead class="text-white text-center">
+                        <th class="py-2 text-center">#ID</th>
+                        <th class="">Programme</th>
+                        <th>Debut</th>
+                        <th>Fin</th>
+                        <th>Durée</th>
+                        <th>Actions</th>
+                    </thead>
+                    <tbody>
+                        @foreach($semestre_calendars as $k => $s_c)
+                            <tr class="text-capitalize" style="cursor:default; !important;">
+                                <td class="text-center border-right" >{{ $loop->iteration }}</td>
+                                </td>
+                                <td class="text-center">{{ $s_c['model']->object }}</td>
+                                <td class="text-center"> {{ $s_c['start'] }}</td>
+                                <td class="text-center"> {{  $s_c['end'] }}</td>
+                                <td class="text-center"> {{ $s_c['duration'] }}</td>
+                                <td class="text-center">
+                                    <span class="d-flex justify-content-center">
+                                        <span wire:click="editSemestrePeriods" title="Editer ce calendrier" class="fa fa-edit text-primary cursor-pointer"></span>
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <blockquote class="text-secondary bg-secondary mx-auto small w-100">
+                    <span>
+                        <span class="text-white-50 text-uppercase">
+                            Le CALENDRIER DES {{ $school_calendar_title }} de l'année scolaire {{ $school_year_model->school_year }} est vide. <br>
+                            <small class="text-warning">Veuillez en ajouter en cliquant sur le bouton supérieur à gauche!</small>
+                        </span>
+                    </span>
+                </blockquote>
+            @endif
         @elseif($school_calendar)
             @if(count($school_calendars) > 0)
                 <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white">
@@ -82,12 +98,17 @@
                             <span class="fa-1x">
                                 LE calendrier des {{ $school_calendar_title }}
                             </span> 
+
+                            <h6 wire:click="resetCalendars" class="text-white cursor-pointer mx-2 fx-15 p-0 m-0 px-3 py-1 float-right btn bg-orange border border-white " title="Vider le calendrier {{ $school_calendar_title }} ">
+                                <span class="">Vider</span>
+                                <span class="fa fa-trash"></span>
+                            </h6>
                         </th>
                     </thead>
                     <thead class="text-white text-center">
                         
                         <th class="py-2 text-center">#ID</th>
-                        <th class="text-center">Objet</th>
+                        <th class="text-center">Programme</th>
                         <th class="">{{ $semestre_type }} concerné</th>
                         <th>Debut</th>
                         <th>Fin</th>

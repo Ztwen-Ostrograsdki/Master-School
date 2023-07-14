@@ -138,21 +138,31 @@ class PupilProfil extends Component
     public function resetAbsences($allyears = false)
     {
         $pupil = Pupil::find($this->pupil_id);
+
         if ($pupil) {
+
+            $name = $pupil->firstName;
+
             $school_year_model = $this->getSchoolYear();
+
             $semestre = $this->semestre_selected;
+
             if (session()->has('semestre_selected') && session('semestre_selected')) {
+
                 $semestre = session('semestre_selected');
             }
 
             $subject_id = session('classe_subject_selected');
-            $a = $pupil->resetAllAbsences($school_year_model->id, $semestre, $subject_id, $allyears);
+
+            $a = $pupil->deletePupilAbsences($semestre, $subject_id, $school_year_model->id);
+
             if($a){
                 $this->emit('pupilUpdated', $pupil->id);
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Les absences de $pupil->getName() ont été rafraîchies avec succès!", 'type' => 'success']);
+
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Les absences de $name ont été rafraîchies avec succès!", 'type' => 'success']);
             }
             else{
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Le rafraichissement des absences de $pupil->getName() a échoué!", 'type' => 'error']);
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Le rafraichissement des absences de $name a échoué!", 'type' => 'error']);
             }
         }
         else{
@@ -168,20 +178,30 @@ class PupilProfil extends Component
     {
         $pupil = Pupil::find($this->pupil_id);
         if ($pupil) {
+
             $school_year_model = $this->getSchoolYear();
+
             $semestre = $this->semestre_selected;
+
             if (session()->has('semestre_selected') && session('semestre_selected')) {
+
                 $semestre = session('semestre_selected');
             }
 
             $subject_id = session('classe_subject_selected');
-            $l = $pupil->resetAllLates($school_year_model->id, $semestre, $subject_id, $allyears);
+
+            $l = $pupil->deletePupilLates($subject_id, $semestre, $school_year_model->id);
+
+            $name = $pupil->firstName;
+
             if($l){
+
                 $this->emit('pupilUpdated', $pupil->id);
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Les retards de $pupil->getName() ont été rafraîchies avec succès!", 'type' => 'success']);
+
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Les retards de $name ont été rafraîchies avec succès!", 'type' => 'success']);
             }
             else{
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Le rafraichissement des retards de $pupil->getName() a échoué!", 'type' => 'error']);
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Le rafraichissement des retards de $name a échoué!", 'type' => 'error']);
             }
         }
         else{
@@ -245,11 +265,16 @@ class PupilProfil extends Component
     }
 
 
-    public function resetMarks($allyears = false)
+    public function resetMarks($type = null)
     {
         $school_year_model = $this->getSchoolYear();
+
         $pupil = $school_year_model->pupils()->where('pupils.id', $this->pupil_id)->first();
+
         if ($pupil) {
+
+            $name = $pupil->firstName;
+
             $classe = $pupil->getCurrentClasse($school_year_model->id);
             if($classe){
                 $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe->id);
@@ -260,17 +285,65 @@ class PupilProfil extends Component
                     }
                     $subject_id = session('classe_subject_selected');
 
-                    $done = $pupil->resetAllMarks($school_year_model->id, $semestre, $subject_id, $type, $allyears);
+                    $done = $pupil->deletePupilMarks($semestre, $school_year_model->id, $subject_id, $type);
+
                     if($done){
                         $this->emit('pupilUpdated', $pupil->id);
-                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "Les notes de $pupil->getName() ont été rafraîchies!", 'type' => 'success']);
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "Les notes de $name ont été rafraîchies!", 'type' => 'success']);
                     }
                     else{
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Le rafraichissement des notes  $pupil->getName() a échoué. Veuillez réessayer!", 'type' => 'error']);
+                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Le rafraichissement des notes  $name a échoué. Veuillez réessayer!", 'type' => 'error']);
                     }
                 }
                 else{
                     $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE TEMPORAIREMENT', 'message' => "Vous ne pouvez pas supprimer les notes!", 'type' => 'warning']);
+                }
+
+            }
+            else{
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "La classe est introuvable!", 'type' => 'error']);
+            }
+        }
+        else{
+            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "L'apprenant est introuvable!", 'type' => 'error']);
+
+        }
+        
+    }
+
+
+    public function resetRelatedMarks()
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        $pupil = $school_year_model->pupils()->where('pupils.id', $this->pupil_id)->first();
+
+        if ($pupil) {
+
+            $name = $pupil->firstName;
+
+            $classe = $pupil->getCurrentClasse($school_year_model->id);
+            if($classe){
+                $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe->id);
+                if($not_secure){
+                    $semestre = $this->semestre_selected;
+                    if (session()->has('semestre_selected') && session('semestre_selected')) {
+                        $semestre = session('semestre_selected');
+                    }
+                    $subject_id = session('classe_subject_selected');
+
+                    $done = $pupil->deleteAllPupilRelatedMarks($semestre, $school_year_model->id, $subject_id);
+
+                    if($done){
+                        $this->emit('pupilUpdated', $pupil->id);
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "Les notes relatives de $name ont été rafraîchies!", 'type' => 'success']);
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Le rafraichissement des notes relatives de $name a échoué. Veuillez réessayer!", 'type' => 'error']);
+                    }
+                }
+                else{
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE TEMPORAIREMENT', 'message' => "Vous ne pouvez pas supprimer les notes relatives!", 'type' => 'warning']);
                 }
 
             }

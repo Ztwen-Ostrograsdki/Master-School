@@ -25,6 +25,8 @@ class CreateTeachersTable extends Migration
             $table->date('birth_day')->nullable()->default(null);
             $table->string('residence')->nullable()->default(null);
             $table->boolean('authorized')->default(false);
+            $table->boolean('teaching')->default(true);
+            $table->timestamp('last_teaching_date')->nullable()->default(null);
             $table->unsignedBigInteger('level_id')->nullable();
             $table->foreign('level_id')
                   ->references('id')

@@ -19,7 +19,9 @@
 <script src="{{asset('myassets/dist/js/demo.js')}}"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 {{-- <script src="{{asset('myassets/dist/js/pages/dashboard2.js')}}"></script> --}}
-<script src="{{asset('js/ztw.js')}}"></script>
+<script src="{{asset('js/modals.js')}}"></script>
+<script src="{{asset('js/toasters.js')}}"></script>
+<script src="{{asset('js/actions.js')}}"></script>
     @stack('modals')
 
     @livewireScripts

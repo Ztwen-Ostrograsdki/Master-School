@@ -18,16 +18,18 @@ class ClasseGroupProfil extends Component
         'classeGroupSubjectsUpdated' => 'reloadClasseGroupData',
         'schoolYearChangedLiveEvent' => 'reloadClasseGroupData',
         'newClasseCreated' => 'reloadClasseGroupData',
-        'newLevelCreated' => 'reloadClasseGroupData'
+        'newLevelCreated' => 'reloadClasseGroupData',
+        'QuotaTableUpdated' => 'reloadClasseGroupData'
     ]; 
 
     public $editingClasseGroupeName = false;
     public $slug;
     public $counter = 0;
+    public $semestre_type = "semestre";
 
     public function mount($slug = null)
     {
-        $this->school_year_model = $this->getSchoolYear();
+        
         if($slug){
             $this->slug = $slug;
         }
@@ -40,25 +42,41 @@ class ClasseGroupProfil extends Component
 
     public function render()
     {
+        $school_year_model = $this->getSchoolYear();
+
         $school = School::first();
+
         $semestres = [1, 2];
+
         if($school){
+
             if($school->trimestre){
+
                 $this->semestre_type = 'trimestre';
+
                 $semestres = [1, 2, 3];
+
             }
             else{
+
                 $semestres = [1, 2];
             }
         }
+
         $classe_group = ClasseGroup::where('name', urldecode($this->slug))->first();
         
-        return view('livewire.classe-group-profil', compact('classe_group'));
+        return view('livewire.classe-group-profil', compact('classe_group', 'school_year_model'));
     }
 
     public function createNewClasseGroup()
     {
         $this->emit('createNewClasseGroupLiveEvent');
+    }
+
+
+    public function manageQuota($classe_group_id)
+    {
+        $this->emit('ManageQuotaLiveEvent', null, null, null,  $classe_group_id);
     }
 
 

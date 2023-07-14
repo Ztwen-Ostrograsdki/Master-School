@@ -136,7 +136,7 @@
                                 <hr class="m-0 p-0 bg-white text-white">
                                 <div>
                                     @if($section_to_display == 'marks')
-                                        @livewire('classe-marks-lister', ['classe_id' => $classe->id, 'subject_selected' => $user->teacher->speciality(), 'classe_subject_selected' => $user->teacher->speciality()->id, 'semestre_selected' => $semestre_selected])
+                                        @livewire('classe-marks-lister', ['classe_id' => $classe->id, 'subject_selected' => $user->teacher->speciality(), 'classe_subject_selected' => $user->teacher->speciality()->id, 'semestre_selected' => $semestre_selected, 'teacher_profil' => $teacher_profil])
                                     @elseif($section_to_display == 'liste')
                                         @livewire('classe-pupils-lister', ['classe_id' => $classe->id])
 

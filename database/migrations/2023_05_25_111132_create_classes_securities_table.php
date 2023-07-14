@@ -13,6 +13,8 @@ class CreateClassesSecuritiesTable extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
+        Schema::dropIfExists('classes_securities');
         Schema::create('classes_securities', function (Blueprint $table) {
             $table->id();
             $table->string('description')->nullable()->default(null);
@@ -36,29 +38,36 @@ class CreateClassesSecuritiesTable extends Migration
             $table->foreign('classe_id')
                   ->references('id')
                   ->on('classes')
-                  ->onDelete('restrict')
-                  ->onUpdate('restrict');   
+                  ->onDelete('cascade')
+                  ->onUpdate('cascade');  
+
+            $table->unsignedBigInteger('pupil_id')->nullable()->default(null);
+            $table->foreign('pupil_id')
+                  ->references('id')
+                  ->on('pupils')
+                  ->onDelete('cascade')
+                  ->onUpdate('cascade');     
                    
             $table->unsignedBigInteger('teacher_id')->nullable()->default(null);
             $table->foreign('teacher_id')
                   ->references('id')
                   ->on('teachers')
-                  ->onDelete('restrict')
-                  ->onUpdate('restrict');    
+                  ->onDelete('cascade')
+                  ->onUpdate('cascade');    
 
             $table->unsignedBigInteger('school_year_id');
             $table->foreign('school_year_id')
                   ->references('id')
                   ->on('school_years')
-                  ->onDelete('restrict')
-                  ->onUpdate('restrict');   
+                  ->onDelete('cascade')
+                  ->onUpdate('cascade');   
 
             $table->unsignedBigInteger('subject_id')->nullable()->default(null);
             $table->foreign('subject_id')
                   ->references('id')
                   ->on('subjects')
-                  ->onDelete('restrict')
-                  ->onUpdate('restrict');   
+                  ->onDelete('cascade')
+                  ->onUpdate('cascade');   
 
             $table->timestamps();
         });

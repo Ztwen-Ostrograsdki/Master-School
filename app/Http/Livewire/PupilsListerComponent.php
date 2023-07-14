@@ -41,7 +41,7 @@ class PupilsListerComponent extends Component
     public $level;
     public $editingPupilName = false;
 
-    public $levels = ['Secondaire' => 'secondary', 'Primaire' => 'primary'];
+    public $levels = ['secondaire' => 'secondary', 'secondary' => 'secondary', 'primary' => 'primary', 'primaire' => 'primary'];
 
 
 
@@ -51,12 +51,20 @@ class PupilsListerComponent extends Component
     {
         if($level){
             $this->level = $level;
-            $this->theLevel = $this->levels[ucfirst($level)];
+            $this->theLevel = $this->levels[strtolower($level)];
         }
         else{
             return abort(404);
         }
 
+    }
+
+
+    public function valideSemestre()
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        $school_year_model->marksWasAlreadyStopped();
     }
 
     public function resetSearch()
@@ -154,7 +162,7 @@ class PupilsListerComponent extends Component
         return view('livewire.pupils-lister-component', compact('pupils', 'school_year_model', 'classes', 'classe_groups'));
     }
 
-    public function deletePupil($pupil_id)
+    public function deletePupilOO($pupil_id)
     {
         return false;
         $pupil = Pupil::find($pupil_id);
@@ -172,14 +180,18 @@ class PupilsListerComponent extends Component
         $this->search = $value;
     }
 
-    public function forceDeletePupil($pupil_id)
+    public function deletePupil($pupil_id)
     {
-        return false;
         $pupil = Pupil::find($pupil_id);
+
         if($pupil){
+
             DB::transaction(function($e) use ($pupil){
+
                 $school_year_model = $this->getSchoolYear();
+
                 $marks = $pupil->marks;
+
                 $classes = $pupil->classes;
 
                 $pupil->marks()->each(function($mark) use ($school_year_model){
@@ -285,6 +297,48 @@ class PupilsListerComponent extends Component
         else{
             $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Opération de mise à jour a échoué!", 'type' => 'error']);
         }
+    }
+
+
+    public function classed($pupil_id)
+    {
+
+
+    }
+
+    public function unclassed($pupil_id)
+    {
+
+
+    }
+
+    public function lockMarksUpdating($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+        $pupil->lockPupilMarksUpdating();
+
+    }
+
+
+    public function unlockMarksUpdating($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+        $pupil->unlockPupilMarksUpdating();
+
+    }
+
+    public function lockMarksInsertion($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+        $pupil->lockPupilMarksInsertion();
+
+    }
+
+    public function unlockMarksInsertion($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+        $pupil->unlockPupilMarksInsertion();
+
     }
 
 

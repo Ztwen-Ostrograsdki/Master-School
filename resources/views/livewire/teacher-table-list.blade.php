@@ -1,9 +1,18 @@
 <div>
     <div>
         <blockquote class="text-warning">
-            <h6 class="m-0 p-0 h6 text-white-50 py-2">
+            <div class="d-flex justify-content-between">
+                <h6 class="m-0 p-0 h6 text-white-50 py-2">
                 Liste des enseignants enregistrés sur la plateforme <span class="text-warning"></span>
             </h6>
+            <span class="float-right">
+                @if($teaching)
+                    <span wire:click="changeSection" class="btn btn-warning">Afficher Enseignants non en fonction</span>
+                @else
+                    <span wire:click="changeSection('true')" class="btn btn-success">Afficher Enseignants en fonction</span>
+                @endif
+            </span>
+            </div>
         </blockquote>
     </div>
     <div class="w-100 m-0 p-0 mt-3">
@@ -12,7 +21,11 @@
             <thead class="text-white text-center">
                 <th class="py-2 text-center">#ID</th>
                 <th class="py-1">Nom et Prénoms</th>
-                <th>Classes</th>
+                @if($teaching)
+                    <th>Classes</th>
+                @else
+                    <th>Retrait de la fonction depuis</th>
+                @endif
                 <th>Contacts</th>
                 <th>Spécialité</th>
                 <th>Inscrit depuis</th>
@@ -60,6 +73,7 @@
                             </span>
                             @endif
                         </td>
+                        @if($teaching)
                         <td class="text-left pl-1"> 
                             @if($t->hasClasses())
                                 <span class="d-flex justify-content-between">
@@ -81,15 +95,24 @@
                                 Aucune classe assignée!
                             @endif
                         </td>
+                        @else
+                            <td class="text-center"> {{ $t->getLastTeachingDate() }}</td>
+                        @endif
                         <td class="text-center"> {{ $t->contacts }}</td>
                         <td class="text-center"> {{ $t->speciality() ? $t->speciality()->name : 'Non définie' }}</td>
                         <td class="text-center"> {{ $t->user->getDateAgoFormated($t->user->created_at) }}</td>
                          @if($baseRoute == 'teacher_listing')
                         <td class="text-center"> 
                             <span class="row w-100 m-0 p-0">
-                                <span title="Retirer la fonction enseignante" wire:click="retrieveFromTeachers({{$t->id}})" class="text-danger col-3 m-0 p-0 cursor-pointer">
-                                    <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
-                                </span>
+                                @if($t->teaching)
+                                    <span title="Retirer la fonction enseignante" wire:click="retrieveFromTeachers({{$t->id}})" class="text-danger col-3 m-0 p-0 cursor-pointer">
+                                        <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
+                                    </span>
+                                @else
+                                    <span title="Réinsérer dans la fonction enseignante" wire:click="insertIntoTeachers({{$t->id}})" class="text-danger col-3 m-0 p-0 cursor-pointer">
+                                        <span class="text-success cursor-pointer fa fa-recycle py-2 px-2"></span>
+                                    </span>
+                                @endif
                                 @if($t->user->hasVerifiedEmail())
                                     <span title="Marquer comme compte non vérifié" wire:click="markEmailAsUnverified({{$t->user->id}})" class="text-warning col-3 m-0 p-0 cursor-pointer">
                                     <span class="fa bi-person-x-fill py-2 px-2"></span>
@@ -102,9 +125,11 @@
                                 <span wire:click="manageAdminStatus({{$t->user->id}})" title="Etendre entant que administrateur" class="text-danger col-3 m-0 p-0 cursor-pointer">
                                     <span class="text-secondary cursor-pointer fa fa-user-secret py-2 px-2"></span>
                                 </span>
+                                @if($teaching)
                                 <span wire:click="manageTeacherClasses({{$t->id}})" title="Editer les classes de {{ $t->name . ' ' . $t->surname }}" class="text-danger col-3 m-0 p-0 cursor-pointer">
                                     <span class="text-primary cursor-pointer fa fa-edit py-2 px-2"></span>
                                 </span>
+                                @endif
                             </span>
                         </td>
                         @endif

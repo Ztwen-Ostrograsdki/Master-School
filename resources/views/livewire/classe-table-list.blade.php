@@ -27,29 +27,6 @@
                     </ul>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="container-fluid m-0 p-0 w-100">
-                    <div class="card-deck w-100 p-0 m-0">
-                        <div class="card active" href="#tab_1" data-toggle="tab">
-                            <div class="info-box m-0 p-0 bg-transparent">
-                                <span class="info-box-icon"><i class="fa bi-search"></i></span>
-                                <div class="info-box-content">
-                                    <div class="d-flex justify-content-between">
-                                        <form action="" class="col-10">
-                                            <input placeholder="Veuillez saisir un mot clé à retrouver ..." class="form-control bg-transparent py-1" type="text" name="search" wire:model="search">
-                                        </form>
-                                        <div x-on:click="@this.call('resetSearch')" data-card-widget="collapse" class="btn-secondary rounded text-center p-1 cursor-pointer border border-white col-2">
-                                            <span>Annuler</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    
-                </div>
-            </div>
         </div>
     </div>
     <div>
@@ -124,7 +101,7 @@
                                 <tr class="">
                                     <td class="text-center border-right">{{ $loop->iteration }}</td>
                                     <td class="text-left px-2"> 
-                                        <a class="text-white m-0 p-0 py-1" href="#">
+                                        <a class="text-white m-0 p-0 py-1" href="{{route('classe_profil', ['slug' => $classe->slug])}}">
                                             <span class="d-flex justify-content-between">
                                                 <span class="mx-2 d-none d-lg-inline d-xl-inline text-small ">
                                                     {{ $classe->name }}

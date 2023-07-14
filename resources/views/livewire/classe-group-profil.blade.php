@@ -24,8 +24,26 @@
                             <div class="info-box m-0 p-0 bg-info">
                                 <span class="info-box-icon"><i class="fa fa-user-friends"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Effectif</span>
-                                    <span class="info-box-number"></span>
+                                    <span class="info-box-text">Effectif 
+                                        (<b class="text-warning">
+                                            {{ $classe_group ? count($classe_group->getPupils(session('school_year_selected'))) : 'vide'}}
+                                        </b>)
+                                    </span>
+                                    <span class="info-box-number d-flex flex-column m-0 p-0">
+                                        <span class="small">
+                                            <i class="font-italic"> Garçons </i> : 
+                                            <small> 
+                                                {{ $classe_group ? count($classe_group->getClassePupilsOnGender('male', session('school_year_selected'))) : '00'}}
+                                            </small>
+                                        </span>
+
+                                        <span class="small">
+                                            <i class="font-italic"> Filles </i> : 
+                                            <small> 
+                                                {{ $classe_group ? count($classe_group->getClassePupilsOnGender('female', session('school_year_selected'))) : '00' }}
+                                            </small>
+                                        </span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -33,8 +51,35 @@
                             <div class="info-box m-0 p-0 bg-primary">
                                 <span class="info-box-icon"><i class="fa fa-user-nurse"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Les Notes</span>
-                                    <span class="info-box-number">90 000</span>
+                                    <span class="info-box-text">Les Notes
+                                        (<b class="text-warning">
+                                            {{ $classe_group ? count($classe_group->marks($school_year_model->id)) : '00'}}
+                                        </b>)
+                                    </span>
+                                    <span class="info-box-number d-flex flex-column m-0 p-0">
+                                        <span class="small">
+                                            <i class="font-italic"> {{ $semestre_type }} 1 </i> : 
+                                            <small> 
+                                                {{ $classe_group ? count($classe_group->marks($school_year_model->id, 1)) : '00'}}
+                                            </small>
+                                        </span>
+
+                                        <span class="small">
+                                            <i class="font-italic"> {{ $semestre_type }} 2 </i> : 
+                                            <small> 
+                                                {{ $classe_group ? count($classe_group->marks($school_year_model->id, 2)) : '00'}}
+                                            </small>
+                                        </span>
+
+                                        @if($semestre_type == 'Trimestre')
+                                            <span class="small">
+                                                <i class="font-italic"> {{ $semestre_type }} 3 </i> : 
+                                                <small> 
+                                                    {{ $classe_group ? count($classe_group->marks($school_year_model->id, 3)) : '00'}}
+                                                </small>
+                                            </span>
+                                        @endif
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -43,7 +88,7 @@
                                 <span class="info-box-icon"><i class="far fa-heart"></i></span>
                                 <div class="info-box-content">
                                   <span class="info-box-text">Scolarités</span>
-                                  <span class="info-box-number">92 050</span>
+                                  <span class="info-box-number">25%</span>
                                 </div>
                             </div>
                         </div>
@@ -52,7 +97,7 @@
                                 <span class="info-box-icon"><i class="fa fa-cloud-download-alt"></i></span>
                                 <div class="info-box-content">
                                     <span class="info-box-text">Emploi du temps</span>
-                                    <span class="info-box-number">114 381</span>
+                                    <span class="info-box-number">12%</span>
                                 </div>
                             </div>
                         </div>
@@ -106,6 +151,14 @@
                             <span class="ml-1 text-dark">
                                 <span class="fa fa-plus"></span>
                                 <span class="small">Matières</span>
+                            </span>
+                        </span>
+                    </li>
+                    <li class=" float-right">
+                        <span wire:click="manageQuota({{$classe_group->id}})" title="Editer les quotas horaires hebdomadaires de cette promotion de {{$classe_group->name}}" class="float-right btn btn-warning mr-2 border">
+                            <span class="ml-1 text-dark">
+                                <span class="fa fa-plus"></span>
+                                <span class="small">Quota H</span>
                             </span>
                         </span>
                     </li>

@@ -2,6 +2,7 @@
 namespace App\Helpers\ModelTraits;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\ClassesSecurity;
+use Illuminate\Support\Facades\DB;
 
 
 trait TeachersTrait{
@@ -12,16 +13,23 @@ trait TeachersTrait{
 	public function teacherCanUpdateMarksInThisClasse($classe_id)
     {
         $school_year_model = $this->getSchoolYear();
+
         $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
 
         if($classe){
+
             $teacher_classes = $this->getTeachersCurrentClasses();
+
             if(array_key_exists($classe->id, $teacher_classes)){
+
                 if($classe->hasSecurities()){
+
                     $locked_marks_updating_for_teacher = $classe->securities()->where('school_year_id', $school_year_model->id)->where('locked_marks_updating', true)->where('teacher_id', $this->id)->get();
+
                     $locked_marks_updating_for_all = $classe->securities()->where('school_year_id', $school_year_model->id)->where('locked_marks_updating', true)->get();
 
                     if(!$locked_marks_updating_for_all && !$locked_marks_updating_for_teacher){
+
                         return true;
                     }
                     else{
@@ -60,13 +68,21 @@ trait TeachersTrait{
     }
 
 
-    public function teacherWasFreeInThisTime($start, $end, $day, $school_year_id = null)
+    public function teacherWasFreeInThisTime($start, $end, $day, $school_year_id = null, $except = null)
     {
         if(!$school_year_id){
             $school_year_id = $this->getSchoolYear()->id;
         }
 
-        $times = $this->timePlans()->where('time_plans.school_year_id', $school_year_id)->where('time_plans.day', $day)->get();
+        if($except){
+            
+            $times = $this->timePlans()->where('time_plans.school_year_id', $school_year_id)->where('time_plans.day', $day)->where('time_plans.id', '<>', $except)->get();
+        }
+        else{
+
+            $times = $this->timePlans()->where('time_plans.school_year_id', $school_year_id)->where('time_plans.day', $day)->get();
+
+        }
 
         if(count($times) > 0){
             foreach($times as $time){
@@ -99,10 +115,199 @@ trait TeachersTrait{
     }
 
 
+    public function teacherHasCourseAtThisTime($classe_id, $day = null, $school_year = null)
+    {
+        $school_year_id = $this->getSchoolYear($school_year)->id;
+
+        $time_plans = [];
+
+        
+
+        if(!$day){
+            setlocale(LC_TIME, "fr_FR.utf8", 'fra');
+
+            $day = strftime('%A', time());
+
+        }
+
+        $times = $this->timePlans()->where('time_plans.school_year_id', $school_year_id)->where('time_plans.classe_id', $classe_id)->where('time_plans.day', $day)->get();
+
+
+        if(count($times) > 0){
+
+            foreach($times as $time){
+
+                $now_hour = date('H');
+
+                $start = $time->start;
+
+                $s = $start . 'H';
+
+                $end = $time->end;
+
+                $e = $end . 'H';
+
+                $duration = $time->duration;
+
+                $d = $duration . 'H de cours';
+
+                if($start < $now_hour && ($start + $duration) < $now_hour){
+
+                    $time_plans[$time->id] = "Le prof a fait cours aujourd'hui de $s à $e ! ($d)";
+
+                }
+                elseif($start <= $now_hour && $end >= $now_hour){
+
+                    $time_plans[$time->id] = "Le prof est actullement au cours depuis $s, il finira à $e ! ($d)" ;
+
+                }
+                elseif($start > $now_hour){
+
+                    $time_plans[$time->id] = "Le prof fera cours aujourd'hui de $s à $e ! ($d)";
+
+                }
+            }
+
+        }
+        else{
+
+            $time_plans[] = "Le prof n'a pas cours aujourd'hui avec cette classe";
+
+        }
+
+        return $time_plans;
+
+    }
+
+
     public function getFormatedName()
     {
         return strtoupper($this->name) . ' ' . ucwords($this->surname);
     }
+
+
+    public function isTeacherOfThisYear($school_year = null)
+    {
+
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $is = $school_year_model->teachers()->where('teachers.id', $this->id)->first();
+
+        return $is ? true : false;
+    }
+
+
+    public function teacherDeleter($destroy = false)
+    {
+
+        $school_year_model = $this->getSchoolYear();
+
+        DB::transaction(function($e) use ($school_year_model){
+
+            $this->timePlans()->where('time_plans.school_year_id', $school_year_model->id)->each(function($tp){
+
+                $tp->update(['teacher_id' => null]);
+
+            });
+
+            $this->securities()->where('classes_securities.school_year_id', $school_year_model->id)->each(function($sec){
+
+                $sec->delete();
+
+            });
+            
+            $this->lates()->where('teacher_lates.school_year_id', $school_year_model->id)->each(function($late){
+
+                $late->delete();
+
+            });
+            $this->absences()->where('teacher_absences.school_year_id', $school_year_model->id)->each(function($abs){
+
+                $abs->delete();
+            });
+
+            $this->teacherCursus()->where('teacher_cursuses.school_year_id', $school_year_model->id)->each(function($cursus){
+
+                $cursus->delete();
+
+            });
+
+
+            $principal = $this->principal($school_year_model->id);
+
+            $ae = $this->ae($school_year_model->id);
+
+            if($principal){
+
+                $principal->delete();
+            }
+
+            if($ae){
+                
+                $ae->delete();
+            }
+
+
+            $school_year_model->teachers()->detach($this->id);
+
+
+            if($destroy){
+
+                $this->timePlans()->each(function($tp){
+
+                $tp->update(['teacher_id' => null]);
+
+                });
+
+                $this->securities()->each(function($sec){
+
+                    $sec->delete();
+
+                });
+                
+                $this->lates()->each(function($late){
+
+                    $late->delete();
+
+                });
+
+                $this->absences()->each(function($abs){
+
+                    $abs->delete();
+                });
+
+                $this->principals()->each(function($pr){
+
+                    $pr->delete();
+                });
+
+                $this->aes()->each(function($ae){
+
+                    $ae->delete();
+                });
+
+                $this->school_years()->each(function($school_year){
+
+                    $school_year->teachers()->detach($this->id);
+
+                });
+
+                $this->teacherCursus()->each(function($cursus){
+
+                    $cursus->delete();
+
+                });
+
+                $this->forceDelete();
+
+            }
+
+
+        });
+
+
+    }
+
 
 
 

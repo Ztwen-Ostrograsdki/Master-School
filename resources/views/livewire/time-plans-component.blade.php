@@ -1,6 +1,6 @@
 <div>
     <div class="px-2">
-        <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
+        <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark my-2">
             <div class="card-header bg-dark"> 
                 <h5 class="card-title cursor-pointer" data-card-widget="collapse">Effectuer une recherche...</h5>
               <div class="card-tools">
@@ -53,7 +53,7 @@
         </div>
     </div>
 
-    <div class="card mx-2">
+    <div class="card mx-2 my-2">
         <div class="card-header d-flex justify-content-between p-0 mx-2">
             <span class="ml-3 mt-2">
                 <span title="Insérer un nouvel emploi de temps" class="float-right text-white-50 border p-2 px-5 rounded cursor-pointer bg-primary" wire:click="addTimePlan">
@@ -65,9 +65,17 @@
                     <span class="fa fa-recycle"></span>
                     <span>Tout rafraichir</span>
                 </span>
-
             </span>
             <ul class="nav nav-pills ml-auto p-2">
+                <li class="nav-item mx-2">
+                    <select wire:change="changeSection('subject')" wire:model="subject_id_selected" class="form-select z-bg-secondary custom-select">
+                        <option value="{{null}}"> Les Matières </option>
+                        @foreach($subjects as $s)
+                            <option value="{{$s->id}}"> {{ $s->name }} </option>
+                        @endforeach
+                    </select>
+                </li>
+
                 <li class="nav-item">
                     <select wire:change="changeSection('level')" wire:model="level_id_selected" class="form-select z-bg-secondary custom-select">
                         <option value="{{null}}"> Le Cycle </option>
@@ -106,138 +114,5 @@
             </h6>
         </blockquote>
     </div>
-    <div class="w-100 m-0 p-0 mt-3 px-1">
-        @if($classesToShow && count($classesToShow) > 0)
-            <div class="w-100 m-0 p-0 mt-3 px-1 py-2" style="overflow-x: auto;">
-                <table class="m-0 p-0 w-100 table-striped table-bordered z-table text-white text-center" style="">
-                    <col>
-                    @foreach($classesToShow as $cl0)
-                        <colgroup span="{{5}}"></colgroup>
-                    @endforeach
-                    <colgroup span="3"></colgroup>
-                    <tr class="text-center z-bg-secondary">
-                        <th rowspan="2" scope="colgroup">Les classes</th>
-                        @foreach($classesToShow as $cl1)
-                        <th colspan="{{5}}" scope="colgroup">
-                            {{$cl1->name}}
-                            @if(auth()->user()->isAdminAs('master'))
-                                @if($cl1->classeHasTimePlans())
-                                    <span wire:click="deleteClasseTimePlans({{$cl1->id}})" class="fa fa-trash text-danger cursor-pointer fx-15 m-1 float-right" title="Supprimer les Emplois du temps de la {{$cl1->name}}..."></span>
-                                @endif
-                            @endif
-                        </th>
-                        @endforeach
-                    </tr>
-                    @foreach($classesToShow as $cl2)
-                        <th scope="col" class="z-bg-secondary-dark">L</th>
-                        <th scope="col" class="z-bg-secondary-dark">M</th>
-                        <th scope="col" class="z-bg-secondary-dark">M</th>
-                        <th scope="col" class="z-bg-secondary-dark">J</th>
-                        <th scope="col" class="z-bg-secondary-dark">V</th>
-                    @endforeach
-                    @foreach($morning_times1 as $hm1)
-                        @php
-                            $s1 = $hm1['s'];
-                            $e1 = $hm1['e'];
-                        @endphp
-                        <tr class="text-left">
-                            <th class=" text-capitalize pl-2 p-0 m-0 z-bg-secondary-light-opac text-dark">
-                                {{ $s1 . 'H - ' . $e1 . 'H' }}
-                            </th>
-
-
-                                {{-- LES Programmes --}}
-                            @foreach($classesToShow as $cl3)
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Lundi', $s1, $e1) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Mardi', $s1, $e1) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Mercredi', $s1, $e1) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Jeudi', $s1, $e1) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Vendredi', $s1, $e1) }} </small></td>
-                            @endforeach
-                        </tr>
-                    @endforeach
-
-                    <tr>
-                        <td class="py-1" colspan="{{count($classesToShow) * 5 + 1}}">
-                            <span class="text-center text-warning py-1 d-flex justify-content-around">
-                                <span>RECREATION</span>
-                                <span>RECREATION</span>
-                                <span>RECREATION</span>
-                                <span>RECREATION</span>
-                                <span>RECREATION</span>
-                                <span>RECREATION</span>
-                                <span>RECREATION</span>
-                            </span>
-                        </td>
-                    </tr>
-                    @foreach($morning_times2 as $hm2)
-                        @php
-                            $s2 = $hm2['s'];
-                            $e2 = $hm2['e'];
-                        @endphp
-                        <tr class="text-left">
-                            <th class=" text-capitalize pl-2 p-0 m-0 z-bg-secondary-light-opac text-dark">
-                                {{ $s2 . 'H - ' . $e2 . 'H' }}
-                            </th>
-
-
-                                {{-- LES Programmes --}}
-                            @foreach($classesToShow as $cl3)
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Lundi', $s2, $e2) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Mardi', $s2, $e2) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Mercredi', $s2, $e2) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Jeudi', $s2, $e2) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Vendredi', $s2, $e2) }} </small></td>
-                            @endforeach
-                        </tr>
-                    @endforeach
-                    <tr>
-                        <td class="py-1" colspan="{{count($classesToShow) * 5 + 1}}">
-                            <span class="text-center text-orange py-1 d-flex justify-content-around">
-                                <span>PAUSE - APRES-MIDI</span>
-                                <span>PAUSE - APRES-MIDI</span>
-                                <span>PAUSE - APRES-MIDI</span>
-                                <span>PAUSE - APRES-MIDI</span>
-                            </span>
-                        </td>
-                    </tr>
-                    @foreach($afternoon_times as $aft)
-                        @php
-                            $s3 = $aft['s'];
-                            $e3 = $aft['e'];
-                        @endphp
-                        <tr class="text-left">
-                            <th class=" text-capitalize pl-2 p-0 m-0 z-bg-secondary-light-opac text-dark">
-                                {{ $s3 . 'H - ' . $e3 . 'H' }}
-                            </th>
-
-
-                                {{-- LES Programmes --}}
-                            @foreach($classesToShow as $cl3)
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Lundi', $s3, $e3) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Mardi', $s3, $e3) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Mercredi', $s3, $e3) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Jeudi', $s3, $e3) }} </small></td>
-                                <td class="text-center cursor-pointer"><small class="w-100 cursor-pointer"> {{ $cl3->getTimePlanSubject('Vendredi', $s3, $e3) }} </small></td>
-                            @endforeach
-                        </tr>
-                    @endforeach
-                </table>
-            @else
-                <div>
-                    <div class="d-flex justify-content-center mx-auto w-100">
-                        <span class="fa fa-trash text-muted fa-8x"></span>
-                    </div>
-                    <blockquote class="text-warning">
-                        <span class="float-right border-top border-white w-100 d-inline-block text-right">
-                            <span class="fa fa-heart text-danger"></span>
-                            <span class="fa fa-heart text-danger"></span>
-                            <span class="fa fa-heart text-danger"></span>
-                            <i class="text-warning small">Aucune classe n'a trouvé! Aucune donnée n'est peut-être disponible</i>
-                        </span>
-                    </blockquote>
-                </div>
-            </div>
-        @endif                                                                                 
-    </div>
+    @livewire('time-plan-lister', ['classesToShow' => $classesToShow, 'subject_id' => $subject_id_selected, 'intoClasseProfil' => false])
 </div>

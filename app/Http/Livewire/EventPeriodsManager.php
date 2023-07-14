@@ -29,6 +29,7 @@ class EventPeriodsManager extends Component
     public $end;
     public $object;
     public $target;
+    public $period;
     
 
     protected $rules = [
@@ -106,15 +107,23 @@ class EventPeriodsManager extends Component
         $period = Period::find($period_id);
 
         if($period){
+
             $school_year_model = $period->school_year;
 
+            $this->period = $period;
+
             $this->start = $period->start;
+
             $this->end = $period->end;
+
             $this->object = $period->object;
+
             $this->target = $period->target;
 
             $years = explode(' - ', $school_year_model->school_year);
+
             $this->years = $years;
+            
             $this->looked = 'Edition';
 
             $this->dispatchBrowserEvent('modal-eventPeriodManager');
@@ -126,16 +135,21 @@ class EventPeriodsManager extends Component
     public function updatedStart($start)
     {
         $this->resetErrorBag(['start']);
+
         $this->start = $start;
 
         $this->validatePeriods($this->start, $this->end);
 
         if($this->semestre_id){
+
             $periodsExisted = $this->school_year_model->periods()->where('target', 'semestre-trimestre')->where('object', $this->semestre_type . ' ' . $this->semestre_id)->first();
+
             if($periodsExisted){
+
                 $v_start = $this->thisDateIsBetween($periodsExisted->start, $periodsExisted->end, $this->start);
 
                 if(!$v_start){
+
                     $this->addError('start', "La date renseillée est invalide. Elle doit être située entre le " . $this->semestre_type . ' ' . $this->semestre_id);
                 }
             }
@@ -147,9 +161,13 @@ class EventPeriodsManager extends Component
     public function updatedSemestreId($semestre_id)
     {
         $this->semestre_id = $semestre_id;
+
         $periodsExisted = $this->school_year_model->periods()->where('target', 'semestre-trimestre')->where('object', $this->semestre_type . ' ' . $this->semestre_id)->first();
+
         if($periodsExisted){
+
             $this->start = $periodsExisted->start;
+
             $this->end = $periodsExisted->end;
         }
     }
@@ -157,15 +175,21 @@ class EventPeriodsManager extends Component
     public function updatedEnd($end)
     {
         $this->resetErrorBag(['end']);
+
         $this->end = $end;
+
         $this->validatePeriods($this->start, $this->end, 'end');
 
         if($this->semestre_id){
+
             $periodsExisted = $this->school_year_model->periods()->where('target', 'semestre-trimestre')->where('object', $this->semestre_type . ' ' . $this->semestre_id)->first();
+            
             if($periodsExisted){
+
                 $v_end = $this->thisDateIsBetween($periodsExisted->start, $periodsExisted->end, $this->end);
 
                 if(!$v_end){
+
                     $this->addError('end', "La date renseillée est invalide. Elle doit être située entre le " . $this->semestre_type . ' ' . $this->semestre_id);
                 }
 
@@ -179,13 +203,21 @@ class EventPeriodsManager extends Component
     public function validatePeriods($start, $end, $target = null)
     {
         $errors = null;
+
         if($start && $end){
+
             if(in_array(Carbon::parse($start)->year, $this->years) && in_array(Carbon::parse($end)->year, $this->years)){
+
                 $timestamp_start = Carbon::parse($start)->timestamp;
+
                 $timestamp_end = Carbon::parse($end)->timestamp;
+
                 $v = $timestamp_end - $timestamp_start;
+
                 if($v <= 0){
+
                     $errors = true;
+
                     $this->addError($target, "La période définie est incorrecte!");
                 }
                 else{
@@ -193,24 +225,33 @@ class EventPeriodsManager extends Component
                 }
             }
             else{
+
                 $errors = true;
+
                 $this->addError($target, "L'année est incorrecte!");
 
             }
 
             if($this->semestre_id){
+
                 $periodsExisted = $this->school_year_model->periods()->where('target', 'semestre-trimestre')->where('object', $this->semestre_type . ' ' . $this->semestre_id)->first();
+
                 if($periodsExisted){
+
                     $v_start = $this->thisDateIsBetween($periodsExisted->start, $periodsExisted->end, $start);
                     $v_end = $this->thisDateIsBetween($periodsExisted->start, $periodsExisted->end, $end);
 
                     if(!$v_start){
+
                         $this->addError('start', "La date renseillée est invalide. Elle doit être située entre le " . $this->semestre_type . ' ' . $this->semestre_id);
+
                         $errors = true;
                     }
 
                     if(!$v_end){
+
                         $this->addError('end', "La date renseillée est invalide. Elle doit être située entre le " . $this->semestre_type . ' ' . $this->semestre_id);
+
                         $errors = true;
                     }
 
@@ -229,6 +270,7 @@ class EventPeriodsManager extends Component
     public function submit()
     {
         $this->reset('hasErrorsHere');
+
         $errors = $this->getErrorBag();
 
         if(!$this->validate()){
@@ -239,28 +281,71 @@ class EventPeriodsManager extends Component
             $this->validatePeriods($this->start, $this->end, 'start');
 
             if(!$this->hasErrorsHere){
-                DB::transaction(function($e) {
-                    try {
-                        $event = Period::create([
-                            'start' => $this->start,
-                            'end' => $this->end,
-                            'target' => $this->target,
-                            'object' => $this->object,
-                            'semestre' => $this->semestre_id,
-                            'school_year_id' => $this->school_year_model->id,
-                        ]);
-                    } 
-                    catch (Exception $e1) {
-                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur!', 'message' => "Une erreure est survenue lors de la mise à jour de cet évènement!", 'type' => 'error']);
-                    }
-                });
 
-                DB::afterCommit(function(){
-                    $this->dispatchBrowserEvent('hide-form');
-                    $this->emit('relaodCalendars');
-                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour réussie!', 'message' => "Votre évènement $this->target : $this->object avec succès", 'type' => 'success']);
-                });
+                if($this->period){
+                    //UPDATING
+                    DB::transaction(function($e) {
+                        try {
+                            $this->period->update
+                            ([
+                                'start' => $this->start,
+                                'end' => $this->end,
+                                'target' => $this->target,
+                                'object' => $this->object,
+                                'semestre' => $this->semestre_id,
+                                'school_year_id' => $this->school_year_model->id,
+                            ]);
+                        } 
+                        catch (Exception $e1) {
 
+                            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur!', 'message' => "Une erreure est survenue lors de la mise à jour de cet évènement!", 'type' => 'error']);
+                        }
+                    });
+
+                    DB::afterCommit(function(){
+
+                        $this->dispatchBrowserEvent('hide-form');
+
+                        $this->emit('NewCalendarAddedLiveEvent');
+                        $this->emit('relaodCalendars');
+
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour réussie!', 'message' => "Votre évènement $this->target : $this->object avec succès", 'type' => 'success']);
+                    });
+
+
+
+                }
+                else{
+                    //CREATING
+                    DB::transaction(function($e) {
+                        try {
+                            $event = Period::create([
+                                'start' => $this->start,
+                                'end' => $this->end,
+                                'target' => $this->target,
+                                'object' => $this->object,
+                                'semestre' => $this->semestre_id,
+                                'school_year_id' => $this->school_year_model->id,
+                            ]);
+                        } 
+                        catch (Exception $e1) {
+
+                            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur!', 'message' => "Une erreure est survenue lors de la mise à jour de cet évènement!", 'type' => 'error']);
+                        }
+                    });
+
+                    DB::afterCommit(function(){
+
+                        $this->dispatchBrowserEvent('hide-form');
+
+                        $this->emit('NewCalendarAddedLiveEvent');
+                        $this->emit('relaodCalendars');
+
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour réussie!', 'message' => "Votre évènement $this->target : $this->object avec succès", 'type' => 'success']);
+                    });
+                }
+
+                
             }
         }
 

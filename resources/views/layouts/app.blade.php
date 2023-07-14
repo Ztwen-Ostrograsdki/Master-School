@@ -87,33 +87,35 @@
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
+                                        @php 
+                                            setlocale(LC_TIME, "fr_FR.utf8", 'fra');
+
+                                            $date = strftime("%A %d %B %Y", time());
+
+                                            $time = strftime("%H H %M' ", time());
+
+                                        @endphp
                                         <ol class="breadcrumb float-sm-right">
                                             @isRoute('admin')
                                                 <li class="breadcrumb-item"><a href="{{route('admin')}}">Administration</a></li>
                                                 <li class="breadcrumb-item active">Tableau de bord</li>
                                                 <li class="breadcrumb-item active">
                                                     <span class="bi-calendar"></span>
-                                                    {{ \Illuminate\Support\Carbon::now()->format('D') }}
-                                                    {{ \Illuminate\Support\Carbon::now()->format('d') }}
-                                                    {{ \Illuminate\Support\Carbon::now()->format('M') }}
+                                                    {{ ucwords($date) }}
                                                     <span>
                                                         |
                                                         <span class="bi-clock mx-1"></span>
-                                                        {{ \Illuminate\Support\Carbon::now()->format('H') + 1 . 'H' }}
-                                                        {{ \Illuminate\Support\Carbon::now()->format('i') . "'" }}
+                                                        {{ $time }}
                                                     </span>
                                                 </li>
                                             @else
                                                 <li class="breadcrumb-item active text-warning">
                                                     <span class="bi-calendar"></span>
-                                                    {{ \Illuminate\Support\Carbon::now()->format('D') }}
-                                                    {{ \Illuminate\Support\Carbon::now()->format('d') }}
-                                                    {{ \Illuminate\Support\Carbon::now()->format('M') }}
+                                                    {{ ucwords($date) }}
                                                     <span>
                                                         |
                                                         <span class="bi-clock mx-1"></span>
-                                                        {{ \Illuminate\Support\Carbon::now()->format('H') + 1 . 'H' }}
-                                                        {{ \Illuminate\Support\Carbon::now()->format('i') . "'" }}
+                                                        {{ $time }}
                                                     </span>
                                                 </li>
                                                 @isRoute('classe_profil')

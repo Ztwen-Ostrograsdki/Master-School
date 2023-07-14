@@ -14,13 +14,14 @@ class TeacherTableList extends Component
 {
     use ModelQueryTrait;
 
-    protected $listeners = ['newTeacherHasBeenAdded' => 'reloadData', 'changeTeacherList' => 'reloadDataOnSection', 'userDataEdited' => 'reloadData', 'selectedsWasChanged' => 'reGetUpdatesOfSelecteds', 'teacherTableListFetchOnSearch' => 'updatedSearch'];
+    protected $listeners = ['newTeacherHasBeenAdded' => 'reloadData', 'changeTeacherList' => 'reloadDataOnSection', 'userDataEdited' => 'reloadData', 'selectedsWasChanged' => 'reGetUpdatesOfSelecteds', 'TeacherTableListFetchOnSearch' => 'updatedSearch'];
     public $counter = 0;
     public $classe_id = null;
     public $subject_id = null;
     public $level_id = null;
     public $selecteds = [];
     public $baseRoute;
+    public $teaching = true;
     public $search = '';
     public $title = 'Le prof...';
 
@@ -28,10 +29,14 @@ class TeacherTableList extends Component
     {
         $school_year_model = $this->getSchoolYear();
 
+        if(session()->has('teacher_list_on_teaching')){
+            $this->teaching = session('teacher_list_on_teaching');
+        }
+
         if($this->search && mb_strlen($this->search) > 2){
             $target = '%' . $this->search . '%';
 
-            $teachers = $school_year_model->teachers()->where('teachers.name', 'like', $target)->orWhere('teachers.surname', 'like', $target)->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
+            $teachers = $school_year_model->teachers()->where('teachers.name', 'like', $target)->orWhere('teachers.surname', 'like', $target)->where('teachers.teaching', $this->teaching)->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
 
         }
         else{
@@ -51,7 +56,7 @@ class TeacherTableList extends Component
             }
 
             if(!$this->classe_id && !$this->level_id && !$this->subject_id){
-                $teachers = $school_year_model->teachers()->whereNotNull('teachers.id')->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
+                $teachers = $school_year_model->teachers()->whereNotNull('teachers.id')->orderBy('name', 'asc')->orderBy('surname', 'asc')->where('teachers.teaching', $this->teaching)->get();
             }
             else{
                 $teachers = $this->getData();
@@ -59,6 +64,14 @@ class TeacherTableList extends Component
 
         }
         return view('livewire.teacher-table-list', compact('teachers'));
+    }
+
+
+    public function changeSection($teaching = null)
+    {
+        $teaching = boolval($teaching);
+        session()->put('teacher_list_on_teaching', $teaching);
+        $this->teaching = $teaching;
     }
 
 
@@ -100,7 +113,7 @@ class TeacherTableList extends Component
 
         if($level_id){
             $level = Level::find($level_id);
-            $data = $school_year_model->teachers()->where('level_id', $level_id)->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
+            $data = $school_year_model->teachers()->where('level_id', $level_id)->orderBy('name', 'asc')->where('teachers.teaching', $this->teaching)->orderBy('surname', 'asc')->get();
 
             if($classe_id){
                 if($subject_id){
@@ -139,18 +152,18 @@ class TeacherTableList extends Component
                 if($subject_id){
                     foreach($teachers_ids as $t){
                         if($t->subject_id == $subject_id){
-                            $teachers = $school_year_model->teachers()->whereIn('teachers.id', $teachers_ids)->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
+                            $teachers = $school_year_model->teachers()->whereIn('teachers.id', $teachers_ids)->where('teachers.teaching', $this->teaching)->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
                         }
                     }
 
                 }
                 else{
-                    $teachers = $school_year_model->teachers()->whereIn('teachers.id', $teachers_ids)->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
+                    $teachers = $school_year_model->teachers()->whereIn('teachers.id', $teachers_ids)->where('teachers.teaching', $this->teaching)->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
                 }
 
             }
             elseif(!$classe_id && $subject_id){
-                $data = $school_year_model->teachers()->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
+                $data = $school_year_model->teachers()->where('teachers.teaching', $this->teaching)->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
 
                 foreach($data as $teacher){
                     if($teacher->speciality()->id == $subject_id){
@@ -242,8 +255,69 @@ class TeacherTableList extends Component
         }
     }
 
+    public function insertIntoTeachers($teacher_id)
+    {
+        $teacher = Teacher::find($teacher_id);
+
+        if($teacher){
+            if(!$teacher->teaching){
+
+                $update = $teacher->update(['teaching' => true, 'last_teaching_date' => null]);
+
+                if($update){
+
+                    $name = $teacher->getFormatedName();
+                    $speciality = $teacher->speciality()->name;
+
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "L'utilisateur de $name a été réinséré dans le corps des enseigants comme prof de $speciality !", 'type' => 'success']);
+
+                    $this->emit('userDataEdited');
+
+                    $this->reloadData();
+                }
+            }
+            else{
+                $this->dispatchBrowserEvent('Toast', ['title' => 'ENSEIGNANT DEJA EN FONCTION', 'message' => "L'enseignant est toujours en fonction!", 'type' => 'info']);
+            }
+
+        }
+        else{
+            $this->dispatchBrowserEvent('Toast', ['title' => 'ENSEIGNANT INTROUVABLE', 'message' => "L'enseignant est introuvable!", 'type' => 'warning']);
+        }
+
+
+    }
+
     public function retrieveFromTeachers($teacher_id)
     {
-        $this->retrieveAllClasses($teacher_id);
+        $teacher = Teacher::find($teacher_id);
+
+        if($teacher){
+
+            DB::transaction(function($e) use ($teacher){
+
+                $now = Carbon::now();
+
+                $this->retrieveAllClasses($teacher->id);
+
+                $update = $teacher->update(['teaching' => false, 'last_teaching_date' => $now]);
+
+                if($update){
+
+                    $name = $teacher->getFormatedName();
+
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "L'utilisateur de $name a été retiré des enseigants et n'enseignera donc plus!", 'type' => 'success']);
+
+                    $this->emit('userDataEdited');
+
+                    $this->reloadData();
+                }
+            });
+        }
+        else{
+
+            $this->dispatchBrowserEvent('Toast', ['title' => 'ENSEIGNANT INTROUVABLE', 'message' => "L'enseignant est introuvable!", 'type' => 'warning']);
+        }
+
     }
 }

@@ -3,6 +3,7 @@ namespace App\Helpers\ModelTraits;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
+use App\Models\ClassePupilSchoolYear;
 use App\Models\PupilAbsences;
 use App\Models\PupilLates;
 use App\Models\SchoolYear;
@@ -12,6 +13,247 @@ use Illuminate\Support\Facades\Schema;
 trait PupilTraits{
 
     use ModelQueryTrait;
+
+
+    /**
+     * Get and return the polyvalente classe
+     */
+    public function polyvalenteClasse($level = 'secondary')
+    {
+        $target = '%' . 'polyvalente' . '%';
+
+        $level_id = $this->level->id;
+
+        return Classe::where('name', 'like', $target)->where('level_id', $level_id)->first();
+    }
+
+
+    public function pupilDeleter($school_year = null, $destroy = false)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $pupil = $this;
+
+        $pupil->lates()->where('pupil_lates.school_year_id', $school_year_model->id)->each(function($late){
+            $late->delete();
+
+        });
+
+        $pupil->absences()->where('pupil_absences.school_year_id', $school_year_model->id)->each(function($abs){
+            $abs->delete();
+        });
+
+        $pupil->marks()->where('marks.school_year_id', $school_year_model->id)->each(function($mark){
+            $mark->delete();
+        });
+
+        $pupil->related_marks()->where('related_marks.school_year_id', $school_year_model->id)->each(function($r_m){
+            $r_m->delete();
+        });
+
+
+        $classe = $this->getCurrentClasse($school_year_model->id);
+
+        if($classe){
+
+            $pupil->pupilClassesHistoriesBySchoolYears()->where('classe_pupil_school_years.school_year_id', $school_year_model->id)
+              ->where('classe_pupil_school_years.classe_id', $classe->id)
+              ->first()
+              ->delete();
+
+            $classe->classePupils()->detach($pupil->id);
+
+            if(!$destroy){
+                $classeVolante = $this->polyvalenteClasse();
+
+                if($classeVolante){
+                    ClassePupilSchoolYear::create(
+                        [
+                            'classe_id' => $classeVolante->id,
+                            'pupil_id' => $pupil->id,
+                            'school_year_id' => $school_year_model->id,
+                        ]
+                    );
+                    $pupil->update(['classe_id' => $classeVolante->id]);
+                    $classeVolante->classePupils()->attach($pupil->id);
+                }
+
+            }
+            else{
+                $pupil->forceDelete();
+
+            }
+        }
+
+        
+    }
+
+
+    public function pupilDestroyer($school_year)
+    {
+        $this->pupilDeleter($school_year, true);
+    }
+
+
+    public function lockPupilMarksUpdating($duration = 48, $classe_id = null, $subject_id = null, $school_year = nll)
+    {
+
+    }
+
+
+    public function lockPupilMarksInsertion($duration = 48, $classe_id = null, $subject_id = null, $school_year = nll)
+    {
+
+    }
+
+
+    public function unlockPupilMarksUpdating($classe_id = null, $subject_id = null, $school_year = null)
+    {
+        if(!$classe_id){
+
+            $classe_id = $this->getCurrentClasse()->id;
+        }
+
+        $canUpdate = $this->canUpdateMarksOfThisPupil($classe_id, $subject_id, $school_year);
+
+        $unlocked = false;
+
+        if(!$canUpdate){
+
+            if($subject_id){
+
+                $unlocked = $this->securities()
+                                 ->where('classes_securities.school_year_id', $school_year_model->id)
+                                 ->where('classes_securities.subject_id', $subject_id)
+                                 ->where('locked_marks_updating', true)
+                                 ->where('classes_securities.classe_id', $classe_id)
+                                 ->delete();
+            }
+            else{
+                $unlocked = $this->securities()
+                                 ->where('classes_securities.school_year_id', $school_year_model->id)
+                                 ->where('locked_marks_updating', true)
+                                 ->where('classes_securities.classe_id', $classe_id)
+                                 ->delete();
+            }
+        }
+
+        return $unlocked;
+
+    }
+
+
+    public function unlockPupilMarksInsertion($classe_id = null, $subject_id = null, $school_year = null)
+    {
+        if(!$classe_id){
+            
+            $classe_id = $this->getCurrentClasse()->id;
+        }
+
+        $canInsert = $this->canInsertOrUpdateMarksOfThisPupil($classe_id, $subject_id, $school_year);
+
+        $unlocked = false;
+
+        if(!$canInsert){
+            if($subject_id){
+                $unlocked = $this->securities()
+                                 ->where('classes_securities.school_year_id', $school_year_model->id)
+                                 ->where('classes_securities.subject_id', $subject_id)
+                                 ->where('classes_securities.classe_id', $classe_id)
+                                 ->where('locked_marks_updating', true)
+                                 ->orWhere('locked_marks', true)
+                                 ->delete();
+            }
+            else{
+                $unlocked = $this->securities()
+                                 ->where('classes_securities.school_year_id', $school_year_model->id)
+                                 ->where('classes_securities.classe_id', $classe_id)
+                                 ->where('locked_marks_updating', true)
+                                 ->orWhere('locked_marks', true)
+                                 ->delete();
+            }
+        }
+
+        return $unlocked;
+
+    }
+
+    public function canUpdateMarksOfThisPupil($classe_id = null, $subject_id = null, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        if(!$classe_id){
+
+            $current_classe = $this->getCurrentClasse();
+
+            if($current_classe){
+
+                $classe_id = $current_classe->id;
+            }
+            else{
+                return false;
+
+            }
+            
+        }
+
+        if($subject_id){
+            $secure = $this->securities()
+                           ->where('classes_securities.school_year_id', $school_year_model->id)
+                           ->where('classes_securities.subject_id', $subject_id)
+                           ->where('locked_marks_updating', true)
+                           ->where('classes_securities.classe_id', $classe_id)
+                           ->first();
+        }
+        else{
+            $secure = $this->securities()
+                           ->where('classes_securities.school_year_id', $school_year_model->id)
+                           ->where('locked_marks_updating', true)
+                           ->where('classes_securities.classe_id', $classe_id)
+                           ->first();
+        }
+
+        return $secure ? false : true;
+        
+    }
+
+
+    public function canInsertOrUpdateMarksOfThisPupil($classe_id = null, $subject_id = null, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $current_classe = $this->getCurrentClasse();
+
+        if($current_classe){
+
+            $classe_id = $current_classe->id;
+        }
+        else{
+            return false;
+
+        }
+
+        if($subject_id){
+            $secure = $this->securities()
+                           ->where('classes_securities.school_year_id', $school_year_model->id)
+                           ->where('classes_securities.subject_id', $subject_id)
+                           ->where('classes_securities.classe_id', $classe_id)
+                           ->where('locked_marks_updating', true)
+                           ->orWhere('locked_marks', true)
+                           ->first();
+        }
+        else{
+            $secure = $this->securities()
+                           ->where('classes_securities.school_year_id', $school_year_model->id)
+                           ->where('classes_securities.classe_id', $classe_id)
+                           ->where('locked_marks_updating', true)
+                           ->orWhere('locked_marks', true)
+                           ->first();
+        }
+
+        return $secure ? false : true;
+        
+    }
 
 
     public function inPolyvalenceClasse()
@@ -199,9 +441,6 @@ trait PupilTraits{
     }
 
 
-
-
-
     public function isAbsentThisDay($date = null, $school_year = null, $semestre = null, $subject_id = null)
     {
         if($date && $school_year && $semestre && $subject_id){
@@ -286,125 +525,353 @@ trait PupilTraits{
     }
 
 
-    public function resetAllAbsences(int $school_year, int $semestre, int $subject_id, $classe_id = null, bool $allyears = false)
+    public function deletePupilAbsences($subject_id = null, $semestre = null, $school_year = null)
     {
-        if($school_year && $semestre && $subject_id){
-            if($allyears){
-                $absences = $this->absences()->where('semestre', $semestre)->where('subject_id', $subject_id)->where('classe_id', $this->classe_id);
-                if($absences->get()){
-                    $d = $absences->delete();
-                    return $diff;
-                }
-            }
-            elseif($school_year && !$allyears){
-                $school_year_model = SchoolYear::find($school_year);
-                if ($school_year_model) {
-                    $absences = $this->absences()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->where('subject_id', $subject_id)->where('classe_id', $this->classe_id);
-                    if($absences->get()){
-                        $d = $absences->delete();
-                        return $diff;
-                    }
-                }
-                return false;
-            }
+        $school_year_model = $this->getSchoolYear($school_year);
 
-        }
-    }
+        if($school_year){
 
-    public function resetAllLates(int $school_year, int $semestre, int $subject_id, $classe_id = null, bool $allyears = false)
-    {
-        if($semestre && $subject_id){
-            if($allyears){
-                $lates = $this->lates()->where('semestre', $semestre)->where('subject_id', $subject_id)->where('classe_id', $this->classe_id);
-                if($lates->get()){
-                    $d = $lates->delete();
-                    return $d;
+            if($subject_id){
+
+                if($semestre){
+
+                    $this->absences()->where('pupil_absences.school_year_id', $school_year_model->id)->where('pupil_absences.subject_id', $subject_id)->where('pupil_absences.semestre', $semestre)->each(function($abs){
+
+                        $abs->delete();
+                    });
+
                 }
-            }
-            elseif($school_year && !$allyears){
-                $school_year_model = SchoolYear::find($school_year);
-                if ($school_year_model) {
-                    $lates = $this->lates()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->where('subject_id', $subject_id)->where('classe_id', $this->classe_id);
-                    if($lates->get()){
-                        $d = $lates->delete();
-                        return $d;
-                    }
+                else{
+
+                    $this->absences()->where('pupil_absences.school_year_id', $school_year_model->id)->where('pupil_absences.subject_id', $subject_id)->each(function($abs){
+                        
+                        $abs->delete();
+                    });
+
+
                 }
-                return false;
+
             }
             else{
-                return false;
+                $this->absences()->where('pupil_absences.school_year_id', $school_year_model->id)->where('pupil_absences.semestre', $semestre)->each(function($abs){
+                        
+                    $abs->delete();
+                });
+
             }
 
         }
-    }
+        else{
+
+            if($subject_id){
+
+                if($semestre){
+
+                    $this->absences()->where('pupil_absences.subject_id', $subject_id)->where('pupil_absences.semestre', $semestre)->each(function($abs){
+
+                        $abs->delete();
+                    });
+
+                }
+                else{
+
+                    $this->absences()->where('pupil_absences.subject_id', $subject_id)->each(function($abs){
+                        
+                        $abs->delete();
+                    });
 
 
-    public function resetAllMarks($school_year = null, $semestre = null, $subject_id, $classe_id = null, $type = null, bool $allyears = false)
-    {
-        if($classe_id){
-            $classe_id = Classe::find($classe_id);
-            if($classe){
-                $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe_id);
-                if ($not_secure) {
-                    if($semestre && $subject_id){
-                        if($allyears){
-                            $school_years = SchoolYear::all();
-                            foreach ($school_years as $school_year_model) {
-                                $marks = $school_year_model->marks()->where('pupil_id', $this->id)->where('classe_id', $this->classe_id);
-                                if($marks->get()->count()){
-                                    return $marks->forceDelete();
-                                }
-                            }
-
-                        }
-                        else{
-                            $school_year_model = $this->getSchoolYear($school_year);
-                            $marks = $this->marks()
-                                           ->where('semestre', $semestre)
-                                           ->where('school_year_id', $school_year_model->id)
-                                           ->where('classe_id', $this->classe_id)
-                                           ->where('subject_id', $subject_id);
-                            if($marks->get()->count()){
-                                foreach ($marks->get() as $mark) {
-                                    $school_year_model->marks()->detach($mark->id);
-                                }
-                                return $marks->forceDelete();
-                            }
-                        }
-                    }
                 }
 
             }
+            else{
+                $this->absences()->where('pupil_absences.semestre', $semestre)->each(function($abs){
+                        
+                    $abs->delete();
+                });
 
+            }
 
         }
-        
     }
 
 
-    public function deleteAllPupilRelatedMarks(int $classe_id, int $subject_id, int $semestre, $school_year)
+
+    public function deletePupilLates($subject_id = null, $semestre = null, $school_year = null)
     {
-        $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe_id);
-        
-        if ($not_secure) {
-            if($subject_id && $semestre && $school_year){
-                DB::transaction(function($e) use ($subject_id, $semestre, $school_year, $classe_id){
-                    $school_year_model = $this->getSchoolYear($school_year);
-                    if($school_year_model){
-                        $this->related_marks()->where('school_year_id', $school_year_model->id)->where('semestre', $semestre)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->each(function($mark) use ($school_year_model){
-                            $detach = $school_year_model->related_marks()->detach($mark->id);
-                            if($detach){
-                                $mark->delete();
-                            }
-                        });
-                        return true;
-                    }
-                    return false;
-                });
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        if($school_year){
+
+            if($subject_id){
+
+                if($semestre){
+
+                    $this->lates()->where('pupil_lates.school_year_id', $school_year_model->id)->where('pupil_lates.subject_id', $subject_id)->where('pupil_lates.semestre', $semestre)->each(function($late){
+
+                        $late->delete();
+                    });
+
+                }
+                else{
+
+                    $this->lates()->where('pupil_lates.school_year_id', $school_year_model->id)->where('pupil_lates.subject_id', $subject_id)->each(function($late){
+                        
+                        $late->delete();
+                    });
+
+
+                }
+
             }
+            else{
+                $this->lates()->where('pupil_lates.school_year_id', $school_year_model->id)->where('pupil_lates.semestre', $semestre)->each(function($late){
+                        
+                    $late->delete();
+                });
+
+            }
+
         }
-        return false;
+        else{
+
+            if($subject_id){
+
+                if($semestre){
+
+                    $this->lates()->where('pupil_lates.subject_id', $subject_id)->where('pupil_lates.semestre', $semestre)->each(function($late){
+
+                        $late->delete();
+                    });
+
+                }
+                else{
+
+                    $this->lates()->where('pupil_lates.subject_id', $subject_id)->each(function($late){
+                        
+                        $late->delete();
+                    });
+
+
+                }
+
+            }
+            else{
+                $this->lates()->where('pupil_lates.semestre', $semestre)->each(function($late){
+                        
+                    $late->delete();
+                });
+
+            }
+
+        }
+    }
+
+
+
+    public function deletePupilMarks($semestre = null, $school_year = null, $subject_id, $type = null)
+    {
+        DB::transaction(function($e) use($school_year, $semestre, $subject_id, $type){
+
+            $school_year_model = $this->getSchoolYear($school_year);
+
+            $pupil_id = $this->id;
+
+            if($subject_id && $type && $semestre){
+
+                $school_year_model->marks()
+                                  ->where('marks.pupil_id', $pupil_id)
+                                  ->where('marks.subject_id', $subject_id)
+                                  ->where('marks.semestre', $semestre)
+                                  ->where('marks.type', $type)
+                                  ->each(function($mark){
+                                        $school_year_model->marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+            elseif($subject_id && $semestre){
+
+                $school_year_model->marks()
+                                  ->where('marks.pupil_id', $pupil_id)
+                                  ->where('marks.subject_id', $subject_id)
+                                  ->where('marks.semestre', $semestre)
+                                  ->each(function($mark){
+                                        $school_year_model->marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+            elseif($subject_id && $type){
+
+                $school_year_model->marks()
+                                  ->where('marks.pupil_id', $pupil_id)
+                                  ->where('marks.subject_id', $subject_id)
+                                  ->where('marks.type', $type)
+                                  ->each(function($mark){
+                                        $school_year_model->marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+            elseif($semestre && $type){
+
+                $school_year_model->marks()
+                                  ->where('marks.pupil_id', $pupil_id)
+                                  ->where('marks.semestre', $semestre)
+                                  ->where('marks.type', $type)
+                                  ->each(function($mark){
+                                        $school_year_model->marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+            elseif($subject_id){
+
+                $school_year_model->marks()
+                                  ->where('marks.pupil_id', $pupil_id)
+                                  ->where('marks.subject_id', $subject_id)
+                                  ->each(function($mark){
+                                        $school_year_model->marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+
+            elseif($type){
+
+                $school_year_model->marks()
+                                  ->where('marks.pupil_id', $pupil_id)
+                                  ->where('marks.type', $type)
+                                  ->each(function($mark){
+                                        $school_year_model->marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+            elseif($semestre){
+
+                $school_year_model->marks()
+                                  ->where('marks.pupil_id', $pupil_id)
+                                  ->where('marks.semestre', $semestre)
+                                  ->each(function($mark){
+                                        $school_year_model->marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+            else{
+
+                $school_year_model->marks()
+                                  ->where('marks.pupil_id', $pupil_id)
+                                  ->each(function($mark){
+
+                                        $school_year_model->marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+
+            }
+
+
+        });
+
+        DB::afterCommit(function(){
+
+            return true;
+        });
+
+       
+    }
+
+
+    public function deletePupilRelatedMarks($semestre = null, $school_year = null, $subject_id = null)
+    {
+        DB::transaction(function($e) use($school_year, $semestre, $subject_id){
+
+            $school_year_model = $this->getSchoolYear($school_year);
+
+            $pupil_id = $this->id;
+
+            if($subject_id && $semestre){
+
+                $school_year_model->related_marks()
+                                  ->where('related_marks.pupil_id', $pupil_id)
+                                  ->where('related_marks.subject_id', $subject_id)
+                                  ->where('related_marks.semestre', $semestre)
+                                  ->each(function($mark){
+
+                                        $school_year_model->related_marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+            elseif($subject_id){
+
+                $school_year_model->related_marks()
+                                  ->where('related_marks.pupil_id', $pupil_id)
+                                  ->where('related_marks.subject_id', $subject_id)
+                                  ->each(function($mark){
+
+                                        $school_year_model->related_marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+            elseif($semestre){
+
+                $school_year_model->related_marks()
+                                  ->where('related_marks.pupil_id', $pupil_id)
+                                  ->where('related_marks.semestre', $semestre)
+                                  ->each(function($mark){
+
+                                        $school_year_model->related_marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+            else{
+
+                $school_year_model->related_marks()
+                                  ->where('related_marks.pupil_id', $pupil_id)
+                                  ->each(function($mark){
+
+                                        $school_year_model->related_marks()->detach($mark->id);
+
+                                    $mark->forceDelete();
+                                });
+
+            }
+            
+        });
+
+        DB::afterCommit(function(){
+
+            return true;
+        });
+    }
+
+
+
+    public function isPupilOfThisYear($school_year = null)
+    {
+
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $is = $school_year_model->pupils()->where('pupils.id', $this->id)->first();
+
+        return $is ? true : false;
     }
 
 

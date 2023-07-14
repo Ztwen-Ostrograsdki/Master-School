@@ -159,7 +159,7 @@
                         </div>
                         <hr class="w-100 bg-white text-white mt-2">
                         <div class="px-2" style="height: 500px; overflow: auto">
-                            @if($user->teacher)
+                            @if($user->teacher && $user->teacher->teaching)
                                 <div class="row d-flex justify-content-end text-white w-100 ">
                                     <div class="col-3 shadow border-orange border rounded float-right p-2 m-2">
                                         <h6 class="text-white-50">
@@ -288,7 +288,6 @@
                                 </div>
                             @endif
                         
-
                             @if($activeTagName == 'editing')
                                @include('livewire.components.user.user-profil-editor')
                             @endif

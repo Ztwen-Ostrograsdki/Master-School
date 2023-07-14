@@ -22,7 +22,7 @@ class Mark extends Model
         'school_year_id', 
         'classe_id', 
         'user_id',
-        'trimestre', 
+        // 'trimestre', 
         'semestre', 
         'type', 
         'exam_name', 

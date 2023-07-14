@@ -9,6 +9,7 @@ use App\Models\Classe;
 use App\Models\Coeficient;
 use App\Models\Image;
 use App\Models\Level;
+use App\Models\QotHour;
 use App\Models\SchoolYear;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,6 +30,12 @@ class Subject extends Model
 
     public $tables = [
     ];
+
+
+    public function qotHours()
+    {
+        return $this->hasMany(QotHour::class);
+    }
 
 
 

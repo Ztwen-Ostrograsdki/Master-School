@@ -16,6 +16,8 @@ class TeacherListing extends Component
     public $subject_id_selected = null;
     public $counter = 0;
     public $baseRoute = 'teacher_listing';
+    public $search = '';
+
 
     public function render()
     {
@@ -45,6 +47,23 @@ class TeacherListing extends Component
     {
         // $this->classe_id = $section;
         session()->put('teachers_section_selected', $section);
+    }
+
+
+    public function updatedSearch($search)
+    {
+        $this->search = $search;
+
+        if($search && strlen($search) > 2){
+
+            $this->emit('TeacherTableListFetchOnSearch', $search);
+
+        }
+        else{
+
+            $this->emit('TeacherTableListFetchOnSearch', null);
+        }
+
     }
 
      public function addNewTeacher()

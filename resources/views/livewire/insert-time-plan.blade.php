@@ -12,20 +12,22 @@
                             </span>
                             <span class="text-white-50 ml-4"> ({{ $subject ? $subject->name : 'La matière...'}}) </span>
                         </blockquote>
-                        <span class="d-flex justify-content-between">
-                            @if(count($times_plans) <= 10)
-                                <span wire:click="pushIntoTimesPlans" class="btn btn-primary border rounded cursor-pointer px-4">
-                                    <span class="fa fa-plus"></span>
-                                    <span>Ajouter</span>
-                                </span>
-                            @endif
-                            @if(count($times_plans) > 0)
-                                <span wire:click="retrieveFromTimesPlans" class="ml-1 btn btn-info border rounded cursor-pointer px-4">
-                                    <span class="fa fa-trash"></span>
-                                    <span>Retirer</span>
-                                </span>
-                            @endif
-                        </span>
+                        @if(!$time_plan)
+                            <span class="d-flex justify-content-between">
+                                @if(count($times_plans) <= 10)
+                                    <span wire:click="pushIntoTimesPlans" class="btn btn-primary border rounded cursor-pointer px-4">
+                                        <span class="fa fa-plus"></span>
+                                        <span>Ajouter</span>
+                                    </span>
+                                @endif
+                                @if(count($times_plans) > 0)
+                                    <span wire:click="retrieveFromTimesPlans" class="ml-1 btn btn-info border rounded cursor-pointer px-4">
+                                        <span class="fa fa-trash"></span>
+                                        <span>Retirer</span>
+                                    </span>
+                                @endif
+                            </span>
+                        @endif
                     </div>
                     <div class="col-12 d-flex justify-content-between row m-0 p-0">
                         @if($time_plan)
@@ -33,16 +35,6 @@
                                 <span wire:click="delete" title="Supprimer définitivement cet emploi du temps" class="cursor-pointer btn btn-danger w-100 border py-2 text-center">
                                     <span class="bi-trash mx-2"></span>
                                     <span class="text-uppercase">supprimer cet emploi du temps</span>
-                                </span>
-                            </div>
-                            <div class="w-100 mx-auto d-flex justify-content-between m-0 p-0 mt-4">
-                                <span title="" class="cursor-pointer btn btn-primary col-5 border py-2 text-center">
-                                    <span class="bi-eye mx-2"></span>
-                                    <span >Ne plus oublier</span>
-                                </span>
-                                <span title="" class="cursor-pointer btn btn-info col-5 border py-2 text-center">
-                                    <span class="bi-eye-slash mx-2"></span>
-                                    <span >Oublier cette note</span>
                                 </span>
                             </div>
                         @endif
@@ -106,7 +98,7 @@
                         <div class="col-12 d-flex justify-content-between row m-0 p-0">
                             <div class="col-3">
                                 <label class="z-text-cyan span m-0 p-0 w-100 cursor-pointer" for="">Le jour </label>
-                                <select class="px-2 form-select custom-select text-white z-bg-secondary w-100 @error('day') text-danger border border-danger @enderror" wire:model.defer="day" name="day">
+                                <select class="px-2 form-select custom-select text-white z-bg-secondary w-100 @error('day') text-danger border border-danger @enderror" wire:model="day" name="day">
                                     <option class="" value="{{null}}">Choisissez le jour</option>
                                     @foreach ($days as $dy)
                                         <option  value="{{$dy}}">{{$dy}}</option>
@@ -159,12 +151,19 @@
             </div>
         </div>
         <div class="p-0 m-0 mx-auto d-flex justify-content-center flex-column pb-1 pt-1">
-            @if(count($times_plans) > 0)
-                <x-z-button :bg="'btn-primary'" class="text-dark">Terminer</x-z-button>
 
-                <h6 class="text-center text-warning"> 0{{count($times_plans)}} programmes ont été ajoutés </h6>
-            @else
-                <span class="text-dark bg-secondary border text-dark px-4 col-7 text-center mx-auto btn rounded">Veuillez ajouter des programmes</span>
+            @if($time_plan)
+                <x-z-button :bg="'btn-primary'" class="text-dark">Terminer</x-z-button>
+            @endif
+
+            @if(!$time_plan)
+                @if(count($times_plans) > 0)
+                    <x-z-button :bg="'btn-primary'" class="text-dark">Terminer</x-z-button>
+
+                    <h6 class="text-center text-warning"> 0{{count($times_plans)}} programmes ont été ajoutés </h6>
+                @else
+                    <span class="text-dark bg-secondary border text-dark px-4 col-7 text-center mx-auto btn rounded">Veuillez ajouter des programmes</span>
+                @endif
             @endif
         </div>
     </form>

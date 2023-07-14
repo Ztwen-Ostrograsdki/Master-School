@@ -1,4 +1,4 @@
-<div>
+<div wire:ignore.self>
     <nav class="main-header navbar navbar-expand navbar-dark">
         <!-- Left navbar links -->
         <ul class="navbar-nav">
@@ -21,18 +21,18 @@
           <!-- Navbar Search -->
           <li class="nav-item">
             <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-                <i class="fas fa-search"></i>
+                <i class="fas fa-search form-search-opener"></i>
             </a>
-            <div class="navbar-search-block">
-                <form class="form-inline" wire:ignore.self >
+            <div  class="navbar-search-block form-searcher">
+                <form class="form-inline">
                     <div class="input-group input-group-sm">
-                        <input class="form-control form-control-navbar" role="search" type="search" placeholder="Taper un mot clé ..." aria-label="Search">
+                        <input wire:model="search" class="form-control form-control-navbar"  placeholder="Taper un mot clé ...">
                         <div class="input-group-append">
                             <button class="btn btn-navbar" type="submit">
                                 <i class="fas fa-search"></i>
                             </button>
                             <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                                <i class="fas fa-times"></i>
+                                <i class="fas fa-times form-search-closer"></i>
                             </button>
                         </div>
                     </div>

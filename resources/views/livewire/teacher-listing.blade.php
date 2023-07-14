@@ -27,29 +27,6 @@
                     </ul>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="container-fluid m-0 p-0 w-100">
-                    <div class="card-deck w-100 p-0 m-0">
-                        <div class="card active" href="#tab_1" data-toggle="tab">
-                            <div class="info-box m-0 p-0 bg-transparent">
-                                <span class="info-box-icon"><i class="fa bi-search"></i></span>
-                                <div class="info-box-content">
-                                    <div class="d-flex justify-content-between">
-                                        <form action="" class="col-10">
-                                            <input placeholder="Veuillez entrer le nom ou le prénom de l'apprenant à retrouver ..." class="form-control bg-transparent py-1" type="text" name="search" wire:model="search">
-                                        </form>
-                                        <div x-on:click="@this.call('resetSearch')" data-card-widget="collapse" class="btn-secondary rounded text-center p-1 cursor-pointer border border-white col-2">
-                                            <span>Annuler</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    
-                </div>
-            </div>
         </div>
     </div>
 
@@ -66,7 +43,7 @@
                     <ul class="nav nav-pills ml-auto p-2">
                         <li class="nav-item">
                             <select wire:change="changeSection('level')" wire:model="level_id_selected" class="form-select z-bg-secondary custom-select">
-                                <option value=""> Liste enseignants selon le cycle </option>
+                                <option value=""> Enseignants selon le cycle </option>
                                 @foreach($levels as $lev)
                                     <option value="{{$lev->id}}"> {{ $lev->getName() }} </option>
                                 @endforeach
@@ -75,7 +52,7 @@
 
                         <li class="nav-item mx-2">
                             <select wire:change="changeSection('classe')" wire:model="classe_id_selected" class="form-select z-bg-secondary custom-select">
-                                <option value=""> Liste enseignants selon la classe </option>
+                                <option value=""> Enseignants selon la classe </option>
                                 @foreach($classes as $cl)
                                     <option value="{{$cl->id}}"> {{ $cl->name }} </option>
                                 @endforeach
@@ -84,7 +61,7 @@
 
                         <li class="nav-item">
                             <select wire:change="changeSection('subject')" wire:model="subject_id_selected" class="form-select z-bg-secondary custom-select">
-                                <option value=""> Liste enseignants selon la matière </option>
+                                <option value=""> Enseignants selon la matière </option>
                                 @foreach($subjects as $sub)
                                     <option value="{{$sub->id}}"> {{ $sub->name }} </option>
                                 @endforeach

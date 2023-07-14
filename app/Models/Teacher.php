@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Helpers\DateFormattor;
 use App\Helpers\ModelTraits\TeachersTrait;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\AE;
 use App\Models\Classe;
 use App\Models\ClassesSecurity;
 use App\Models\Level;
+use App\Models\PrincipalTeacher;
 use App\Models\SchoolYear;
 use App\Models\Subject;
 use App\Models\TeacherAbsences;
@@ -26,6 +28,7 @@ class Teacher extends Model
     use SoftDeletes;
     use ModelQueryTrait;
     use TeachersTrait;
+    use DateFormattor;
 
     protected $fillable = [
         'name',
@@ -37,6 +40,8 @@ class Teacher extends Model
         'birth_day',
         'nationality',
         'authorized',
+        'teaching',
+        'last_teaching_date',
         'marital_status',
     ];
 
@@ -58,9 +63,36 @@ class Teacher extends Model
         return $this->hasMany(TeacherCursus::class);
     }
 
-    public function ae()
+    public function aes()
     {
-        return $this->belongsTo(AE::class);
+        return $this->hasMan(AE::class);
+    }
+
+    public function principals()
+    {
+        return $this->hasMany(PrincipalTeacher::class);
+    }
+
+
+    public function ae($school_year)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $has = $this->aes()->where('a_e_s.school_year_id', $school_year_model->id)->first();
+
+        return $has ? $has : null;
+
+    }
+
+
+    public function principal($school_year)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $has = $this->principals()->where('principal_teachers.school_year_id', $school_year_model->id)->first();
+
+        return $has ? $has : null;
+
     }
 
     public function user()
@@ -82,19 +114,35 @@ class Teacher extends Model
         return $this->dateAgoToStringForUpdated;
     }
 
-
-
-    public function getTeachersCurrentClasses($withDuration = false)
+   
+    public function getLastTeachingDate()
     {
-        $school_year_model = $this->getSchoolYear();
+        $date = $this->last_teaching_date;
+
+        $formatted_date = $this->__getDateAsString($date, null);
+
+        return  ucwords($this->__getDateAsString($date, null)) ;
+        
+    }
+
+
+
+    public function getTeachersCurrentClasses($withDuration = false, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
         $current_classes = [];
         
-        if($this->hasClasses()){
+        if($this->hasClasses($school_year)){
+
             if(!$withDuration){
+
                 $classes_id = $school_year_model->teacherCursus()->where('teacher_id', $this->id)->whereNull('end')->pluck('classe_id')->toArray();
 
                 foreach($classes_id as $classe_id){
+
                     $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
+                    
                     $current_classes[$classe_id] = $classe;
                 }
             }
@@ -102,7 +150,9 @@ class Teacher extends Model
                 $cursuses = $school_year_model->teacherCursus()->where('teacher_id', $this->id)->whereNull('end')->get();
 
                 foreach($cursuses as $cursus){
+                    
                     $classe = $school_year_model->classes()->where('classes.id', $cursus->classe_id)->first();
+
                     $current_classes[$cursus->classe_id] = ['classe' => $classe, 'cursus' => $cursus, 'asWorkedDuration' => $cursus->canMarksAsWorkedForTeacher()];
                 }
 
@@ -115,9 +165,10 @@ class Teacher extends Model
     }
 
 
-    public function hasClasses()
+    public function hasClasses($school_year = null)
     {
-        $school_year_model = $this->getSchoolYear();
+        $school_year_model = $this->getSchoolYear($school_year);
+
         $cursuses = $school_year_model->teacherCursus()->where('teacher_id', $this->id)->whereNull('end')->count();
 
         return $cursuses > 0;
@@ -198,6 +249,10 @@ class Teacher extends Model
         }
         return true;
     }
+
+
+
+
 
 
 

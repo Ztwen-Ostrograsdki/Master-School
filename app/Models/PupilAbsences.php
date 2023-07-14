@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Helpers\DateFormattor;
+use App\Models\Classe;
+use App\Models\Pupil;
 use App\Models\SchoolYear;
 use App\Models\Subject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -29,6 +31,24 @@ class PupilAbsences extends Model
     public function subject()
     {
         return $this->belongsTo(Subject::class);
+    }
+
+
+    public function school_year()
+    {
+        return $this->belongsTo(SchoolYear::class);
+    }
+
+
+    public function pupil()
+    {
+        return $this->belongsTo(Pupil::class);
+    }
+
+
+    public function classe()
+    {
+        return $this->belongsTo(Classe::class);
     }
 
 }

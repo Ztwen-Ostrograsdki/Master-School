@@ -4,6 +4,7 @@
         <div class="mt-0 col-11 mx-auto">
             <div class="card w-100">
                 <div class="card-body p-0 m-0 w-100">
+                    @if($teacher)
                     <div class="tab-content w-100">
                         <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white">
                             <thead class="text-white text-center">
@@ -23,12 +24,12 @@
                                         </td>
                                         <td>
                                             @if(!in_array($classe->id, $classes_selecteds))
-                                                <span wire:click="join({{$classe->id}})" class="cursor-pointer w-100 py-1 d-inline-block btn btn-primary">
+                                                <span title="Confier la gestion de la classe de {{ $classe->name }} au prof {{ $teacher->getFormatedName() }} " wire:click="join({{$classe->id}})" class="cursor-pointer w-100 py-1 d-inline-block btn btn-primary">
                                                     <span>Ajouter</span>
                                                     <span class="fa fa-plus"></span>
                                                 </span>
                                             @else
-                                                <span wire:click="disjoin({{$classe->id}})" class="cursor-pointer w-100 py-1 d-inline-block btn btn-warning">
+                                                <span title="Retirer la classe de {{ $classe->name }} au prof {{ $teacher->getFormatedName() }} " wire:click="disjoin({{$classe->id}})" class="cursor-pointer w-100 py-1 d-inline-block btn btn-danger">
                                                     <span>Retirer</span>
                                                     <span class="fa fa-minus"></span>
                                                 </span>
@@ -42,6 +43,7 @@
                             </tbody>
                         </table>
                     </div>
+                    @endif
                 </div>
 
             </div>
@@ -52,7 +54,7 @@
             <h6 class="m-0 p-0 h6 py-1 text-white-50 col-12 shadow d-flex justify-content-between">
                 @if(count($classes_selecteds) > 0)
                     <span class="pl-2">
-                       {{count($classes_selecteds) > 9 ? count($classes_selecteds) : '0'.count($classes_selecteds)}} matière(s) liée(s)!
+                       {{count($classes_selecteds) > 9 ? count($classes_selecteds) : '0'.count($classes_selecteds)}} classes(s) assignées(s) au prof {{ $teacher ? $teacher->getFormatedName() . ' !' : ' !' }}
                     </span>
                 @else
                     <span class="pl-2">

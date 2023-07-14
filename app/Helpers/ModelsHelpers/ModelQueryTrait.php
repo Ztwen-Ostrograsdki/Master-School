@@ -138,4 +138,10 @@ trait ModelQueryTrait{
         return false;
     }
 
+
+    public function getLastYear()
+    {
+        return SchoolYear::orderBy('school_year', 'desc')->first();
+    }
+
 }

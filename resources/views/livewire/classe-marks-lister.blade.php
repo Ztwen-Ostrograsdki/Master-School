@@ -1,17 +1,17 @@
 <div>
-    <div x-data={key: null} class="w-100 my-1">
-        @isRoute('classe_profil')
-        <select id="classe_subject_selected" wire:model="classe_subject_selected" wire:change="changeSubject" class="form-select">
-            <option value="{{null}}">Veuillez sélectionner une matière</option>
-            @foreach ($classe_subjects as $subject)
-            <option value="{{$subject->id}}">{{$subject->name}}</option>
-            @endforeach
-        </select>
-        @endisRoute
+    <div class="w-100 my-1">
+        @if(!$teacher_profil)
+            <select wire:model="classe_subject_selected" class="form-select custom-select w-auto d-block ">
+                <option value="{{null}}">Veuillez sélectionner une matière</option>
+                @foreach ($classe_subjects as $s)
+                    <option value="{{$s->id}}">{{$s->name}}</option>
+                @endforeach
+            </select>
+        @endif
         @if($subject_selected)
             <small class="text-warning m-2">
                 @if($modality)
-                    <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, <b class="text-success">0{{$modality}}</b> notes seront prises en comptes!
+                    <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, <b class="text-white">0{{$modality}}</b> notes seront prises en comptes!
                 @else
                     <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, toutes les notes seront prises en comptes!
                 @endif
@@ -54,34 +54,55 @@
                 </span>
             @endif
         @endif
-        @isMaster(auth()->user())
-            @isRoute('classe_profil')
+        @if(auth()->user()->isAdminAs('master'))
+            @if(!$teacher_profil)
                 <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right" title="Ajouter une matière à cette classe">
                     <span class="fa fa-bookmark"></span>
                     <span>Ajouter</span>
                 </span>
-            @endisRoute
-        @endisMaster
+            @endif
+        @endif
+        <hr class="w-100 bg-warning text-warning p-0 m-0 mt-3">
     </div>
     <div class="my-2">
         @if($pupils && $classe_subject_selected && count($pupils) > 0)
         <div>
+            <hr class="w-100 text-white p-0 m-0 my-1">
             <blockquote class="text-primary">
-                <h5 class="m-0 p-0 text-white-50 h6 w-100 d-flex justify-content-between">
-                    <span>Les détails sur les notes</span>
+                <h5 class="m-0 p-0 text-white-50 h6 w-100 d-flex justify-content-between flex-column">
                     <span class="d-flex justify-content-between">
-                        @isRoute('classe_profil')
-                            @if($classe && $classe->classe_group)
-                                <a title="charger le profil de la promotion" class="text-success mx-1" href="{{route('classe_group_profil', ['slug' => $classe->classe_group->name])}}">
-                                    Promotion {{ $classe->classe_group->name }}
-                                </a>
-                            @else
-                                <span wire:click="editClasseGroup({{$classe->id}})" title="Cette classe n'est pas encore liée à une promotion, veuillez cliquer afin de le faire et d'avoir accès aux coéfiscients des différentes matières" class="mx-1 p-0 px-2 btn btn-success border border-white">
-                                    Promouvoir maintenant
-                                </span>
+                        <span>Les détails sur les notes</span>
+                        <span class="d-flex justify-content-between">
+                            @if(!$teacher_profil)
+                                @if($classe && $classe->classe_group)
+                                    <a title="charger le profil de la promotion" class="text-success mx-1" href="{{route('classe_group_profil', ['slug' => $classe->classe_group->name])}}">
+                                        Promotion {{ $classe->classe_group->name }}
+                                    </a>
+                                @else
+                                    @if(auth()->user()->isAdminAs('master'))
+                                        <span wire:click="editClasseGroup({{$classe->id}})" title="Cette classe n'est pas encore liée à une promotion, veuillez cliquer afin de le faire et d'avoir accès aux coéfiscients des différentes matières" class="mx-1 p-0 px-2 btn btn-success border border-white">
+                                            Promouvoir maintenant
+                                        </span>
+                                    @endif
+                                @endif
+                                <span class="ml-3">Coef:  {{ $classe_subject_coef }}</span>
                             @endif
-                            <span class="ml-3">Coef:  {{ $classe_subject_coef }}</span>
-                        @endisRoute
+                        </span>
+                    </span>
+                    <span class="mx-2">
+                        @if($current_period)
+                            <span>
+                                <small class="text-white-50">Nous sommes dans le {{ $current_period['target'] }}</small>
+                                <small class="text-success">Il y a déjà {{ $current_period['passed'] }} qui se sont écoulés</small>
+                                <small class="text-danger">Il nous reste encore {{ $current_period['rest'] }}</small>
+                                <span class="mx-2 text-white-50">
+                                    <small class="fa fa-warning text-danger"></small>
+                                    <small class="fa fa-warning text-danger"></small>
+                                    <small>Après cete période, l'insertion des notes séra bloquée pour ce semestre!</small>
+                                    <small class="fa fa-warning text-danger"></small>
+                                </span>
+                            </span>
+                        @endif
                     </span>
                 </h5>
             </blockquote>

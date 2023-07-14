@@ -18,10 +18,20 @@ class AuthTeacherMiddleware
     public function handle(Request $request, Closure $next)
     {
         if(Auth::user() && $request->user()->teacher){
-            return $next($request);
+
+            if($request->user()->teacher->teaching){
+
+                return $next($request);
+            }
+            else{
+                $date = $request->user()->teacher->getLastTeachingDate();
+                return abort(403, "Vous n'êtes plus authorisé à accéder à une telle page, Vous n'êtes plus enseignant de la plateforme depuis le $date !");
+            }
         }
         else{
+
             return abort(403, "Vous n'êtes pas authorisé à accéder à une telle page, Vous n'êtes pas enseignant!");
+            
         }
     }
 }

@@ -18,6 +18,7 @@ use App\Http\Livewire\PupilsListerComponent;
 use App\Http\Livewire\RegisteringNewUser;
 use App\Http\Livewire\ResetPassword;
 use App\Http\Livewire\SchoolCalendar;
+use App\Http\Livewire\SchoolYearableComponent;
 use App\Http\Livewire\SubjectTableList;
 use App\Http\Livewire\TeacherListing;
 use App\Http\Livewire\TeacherProfilAsUser;
@@ -52,14 +53,17 @@ Route::group(['prefix' => '/administration', 'middleware' => ['auth', 'admin']],
     Route::get('/', Admin::class)->middleware('auth')->name('admin');
     Route::get('/utilisateurs', UserListing::class)->name('user_listing');
     Route::get('/utilisateurs/{target}', UsersListingByTarget::class)->name('user_listing_by_target');
-    Route::get('/enseignants', TeacherListing::class)->name('teacher_listing');
+    Route::get('/tous-les-enseignants', TeacherListing::class)->name('teacher_listing');
     Route::get('/securisation/enseignants', AdminTeacherSecurityActions::class)->name('admin_teacher_security_actions');
+    Route::get('/gestionnaire/base-de-données/Secondaire', SchoolYearableComponent::class)->name('data_manager_secondary');
+    Route::get('/gestionnaire/base-de-données/Primaire', SchoolYearableComponent::class)->name('data_manager_primary');
     Route::get('/calendrier-scolaire/{school_year}', SchoolCalendar::class)->name('school_calendar');
     Route::get('/emploi-du-temps/{school_year}', TimePlansComponent::class)->name('time_plans');
     
-    Route::get('/tous-les-apprenant/{level}', PupilsListerComponent::class)->name('pupil_listing');
+    Route::get('/tous-les-apprenant', PupilsListerComponent::class)->name('pupil_listing');
     Route::get('/toutes-les-classes', ClasseTableList::class)->name('classe_listing');
-    Route::get('/la-classe-polyvalente/{level}', PolyvalenteClasseManager::class)->name('polyvalente_classe');
+    Route::get('/la-classe-polyvalente/Primary', PolyvalenteClasseManager::class)->name('polyvalente_classe_primary');
+    Route::get('/la-classe-polyvalente/Secondaire', PolyvalenteClasseManager::class)->name('polyvalente_classe_secondary');
     Route::get('/toutes-les-specialites', SubjectTableList::class)->name('subject_listing');
     Route::get('/classe/{slug}', ClasseProfil::class)->name('classe_profil');
     Route::get('/promotion/{slug}', ClasseGroupProfil::class)->name('classe_group_profil');

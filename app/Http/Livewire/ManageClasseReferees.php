@@ -41,7 +41,7 @@ class ManageClasseReferees extends Component
         $teachers = [];
         $pupils = [];
         if($this->classe){
-            $teachers = $this->classe->getTeachersCurrentTeachers();
+            $teachers = $this->classe->getClasseCurrentTeachers();
             $pupils = $this->classe->getClassePupils();
         }
         return view('livewire.manage-classe-referees', compact('school_years', 'pupils', 'teachers'));

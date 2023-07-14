@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Helpers\DateFormattor;
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\AE;
 use App\Models\Classe;
 use App\Models\ClasseGroup;
@@ -10,20 +12,24 @@ use App\Models\ClassePupilSchoolYear;
 use App\Models\ClassesSecurity;
 use App\Models\Level;
 use App\Models\Mark;
+use App\Models\MarkStopped;
 use App\Models\Period;
 use App\Models\PrincipalTeacher;
 use App\Models\Pupil;
 use App\Models\PupilAbsences;
 use App\Models\PupilCursus;
 use App\Models\PupilLates;
+use App\Models\QotHour;
 use App\Models\RelatedMark;
 use App\Models\Responsible;
+use App\Models\School;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeacherAbsences;
 use App\Models\TeacherCursus;
 use App\Models\TeacherLates;
 use App\Models\TimePlan;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,13 +37,45 @@ class SchoolYear extends Model
 {
     use HasFactory;
 
+    use ModelQueryTrait;
+
+    use DateFormattor;
+
     protected $fillable = ['school_year'];
 
+    public $calendars;
+    public $local_events = [];
+    public $semestre_type = 'Semestre';
+    public $semestres = [1, 2];
 
+    public function marksWasAlreadyStopped($semestre = 1, $date = null)
+	{
+		$semestre_calendar = $this->periods()->where('target', 'semestre-trimestre')->where('semestre', $semestre)->first();
+		if($semestre_calendar){
+			$start = $semestre_calendar->start;
+			$end = $semestre_calendar->end;
+
+			return !$this->thisDateIsBetween($start, $end, $date);
+
+		}
+
+		return true;
+	}
+
+
+    public function marks_stopped()
+	{
+		return $this->hasMany(MarkStopped::class);
+	}
 
     public function levels()
 	{
 		return $this->morphedByMany(Level::class, 'schoolable');
+	}
+
+	public function qotHours()
+	{
+		return $this->hasMany(QotHour::class);
 	}
 
 	public function responsibles()
@@ -127,17 +165,20 @@ class SchoolYear extends Model
 	{
 		return $this->morphedByMany(Pupil::class, 'schoolable');
 	}
+
     public function pupilCursus()
 	{
-		return $this->morphedByMany(PupilCursus::class, 'schoolable');
+		return $this->hasMany(PupilCursus::class);
 	}
+
     public function pupilLates()
 	{
-		return $this->morphedByMany(PupilLates::class, 'schoolable');
+		return $this->hasMany(PupilLates::class);
 	}
+	
     public function pupilAbsences()
 	{
-		return $this->morphedByMany(PupilAbsences::class, 'schoolable');
+		return $this->hasMany(PupilAbsences::class);
 	}
 
 
@@ -169,6 +210,104 @@ class SchoolYear extends Model
 
 
 
+    public function calendarProfiler()
+    {
+    	$school = School::first();
+
+        $current_period = [];
+
+        $this->local_events = config('app.local_events');
+
+        if($school){
+
+            if($school->trimestre){
+
+                $this->semestre_type = 'Trimestre';
+
+                $this->semestres = [1, 2, 3];
+            }
+            else{
+
+                $semestres = [1, 2];
+            }
+
+            
+        }
+        $semestre_calendars = [];
+
+        $school_calendars = [];
+
+        $s_cals = $this->periods()->where('periods.target', 'semestre-trimestre')->get();
+        
+        foreach($s_cals as $s_cal){
+
+            $start_string = $this->__getDateAsString($s_cal->start, false);
+
+            $end_string = $this->__getDateAsString($s_cal->end, false);
+
+            $weeks = Carbon::parse($s_cal->end)->floatDiffInRealWeeks($s_cal->start);
+
+            $days = floor(($weeks - floor($weeks)) * 7);
+
+            $duration = floor($weeks) . ' Semaines ' . $days . ' Jours';
+
+            $in_period = $this->thisDateIsBetween($s_cal->start, $s_cal->end);
+
+            $semestre_calendars[$s_cal->id] = [
+                'model' => $s_cal,
+                'start' => $start_string,
+                'end' => $end_string,
+                'duration' => $duration,
+                'in_period' => $in_period,
+            ];
+
+            if($in_period){
+
+                $passed = '';
+
+                $rest = '';
+
+                $today = Carbon::now();
+
+                $weeks_passed = Carbon::parse($s_cal->today)->floatDiffInRealWeeks($s_cal->start);
+
+                $days_passed = floor(($weeks_passed - floor($weeks_passed)) * 7);
+
+                if(floor($weeks_passed)){
+
+                    $passed.= floor($weeks_passed) . ' Semaines ';
+                }
+                if($days_passed){
+
+                    $passed.= $days_passed . ' Jours';
+
+                }
+
+                $weeks_rest = Carbon::parse($s_cal->today)->floatDiffInRealWeeks($s_cal->end);
+
+                $days_rest = floor(($weeks_rest - floor($weeks_rest)) * 7);
+
+                if(floor($weeks_rest)){
+
+                    $rest.= floor($weeks_rest) . ' Semaines ';
+                }
+                if($days_rest){
+
+                    $rest.= $days_rest . ' Jours';
+
+                }
+                $current_period = [
+                    'target' => $s_cal->object,
+                    'passed' => $passed,
+                    'rest' => $rest
+                ];
+
+            }
+        }
+        return ['current_period' => $current_period, 'semestre_calendars' => $semestre_calendars];
+
+
+    }
 
 
 

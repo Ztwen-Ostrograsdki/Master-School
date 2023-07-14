@@ -7,6 +7,10 @@
             <tr>
                 <td rowspan="2">Matières</td>
                 <th scope="colgroup"  colspan="{{count($classe_group->classes)}}">Les Groupes Pédagogiques</th>
+                <th scope="colgroup" colspan="1" rowspan="2">
+                    <span class="d-block">Q2H</span>
+                    <small class="text-warning">Quota horaire hebdomadaire</small>
+                </th>
                 <th scope="colgroup" colspan="2" rowspan="2">Actions</th>
             </tr>
             <tr>
@@ -23,13 +27,27 @@
                 <tr>
                     <th scope="row">{{ $subject->name }}</th>
                     @foreach($classe_group->classes as $c)
-                        <td title="Cliquer pour éditer">
+                        <td title="Cliquer pour éditer ce coefiscient">
                             @if($classe_group->getCoef($subject->id))
                                 <span  class="cursor-pointer w-100 d-inline-block" wire:click="editClasseGroupCoeficient({{$classe_group->id}}, {{$subject->id}}, {{$classe_group->getCoef($subject->id)->id}})">
                                     {{ $classe_group->getCoef($subject->id)->coef }}
                                 </span>
                             @else
-                                <span class="cursor-pointer w-100 d-inline-block"  wire:click="editClasseGroupCoeficient({{$classe_group->id}}, {{$subject->id}}, {{null}})"> - </span>
+                                <span class="cursor-pointer w-100 d-inline-block"  wire:click="editClasseGroupCoeficient({{$classe_group->id}}, '{{$subject->id}}', '{{null}}')"> - </span>
+                            @endif
+                        </td>
+                    @endforeach
+                    @foreach($classe_group->classes as $cll)
+                        <td title="Cliquer pour éditer le quota" class="text-warning">
+                            @php
+                                $qt = $cll->hasQuota($subject->id);
+                            @endphp
+                            @if($qt)
+                                <span  class="cursor-pointer w-100 d-inline-block" wire:click="manageQuotaFrom({{$qt->id}})">
+                                    {{ $qt->quota }}
+                                </span>
+                            @else
+                                <span class="cursor-pointer w-100 d-inline-block"  wire:click="manageQuotaFrom('{{null}}', '{{$subject->id}}', '{{$cll->id}}')"> - </span> 
                             @endif
                         </td>
                     @endforeach

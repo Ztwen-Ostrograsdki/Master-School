@@ -8,6 +8,7 @@ use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Helpers\ZtwenManagers\GaleryManager;
 use App\Models\Classe;
 use App\Models\ClassePupilSchoolYear;
+use App\Models\ClassesSecurity;
 use App\Models\Image;
 use App\Models\Level;
 use App\Models\Mark;
@@ -52,6 +53,11 @@ class Pupil extends Model
     ];
 
     public $imagesFolder = 'pupilsPhotos';
+
+    public function securities()
+    {
+        return $this->hasMany(ClassesSecurity::class);
+    }
 
     public function classesSchoolYears()
     {
@@ -272,13 +278,22 @@ class Pupil extends Model
     }
 
 
-    public function getCurrentClasse($school_year = null)
+    public function getCurrentClasse($school_year = null, $ofTheLastYear = false)
     {
         $classe = null;
-        $school_year_model = $this->getSchoolYear($school_year);
+        
+        if($ofTheLastYear){
+
+            $school_year_model = SchoolYear::orderBy('school_year', 'desc')->first();
+
+        }
+        else{
+            $school_year_model = $this->getSchoolYear($school_year);
+        }
 
         $relation = $this->classesSchoolYears()->where('school_year_id', $school_year_model->id)->first();
         if($relation){
+
             $classe = $relation->classe;
         }
 

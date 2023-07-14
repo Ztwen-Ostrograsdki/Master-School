@@ -15,6 +15,7 @@ class TeacherProfilAsUser extends Component
     use ModelQueryTrait;
 
     public $user;
+    public $teacher_profil = true;
     public $slug;
     public $classe_id;
     public $counter = 0;
@@ -24,12 +25,12 @@ class TeacherProfilAsUser extends Component
     public $semestre_selected = 1;
     public $search = null;
     public $titles = [
-                        'liste' => 'La liste de la classe',
-                        'marks' => 'Les notes de la classe',
-                        'related_marks' => 'Gestion bonus/sanctions de la classe',
-                        'classe_general_stats' => 'Statistique de la classe',
-                        'absences' => 'Gestion absences/présences de la classe'
-                    ];
+                'liste' => 'La liste de la classe',
+                'marks' => 'Les notes de la classe',
+                'related_marks' => 'Gestion bonus/sanctions de la classe',
+                'classe_general_stats' => 'Statistique de la classe',
+                'absences' => 'Gestion absences/présences de la classe'
+            ];
 
 
 

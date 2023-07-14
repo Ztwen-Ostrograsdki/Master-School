@@ -604,7 +604,25 @@
               </li>
               <li class="nav-header text-uppercase">Outils</li>
               <li class="nav-item">
-                <a href="{{route('polyvalente_classe', ['level' => 'Primaire'])}}" class="nav-link @isRoute('polyvalente_classe') active @endisRoute">
+                <a href="{{route('data_manager_primary')}}" class="nav-link @isRoute('data_manager_primary') active @endisRoute">
+                  <i class="nav-icon fas fa-school"></i>
+                  <p>
+                    Gest. Scolaire Primaire
+                    <span class="badge badge-info right"></span>
+                  </p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{route('data_manager_secondary')}}" class="nav-link @isRoute('data_manager_secondary') active @endisRoute">
+                  <i class="nav-icon fas fa-school"></i>
+                  <p>
+                    Gest. Scolaire Secondaire
+                    <span class="badge badge-info right"></span>
+                  </p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{route('polyvalente_classe_primary')}}" class="nav-link @isRoute('polyvalente_classe_primary') active @endisRoute">
                   <i class="nav-icon fas fa-table"></i>
                   <p>
                     Polyvalente Primaire
@@ -613,7 +631,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{{route('polyvalente_classe', ['level' => 'Secondaire'])}}" class="nav-link @isRoute('polyvalente_classe') active @endisRoute">
+                <a href="{{route('polyvalente_classe_secondary')}}" class="nav-link @isRoute('polyvalente_classe_secondary') active @endisRoute">
                   <i class="nav-icon fas fa-table"></i>
                   <p>
                     Polyvalente Secondaire

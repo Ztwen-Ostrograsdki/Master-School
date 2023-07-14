@@ -27,6 +27,7 @@ return [
     'min_weeks_to_consider_that_teacher_has_worked_in_classe' => 2,
     'teacher_classes_limit' => 4,
     'local_events' => [
+        'semestre-trimestre' => 'Semstres / Trimestres',
         'devoir' => 'Devoirs',
         'examen-bepc' => 'Examens BEPC',
         'examen-cap' => 'Examens CAP',

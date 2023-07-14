@@ -20,4 +20,5 @@
     @livewire('manage-subject-data')
     @livewire('manage-classe-referees')
     @livewire('confirmation-component')
+    @livewire('quota-manager')
 </div>

@@ -15,29 +15,6 @@
                     
                 </div>
             </div>
-            <div class="card-body">
-                <div class="container-fluid m-0 p-0 w-100">
-                    <div class="card-deck w-100 p-0 m-0">
-                        <div class="card active" href="#tab_1" data-toggle="tab">
-                            <div class="info-box m-0 p-0 bg-transparent">
-                                <span class="info-box-icon"><i class="fa bi-search"></i></span>
-                                <div class="info-box-content">
-                                    <div class="d-flex justify-content-between">
-                                        <form action="" class="col-10">
-                                            <input placeholder="Veuillez entrer le nom ou le prénom de l'apprenant à retrouver ..." class="form-control bg-transparent py-1" type="text" name="search" wire:model="search">
-                                        </form>
-                                        <div x-on:click="@this.call('resetSearch')" data-card-widget="collapse" class="btn-secondary rounded text-center p-1 cursor-pointer border border-white col-2">
-                                            <span>Annuler</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    
-                </div>
-            </div>
         </div>
         <div class="m-0 p-0 w-100">
             <blockquote class="text-warning py-2">
@@ -97,10 +74,10 @@
                     </div>
 
                     @if($pupils && count($pupils))
-                    <a href="#"  class="btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de complète...">
+                    <span wire:click="valideSemestre" class="btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de complète...">
                         <span class="fa fa-print"></span>
                         <span>Impr.</span>
-                    </a>
+                    </span>
                     @endif
                 </div>
                 <div class="w-100 m-0 p-0 mt-3">
@@ -115,6 +92,7 @@
                         <th>Moy. en Pré-classe</th>
                         <th>Inscrit(e)</th>
                         <th>Action</th>
+                        <th>Suppr.</th>
                     </thead>
                     <tbody>
                         @foreach($pupils as $k => $p)
@@ -201,30 +179,45 @@
                                 @if(!$editingPupilName)
                                     <td class="text-center w-auto p-0">
                                         <span class="row w-100 m-0 p-0">
-                                            @if ($p->deleted_at)
-                                                <span title="Supprimer définivement {{$p->name}} de la base de donnée" wire:click="forceDeleteAUser({{$p->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
-                                                    <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
-                                                </span>
-                                                <span title="Restaurer {{$p->name}}" wire:click="restoreAUser({{$p->id}})" class="text-success col-4 m-0 p-0 cursor-pointer border-right border-left">
-                                                    <span class="fa fa-reply py-2 px-2"></span>
-                                                </span>
-                                                <span title="Débloquer {{$p->name}}" wire:click="unblockAUser({{$p->id}})" class="text-success col-4 m-0 p-0 cursor-pointer">
-                                                    <span class="fa fa-unlock py-2 px-2"></span>
+                                            @if ($p->inPolyvalenceClasse())
+                                                <span title="Définir la classe de  l'apprenant {{$p->name}}" wire:click="classed({{$p->id}})" class="text-danger col-12 m-0 p-0 cursor-pointer">
+                                                    <span class="text-primary cursor-pointer fa bi-tools py-2 px-2"></span>
                                                 </span>
                                             @else
-                                                <span title="Supprimer définivement {{$p->name}} de la base de donnée" wire:click="forceDeletePupil({{$p->id}})" class="text-danger col-3 m-0 p-0 cursor-pointer">
-                                                    <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
+                                                <span title="Renvoyer l'apprenant {{$p->name}} en classe volante ou polyvalence" wire:click="unclassed({{$p->id}})" class="text-danger col-3 m-0 p-0 cursor-pointer">
+                                                    <span class="text-orange cursor-pointer fa bi-tools py-2 px-2"></span>
                                                 </span>
-                                                <span title="Envoyer {{$p->name}} dans la corbeile" wire:click="deletePupil({{$p->id}})" class="text-warning border-right border-left col-3 m-0 p-0 cursor-pointer">
-                                                    <span class="cursor-pointer fa fa-trash py-2 px-2"></span>
-                                                </span>
-                                                <span title="Bloquer {{$p->name}}" class="text-info col-3 m-0 p-0 cursor-pointer border-right">
-                                                    <span class="fa fa-lock py-2 px-2"></span>
-                                                </span>
-                                                <span title="Faire migrer l'apprenant {{$p->name}}" class="text-success col-3 m-0 p-0 cursor-pointer border-right">
+
+                                                @if($p->canUpdateMarksOfThisPupil())
+                                                    <span title="Verrouiller édtion des notes de l'apprenant {{$p->name}}" wire:click="lockMarksUpdating({{$p->id}})" class="text-warning border-right border-left col-3 m-0 p-0 cursor-pointer">
+                                                        <span class="cursor-pointer fa fa-lock py-2 px-2"></span>
+                                                    </span>
+                                                @else
+                                                    <span title="déverrouiller édtion des notes de l'apprenant {{$p->name}}" wire:click="unlockMarksUpdating({{$p->id}})" class="text-warning border-right border-left col-3 m-0 p-0 cursor-pointer">
+                                                        <span class="cursor-pointer fa fa-unlock py-2 px-2"></span>
+                                                    </span>
+
+                                                @endif
+
+                                                @if($p->canInsertOrUpdateMarksOfThisPupil())
+                                                    <span wire:click="lockMarksInsertion({{$p->id}})" title="Verrouiller la gestion des notes de l'apprenant {{$p->name}}" class="text-info col-3 m-0 p-0 cursor-pointer border-right">
+                                                        <span class="fa fa-lock py-2 px-2"></span>
+                                                    </span>
+
+                                                @else
+                                                    <span wire:click="unlockMarksInsertion({{$p->id}})" title="déverrouiller la gestion des notes de l'apprenant {{$p->name}}" class="text-info col-3 m-0 p-0 cursor-pointer border-right">
+                                                        <span class="fa fa-unlock py-2 px-2"></span>
+                                                    </span>
+                                                @endif
+                                                <span title="Faire migrer l'apprenant {{$p->name}}" class="text-success col-3 m-0 p-0 cursor-pointer">
                                                     <span class="fa fa-recycle py-2 px-2"></span>
                                                 </span>
                                             @endif
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span wire:click="deletePupil({{$p->id}})" title="Supprimer définitivement l'apprenant {{$p->name}}" class="text-danger m-0 p-0 cursor-pointer">
+                                            <span class="fa fa-trash py-2 px-2"></span>
                                         </span>
                                     </td>
                                 @endif

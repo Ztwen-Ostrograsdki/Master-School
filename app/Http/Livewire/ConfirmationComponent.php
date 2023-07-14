@@ -79,10 +79,14 @@ class ConfirmationComponent extends Component
     public function fullDelete()
     {
         $school_years = $this->model->school_years;
+
         foreach($school_years as $school_year_model){
+
             $this->makerForClasse($school_year_model);
+
         }
         $this->dispatchBrowserEvent('hide-form');
+        
         $this->emit('classeUpdated');
     }
 
