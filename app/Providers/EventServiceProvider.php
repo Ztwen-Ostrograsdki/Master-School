@@ -2,14 +2,22 @@
 
 namespace App\Providers;
 
-use App\Events\PaymentSystemEvent;
-use Illuminate\Support\Facades\Event;
 use App\Events\NewProductCreatedEvent;
-use Illuminate\Auth\Events\Registered;
-use App\Listeners\PaymentSystemListener;
+use App\Events\PaymentSystemEvent;
 use App\Listeners\NewProductCreatedListener;
+use App\Listeners\PaymentSystemListener;
+use App\Models\Classe;
+use App\Models\Mark;
+use App\Models\Pupil;
+use App\Observers\ClasseObserver;
+use App\Observers\MarkObserver;
+use App\Observers\PupilObserver;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -19,6 +27,7 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
+
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
@@ -37,6 +46,12 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        
+        Pupil::observe(PupilObserver::class);
+
+        Mark::observe(MarkObserver::class);
+
+        Classe::observe(ClasseObserver::class);
+
     }
+
 }

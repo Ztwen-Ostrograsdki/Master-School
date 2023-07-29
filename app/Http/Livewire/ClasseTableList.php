@@ -59,7 +59,7 @@ class ClasseTableList extends Component
 
        
 
-        return view('livewire.classe-table-list', compact('classes', 'levels', 'classe_groups'));
+        return view('livewire.classe-table-list', compact('classes', 'levels', 'classe_groups', 'school_year_model'));
     }
 
 

@@ -34,6 +34,7 @@ class ManageTeacherClasses extends Component
             $teacher_classes = $this->teacher->getTeachersCurrentClasses();
 
             foreach($teacher_classes as $classe_id =>  $cl){
+
                 $classes_selecteds[] = $classe_id;
             }
         }
@@ -42,25 +43,9 @@ class ManageTeacherClasses extends Component
     }
 
 
-    // public function removeclasses($classes_id)
-    // {
-    //     $classess_selecteds = [];
-
-    //     if($this->classes_selecteds){
-    //         foreach ($this->classes_selecteds as $classes) {
-    //             if(intval($classes) !== intval($classes_id)){
-    //                 $classes_selecteds[] = $classes;
-    //             }
-    //         }
-    //     }
-    //     $this->classes_selecteds = $classes_selecteds;
-    // }
-
-
-
     public function join($classe_id)
     {
-        $classe = $this->school_year_model->classes()->where('classes.id', $classe_id)->first();
+        $classe = $this->school_year_model->findClasse($classe_id);
 
         if($classe){
 
@@ -68,57 +53,74 @@ class ManageTeacherClasses extends Component
                 
                 if(!in_array($classe->id, $this->school_year_model->teacherCursus()->where('teacher_id', $this->target->id)->whereNull('end')->pluck('classe_id')->toArray())){
                     
-                    DB::transaction(function($e) use ($classe){
-                        try {
+                    $has_already_teacher_for_this_subject = $classe->hasAlreadyTeacherForThisSubject($this->target->speciality()->id, $this->school_year_model->id);
 
-                            $joined = $classe->teachers()->attach($this->target->id);
+                    if(!$has_already_teacher_for_this_subject){
 
+                        DB::transaction(function($e) use ($classe){
                             try {
-                                $cursus = TeacherCursus::create([
-                                    'classe_id' => $classe->id,
-                                    'subject_id' => $this->target->speciality()->id,
-                                    'teacher_id' => $this->target->id,
-                                    'school_year_id' => $this->school_year_model->id,
-                                    'level_id' => $this->target->level_id,
-                                    'start' => Carbon::now(),
-                                ]);
 
-                                if($cursus){
+                                $joined = $classe->teachers()->attach($this->target->id);
 
-                                    $this->school_year_model->teacherCursus()->attach($cursus->id);
+                                try {
+                                    $cursus = TeacherCursus::create([
+                                        'classe_id' => $classe->id,
+                                        'subject_id' => $this->target->speciality()->id,
+                                        'teacher_id' => $this->target->id,
+                                        'school_year_id' => $this->school_year_model->id,
+                                        'level_id' => $this->target->level_id,
+                                        'start' => Carbon::now(),
+                                    ]);
 
-                                    // $classe->timePlans()->where('time_plans.school_year_id', $this->school_year_model->id)->where('time_plans.subject_id', $this->target->speciality()->id)->each(function($tp){
+                                    if($cursus){
 
-                                    //     // Ralier les emplois du temps si le prof est dispo pendanst les horaires de ces emplois du temps 
-                                    //     // $tp->update(['teacher_id' => $this->target->id]);
+                                        $this->school_year_model->teacherCursus()->attach($cursus->id);
 
-                                    // });
-                                }
-                                else{
+                                        // $classe->timePlans()->where('time_plans.school_year_id', $this->school_year_model->id)->where('time_plans.subject_id', $this->target->speciality()->id)->each(function($tp){
 
-                                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur', 'message' => "La mise à jour n'a pas été effective!", 'type' => 'error']);
+                                        //     // Ralier les emplois du temps si le prof est dispo pendanst les horaires de ces emplois du temps 
+                                        //     // $tp->update(['teacher_id' => $this->target->id]);
 
+                                        // });
+                                    }
+                                    else{
+
+                                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur', 'message' => "La mise à jour n'a pas été effective!", 'type' => 'error']);
+
+                                    }
+                                    
+                                } catch (Exception $ee) {
+
+                                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur Serveur niveau 1', 'message' => "Une erreure inconnue est survenue veuillez réessayer dans quelques secondes!", 'type' => 'warning']);
                                 }
                                 
-                            } catch (Exception $ee) {
+                            } catch (Exception $e) {
 
-                                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur Serveur niveau 1', 'message' => "Une erreure inconnue est survenue veuillez réessayer dans quelques secondes!", 'type' => 'warning']);
+                                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur Serveur niveau 2', 'message' => "Une erreure inconnue est survenue veuillez réessayer dans quelques secondes!", 'type' => 'warning']);
                             }
-                            
-                        } catch (Exception $e) {
 
-                            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur Serveur niveau 2', 'message' => "Une erreure inconnue est survenue veuillez réessayer dans quelques secondes!", 'type' => 'warning']);
-                        }
+                        });
 
-                    });
+                        DB::afterCommit(function(){
 
-                    DB::afterCommit(function(){
+                            $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "La liste des classes de $this->title a été mise à jour avec succès!", 'type' => 'success']);
 
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "La liste des classes de $this->title a été mise à jour avec succès!", 'type' => 'success']);
+                            $this->emit('userDataEdited');
 
-                        $this->emit('userDataEdited');
+                        });
 
-                    });
+                    }
+                    else{
+
+                        $cursus = $has_already_teacher_for_this_subject;
+
+                        $taking = $cursus->teacher->getFormatedName();
+
+                        $subject = $this->target->speciality()->name;
+
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'PROF DEJA DISPONBLE POUR CETTE MATIERE', 'message' => "Cette classe a déja un enseignant de $subject. Il s'agit de Mr/Mme $taking !", 'type' => 'warning']);
+
+                    }
                 }
                 else{
 
@@ -138,7 +140,7 @@ class ManageTeacherClasses extends Component
     public function disjoin($classe_id)
     {
 
-        $classe = $this->school_year_model->classes()->where('classes.id', $classe_id)->first();
+        $classe = $this->school_year_model->findClasse($classe_id);
 
         if($classe){
 
@@ -210,7 +212,7 @@ class ManageTeacherClasses extends Component
     {
         $this->school_year_model = $this->getSchoolYear();
 
-        $teacher = $this->school_year_model->teachers()->where('teachers.id', $teacher_id)->first();
+        $teacher = $this->school_year_model->findTeacher($teacher_id);
 
         $this->teacher = $teacher;
 

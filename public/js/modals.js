@@ -19,6 +19,13 @@ window.addEventListener('modal-quotaManager', function(e) {
 window.addEventListener('modal-manageTeacherClasses', function(e) {
     $('#manageTeacherClasses').modal('show');
 });
+window.addEventListener('modal-importPupilsIntoClasse', function(e) {
+    $('#migratePupilsIntoClasseModal').modal('show');
+});
+
+window.addEventListener('modal-definedClasseTeachers', function(e) {
+    $('#definedClasseTeachersModal').modal('show');
+});
 
 window.addEventListener('modal-addNewTeacher', function(e) {
     $('#addNewTeacherModal').modal('show');
@@ -40,6 +47,10 @@ window.addEventListener('modal-insertMultiplePupils', function(e) {
 });
 window.addEventListener('modal-editPupilPersoData', function(e) {
     $('#pupilPersoData').modal('show');
+});
+
+window.addEventListener('modal-movePupilToNewClasse', function(e) {
+    $('#movePupilToNewClasseModal').modal('show');
 });
 window.addEventListener('modal-createNewClasse', function(e) {
     $('#createNewClasse').modal('show');

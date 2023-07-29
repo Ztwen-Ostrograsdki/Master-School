@@ -30,26 +30,34 @@ trait ModelQueryTrait{
 
             return $school_year_model;
         }
-
-        $school_year = null;
-        $current_month_index = intval(date('m'));
-        if($current_month_index >= 10){
-            $school_year = date('Y') . ' - ' . intval(date('Y') + 1);
-        }
         else{
-            $school_year = intval(date('Y') - 1) . ' - ' . intval(date('Y'));
-        }
-        if(session()->has('school_year_selected') && session('school_year_selected')){
-            $school_year = session('school_year_selected');
-            session()->put('school_year_selected', $school_year);
-        }
-        else{
-            session()->put('school_year_selected', $school_year);
+
+            $school_year = null;
+
+            $current_month_index = intval(date('m'));
+
+            if($current_month_index >= 10){
+
+                $school_year = date('Y') . ' - ' . intval(date('Y') + 1);
+            }
+            else{
+
+                $school_year = intval(date('Y') - 1) . ' - ' . intval(date('Y'));
+            }
+            if(session()->has('school_year_selected') && session('school_year_selected')){
+                $school_year = session('school_year_selected');
+                session()->put('school_year_selected', $school_year);
+            }
+            else{
+                session()->put('school_year_selected', $school_year);
+            }
+
+            $this->__setSemestreIndex();
+
+            return SchoolYear::where('school_year', $school_year)->first();
+
         }
 
-        $this->__setSemestreIndex();
-
-        return SchoolYear::where('school_year', $school_year)->first();
     }
 
 
@@ -142,6 +150,43 @@ trait ModelQueryTrait{
     public function getLastYear()
     {
         return SchoolYear::orderBy('school_year', 'desc')->first();
+    }
+
+    public function getSchoolYearBefor($school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $sy = $school_year_model->school_year;
+
+        $y = explode(' - ', $sy)[0];
+
+        $y_bf = $y - 1 . ' - ' . $y;
+
+        return SchoolYear::where('school_year', $y_bf)->first();
+
+    }
+
+
+    public function getSemestres()
+    {
+        $school = School::first();
+
+        $semestres = [1, 2];
+
+        if($school){
+
+            if($school->trimestre){
+
+                $semestres = [1, 2, 3];
+            }
+            else{
+
+                $semestres = [1, 2];
+            }
+        }
+
+        return $semestres;
+
     }
 
 }

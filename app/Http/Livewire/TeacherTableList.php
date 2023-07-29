@@ -14,7 +14,14 @@ class TeacherTableList extends Component
 {
     use ModelQueryTrait;
 
-    protected $listeners = ['newTeacherHasBeenAdded' => 'reloadData', 'changeTeacherList' => 'reloadDataOnSection', 'userDataEdited' => 'reloadData', 'selectedsWasChanged' => 'reGetUpdatesOfSelecteds', 'TeacherTableListFetchOnSearch' => 'updatedSearch'];
+    protected $listeners = [
+        'newTeacherHasBeenAdded' => 'reloadData', 
+        'changeTeacherList' => 'reloadDataOnSection', 
+        'userDataEdited' => 'reloadData', 
+        'selectedsWasChanged' => 'reGetUpdatesOfSelecteds', 
+        'TeacherTableListFetchOnSearch' => 'updatedSearch'
+    ];
+
     public $counter = 0;
     public $classe_id = null;
     public $subject_id = null;
@@ -22,6 +29,7 @@ class TeacherTableList extends Component
     public $selecteds = [];
     public $baseRoute;
     public $teaching = true;
+    public $all = true;
     public $search = '';
     public $title = 'Le prof...';
 
@@ -30,10 +38,12 @@ class TeacherTableList extends Component
         $school_year_model = $this->getSchoolYear();
 
         if(session()->has('teacher_list_on_teaching')){
+
             $this->teaching = session('teacher_list_on_teaching');
         }
 
-        if($this->search && mb_strlen($this->search) > 2){
+        if($this->search && mb_strlen($this->search) > 1){
+
             $target = '%' . $this->search . '%';
 
             $teachers = $school_year_model->teachers()->where('teachers.name', 'like', $target)->orWhere('teachers.surname', 'like', $target)->where('teachers.teaching', $this->teaching)->orderBy('name', 'asc')->orderBy('surname', 'asc')->get();
@@ -106,7 +116,9 @@ class TeacherTableList extends Component
         $school_year_model = $this->getSchoolYear();
 
         $classe_id = $this->classe_id;
+
         $level_id = $this->level_id;
+
         $subject_id = $this->subject_id;
 
         $teachers = [];

@@ -21,6 +21,7 @@
                             Reglages <span class="caret"></span>
                           </a>
                           <div class="dropdown-menu">
+                            <a class="dropdown-item" tabindex="-1" wire:click="moveToNewClasse" href="#">Changer de classe</a>
                             <a class="dropdown-item" tabindex="-1" wire:click="resetMarks" href="#">Rafraichir les notes</a>
                             <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
                             <a class="dropdown-item" tabindex="-1" href="#">Rafraichir les notes relatives</a><a class="dropdown-item" wire:click="resetMarks" tabindex="-1" href="#">Rafraichir les retards</a>

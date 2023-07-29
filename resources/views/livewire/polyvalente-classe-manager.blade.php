@@ -1,44 +1,60 @@
 <div class="w-100 p-0 m-0">
     <div class="w-100 m-0 p-0 mx-auto">
-        <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark p-3">
-            <div class="card-header bg-dark"> 
-                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Effectuer une recherche...</h5>
-              <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                  <i class="fa fa-minus"></i>
-                </button>
-                <button type="button" class="btn btn-tool" data-card-widget="remove">
-                  <i class="fa fa-times"></i>
-                </button>
-              </div>
-                <div class="card-tools">
-                    
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="container-fluid m-0 p-0 w-100">
-                    <div class="card-deck w-100 p-0 m-0">
-                        <div class="card active" href="#tab_1" data-toggle="tab">
-                            <div class="info-box m-0 p-0 bg-transparent">
-                                <span class="info-box-icon"><i class="fa bi-search"></i></span>
-                                <div class="info-box-content">
-                                    <div class="d-flex justify-content-between">
-                                        <form action="" class="col-10">
-                                            <input placeholder="Veuillez entrer le nom ou le prénom de l'apprenant à retrouver ..." class="form-control bg-transparent py-1" type="text" name="search" wire:model="search">
-                                        </form>
-                                        <div x-on:click="@this.call('resetSearch')" data-card-widget="collapse" class="btn-secondary rounded text-center p-1 cursor-pointer border border-white col-2">
-                                            <span>Annuler</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
+        <div class="card-header d-flex justify-content-between p-0 px-3 mx-3 border border-orange rounded">
+            <span style="letter-spacing: 1.2px;" class="ml-3 mt-2">
+               <span class="info-box-text">Effectif : 
+                    <b class="text-warning">
+                        {{ $classe ? count($classe->getPupils(session('school_year_selected'))) : 'vide'}}
+                    </b>
+                </span>
+                <span class="info-box-number d-flex flex-column m-0 p-0">
+                    <span class="small">
+                        <i class="font-italic"> Garçons </i> : 
+                        <small> 
+                            {{ $classe ? count($classe->getClassePupilsOnGender('male', session('school_year_selected'))) : '00'}}
+                        </small>
+                    </span>
+
+                    <span class="small">
+                        <i class="font-italic"> Filles </i> : 
+                        <small> 
+                            {{ $classe ? count($classe->getClassePupilsOnGender('female', session('school_year_selected'))) : '00' }}
+                        </small>
+                    </span>
+                </span>
+            </span>
+            <ul class="nav nav-pills ml-auto p-2">
+                <span class="text-orange mx-1">
+                    @if($classe)
+                        @php
+                            $cl = $classe->getNumericName();
+                        @endphp
+                        <span class="fa fa-2x underline">
+                            {{ $cl['root'] }}<sup>{{ $cl['sup'] }} </sup> {{ $cl['idc'] }}
+                        </span>
+                    @else
+                        <span>Classe inconnue</span>
+                    @endif
+                </span>
+            </ul>
+        </div><!-- /.card-header -->
+        <div class="card-body">
+            <div class="tab-content">
+                <div>
+                    <blockquote class="text-warning">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="m-0 p-0 h6 text-white-50 py-2">
+                                Liste des apprenants de la <a class="text-warning underline" href="{{route('classe_profil', ['slug' => $classe->slug])}}">{{$classe->name}}</a> du {{$level->nameInFrench()}} de la plateforme <span class="text-warning"></span>
+                            </h6>
                         
-                    </div>
-                    
+                        </div>
+                    </blockquote>
                 </div>
             </div>
+
         </div>
+
         <div class="w-100 mx-auto p-3">
             @if($classe)
                 <div class="w-100 my-1 mt-2">
@@ -50,10 +66,6 @@
                         <span wire:click="addNewPupilTo" class="btn btn-primary border border-white" title="Ajouter un aprrenant à cette classe">
                             <span class="fa fa-user-plus"></span>
                             <span>Ajouter</span>
-                        </span>
-                        <span wire:click="editClasseSubjects"  class="btn mx-2 btn-secondary border border-white" title="Editer les matières de cette classe">
-                            <span class="fa fa-edit"></span>
-                            <span>Editer</span>
                         </span>
                     @endif
                     @if($pupils && count($pupils))
@@ -70,7 +82,7 @@
                         <th class="py-2 text-center">#ID</th>
                         <th class="">Nom et Prénoms (Sexe)</th>
                         <th class="">Matricule</th>
-                        <th>Pré-Classe(An.Sco)</th>
+                        <th>Dernière classe faite (An.Sco)</th>
                         <th>Moy. en Pré-classe</th>
                         <th>En polyvalence depuis</th>
                         <th>Action</th>
@@ -120,12 +132,28 @@
                                     {{ $p->matricule }}
                                 </td>
                                 @php
-                                    $pre = $p->getPupilPreclasse();
-                                    $classe = $pre['classe'];
-                                    $school_year = $pre['school_year'];
-                                    if($classe){
-                                        $cl = $classe->getNumericName();
+                                    $lastClasse = $p->getLastClasse();
+
+                                    if($lastClasse){
+
+                                        $classe = $lastClasse['classe'];
+
+                                        $school_year = $lastClasse['school_year'];
+
+                                        if($classe){
+
+                                            $cl = $classe->getNumericName();
+                                        }
+
                                     }
+                                    else{
+
+                                        $lastClasse = null;
+
+                                        $classe = null;
+
+                                    }
+
                                 @endphp
                                 <td class="text-center px-1">
                                     @if($classe)
@@ -134,12 +162,53 @@
                                     </span>
                                     <small class="text-white-50 font-italic ml-2">({{ 'en ' . $school_year }})</small>
                                     @else
-                                        Aucune <small class="text-white-50 font-italic ml-2">({{ 'en ' . $school_year }})</small>
+                                        <small class="text-white-50 font-italic ml-2">Aucune classe faite</small>
                                     @endif
                                 </td>
-                                <td class="px-2">{{  rand(9.55, 19.75) }}</td>
+                                
+                                @if($lastClasse && $classe && $school_year)
+
+                                    @php
+
+                                        $annualAverage = $p->annual_average($classe->id, $school_year->id);
+
+                                        if($annualAverage && is_object($annualAverage)){
+
+                                            $moy_an = $annualAverage->moy;
+
+                                        }
+                                        else{
+
+                                            $annualAverage = null;
+
+                                        }
+
+                                    @endphp
+                                    <td class="px-2">
+                                        @if($annualAverage)
+                                            <span class="mr-2 {{$moy_an >= 10 ? 'text-green-y' : 'text-danger'}}">
+                                                {{ $moy_an > 9 ? $moy_an : '0' . $moy_an }}
+                                            </span>
+                                            <span class="text-orange mx-1">
+                                                <span>{{$annualAverage->rank}}</span><sup>{{$annualAverage->exp}}</sup><small>{{$annualAverage->base }} </small>
+                                            </span>
+                                        @else
+
+                                        @endif
+                                    </td>
+
+                                @else
+                                    <td class="text-center px-2">
+                                        <small class="text-white-50 font-italic ml-2">Non défini</small>
+                                    </td>
+                                @endif
+
                                 <td class="text-center">
-                                    {{ $p->inPolyvalenceClasseSince() ? $p->inPolyvalenceClasseSince() : ' - ' }}
+                                    @if($p->inPolyvalenceClasseSince())
+                                        {{ $p->inPolyvalenceClasseSince() }}
+                                    @else
+                                        <small class="font-italic text-white-50">Date inconnue </small>
+                                    @endif
                                 </td>
                                 @if(!$editingPupilName)
                                     <td class="text-center w-auto p-0">

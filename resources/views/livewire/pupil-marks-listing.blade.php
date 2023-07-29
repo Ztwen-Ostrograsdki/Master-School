@@ -118,16 +118,42 @@
                                         <td class="text-center cursor-pointer"> - </td>
                                     @endfor
                                 @endif
+                                @php
+
+
+                                @endphp
+                                @if(isset($averageEPETabs[$subject_id]))
                                 <td class=" text-center moy-epe-note {{$averageEPETabs[$subject_id] !== null ? ($averageEPETabs[$subject_id] >= 10 ? 'text-success' : 'text-danger') : 'text-warning'}}">
                                     {{ $averageEPETabs[$subject_id] !== null ? ($averageEPETabs[$subject_id] >= 10 ? $averageEPETabs[$subject_id] : '0'.$averageEPETabs[$subject_id]) : ' - ' }} 
                                 </td>
+                                @else
+                                <td class="text-center">
+                                    <small>-</small>
+                                </td>
+                                @endif
+
+                                @if(isset($averageTabs[$subject_id]))
                                 <td class=" text-center moy-note {{$averageTabs[$subject_id] !== null ? ($averageTabs[$subject_id] >= 10 ? 'bg-success' : 'bg-danger') : 'bg-secondary'}}"> 
                                     
                                     {{ $averageTabs[$subject_id] !== null ? ($averageTabs[$subject_id] >= 10 ? $averageTabs[$subject_id] : '0'.$averageTabs[$subject_id]) : ' - ' }}
                                 </td>
+                                @else
+                                <td class="text-center">
+                                    <small>-</small>
+                                </td>
+                                @endif
+
+                                @if(isset($averageTabs[$subject_id]))
                                 <td class=" text-center moy-coef-note"> 
                                     {{ $averageTabs[$subject_id] !== null ? (($averageTabs[$subject_id] * $classeCoefTabs[$subject_id]) >= 10 ? ($averageTabs[$subject_id] * $classeCoefTabs[$subject_id]) : '0'.($averageTabs[$subject_id] * $classeCoefTabs[$subject_id])) : ' - ' }}
                                 </td>
+                                @else
+                                <td class="text-center">
+                                    <small>-</small>
+                                </td>
+                                @endif
+
+                                @if(isset($ranksTabs[$subject_id]))
                                 <td class=" text-center rank-note">  
                                     @if($ranksTabs[$subject_id])
                                         <span>{{ $ranksTabs[$subject_id]['rank']}}</span><sup>{{ $ranksTabs[$subject_id]['exp']}}</sup>
@@ -136,6 +162,11 @@
                                         -
                                     @endif
                                 </td>
+                                <td class="text-center">
+                                    <small>-</small>
+                                </td>
+                                @endif
+                                
                                 <td class="text-center">
                                     <span class="bi-shield-check"></span>
                                 </td>
@@ -159,7 +190,220 @@
                             @endif
                         </tr>
                     @endforeach
-            </table>                                                     
+            </table> 
+
+            <div class="m-0 p-0 w-100 mt-3 mb-2">
+                <hr class="text-warning w-100 m-0 p-0 bg-primary">
+                <blockquote class="text-warning px-2 py-3 m-0 ">
+                    <span style="letter-spacing: 1.2px" class="fx-20 font-weight-bold text-uppercase font-italic">
+                        Les détails sur les moyennes par {{$semestre_type}}
+                    </span>
+                </blockquote>
+                <hr class="text-warning w-100 m-0 p-0 bg-primary">
+            </div>
+
+            <div class="d-flex mx-auto w-100 my-2 p-3 row rounded border justify-content-between">
+                @foreach($semestres as $semestre)
+                    <div style="width: {{(100/(count($semestres)) - 2)}}%" class="card shadow border mx-1 p-0 bg-secondary-light-{{$semestre}}">
+                        <h6 class="w-100 m-0 p-0 p-2"> {{$semestre_type .' '. $semestre}}  </h6>
+                        <hr class="w-100 m-0 p-0 bg-orange">
+
+                        <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white text-center bg-secondary-light-{{$semestre}}">
+                            <colgroup span="3"></colgroup>
+                            <colgroup span="3"></colgroup>
+
+                            <tr>
+                                <th class="py-2 px-1" colspan="3">Apprenants</th>
+                                <th colspan="3">Classe</th>
+                            </tr>
+                            @php 
+                                if($semestrialAverages && $semestrialAverages[$semestre]){
+
+                                    $semestrialAverage = $semestrialAverages[$semestre];
+
+                                    $moy_sm = $semestrialAverage->moy;
+
+                                    $mention_sm = $semestrialAverage->mention;
+
+                                    $min_sm = $semestrialAverage->min;
+
+                                    $max_sm = $semestrialAverage->max;
+
+                                    $rank_sm = $semestrialAverage->rank;
+
+                                    $base_sm = $semestrialAverage->base;
+
+                                    $exp_sm = $semestrialAverage->exp;
+
+                                }
+                                else{
+
+                                    $semestrialAverage = null;
+
+                                }
+
+                            @endphp
+                            <tr>
+                                <th class="py-2 px-1" scope="col">Moyenne</th>
+                                <th class="px-1" scope="col">Rang</th>
+                                <th class="px-1" scope="col">Mention</th>
+                                <th class="px-1" scope="col">Faible moyenne</th>
+                                <th class="px-1" scope="col">Forte moyenne</th>
+                                <th class="px-1" scope="col">Effectif</th>
+                            </tr>
+
+                            <tr>
+                               <td class=" text-center py-2 px-1"> 
+                                    @if($semestrialAverage)
+                                        <span class="{{$moy_sm >= 10 ? 'text-green-y' : 'text-danger'}}">
+                                            {{ $moy_sm > 9 ? $moy_sm : '0' . $moy_sm }}
+                                        </span>
+
+                                    @else
+                                        <small class="text-white-50 font-italic">Non prêt</small>
+                                    @endif
+                                </td>
+                                <td class=" text-center"> 
+                                    @if($semestrialAverage)
+                                        <span>{{$rank_sm}}</span><sup>{{$exp_sm}}</sup><small>{{$base_sm }} </small>
+                                    @else
+                                        <small class="text-white-50 font-italic">Non classé</small>
+                                    @endif
+                                </td>
+                                <td class=" text-center "> 
+                                    @if($semestrialAverage)
+                                       <span class="{{$moy_sm >= 10 ? 'text-green-y' : 'text-danger'}}">
+                                        {{ $mention_sm }}
+                                    </span>
+                                    @else
+                                        {{ ' - ' }}
+                                    @endif
+
+                                </td>
+                                <td class=" text-center "> 
+                                    @if($semestrialAverage)
+                                        <span class="{{$min_sm >= 10 ? 'text-green-y' : 'text-danger'}}">
+                                            {{ $min_sm > 9 ? $min_sm : '0' . $min_sm }}
+                                        </span>
+                                    @else
+                                        {{ ' - ' }}
+                                    @endif
+                                </td>
+                                <td class=" text-center "> 
+                                    @if($semestrialAverage)
+                                        <span class="{{$max_sm >= 10 ? 'text-green-y' : 'text-danger'}}">
+                                            {{ $max_sm > 9 ? $max_sm : '0' . $max_sm }}
+                                        </span>
+                                    @else
+                                        {{ ' - ' }}
+                                    @endif
+                                </td>
+                                <td class=" text-center "> 
+                                    {{ $effectif > 9 ? $effectif : '0' . $effectif }}
+                                </td> 
+                            </tr>
+
+                        </table>
+
+
+                    </div>
+                @endforeach
+
+                <div class=" text-orange card shadow border bg-secondary-light-0 w-100">
+                        <h6 class="w-100 m-0 p-0 p-2"> Moyennes Générales </h6>
+                        <hr class="w-100 m-0 p-0 ">
+
+                        <table class="w-100 m-0 p-0 table-striped table-bordered z-table bg-secondary-light-0 text-white text-center">
+                            <colgroup span="3"></colgroup>
+                            <colgroup span="3"></colgroup>
+
+                            <tr>
+                                <th class="py-2 px-1" colspan="3">Apprenants</th>
+                                <th colspan="3">Classe</th>
+                            </tr>
+                            <tr>
+
+                                @php 
+
+                                    if($annualAverage && is_object($annualAverage)){
+
+                                        $moy_an = $annualAverage->moy;
+
+                                        $mention_an = $annualAverage->mention;
+
+                                        $min_an = $annualAverage->min;
+
+                                        $max_an = $annualAverage->max;
+
+                                    }
+                                    else{
+
+                                        $annualAverage = null;
+
+                                    }
+
+                                @endphp
+
+                                <th class="py-2 px-1" scope="col">Moyenne</th>
+                                <th class="px-1" scope="col">Rang</th>
+                                <th class="px-1" scope="col">Mention</th>
+                                <th class="px-1" scope="col">Faible moyenne</th>
+                                <th class="px-1" scope="col">Forte moyenne</th>
+                                <th class="px-1" scope="col">Effectif</th>
+                            </tr>
+
+                            <tr class="text-cursive cursive fx-20">
+                                <td class=" text-center py-2 px-1"> 
+                                    @if($annualAverage !== null)
+                                    <span class="{{$moy_an >= 10 ? 'text-green-y' : 'text-danger'}}">
+                                        {{ $moy_an > 9 ? $moy_an : '0' . $moy_an }}
+                                    </span>
+                                    @else
+                                        <small class="text-white-50 font-italic">Non prêt</small>
+                                    @endif
+                                </td>
+                                <td class=" text-center"> 
+                                    @if($annualAverage !== null)
+                                        <span>{{$annualAverage->rank}}</span><sup>{{$annualAverage->exp}}</sup><small>{{$annualAverage->base }} </small>
+                                    @else
+                                        <small class="text-white-50 font-italic">Non classé</small>
+                                    @endif
+                                </td>
+                                <td class=" text-center "> 
+                                    @if($annualAverage !== null)
+                                       <span class="{{$moy_an >= 10 ? 'text-green-y' : 'text-danger'}}">
+                                        {{ $mention_an }}
+                                    </span>
+                                    @else
+                                        {{ ' - ' }}
+                                    @endif
+
+                                </td>
+                                <td class=" text-center "> 
+                                    @if($annualAverage !== null)
+                                    <span class="{{$min_an >= 10 ? 'text-green-y' : 'text-danger'}}">
+                                        {{ $min_an > 9 ? $min_an : '0' . $min_an }}
+                                    </span>
+                                    @else
+                                        {{ ' - ' }}
+                                    @endif
+                                </td>
+                                <td class=" text-center "> 
+                                    @if($annualAverage !== null)
+                                    <span class="{{$max_an >= 10 ? 'text-green-y' : 'text-danger'}}">
+                                        {{ $max_an > 9 ? $max_an : '0' . $max_an }}
+                                    </span>
+                                    @else
+                                        {{ ' - ' }}
+                                    @endif
+                                </td>
+                                <td class=" text-center "> 
+                                    {{ $effectif > 9 ? $effectif : '0' . $effectif }}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+            </div>                                                 
         </div>
         @endif
         @if($noMarks || !$pupil)

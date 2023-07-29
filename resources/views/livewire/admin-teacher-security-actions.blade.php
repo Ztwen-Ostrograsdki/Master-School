@@ -2,7 +2,7 @@
     <div class="px-2">
         <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
             <div class="card-header bg-dark"> 
-                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Effectuer une recherche...</h5>
+                <h5 class="card-title cursor-pointer" data-card-widget="collapse"></h5>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fa fa-minus"></i>
@@ -15,39 +15,19 @@
                     <ul class="nav nav-pills ml-auto mr-3">
                         <li class="nav-item dropdown">
                           <a class="nav-link text-white dropdown-toggle border border-warning" data-toggle="dropdown" href="#">
-                            Reglages <span class="caret"></span>
+                            Supprimer les clés de sécurités expirées <span class="caret"></span>
                           </a>
                           <div class="dropdown-menu">
-                            <a class="dropdown-item" tabindex="-1" href="#">Rafraichir la liste</a>
+                            <span wire:click="destroyClasseSecuritiesKeys('{{"teachers"}}')" class="dropdown-item cursor-pointer" tabindex="-1"> Des enseignants </span>
+                            <span wire:click="destroyClasseSecuritiesKeys('{{'classes'}}')" class="dropdown-item cursor-pointer" tabindex="-1"> Des classes </span>
+                            <span wire:click="destroyClasseSecuritiesKeys('{{'marks'}}')" class="dropdown-item cursor-pointer" tabindex="-1"> Des notes </span>
+                            <span wire:click="destroyClasseSecuritiesKeys" class="dropdown-item cursor-pointer" tabindex="-1"> Toutes les clés </span>
                             
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
                           </div>
                         </li>
                     </ul>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="container-fluid m-0 p-0 w-100">
-                    <div class="card-deck w-100 p-0 m-0">
-                        <div class="card active" href="#tab_1" data-toggle="tab">
-                            <div class="info-box m-0 p-0 bg-transparent">
-                                <span class="info-box-icon"><i class="fa bi-search"></i></span>
-                                <div class="info-box-content">
-                                    <div class="d-flex justify-content-between">
-                                        <form action="" class="col-10">
-                                            <input placeholder="Veuillez entrer le nom ou le prénom de l'enseignant à retrouver ..." class="form-control bg-transparent py-1" type="text" name="search" wire:model="search">
-                                        </form>
-                                        <div wire:click="resetSearch" data-card-widget="collapse" class="btn-secondary rounded text-center p-1 cursor-pointer border border-white col-2">
-                                            <span>Annuler</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    
                 </div>
             </div>
         </div>
@@ -122,12 +102,12 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between p-0">
                     <span class="ml-1 my-2">
-                        <span title="Fermer la fenêtre et afficher la page de sélections" class="float-right text-white-50 border p-2 px-5 rounded cursor-pointer bg-orange" wire:click="hide">
+                        <span title="Fermer la fenêtre et afficher la page de sélections" class="float-right text-white-50 border p-2 px-5 mr-3 z-scale rounded cursor-pointer bg-orange" wire:click="hide">
                             <span class="bi-eye-slash"></span>
                             <span>Fermer la fenêtre</span>
                         </span>
 
-                        <span title="Annuler la procédure" class="float-right text-white-50 border p-2 px-5 rounded cursor-pointer bg-danger mx-2" wire:click="cancel">
+                        <span title="Annuler la procédure" class="float-right text-white-50 border p-2 px-5 rounded cursor-pointer bg-danger mx-2 ml-3 z-scale" wire:click="cancel">
                             <span class="bi-reply-all"></span>
                             <span>Annuler la Procédure</span>
                         </span>
@@ -141,7 +121,7 @@
                 <div class="card-body p-2">
                     <div class="tab-content">
                         <div class="">
-                            @foreach($teachers_table as $t)
+                            @foreach($teachers_table as $k =>  $t)
                                 <div class="card border rounded">
                                     <h6 class="d-flex justify-content-between p-2 m-0">
                                         <span>
@@ -157,14 +137,14 @@
                                         </span>
                                         <span>
                                             <span class="text-white-50">Nombre de classes: </span>
-                                            <span class="text-white">{{ count($t->getTeachersCurrentClasses())}}</span>
+                                            <span class="text-white">{{ count($t->getTeachersCurrentClasses()) > 9 ? count($t->getTeachersCurrentClasses()) : '0' . count($t->getTeachersCurrentClasses()) }}</span>
                                         </span>
                                     </h6>
                                     <hr class="bg-white w-100 p-0 m-0">
                                     @if($t->hasClasses())
                                     <div class="row p-2 m-2 justify-content-between">
                                         @foreach($t->getTeachersCurrentClasses() as $cl)
-                                            <div class="card border border-secondary rounded shadow p-0 m-1 zw-45">
+                                            <div class="card border border-secondary rounded shadow p-0 px-2 m-1 zw-45">
                                                 <h6 class="d-flex justify-content-between p-2 m-0">
                                                     <span>
                                                         <span class="bi-house mr-2"></span>
@@ -173,7 +153,7 @@
                                                     </span>
                                                     <span>
                                                         <span class="text-white-50">Effectif: </span>
-                                                        <span class="text-white">0{{ count($cl->getPupils(session('school_year_selected'))) }}</span>
+                                                        <span class="text-white">{{ count($cl->getPupils(session('school_year_selected'))) > 9 ? count($cl->getPupils(session('school_year_selected'))) : '0' . count($cl->getPupils(session('school_year_selected'))) }}</span>
                                                     </span>
                                                     <span>
                                                         <span class="text-white-50">Prof Principal </span>
@@ -183,49 +163,69 @@
                                                 <hr class="bg-orange w-100 p-0 m-0">
 
                                                 <div class="d-flex p-2">
-                                                    @if($t->teacherCanUpdateMarksInThisClasse($cl->id))
-                                                        <span wire:click="submit({{$t->id}},{{$cl->id}}, 'locked_marks_updating')" class="btn btn-secondary m-1">Ver. Edition notes</span>
-                                                    @else
-                                                        <span wire:click="submit({{$t->id}},{{$cl->id}}, 'locked_marks_updating')" class="btn btn-primary m-1">Autoriser Edition notes</span>
-                                                    @endif
-                                                    @if(!$t->teacherCanAccess($cl->id, 'closed'))
-                                                        <span class="btn btn-primary m-1">Ouvrir accès</span>
-                                                    @else
-                                                        <span wire:click="submit({{$t->id}},{{$cl->id}}, 'closed_classe')" class="btn btn-primary m-1">Bloquer Accès</span>
-                                                    @endif
-                                                    @if(!$t->teacherCanAccess($cl->id, 'locked'))
-                                                        <span class="btn btn-success m-1">Déver. classe</span>
-                                                    @else
-                                                        <span wire:click="submit({{$t->id}},{{$cl->id}}, 'locked_classe')" class="btn btn-success m-1">Ver. classe</span>
-                                                    @endif
-                                                    @if(!$t->teacherCanAccessMarks($cl->id))
-                                                        <span class="btn btn-warning m-1">Déver. notes</span>
-                                                    @else
-                                                        <span wire:click="submit({{$t->id}},{{$cl->id}}, 'locked_marks')" class="btn btn-warning m-1">Vér. notes</span>
-                                                    @endif
-                                                    <span class="btn btn-secondary m-1">Vider notes</span>
+
+                                                    <span class="nav-item">
+                                                        <select wire:model="acted" wire:change="insertActions({{$t->id}}, '{{$cl->id}}')" class="form-select z-bg-secondary custom-select py-2">
+                                                            
+                                                            <option value="{{null}}"> Veuillez sélectionner l'action que vous voulez exécuter </option>
+                                                            
+                                                            <option class="" value="locked_marks_updating-true">     Bloquer l'édition de notes 
+                                                            </option>
+                                                            <option value="locked_marks_updating-false">    Activer l'édition de notes 
+                                                            </option>
+                                                            <option value="locked_marks-true"> 
+                                                                Verrouiller l'insertion des notes 
+                                                            </option>
+                                                            <option value="locked_marks-false"> 
+                                                                Déverrouiller l'insertion des notes 
+                                                            </option>
+                                                            <option value="locked-true"> 
+                                                                Verrouiller la classe 
+                                                            </option>
+                                                            <option value="locked-false"> 
+                                                                Déverrouiller la classe 
+                                                            </option>
+                                                            <option value="closed-true"> 
+                                                                Fermer la classe 
+                                                            </option>
+                                                            <option value="closed-false"> 
+                                                                Ouvrir la classe 
+                                                            </option>
+                                                        </select>
+                                                    </span>
+                                                    
                                                 </div>
+                                                <small class="text-orange font-italic w-100 text-right" style="letter-spacing: 1.6px;"> 
+                                                    @if(isset($current_actions[$t->id . '-' . $cl->id]) && $current_actions[$t->id . '-' . $cl->id])
+                                                        Action en cours : {{$current_actions[$t->id . '-' . $cl->id]}} ;
+                                                    @else
+                                                        Aucune action en cours ... ;
+                                                    @endif
+                                                </small>
                                             </div>
                                         @endforeach
                                     </div>
                                     <div class="d-flex p-2 z-bg-secondary justify-content-between">
                                         <h6 class="small">Effectuer une action globale sur les classe de Mr/Mme <span class="text-orange">{{ $t->name . ' ' . $t->surname }}</span> </h6>
                                         <div class="d-flex justify-content-end">
-                                            <span wire:click="submit({{$t->id, null}}, 'locked_marks_updating')" class="btn btn-secondary m-1">Ver. Edition notes</span>
-                                            <span wire:click="submit({{$t->id, null}}, 'locked_marks_updating')" class="btn btn-primary m-1">Autoriser Edition notes</span>
-                                            <span class="btn border-orange btn-primary m-1">Ouvrir accès</span>
-                                            <span wire:click="submit({{$t->id,null}}, 'closed_classe')" class="btn border-orange btn-primary m-1">Bloquer Accès</span>
-                                            <span class="btn border-orange btn-success m-1">Déver. classe</span>
-                                            <span wire:click="submit({{$t->id,null}}, 'locked_classe')" class="btn border-orange btn-success m-1">Ver. classe</span>
-                                            <span class="btn border-orange btn-warning m-1">Déver. notes</span>
-                                            <span wire:click="submit({{$t->id,null}}, 'locked_marks')" class="btn border-orange btn-warning m-1">Vér. notes</span>
-                                            <span class="btn border-orange btn-secondary m-1">Vider notes</span>
+                                            <span wire:click="submitTeacherRequest({{$t->id}})" class="btn btn-secondary m-1 px-3 border border-warning z-scale">
+                                                <span class="mr-3">Exécuter</span>
+                                                <span class="fa fa-arrow-right"></span>
+                                            </span>
+                                            
                                         </div>
                                     </div>
                                     @else
                                         <div class="mx-auto w-75 p-2 text-center">
-                                            <h6 class="text-center w-100"> Mr/Mme <span class="text-orange">{{ $t->name . ' ' . $t->surname }}</span> n'a aucune classes pour le moment. Cliquer sur le bouton en bas pour attribuer des classes </h6>
-                                            <span wire:click="manageTeacherClasses({{$t->id}})" class="btn w-50 mx-auto py-2 border btn-warning">Attribuer classes maintenant</span>
+                                            @if($t->teaching)
+                                                <h6 class="text-center w-100"> Mr/Mme <span class="text-orange">{{ $t->name . ' ' . $t->surname }}</span> n'a aucune classes pour le moment. Cliquer sur le bouton en bas pour attribuer des classes </h6>
+                                                <span wire:click="manageTeacherClasses({{$t->id}})" class="btn w-50 mx-auto py-2 border btn-warning">Attribuer classes maintenant</span>
+
+                                            @else
+                                                <h6 class="text-center w-100"> Mr/Mme <span class="text-orange">{{ $t->name . ' ' . $t->surname }}</span> n'enseigne plus depuis {{ $t->getLastTeachingDate() }} . Cliquer sur le bouton en bas pour le promouvoir au rôle d'enseignant </h6>
+                                                <span wire:click="promoteToteaching({{$t->id}})" class="btn w-50 mx-auto py-2 border btn-success">Promouvoir maintenant comme enseignant actif</span>
+
+                                            @endif
                                         </div> 
                                     @endif
                                 </div>
@@ -233,26 +233,52 @@
                         </div>
                     </div>
                     @if(count($teachers_selecteds) > 1)
-                    <div class="d-flex p-2 z-bg-secondary border rounded border-orange justify-content-between">
-                        <h6 class="small">Effectuer une action globale sur l'ensemble des enseignants sélectionés</h6>
-                        <div class="d-flex justify-content-end">
-                            <span class="btn btn-secondary m-1">Ver. Edition notes</span>
-                            <span class="btn btn-primary m-1">Autoriser Edition notes</span>
-                            <span class="btn border-dark btn-primary m-1">Fermer classes</span>
-                            <span class="btn border-dark btn-success m-1">Ver. classes</span>
-                            <span class="btn border-dark btn-warning m-1">Ver. notes</span>
-                            <span class="btn border-dark btn-secondary m-1">Vider notes</span>
+                    <div class="d-flex p-2 z-bg-secondary border rounded border-orange justify-content-between flex-column px-3">
+                        <h6 class="small border-bottom border-warning">Effectuer une action globale sur l'ensemble des enseignants sélectionés</h6>
+                        <div class="d-flex justify-between">
+                            <span class="nav-item">
+                                <select wire:model="common_acted" class="form-select z-bg-secondary custom-select py-2">
+                                    
+                                    <option value="{{null}}"> Veuillez sélectionner l'action que vous voulez exécuter pour l'ensemble des enseignants </option>
+                                    
+                                    <option value="locked_marks_updating-true">     Bloquer l'édition de notes 
+                                    </option>
+                                    <option value="locked_marks_updating-false">    Activer l'édition de notes 
+                                    </option>
+                                    <option value="locked_marks-true"> 
+                                        Verrouiller l'insertion des notes 
+                                    </option>
+                                    <option value="locked_marks-false"> 
+                                        Déverrouiller l'insertion des notes 
+                                    </option>
+                                    <option value="locked-true"> 
+                                        Verrouiller la classe 
+                                    </option>
+                                    <option value="locked-false"> 
+                                        Déverrouiller la classe 
+                                    </option>
+                                    <option value="closed-true"> 
+                                        Fermer la classe 
+                                    </option>
+                                    <option value="closed-false"> 
+                                        Ouvrir la classe 
+                                    </option>
+                                </select>
+                            </span>
+                            <span wire:click="submitTeachersRequests" class="btn bg-orange mx-1 px-3 border border-white text-white z-scale">
+                                <span class="mr-3">Exécuter la requête d'ensemble</span>
+                                <span class="fa fa-arrow-right"></span>
+                            </span>
                         </div>
                     </div>
                     @endif
                 </div>
             </div>
             @if($start)
-            <div class="w-100 d-flex justify-content-center">
-                <span wire:click="startProcess" class="btn btn-success border py-2 w-50 d-flex flex-column">
-                    <h6>Valider la procédure</h6>
+            <div class="w-100 m-0 p-0 mx-auto ">
+                <blockquote class="text-warning py-2">
                     <span class="text-dark"> {{ count($teachers_selecteds) > 0 ? count($teachers_selecteds) . ' enseignant(s) sélectionné(s) ' : ''}} </span>
-                </span>
+                </blockquote>
             </div>
             @endif
         </div>

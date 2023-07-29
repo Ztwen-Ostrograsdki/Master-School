@@ -207,7 +207,7 @@
                         <button type="submit" class="z-bg-orange border rounded px-3 py-2 w-75">Lancer</button>
                     </div> 
                     <div class="w-100 mt-3 d-flex justify-center">
-                        <a href="{{route('login')}}" class="text-warning text-center px-3 py-2 w-75">
+                        <a href="{{route('connexion')}}" class="text-warning text-center px-3 py-2 w-75">
                             <strong class="">Annuler le processus ?</strong>
                         </a>
                     </div>

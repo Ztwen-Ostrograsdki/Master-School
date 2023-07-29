@@ -67,6 +67,40 @@ trait TeachersTrait{
         }
     }
 
+    public function getLastTeachingDate()
+    {
+        $date = $this->last_teaching_date;
+
+        $formatted_date = $this->__getDateAsString($date, null);
+
+        return  ucwords($this->__getDateAsString($date, null)) ;
+        
+    }
+
+
+    public function getInsertToClasseSince($classe_id, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $cursus = $this->cursus()->where('teacher_cursuses.school_year_id', $school_year_model->id)
+                                 ->where('teacher_cursuses.classe_id', $classe_id)
+                                 ->where('teacher_cursuses.end', null)
+                                 ->first();
+        if($cursus){
+            $date = $cursus->updated_at;
+
+            $formatted_date = $this->__getDateAsString($date, null);
+
+            return  ucwords($this->__getDateAsString($date, null)) ;
+
+        }
+        return 'Inconnue';
+
+
+
+        
+    }
+
 
     public function teacherWasFreeInThisTime($start, $end, $day, $school_year_id = null, $except = null)
     {
@@ -202,7 +236,7 @@ trait TeachersTrait{
 
         $school_year_model = $this->getSchoolYear();
 
-        DB::transaction(function($e) use ($school_year_model){
+        DB::transaction(function($e) use ($school_year_model, $destroy){
 
             $this->timePlans()->where('time_plans.school_year_id', $school_year_model->id)->each(function($tp){
 
@@ -226,7 +260,7 @@ trait TeachersTrait{
                 $abs->delete();
             });
 
-            $this->teacherCursus()->where('teacher_cursuses.school_year_id', $school_year_model->id)->each(function($cursus){
+            $this->cursus()->where('teacher_cursuses.school_year_id', $school_year_model->id)->each(function($cursus){
 
                 $cursus->delete();
 
@@ -292,7 +326,7 @@ trait TeachersTrait{
 
                 });
 
-                $this->teacherCursus()->each(function($cursus){
+                $this->cursus()->each(function($cursus){
 
                     $cursus->delete();
 

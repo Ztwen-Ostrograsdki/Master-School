@@ -33,30 +33,47 @@ class AdminAsideComponent extends Component
 
     public function render()
     {
+        $school_year_model = null;
+
         $school_name = null;
 
         $has_school = count(School::all());
+
         $school_years = count(SchoolYear::all());
+
         $levels = [];
+
         $classes = [];
+
         $pupils = [];
+
         $teachers = [];
+
         $classe_groups = [];
 
         if($school_years > 0 && $has_school > 0){
+
             $this->has_school = true;
+
             $school_name = School::all()->first()->name;
+
             $school_year_model = $this->getSchoolYear();
+
             $levels = Level::all();
+
             $classes = $school_year_model->classes;
+
             $pupils = $school_year_model->pupils;
+
             $classe_groups = $school_year_model->classe_groups;
+
             $teachers = $school_year_model->teachers;
+
         }
 
         
 
-        return view('livewire.admin-aside-component', compact('levels', 'pupils', 'teachers', 'classes', 'school_name', 'classe_groups'));
+        return view('livewire.admin-aside-component', compact('levels', 'pupils', 'teachers', 'classes', 'school_name', 'classe_groups', 'school_year_model'));
     }
 
     public function addNewPupil()

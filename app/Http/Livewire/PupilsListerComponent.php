@@ -38,20 +38,31 @@ class PupilsListerComponent extends Component
     public $classe_id_selected;
     public $sexe_selected;
     public $theLevel;
+    public $slug;
     public $level;
     public $editingPupilName = false;
 
-    public $levels = ['secondaire' => 'secondary', 'secondary' => 'secondary', 'primary' => 'primary', 'primaire' => 'primary'];
+    public $levels = [];
 
 
 
 
 
-    public function mount($level)
+    public function mount($slug)
     {
-        if($level){
-            $this->level = $level;
-            $this->theLevel = $this->levels[strtolower($level)];
+        if($slug){
+
+            $this->slug = $slug;
+
+            $target = '%' . mb_substr($slug, 0, 3) . '%';
+
+            $level = Level::where('name', 'like', $target)->first();
+
+            if($level){
+
+                $this->level = $level;
+            }
+           
         }
         else{
             return abort(404);
@@ -98,13 +109,21 @@ class PupilsListerComponent extends Component
     public function render()
     {
         $school_year_model = $this->getSchoolYear();
+
         $pupils = [];
+
         $classes = [];
+
         $classe_groups = $school_year_model->classe_groups()->orderBy('classe_groups.name', 'asc')->get();
+        
         $classes = $school_year_model->classes()->orderBy('classes.name', 'asc')->get();
-        if($this->theLevel){
-            $level = Level::where('name', $this->theLevel)->firstOrFail();
+        
+        if($this->level){
+
+            $level = $this->level;
+
             if($this->search && mb_strlen($this->search) >= 2){
+
                 $pupils = Pupil::where('level_id', $level->id)->where('firstName', 'like', '%' . $this->search . '%')->orWhere('lastName', 'like', '%' . $this->search . '%')->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
             }
             else{
@@ -127,29 +146,38 @@ class PupilsListerComponent extends Component
                 elseif($this->classe_group_id_selected){
 
                     $classe_group = $school_year_model->classe_groups()->where('classe_groups.id', $this->classe_group_id_selected)->first();
+
                     $pupils_ids = [];    
 
                     if($classe_group){
+
                         $classes_cg = $classe_group->classes;
+
                         if(count($classes_cg) > 0){
+
                             foreach($classes_cg as $classe){
+
                                 $pupils_ids = $classe->getPupils($school_year_model->id, null, null, true);
                             }
                         } 
                     }
 
                     if($sexe && $classe_group){
+
                         $pupils = Pupil::where('level_id', $level->id)->whereIn('pupils.id', $pupils_ids)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
                     }
                     else{
+
                         $pupils = Pupil::where('level_id', $level->id)->whereIn('pupils.id', $pupils_ids)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
                     }
 
                 }
                 elseif($sexe){
+
                     $pupils = Pupil::where('level_id', $level->id)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
                 }
                 else{
+
                     $pupils = Pupil::where('level_id', $level->id)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
                 }
 
@@ -162,17 +190,6 @@ class PupilsListerComponent extends Component
         return view('livewire.pupils-lister-component', compact('pupils', 'school_year_model', 'classes', 'classe_groups'));
     }
 
-    public function deletePupilOO($pupil_id)
-    {
-        return false;
-        $pupil = Pupil::find($pupil_id);
-        if($pupil){
-            $pupil->delete();
-        }
-        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "l'apprenant $pupil->name envoyé dans la corbeille!", 'type' => 'success']);
-        $this->emit('classeUpdated');
-        $this->emit('classePupilListUpdated');
-    }
 
 
     public function reloadClasseDataOnSearch($value)

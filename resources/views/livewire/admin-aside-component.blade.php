@@ -48,7 +48,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link @isRoute('classe_profil') active @endisRoute">
+                <a href="#" class="nav-link @isRoute('classe_pupils') active @endisRoute">
                   <i class="nav-icon bi-people"></i>
                   <p class="text-bold">
                     Les Apprenants
@@ -72,8 +72,8 @@
                     </a>
                     <ul class="nav nav-treeview">
                       <li class="nav-item">
-                        <a href="{{route('pupil_listing', ['level' => $level->name])}}" class="nav-link @isRoute('pupil_listing') active @endisRoute">
-                          <i class="far nav-icon"></i>
+                        <a href="{{route('pupil_listing', ['slug' => strtolower($level->nameInFrench())])}}" class="nav-link ">
+                          <i class="fas nav-icon fa-plus"></i>
                           <p> Liste complète </p>
                           <span class="badge badge-info right">
                             {{ count($level->getLevelPupils()) }}
@@ -83,7 +83,7 @@
                       @foreach ($classes as $c)
                         @if($c->level_id == $level->id)
                         <li class="nav-item">
-                          <a href="{{route('classe_profil', [urlencode($c->slug)])}}" class="nav-link">
+                          <a href="{{route('classe_pupils', [urlencode($c->slug)])}}" class="nav-link">
                             <i class="far fa-circle nav-icon"></i>
                             <p> 
                               <span>{{ $c->name }}</span>
@@ -121,7 +121,7 @@
                 </ul>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link @isRoute('classe_teachers') active @endisRoute">
                   <i class="nav-icon bi-people"></i>
                   <p class="text-bold">
                     Les Enseignants
@@ -129,14 +129,6 @@
                     <span class="badge badge-success right">{{$teachers->count()}}</span>
                   </p>
                 </a>
-                <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="{{route('teacher_listing')}}" class="nav-link @isRoute('teacher_listing') active @endisRoute">
-                        <i class="far fa-circle nav-icon"></i>
-                        <p> Liste complète </p>
-                      </a>
-                    </li>
-                  </ul>
                 @foreach ($levels as $level)
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
@@ -145,16 +137,16 @@
                       <p>
                         {{ $level->getName() }}
                         <i class="fas fa-angle-left right"></i>
-                        <span class="badge badge-success right">12</span>
+                        <span class="badge badge-success right">{{$school_year_model ? $school_year_model->teachers()->where('level_id', $level->id)->count() : 0}}</span>
                       </p>
                     </a>
                     <ul class="nav nav-treeview">
                       @foreach ($classes as $c)
                         @if($c->level_id == $level->id)
                           <li class="nav-item">
-                            <a href="{{route('classe_profil', [urlencode($c->slug)])}}" class="nav-link">
+                            <a href="{{route('classe_teachers', [urlencode($c->slug)])}}" class="nav-link">
                               <i class="far fa-circle nav-icon"></i>
-                              <p> {{ $c->name }} </p>
+                              <p> De la {{ $c->name }} </p>
                             </a>
                           </li>
                         @endif
@@ -165,12 +157,12 @@
                 @endforeach
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{route('teacher_listing')}}" class="nav-link @isRoute('teacher_listing') active @endisRoute" class="nav-link">
                       <i class="nav-icon fas fa-plus"></i>
                       <p>
-                        Tout
+                        Liste complète
                         <i class="fas fa-angle-down right"></i>
-                        <span class="badge badge-success right">447</span>
+                        <span class="badge badge-success right">{{count($teachers)}}</span>
                       </p>
                     </a>
                   </li>
@@ -344,12 +336,12 @@
                   </li>
                 </ul>
               </li>
-              <li class="nav-header text-uppercase text-warning">Archives et historiques</li>
+              <li class="nav-header text-uppercase text-warning">Historiques</li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-user-shield"></i>
+                  <i class="nav-icon fas fa-book-open"></i>
                   <p>
-                    Enseignants
+                    Lire l'historique
                     <i class="fas fa-angle-left right"></i>
                   </p>
                 </a>
@@ -357,96 +349,48 @@
                   <li class="nav-item">
                     <a href="#" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Liste complète</p>
+                      <p>Récente</p>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a href="#" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Primaire</p>
+                      <p>Enseignants</p>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a href="#" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Secondaire</p>
+                      <p>Aprenants</p>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a href="#" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Superieure</p>
+                      <p>Utilisateurs</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Notes</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Payements</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="#" class="nav-link">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Sécurité</p>
                     </a>
                   </li>
                 </ul>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas bi-house"></i>
-                  <p>
-                    Classes
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Liste complète</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Primaire</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Secondaire</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Superieure</p>
-                    </a>
-                  </li>
-                </ul>
-                <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-user-friends"></i>
-                  <p>
-                    Apprenants
-                    <i class="fas fa-angle-left right"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Liste complète</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Primaire</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Secondaire</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Superieure</p>
-                    </a>
-                  </li>
-                </ul>
+              </li>
+              
 
               <li class="nav-header text-uppercase text-orange">Gestionnaire/Comptabilité</li>
               <li class="nav-item">
@@ -621,24 +565,18 @@
                   </p>
                 </a>
               </li>
+              @foreach($levels as $level)
               <li class="nav-item">
-                <a href="{{route('polyvalente_classe_primary')}}" class="nav-link @isRoute('polyvalente_classe_primary') active @endisRoute">
+                <a href="{{route('polyvalente_classe', ['slug' => strtolower($level->nameInFrench())])}}" class="nav-link @isRoute('polyvalente_classe') active @endisRoute">
                   <i class="nav-icon fas fa-table"></i>
                   <p>
-                    Polyvalente Primaire
+                    Polyvalente {{$level->nameInFrench()}}
                     <span class="badge badge-info right"></span>
                   </p>
                 </a>
               </li>
-              <li class="nav-item">
-                <a href="{{route('polyvalente_classe_secondary')}}" class="nav-link @isRoute('polyvalente_classe_secondary') active @endisRoute">
-                  <i class="nav-icon fas fa-table"></i>
-                  <p>
-                    Polyvalente Secondaire
-                    <span class="badge badge-info right"></span>
-                  </p>
-                </a>
-              </li>
+              @endforeach
+              
               <li class="nav-item">
                 <a href="{{route('subject_listing')}}" class="nav-link @isRoute('subject_listing') active @endisRoute">
                   <i class="nav-icon fas fa-book-open"></i>

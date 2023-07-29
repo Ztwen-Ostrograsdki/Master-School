@@ -55,7 +55,7 @@
             @endif
         @endif
         @if(auth()->user()->isAdminAs('master'))
-            @if(!$teacher_profil)
+            @if(!$teacher_profil && $classe)
                 <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right" title="Ajouter une matière à cette classe">
                     <span class="fa fa-bookmark"></span>
                     <span>Ajouter</span>

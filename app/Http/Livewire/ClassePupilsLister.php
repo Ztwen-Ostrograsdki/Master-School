@@ -12,18 +12,22 @@ use Livewire\Component;
 class ClassePupilsLister extends Component
 {
     use ModelQueryTrait;
+
     protected $listeners = [
         'schoolYearChangedLiveEvent' => 'reloadClasseData',
         'classePupilListUpdated' => 'reloadClasseData',
         'classeUpdated' => 'reloadClasseData',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
+        'UpdatedGlobalSearch' => 'reloadClasseDataOnSearch',
     ];
     
     
     public $classe_id;
 
     public $counter = 0;
+
     public $selected;
+
     public $selectedAction;
     public $checkeds = [];
     public $selecteds = [];
@@ -39,11 +43,12 @@ class ClassePupilsLister extends Component
 
     public function render()
     {
-        $school_year = session('school_year_selected');
         $school_year_model = $this->getSchoolYear();
 
         $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+        
         $school_years = SchoolYear::all();
+        
         $pupils = [];
 
         if(session()->has('classe_subject_selected') && session('classe_subject_selected')){
@@ -61,6 +66,7 @@ class ClassePupilsLister extends Component
         }
 
         if($classe){
+            
             $pupils = $classe->getPupils($school_year_model->id, $this->search);
         }
 
@@ -76,13 +82,7 @@ class ClassePupilsLister extends Component
 
     public function deletePupil($pupil_id)
     {
-        $pupil = Pupil::find($pupil_id);
-        if($pupil){
-            $pupil->delete();
-        }
-        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "l'apprenant $pupil->name envoyé dans la corbeille!", 'type' => 'success']);
-        $this->emit('classeUpdated');
-        $this->emit('classePupilListUpdated');
+       
     }
 
 
@@ -98,39 +98,7 @@ class ClassePupilsLister extends Component
 
     public function forceDeletePupil($pupil_id)
     {
-        $pupil = Pupil::find($pupil_id);
-        if($pupil){
-            DB::transaction(function($e) use ($pupil){
-                $school_year_model = $this->getSchoolYear();
-                $marks = $pupil->marks;
-                $classes = $pupil->classes;
-
-                $pupil->marks()->each(function($mark) use ($school_year_model){
-                    $school_year_model->marks()->detach($mark->id);
-                    $mark->delete();
-                });
-
-
-                $pupil->classes()->each(function($classe) use ($pupil){
-                    $classe->classePupils()->detach($pupil->id);
-                });
-
-                $pupil->related_marks()->each(function($r){
-                    $r->delete();
-                });
-
-                $pupil->absences()->delete();
-                $pupil->lates()->delete();
-                $school_year_model->pupils()->detach($pupil->id);
-                $pupil->forceDelete();
-
-            });
-            DB::afterCommit(function() use ($pupil){
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "l'apprenant $pupil->name a été supprimé définitivement!", 'type' => 'success']);
-                $this->emit('classeUpdated');
-                $this->emit('classePupilListUpdated');
-            });
-        }
+        
         
     }
 
@@ -251,22 +219,22 @@ class ClassePupilsLister extends Component
     }
 
 
-
-    public function printClasseList()
+    public function importPupilsIntoClasse()
     {
-
-        
-
-
+        $this->emit('ImportPupilsIntoClasse', $this->classe_id);
     }
 
 
 
+    public function printClasseList()
+    {
 
+    }
     
     public function reloadClasseData($school_year = null)
     {
         $this->reset('pupil_id', 'editingPupilName', 'pupilFirstName', 'pupilLastName');
         $this->counter = 1;
     }
+
 }

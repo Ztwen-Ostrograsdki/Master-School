@@ -4,7 +4,7 @@
         <x-z-input :type="'email'" :error="$errors->first('email_fgt')" :modelName="'email_fgt'" :labelTitle="'Votre address mail...'"  ></x-z-input>
         <x-z-button>Lancer le processus</x-z-button>
         <div class="m-0 p-0 w-50 text-center mx-auto pr-3 pb-2">
-            <span data-toggle="modal" data-dismiss="modal" data-target="#loginModal" class="text-warning" style="cursor: pointer">Non c'est déja bon, j'm souviens</span>
+            <a  href="{{route('connexion')}}" class="text-warning" style="cursor: pointer">Non c'est déja bon, j'm souviens</a> 
         </div>
     </form>
 </x-z-modal-generator>

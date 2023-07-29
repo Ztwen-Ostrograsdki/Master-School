@@ -70,7 +70,7 @@ class ModelQuery{
     /**
      * Get the value of pupils
      */ 
-    public function getPupils()
+    public function getPupilsOfThisSChoolYear()
     {
         return $this->pupils;
     }

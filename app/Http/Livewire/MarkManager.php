@@ -155,18 +155,14 @@ class MarkManager extends Component
         $mark = $this->markModel;
 
         DB::transaction(function($e) use ($mark){
-            $school_year = $mark->school_year();
-            $detach = $school_year->marks()->detach($mark->id);
-            if($detach){
-                $mark->forceDelete();
-            }
+
+            $mark->forceDelete();
 
             DB::afterCommit(function(){
                 $this->emit('pupilUpdated');
                 $this->emit('classeUpdated');
                 $this->dispatchBrowserEvent('hide-form');
                 $this->resetErrorBag();
-                // $this->dispatchBrowserEvent('Toast', ['title' => 'Suupression terminée', 'message' => "La note a été suuprimée", 'type' => 'success']);
             });
 
         });

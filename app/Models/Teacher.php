@@ -63,9 +63,14 @@ class Teacher extends Model
         return $this->hasMany(TeacherCursus::class);
     }
 
+    public function teacherCursus()
+    {
+        return $this->hasMany(TeacherCursus::class);
+    }
+
     public function aes()
     {
-        return $this->hasMan(AE::class);
+        return $this->hasMany(AE::class);
     }
 
     public function principals()
@@ -115,17 +120,6 @@ class Teacher extends Model
     }
 
    
-    public function getLastTeachingDate()
-    {
-        $date = $this->last_teaching_date;
-
-        $formatted_date = $this->__getDateAsString($date, null);
-
-        return  ucwords($this->__getDateAsString($date, null)) ;
-        
-    }
-
-
 
     public function getTeachersCurrentClasses($withDuration = false, $school_year = null)
     {
@@ -216,22 +210,47 @@ class Teacher extends Model
     }
 
 
-    public function hasSecurities($school_year = null)
+    public function hasSecurities($school_year = null, $secure_column = null, $classe_id = null)
     {
         $school_year_model = $this->getSchoolYear();
 
-        return $this->securities()->where('school_year_id', $school_year_model->id)->count() > 0;
+        if($secure_column){
+
+            if($classe_id){
+
+                return $this->securities()->where('school_year_id', $school_year_model->id)->where($secure_column, true)->where('classes_securities.classe_id', $classe_id)->count() > 0;
+
+            }
+
+            return $this->securities()->where('school_year_id', $school_year_model->id)->where($secure_column, true)->count() > 0;
+
+        }
+        else{
+
+            if($classe_id){
+
+                return $this->securities()->where('school_year_id', $school_year_model->id)->where('classes_securities.classe_id', $classe_id);
+
+            }
+
+            return $this->securities()->where('school_year_id', $school_year_model->id)->count() > 0;
+
+        }
+
     }
 
-    public function teacherCanAccess($classe_id, $protection = 'closed', $school_year = null)
+    public function teacherCanAccess($classe_id, $secure_column = 'closed', $school_year = null)
     {
 
         if($this->hasSecurities()){
+
             $school_year_model = $this->getSchoolYear();
-            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('classe_id', $classe_id)->where($protection . '_classe', true)->count();
-            $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('classe_id', $classe_id)->where($protection, true)->count();
-            $req3 = $school_year_model->securities()->where('classe_id', $classe_id)->where($protection, true)->count();
-            return $req1 == 0 && $req2 == 0 && $req3 == 0;
+
+            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('classe_id', $classe_id)->where($secure_column, true)->count();
+
+            $req2 = $school_year_model->securities()->where('classe_id', $classe_id)->where($secure_column, true)->count();
+
+            return $req1 == 0 && $req2 == 0;
         }
         return true;
     }

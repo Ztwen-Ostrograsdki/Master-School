@@ -6,6 +6,7 @@ use App\Models\Classe;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\PupilAbsences;
 use App\Models\PupilLates;
+use App\Models\School;
 use App\Models\SchoolYear;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -272,11 +273,13 @@ trait PupilTraits{
             $target = '%' . 'polyvalente' . '%';
             
             $polyvalence = Classe::where('name', 'like', $target)->where('level_id', $this->level_id)->first();
+            
             $school_year_model = $this->getSchoolYear();
             
             $cursus = $this->classesSchoolYears()->where('classe_pupil_school_years.school_year_id', $school_year_model->id)->where('classe_pupil_school_years.classe_id', $polyvalence->id)->first();
 
             if($cursus){
+
                 return $cursus->getDateAgoFormated(false);
             }
 
@@ -875,5 +878,167 @@ trait PupilTraits{
     }
 
 
+    public function getPupilAveragesWithRank($school_year = null, $semestre = null, $all = false)
+    {
+
+        $school_year_model = $this->getSchoolYear($school_year);
+        
+        $semestrialAverage = [];
+        
+        $annualAverages = [];
+        
+        $annualAverage = null;
+
+        $data = null;
+        
+        $semestre_type = 'Semestre';
+
+        $school = School::first();
+
+        $semestres = [1, 2];
+
+        if($school){
+
+            if($school->trimestre){
+
+                $semestre_type = 'Trimestre';
+
+                $semestres = [1, 2, 3];
+            }
+            else{
+
+                $semestres = [1, 2];
+            }
+        }
+
+        $pupil = $this;
+
+        $classe = $pupil->getCurrentClasse($school_year_model->id);
+
+        if($classe){
+
+            if(!$semestre && !$all){
+
+                $annualAverages = $classe->getClasseAnnualAverageWithRank($school_year_model->id);
+
+                if(isset($annualAverages[$pupil->id])){
+
+                    $annualAverage = $annualAverages[$pupil->id];
+                }
+
+                $data = $annualAverage;
+
+            }
+            else{
+
+                if($semestre){
+
+                    $semestrialAverage = $classe->getClasseSemestrialAverageWithRank($semestre, $school_year_model->id);
+
+                    if(isset($semestrialAverage) && isset($semestrialAverage[$pupil->id])){
+
+                        $semestrialAverage = $semestrialAverage[$pupil->id];
+                    }
+                    else{
+
+                        $semestrialAverage = null;
+
+                    }
+
+
+                    $data = $semestrialAverage;
+
+
+                }
+                elseif(!$semestre || $all){
+
+                    foreach($semestres as $sm){
+
+                        $semestrialAverage[$sm] = $classe->getClasseSemestrialAverageWithRank($sm, $school_year_model->id);
+                        
+                        if(isset($semestrialAverage[$sm]) && isset($semestrialAverage[$sm][$pupil->id])){
+
+                            $semestrialAverage[$sm] = $semestrialAverage[$sm][$pupil->id];
+                        }
+                        else{
+
+                            $semestrialAverage[$sm] = null;
+
+                        }
+
+                    }
+
+
+                    $data = $semestrialAverage;
+
+                }
+
+
+            }
+
+            
+        }
+
+        return $data;
+
+
+        
+    }
+
+
+    public function getLastClasse()
+    {
+        $classes = [];
+
+        $last_classe = null;
+
+        $classes_school_years = $this->classesSchoolYears;
+
+        $current_school_year_model = $this->getSchoolYear();
+
+        if($classes_school_years){
+
+            foreach($classes_school_years as $c_s_y){
+
+                $classe = $c_s_y->classe;
+
+                $school_year_model = $c_s_y->school_year;
+
+                if($classe->isNotPolyvalente() && $school_year_model->id !== $current_school_year_model->id){
+
+                    $index = array_sum(explode(' - ', $school_year_model->school_year));
+
+                    $classes[$classe->id] = ['index' => $index, 'classe' => $classe, 'school_year' => $school_year_model];
+
+                }
+            }
+
+
+            $max = 0;
+
+            foreach($classes as $classe_id => $cl){
+
+                $index = $cl['index'];
+
+                $classe = $cl['classe'];
+
+                $sy_model = $classe['school_year'];
+
+                if($index >= $max){
+
+                    $max = $index;
+
+                    $last_classe = ['classe' => $classe, 'school_year' => $sy_model];
+
+                }
+
+            }
+
+        }
+
+
+        return $last_classe;
+
+    }
     
 }

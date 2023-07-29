@@ -134,4 +134,68 @@ class Tools{
 		return $years;
 	}
 
+	public static function getMention($mark)
+	{
+		$mention = null;
+
+		if($mark){
+
+			if($mark >= 0 && $mark <= 20){
+
+				if(self::numberIsBetween($mark, 0, 4.9999, false)){
+					$mention = 'Très Faible';
+				}
+				elseif (self::numberIsBetween($mark, 5, 7.9999, false)) {
+					$mention = 'Faible';
+				}
+				elseif (self::numberIsBetween($mark, 8, 9.9999, false)) {
+					$mention = 'Insuffisante';
+				}
+				elseif (self::numberIsBetween($mark, 10, 11.9999, false)) {
+					$mention = 'Passable';
+				}
+				elseif (self::numberIsBetween($mark, 12, 13.9999, false)) {
+					$mention = 'Assez Bien';
+				}
+				elseif (self::numberIsBetween($mark, 14, 15.9999, false)) {
+					$mention = 'Bien';
+				}
+				elseif (self::numberIsBetween($mark, 16, 18.9999, false)) {
+					$mention = 'Très Bien';
+				}
+				elseif (self::numberIsBetween($mark, 19, 20, false)) {
+					$mention = 'Excellente';
+				}
+			}
+
+		}
+
+
+		return $mention;
+
+	}
+
+
+	public static function numberIsBetween($mark, $start = 0, $end, $strict = false)
+	{
+
+		if($end > $start){
+
+			if($strict){
+
+				return ($mark > $start && $mark < $end);
+
+			}
+			else{
+
+				return ($mark >= $start && $mark <= $end);
+			}
+
+
+		}
+		return false;
+
+
+	}
+
 }

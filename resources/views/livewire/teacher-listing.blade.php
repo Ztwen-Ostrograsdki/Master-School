@@ -2,16 +2,11 @@
     <div class="px-2">
         <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
             <div class="card-header bg-dark"> 
-                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Effectuer une recherche...</h5>
-              <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                  <i class="fa fa-minus"></i>
-                </button>
-                <button type="button" class="btn btn-tool" data-card-widget="remove">
-                  <i class="fa fa-times"></i>
-                </button>
-              </div>
-                    <div class="card-tools">
+                <h5 class="card-title cursor-pointer" data-card-widget="collapse"></h5>
+                <div class="card-tools">
+                    
+                </div>
+                <div class="card-tools">
                     <ul class="nav nav-pills ml-auto mr-3">
                         <li class="nav-item dropdown">
                           <a class="nav-link text-white dropdown-toggle border border-warning" data-toggle="dropdown" href="#">

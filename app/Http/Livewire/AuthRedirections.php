@@ -93,6 +93,7 @@ class AuthRedirections extends Component
 
     public function login()
     {
+        
         $this->reset('userNoConfirm');
         $this->validateOnly('email_auth');
         $this->validate([

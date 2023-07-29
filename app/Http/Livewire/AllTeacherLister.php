@@ -8,6 +8,7 @@ use App\Models\Level;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeacherCursus;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class AllTeacherLister extends Component
@@ -302,7 +303,7 @@ class AllTeacherLister extends Component
 
             $yet = $school_year_model->teachers()->where('teachers.id', $teacher_id)->first();
 
-            DB::transaction(function($e) use ($yet, $school_year_model, $classe){
+            DB::transaction(function($e) use ($yet, $school_year_model, $teacher){
 
                 if(!$yet && $teacher){
 
@@ -310,7 +311,7 @@ class AllTeacherLister extends Component
 
                     $name = $teacher->getFormatedName();
 
-                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "L'enseignant  $name a été mise à jour avec succès! Les données de cet $name sont désormais disponibles en $school_year_model->school_year !", 'type' => 'success']);
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "L'enseignant  $name a été mise à jour avec succès! Les données de cet enseignant sont désormais disponibles en $school_year_model->school_year !", 'type' => 'success']);
 
                     $this->emit('UpdatedSchoolYearData');
                 }
@@ -386,7 +387,9 @@ class AllTeacherLister extends Component
 
             DB::afterCommit(function() use ($school_year_model, $teacher){
 
-                $this->dispatchBrowserEvent('Toast', ['title' => 'MISE A JOUR TERMINEE', 'message' => "Les données de l'enseignant $teacher->getFormatedName() relatives à l'année-scolaire $school_year_model->school_year ont été supprimé avec succès!", 'type' => 'success']);
+                $name = $teacher->getFormatedName();
+
+                $this->dispatchBrowserEvent('Toast', ['title' => 'MISE A JOUR TERMINEE', 'message' => "Les données de l'enseignant $name relatives à l'année-scolaire $school_year_model->school_year ont été supprimé avec succès!", 'type' => 'success']);
 
                     $this->emit('UpdatedSchoolYearData');
             });

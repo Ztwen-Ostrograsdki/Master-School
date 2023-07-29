@@ -83,23 +83,35 @@ class PupilProfil extends Component
             session()->put('semestre_selected', $this->semestre_selected);
         }
         $pupil_id = $this->pupil_id;
+
         if($pupil_id){
+
             $pupil = Pupil::find($pupil_id);
+
             if($pupil){
+
                 $best = $pupil->getBestSubject($this->semestre_selected);
+
                 $marks_counter = $pupil->getMarksCounter($this->semestre_selected);
+
                 $succeeds_marks_counter = $pupil->getSucceedsMarksCounter($this->semestre_selected);
+
                 $joined = $pupil->school_years()->where('school_years.id', $school_year_model->id)->first();
+
                 $classes = Classe::where('classes.level_id', $pupil->level_id)->get();
+
                 if($joined){
+
                     $this->joinedToThisYear = true;
                 }
                 else{
+
                     $this->joinedToThisYear = false;
                 }
 
             }
             else{
+                
                 $pupil = null;
             }
         }
@@ -377,6 +389,12 @@ class PupilProfil extends Component
     {
         $class = "App\Models\Pupil";
         $this->emit('editImageEvent', $this->pupil_id, $class);
+    }
+
+
+    public function moveToNewClasse()
+    {
+        $this->emit('MovePupilToNewClasse', $this->pupil_id);
     }
 
 

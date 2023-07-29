@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Helpers\ModelTraits\ClasseTraits;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\AverageModality;
+use App\Models\Averages;
 use App\Models\ClasseGroup;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\ClassesSecurity;
@@ -25,6 +26,7 @@ use App\Models\TimePlan;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Classe extends Model
 {
@@ -46,6 +48,20 @@ class Classe extends Model
         'locked',
         'teacher_id'
     ];
+
+    public function averages()
+    {
+        return $this->hasMany(Averages::class);
+    }
+
+    public function averages_of($semestre = null, $school_year = null)
+    {
+
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        return $this->averages()->where('averages.semestre', $semestre)->where('averages.school_year_id', $school_year_model->id)->get();
+        
+    }
 
 
     public function qotHours()
@@ -81,11 +97,11 @@ class Classe extends Model
      */
     public function isNotPolyvalente()
     {
-        $name = $this->name;
+        $name = strtoupper($this->name);
 
-        $match = preg_match_all('/polyvalente/', $name, $matches);
+        $match = preg_match_all('/POLYVALENTE/', $name, $matches);
 
-        return $mach ? false : true;
+        return $match ? false : true;
     }
 
 
@@ -117,17 +133,38 @@ class Classe extends Model
     }
 
 
-    public function getPupils($school_year = null, $search = null, $sexe = null, $onlyIds = false)
+    public function getClasseCurrentPupils($school_year = null)
     {
         $pupils = [];
 
         $school_year_model = $this->getSchoolYear($school_year);
 
-        $c_p_s_ys = $this->classePupilSchoolYear()->where('school_year_id', $school_year_model->id);
+        $cursuses = $this->classePupilSchoolYear()->where('classe_pupil_school_years.school_year_id', $school_year_model->id)->pluck('pupil_id')->toArray();
 
-        if($c_p_s_ys->get() && count($c_p_s_ys->get()) > 0){
+        if($cursuses){
 
-            $pupils_ids = $c_p_s_ys->pluck('pupil_id')->toArray();
+            $pupils = Pupil::whereIn('id', $cursuses)->orderBy('pupils.firstName', 'asc')->orderBy('pupils.lastName', 'asc')->get();
+
+        }
+
+        return $pupils;
+
+    }
+
+
+    public function getPupils($school_year = null, $search = null, $sexe = null, $onlyIds = false, $orderByData = [], $orderBy = 'desc')
+    {
+        $pupils = [];
+
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $cursuses = $this->classePupilSchoolYear()->where('classe_pupil_school_years.school_year_id', $school_year_model->id);
+        
+
+        if($cursuses->get() && count($cursuses->get()) > 0){
+
+            $pupils_ids = $cursuses->pluck('pupil_id')->toArray();
+
 
             if($search && strlen($search) > 2){
 
@@ -166,34 +203,47 @@ class Classe extends Model
                              ->orderBy('lastName', 'asc');
                 }
             }
+
+            if($onlyIds){
+
+                return $pupils->pluck('id')->toArray();
+
+            }
+
+            return $pupils->get();
         }
 
-        return $pupils !== [] ? ($onlyIds ? $pupils->pluck('id')->toArray() : $pupils->get()) : [];
     }
 
 
-    public function getClassePupilsOnGender(string $gender, $school_year = null)
+    public function getClassePupilsOnGender($gender, $school_year = null)
     {
-        $pupils = [];
+        $pupils_all = $this->getClasseCurrentPupils($school_year);
 
-        if(!$school_year){
+        
+        if ($gender !== null) {
 
-            $school_year = $this->getSchoolYear()->id;
-        }
-        if ($gender) {
+            $pupils = [];
 
-            $pupils_all = $this->getPupils($school_year);
+            if($pupils_all){
 
-            foreach($pupils_all as $pupil){
+                foreach($pupils_all as $pupil){
 
-                if($pupil->sexe == $gender){
+                    if($pupil->sexe == $gender){
 
-                    $pupils[] = $pupil;
+                        $pupils[] = $pupil;
+                    }
                 }
+
             }
+
+            return $pupils;
+        }
+        else{
+            return $pupils_all;
+
         }
 
-        return $pupils;
     }
 
 
@@ -206,7 +256,7 @@ class Classe extends Model
         }
         else{
 
-            return count($this->getPupils($school_year, null));
+            return count($this->getClasseCurrentPupils($school_year));
         }
     }
 
@@ -384,11 +434,13 @@ class Classe extends Model
 
     public function get_coefs($subject_id = null, $school_year = null, $value = true)
     {
+        $school_year_model = $this->getSchoolYear($school_year);
+
         if($this->classe_group){
 
-            $coef = $this->classe_group->coeficients()->where('subject_id', $subject_id)->where('school_year_id', $school_year)->first();
+            $coef_model = $this->classe_group->coeficients()->where('coeficients.subject_id', $subject_id)->where('coeficients.school_year_id', $school_year_model->id)->first();
 
-            return $value ? ($coef ? $coef->coef : 1) : $coef;
+            return $value ? ($coef_model ? $coef_model->coef : 1) : $coef_model;
         }
 
         return 1;
@@ -583,34 +635,77 @@ class Classe extends Model
 
     }
 
-    public function getClasseCurrentTeachers($withDuration = false)
+    public function getClasseCurrentTeachers($withDuration = false, $subject_id = null)
     {
         $school_year_model = $this->getSchoolYear();
 
         $current_teachers = [];
-        
+
         if($this->teachers){
 
             if(!$withDuration){
 
-                $teachers_id = $school_year_model->teacherCursus()->where('classe_id', $this->id)->whereNull('end')->pluck('teacher_id')->toArray();
+                $teachers_id = [];
 
-                foreach($teachers_id as $teacher_id){
+                if($subject_id){
 
-                    $teacher = $school_year_model->teachers()->where('teachers.id', $teacher_id)->first();
+                    $cursus = $school_year_model->teacherCursus()
+                                                     ->where('classe_id', $this->id)
+                                                     ->where('teacher_cursuses.subject_id', $subject_id)
+                                                     ->whereNull('end')
+                                                     ->first();
+                    return $cursus ? $school_year_model->teachers()->where('teachers.id', $cursus->teacher_id)->first() : null;
 
-                    $current_teachers[$teacher_id] = $teacher;
                 }
+                else{
+
+                    $teachers_id = $school_year_model->teacherCursus()->where('classe_id', $this->id)->whereNull('end')->get();
+
+
+
+                    foreach($teachers_id as $cursus){
+
+                        $teacher = $school_year_model->findTeacher($cursus->teacher_id);
+
+
+                        $current_teachers[$cursus->teacher_id] = $teacher;
+                    }
+
+                }
+
+                
             }
             else{
-                $cursuses = $school_year_model->teacherCursus()->where('classe_id', $this->id)->whereNull('end')->get();
 
-                foreach($cursuses as $cursus){
+                $cursuses = [];
 
-                    $teacher = $school_year_model->teachers()->where('teachers.id', $cursus->classe_id)->first();
+                if($subject_id){
 
-                    $current_teachers[$cursus->teacher_id] = ['teacher' => $teacher, 'cursus' => $cursus, 'asWorkedDuration' => $cursus->canMarksAsWorkedForTeacher()];
+                    $cursus = $school_year_model->teacherCursus()
+                                                  ->where('classe_id', $this->id)
+                                                  ->where('teacher_cursuses.subject_id', $subject_id)
+                                                  ->whereNull('end')
+                                                  ->first();
+
+                    return $cursus ? ['teacher' => $teacher, 'cursus' => $cursus, 'asWorkedDuration' => $cursus->canMarksAsWorkedForTeacher()] : null;
                 }
+                else{
+
+                    $cursuses = $school_year_model->teacherCursus()
+                                                  ->where('classe_id', $this->id)
+                                                  ->whereNull('end')
+                                                  ->get();
+
+                    foreach($cursuses as $cursus){
+
+                        $teacher = $school_year_model->teachers()->where('teachers.id', $cursus->classe_id)->first();
+
+                        $current_teachers[$cursus->teacher_id] = ['teacher' => $teacher, 'cursus' => $cursus, 'asWorkedDuration' => $cursus->canMarksAsWorkedForTeacher()];
+                    }
+
+                }
+
+                
 
             }
 
@@ -634,6 +729,7 @@ class Classe extends Model
 
 
     }
+
 
 
 

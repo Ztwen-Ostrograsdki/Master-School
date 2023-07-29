@@ -25,12 +25,12 @@
             </a>
             <div  class="navbar-search-block form-searcher">
                 <form class="form-inline">
-                    <div class="input-group input-group-sm">
-                        <input wire:model="search" class="form-control form-control-navbar"  placeholder="Taper un mot clé ...">
+                    <div class="input-group input-group-sm mx-auto col-6">
+                        <input wire:model="search" class="form-control form-control-navbar"  placeholder="Taper un mot clé à rechercher sur le site...">
                         <div class="input-group-append">
-                            <button class="btn btn-navbar" type="submit">
+                            <span class="btn btn-navbar" >
                                 <i class="fas fa-search"></i>
-                            </button>
+                            </span>
                             <button class="btn btn-navbar" type="button" data-widget="navbar-search">
                                 <i class="fas fa-times form-search-closer"></i>
                             </button>

@@ -19,6 +19,7 @@ class PolyvalenteClasseManager extends Component
         'classePupilListUpdated' => 'reloadClasseData',
         'classeUpdated' => 'reloadClasseData',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
+        'UpdatedGlobalSearch' => 'reloadClasseDataOnSearch',
     ];
     
     
@@ -30,24 +31,36 @@ class PolyvalenteClasseManager extends Component
     public $activeData = [];
     public $download_pdf_z = false;
     public $search = null;
+    public $slug;
+    public $level;
+    public $classe_id;
 
     public $pupilFirstName;
     public $pupilLastName;
     public $pupil_id;
     public $editingPupilName = false;
 
-    public $levels = ['Secondaire' => 'secondary', 'Primaire' => 'primary'];
 
 
-    public function mount($level)
+    public function mount($slug)
     {
-        if($level){
-            $this->level = $this->levels[ucfirst($level)];
+         if($slug){
+
+            $this->slug = $slug;
+
+            $target = '%' . mb_substr($slug, 0, 3) . '%';
+
+            $level = Level::where('name', 'like', $target)->first();
+
+            if($level){
+
+                $this->level = $level;
+            }
+           
         }
         else{
             return abort(404);
         }
-
     }
 
 
@@ -59,18 +72,40 @@ class PolyvalenteClasseManager extends Component
     public function render()
     {
         $school_year_model = $this->getSchoolYear();
+
         $pupils = [];
+
         $classe = null;
+
         if($this->level){
-            $level = Level::where('name', $this->level)->firstOrFail();
+
+            $level = $this->level;
+
             $target = '%' . 'polyvalente' . '%';
+
             $classe = Classe::where('name', 'like', $target)->where('level_id', $level->id)->first();
+            
             if($classe){
+
+                $this->classe_id = $classe->id;
+
                 if($this->search){
-                    $pupils = $classe->getPupils($school_year_model->id, $this->search);
+
+                    $pupils = Pupil::where('level_id', $level->id)
+                            ->where('classe_id', $classe->id)
+                            ->where('firstName', 'like', '%' . $search . '%')
+                             ->orWhere('lastName', 'like', '%' . $search . '%')
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->get();
                 }
                 else{
-                    $pupils = $classe->getPupils($school_year_model->id);
+
+                    $pupils = Pupil::where('level_id', $level->id)
+                            ->where('classe_id', $classe->id)
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->get();
                 }
             }
         }
@@ -141,20 +176,6 @@ class PolyvalenteClasseManager extends Component
 
    
 
-
-    public function addNewPupilTo()
-    {
-        $school_year_model = $this->getSchoolYear();
-        // $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
-        if(true){
-
-        }
-        else{
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
-        }
-
-    } 
-
     public function changePupilSexe($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
@@ -195,7 +216,9 @@ class PolyvalenteClasseManager extends Component
     public function updatePupilName()
     {
         $pupilNameHasAlreadyTaken = Pupil::where('lastName', $this->pupilLastName)->where('firstName', $this->pupilFirstName)->first();
+
         $pupil = Pupil::find($this->pupil_id);
+        
         if(!$pupilNameHasAlreadyTaken && $pupil){
             $p = $pupil->update(
                 [
@@ -221,5 +244,40 @@ class PolyvalenteClasseManager extends Component
     public function reloadClasseData()
     {
         $this->counter = rand(0, 14);
+    }
+
+    public function addNewPupilTo()
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+
+        if($classe){
+
+            $this->emit('addNewPupilToClasseLiveEvent', $classe->id);
+        }
+        else{
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
+        }
+
+    }
+    
+
+    public function multiplePupilInsertions()
+    {
+
+        $school_year_model = $this->getSchoolYear();
+
+        $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+
+        if($classe){
+
+            $this->emit('insertMultiplePupils', $classe->id);
+        }
+        else{
+
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
+        }
+
     }
 }

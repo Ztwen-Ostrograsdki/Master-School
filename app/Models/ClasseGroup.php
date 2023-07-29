@@ -76,6 +76,12 @@ class ClasseGroup extends Model
 
     public function getPupils($school_year = null, $search = null, $sexe = null, $onlyIds = false)
     {
+        return $this->getClasseGroupCurrentPupils($school_year, $search, $sexe, $onlyIds);
+    }
+
+
+    public function getClasseGroupCurrentPupils($school_year = null, $search = null, $sexe = null, $onlyIds = false)
+    {
         $pupils = [];
 
         $classes = $this->classes;
@@ -99,6 +105,7 @@ class ClasseGroup extends Model
         }
 
         return $pupils;
+
     }
 
     public function getClassePupilsOnGender(string $gender, $school_year = null)

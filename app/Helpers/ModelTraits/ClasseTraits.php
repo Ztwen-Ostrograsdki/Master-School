@@ -2,12 +2,17 @@
 namespace App\Helpers\ModelTraits;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Helpers\Tools\Tools;
+use App\Jobs\JobMigratePupilsToClasse;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\ClassesSecurity;
 use App\Models\Pupil;
+use App\Models\PupilCursus;
+use App\Models\School;
 use App\Models\SchoolYear;
 use App\Models\Subject;
 use App\Models\Teacher;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 
@@ -114,53 +119,14 @@ trait ClasseTraits{
 
     public function getClassePupils($school_year = null)
     {
-        $school_year_model = $this->getSchoolYear($school_year);
-        
-        if($school_year_model){
-
-            $allPupils = [];
-
-            $pupils_of_this_year = $school_year_model->pupils()->where('level_id', $this->level_id)->get()->pluck('id')->toArray();
-
-            $classe = $school_year_model->classes()->where('classes.id', $this->id)->first();
-
-            if($pupils_of_this_year > 0 && $classe){
-                
-                foreach($classe->pupils()->orderBy('firstName', 'asc')->get() as $p){
-
-                    if(in_array($p->id, $pupils_of_this_year)){
-
-                        $allPupils[] = $p;
-                    }
-                }
-                return $allPupils;
-            }
-
-        }
-        return [];
-
+        return $this->getClasseCurrentPupils($school_year);
     }
 
 
-    public function getClasseCurrentPupils($school_year_id)
-    {
-        $school_year_model = $this->getSchoolYear($school_year_id);
-
-        $pupils = [];
-
-        $data = $school_year_model->classeWithPupils()->where('classe_id', $this->id)->get();
-
-        if(count($data) > 0){
-
-            foreach($data as $datum){
-
-                $pupils = $school_year_model->pupils()->where('pupils.id', $datum->pupil_id)->orderBy('pupils.firstName', 'asc')->orderBy('pupils.lastName', 'asc')->get();
-            }
-        }
-
-        return $pupils;
-    }
-
+    // public function getClasseCurrentPupils($school_year = null)
+    // {
+    //     return $this->getClasseCurrentPupils($school_year);
+    // }
 
 
 
@@ -172,7 +138,7 @@ trait ClasseTraits{
 
         if($school_year_model){
 
-            $pupils = $this->getPupils($school_year_model->id);
+            $pupils = $this->getClasseCurrentPupils($school_year_model->id);
 
             foreach($pupils as $pupil){
 
@@ -189,7 +155,7 @@ trait ClasseTraits{
                 if($take_forget == 2){
 
                     $epes = $this->marks()
-                                          ->where('marks.school_year_id', $school_year_model->id)
+                                 ->where('marks.school_year_id', $school_year_model->id)
                                  ->where('semestre', $semestre)
                                  ->where('subject_id', $subject_id)
                                  ->where('pupil_id', $pupil->id)
@@ -363,6 +329,7 @@ trait ClasseTraits{
             if($type == 'epe'){
 
                 $bonus_counter =  array_sum($school_year_model->related_marks()->where('pupil_id', $pupil_id)->where('classe_id', $this->id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', 'bonus')->pluck('value')->toArray());
+                
                 $minus_counter =  array_sum($school_year_model->related_marks()->where('pupil_id', $pupil_id)->where('classe_id', $this->id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', 'minus')->pluck('value')->toArray());
 
             }
@@ -399,15 +366,19 @@ trait ClasseTraits{
         $allMarks = $this->getMarks($subject_id, $semestre, $school_year);
 
         $devsMarks = [];
+
         $averageTab = [];
+
         $total = 0;
 
         foreach ($allMarks as $pupil_id => $markTab1) {
+
             $devsMarks[$pupil_id] = $markTab1['dev'];
         }
 
 
         foreach ($devsMarks as $pupil_id => $devs) {
+
             $epeAperage = null;
             $max = count($devs);
             if(count($epeAperages) > 0){
@@ -431,7 +402,9 @@ trait ClasseTraits{
                 $averageTab[$pupil_id] = null;
             }
             else{
+
                 $total = array_sum($pupilDevsMarks) + $epeAperage;
+
                 $averageTab[$pupil_id] = floatval(number_format(($total /($max)), 2));
 
             }
@@ -444,119 +417,231 @@ trait ClasseTraits{
     }
 
 
-    public function getClasseRank($subject_id, $semestre = 1, $school_year = null, $takeBonus = true, $takeSanctions = true)
+    public function getClasseAnnualAverage($school_year, $takeBonus = true, $takeSanctions = true)
     {
 
-        $averagesTab = $this->getAverage($subject_id, $semestre, $school_year, $takeBonus, $takeSanctions);
-        
-        $ranksTab = [];
-        $ranksTab_init = [];
-        $ranksTab_init_associative = [];
+        $school = School::first();
 
-        foreach ($averagesTab as $pupil_id_1 => $average_1) {
-            if ($average_1 !== null) {
-                $ranksTab_init[$pupil_id_1] = $average_1;
+        if($school){
+
+            if($school->trimestre){
+
+                $semestres = [1, 2, 3];
+
+                $divided = 5;
+            }
+            else{
+
+                $divided = 3;
+
+                $semestres = [1, 2];
             }
         }
+
+        $annualAverages = [];
+
+        $semestrialAverages = [];
+
+        $pupils = $this->getClasseCurrentPupils($school_year);
+
+
         
 
-        $size = count($ranksTab_init);
+        if(count($pupils) > 0){
 
-        if($size > 0){
+            foreach($semestres as $semestre){
 
-            $k = 1;
-            while (count($ranksTab_init_associative) < $size) {
-                $av = max($ranksTab_init);
-                $pupil_id = array_search($av, $ranksTab_init);
-                $ranksTab_init_associative[$k] = [
-                    'id' => $pupil_id,
-                    'moy' => $av
-                ];
-                unset($ranksTab_init[$pupil_id]);
-                $k++;
+                $semestrialAverages[$semestre] = $this->getClasseSummaryAverage($semestre, $school_year, $takeBonus, $takeSanctions);
+
             }
 
-            if($ranksTab_init_associative !== []){
-                $size = count($ranksTab_init_associative);
+            foreach($pupils as $pupil){
 
-                $index = 1;
-                foreach ($ranksTab_init_associative as $key => $pupil_tab) {
-                    $moy = $pupil_tab['moy'];
-                    $id = $pupil_tab['id'];
+                $p_moy = 0;
 
-                    $pupil_model = Pupil::find($id);
+                $id = $pupil->id;
 
-                    if($index == 1){
-                        $rank = 1;
-                        $exp = $pupil_model->sexe == 'male' ? 'er' : 'ère';
-                        $base = null;
+                $pupilAverages = 0;
+
+                foreach($semestres as $semestre){
+
+                    if(isset($semestrialAverages[$semestre]) && isset($semestrialAverages[$semestre][$id])){
+
+                        $moy = $semestrialAverages[$semestre][$id];
+
+                        if($moy){
+
+                            if(count($semestres) == 2){
+
+                                if($semestre == 2){
+
+                                    $pupilAverages = $pupilAverages + (2 * $moy);
+
+                                }
+                                elseif($semestre == 1){
+
+                                    $pupilAverages = $pupilAverages + $moy;
+
+                                }
+
+                            }
+
+                            if(count($semestres) == 3){
+
+                                if($semestre == 2 || $semestre == 3){
+
+                                    $pupilAverages = $pupilAverages + (2 * $moy);
+
+                                }
+                                elseif($semestre == 1){
+
+                                    $pupilAverages = $pupilAverages + $moy;
+
+                                }
+
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+                if($pupilAverages){
+
+                    $p_moy = floatval(number_format(($pupilAverages / $divided), 2));
+
+                    $annualAverages[$id] = $p_moy;
+
+                }
+                else{
+
+                    $annualAverages[$id] = 0;
+
+                }
+
+            }
+
+
+        }
+
+        return $annualAverages;
+
+    }
+
+
+    public function getClasseAnnualAverageWithRank($school_year = null, $takeBonus = true, $takeSanctions = true)
+    {
+
+        $averagesTab = $this->getClasseAnnualAverage($school_year, $takeBonus, $takeSanctions);
+        
+        $ranks = $this->rankBuilder($averagesTab);
+        
+        return $ranks;   
+    }
+
+
+
+    public function getClasseSummaryAverage($semestre = 1, $school_year = null, $takeBonus = true, $takeSanctions = true)
+    {
+        $semestrialAverage = [];
+
+        $subjectAverages = [];
+
+        $averages = [];
+
+        $classeCoefTabs = [];
+
+        $subjects = $this->subjects;
+
+        $pupils = $this->getClasseCurrentPupils($school_year);
+
+        $pupil_average = 0;
+
+        $pupil_average_sum = 0;
+
+        $coef_total = 0;
+
+        if(count($pupils) > 0){
+
+            if(count($subjects) > 0){
+
+                foreach ($subjects as $subject) {
+
+                    $subjectAverages[$subject->id] = $this->getAverage($subject->id, $semestre, $school_year);
+
+                    $classeCoefTabs[$subject->id] = $this->get_coefs($subject->id, $school_year, true);
+                }
+
+
+                foreach ($pupils as $pupil){
+
+
+                    foreach($subjectAverages as $sub_id => $sub_averages){
+
+                        $p_sub_av = $sub_averages[$pupil->id];
+
+                        if($p_sub_av){
+
+                            $pupil_average_sum = $pupil_average_sum + ($p_sub_av * $classeCoefTabs[$sub_id]);
+
+                            $coef_total = $coef_total + $classeCoefTabs[$sub_id];
+
+                        }
+
+                    }
+
+
+                    if($pupil_average_sum && $coef_total > 0){
+
+                        $pupil_average = floatval(number_format(($pupil_average_sum /($coef_total)), 2));
+
                     }
                     else{
-                        $prev = $ranksTab_init_associative[$prev_index];
 
-                        if ($prev_rank == 1) {
-                            if($moy == $prev_moy){
-                                $rank = 1;
-                                $exp = $pupil_model->sexe == 'male' ? 'er' : 'ère';
-                                $base = 'ex';
-                            }
-                            else{
-                                if($moy == $prev_moy){
-                                    $rank = $prev_rank;
-                                    $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
-                                    $base = 'ex';
-                                }
-                                else{
-                                    $rank = $index;
-                                    $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
-                                    $base = null;
-                                }
-                            }
-                        }
-                        else{
-                            if($moy == $prev_moy){
-                                $rank = $prev_rank;
-                                $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
-                                $base = 'ex';
-                            }
-                            else{
-                                $rank = $index;
-                                $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
-                                $base = null;
-                            }
+                        $pupil_average = null;
 
-                        }
-
-                        
 
                     }
 
-                    $prev_rank = $rank;
-                    $prev_moy = $moy;
-                    $prev_index = $index;
 
-                    $ranksTab[$id] = [
-                        'rank' => $rank,
-                        'exp' => $exp,
-                        'base' => $base,
-                        'moy' => $moy,
-                        'id' => $pupil_model->id,
-                        'pupil' => $pupil_model,
-                    ];
+                    $semestrialAverage[$pupil->id] = $pupil_average;
 
-                    $index++;
-                    
                 }
 
             }
 
         }
-        else{
-            return $ranksTab;
-        }
 
-        return $ranksTab;
+        return $semestrialAverage;
 
+
+    }
+
+
+    public function getClasseSemestrialAverageWithRank($semestre = 1, $school_year = null, $takeBonus = true, $takeSanctions = true, $widthMaxAndMin = false)
+    {
+
+        $averagesTab = $this->getClasseSummaryAverage($semestre, $school_year, $takeBonus, $takeSanctions);
+        
+        $ranks = $this->rankBuilder($averagesTab, $widthMaxAndMin);
+        
+        return $ranks;   
+    }
+
+
+
+    public function getClasseRank($subject_id, $semestre = 1, $school_year = null, $takeBonus = true, $takeSanctions = true)
+    {
+
+        $averagesTab = $this->getAverage($subject_id, $semestre, $school_year, $takeBonus, $takeSanctions);
+
+        $ranks = $this->rankBuilder($averagesTab);
+
+
+        return $ranks;
+        
     }
 
     public function getClasseStats($semestre = 1, $school_year = null, $subject_id_selected = null, $takeBonus = true, $takeSanctions = true)
@@ -825,22 +910,37 @@ trait ClasseTraits{
     public function getMarksTypeLenght($subject_id, $semestre = 1, $school_year = null, $type = 'epe')
     {
         $max = 0;
+
         $school_year_model = $this->getSchoolYear($school_year);
 
         if($school_year_model){
+            
             $pupils_of_this_year = $school_year_model->pupils()->where('level_id', $this->level_id)->get()->pluck('id')->toArray();
+            
             $classe = $school_year_model->classes()->where('classes.id', $this->id)->first();
+            
             if($pupils_of_this_year > 0 && $classe){
+                
                 $allMarks = [];
+                
                 foreach($classe->pupils as $pupil){
+                    
                     $pupilMarks = [];
+                    
                     if(in_array($pupil->id, $pupils_of_this_year)){
+                        
                         $epes = [];
+                        
                         $devs = [];
+                        
                         $marks = $pupil->marks()->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', $type)->get();
+                        
                         if($marks && count($marks) > 0){
+                            
                             foreach($marks as $mark){
-                                if($mark->school_year() && $mark->school_year()->school_year == $school_year_model->school_year){
+                                
+                                if($mark->school_year && $mark->school_year->school_year == $school_year_model->school_year){
+                                    
                                     $pupilMarks[] = $mark;
                                 }
                                 
@@ -852,10 +952,12 @@ trait ClasseTraits{
                 }
 
                 if(count($allMarks)){
+
                     $max = max($allMarks);
                 }
             }
         }
+
         return $max;
     }
 
@@ -1092,10 +1194,15 @@ trait ClasseTraits{
     public function getClasseMarksIndexes($subject_id, $semestre = 1, $school_year = null, $type = 'epe')
     {
         $indexes = [];
+
         $school_year_model = $this->getSchoolYear($school_year);
+
         if($school_year_model){
+
             $marks = $school_year_model->marks()->where('marks.subject_id', $subject_id)->where('semestre', $semestre)->where('marks.classe_id', $this->id)->where('type', $type)->pluck('mark_index')->toArray();
+
             if($marks && count($marks) > 0){
+
                 $indexes = array_unique($marks);
             }
             
@@ -1104,15 +1211,18 @@ trait ClasseTraits{
     }
 
 
-    public function generateClassesSecurity($secure_column, $teacher_id = null, $subject_id = null, $duration = 48)
+    public function generateClassesSecurity($secure_column, $teacher_id = null, $subject_id = null, $duration = 48, $action = true)
     {
         $school_year_model = $this->getSchoolYear();
         
         if($teacher_id){
-            $already_secure = $this->classeWasNotSecureColumn($teacher_id, $secure_column);
-            if($already_secure){
+
+            $already_not_secure = $this->classeWasNotSecureColumn($teacher_id, $secure_column);
+
+            if($already_not_secure){
+
                 $secure = ClassesSecurity::create([
-                    $secure_column => true,
+                    $secure_column => $action,
                     'duration' => $duration,
                     'level_id' => $this->level_id,
                     'classe_id' => $this->id,
@@ -1120,25 +1230,62 @@ trait ClasseTraits{
                     'subject_id' => $subject_id,
                     'school_year_id' => $school_year_model->id
                 ]);
+
                 return $secure;
             }
+
             return null;
         }
         else{
+
             $already_secure = $this->hasSecurities(null, $secure_column);
-            if($already_secure){
+
+            if(!$already_secure){
+
                 $secure = ClassesSecurity::create([
-                    $secure_column => true,
+                    $secure_column => $action,
                     'duration' => $duration,
                     'level_id' => $this->level_id,
                     'classe_id' => $this->id,
                     'school_year_id' => $school_year_model->id
                 ]);
+
                 return $secure;
             }
+
             return null;
 
         }
+    }
+
+
+    public function destroyClasseSecurity($secure_column, $teacher_id = null, $subject_id = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+        
+        if($teacher_id){
+
+            $was_secure = $this->securities()->where('school_year_id', $school_year_model->id)->where($secure_column, true)->where('teacher_id', $teacher_id)->first();
+
+            if($was_secure){
+
+                return $was_secure->delete();
+
+            }
+
+        }
+        else{
+
+            $was_secure = $this->securities()->where('school_year_id', $school_year_model->id)->where($secure_column, true)->first();
+
+            if($was_secure){
+
+                return $was_secure->delete();
+            }
+
+        }
+
+
     }
 
 
@@ -1147,9 +1294,11 @@ trait ClasseTraits{
         $school_year_model = $this->getSchoolYear();
         
         if($teacher_id){
+
             $already_secure = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_marks_updating', true)->where('teacher_id', $teacher_id)->count();
 
             if($already_secure == 0){
+
                 $secure = ClassesSecurity::create([
                     'locked_marks_updating' => true,
                     'duration' => $duration,
@@ -1164,6 +1313,7 @@ trait ClasseTraits{
             return null;
         }
         else{
+
             $already_secure = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_marks_updating', true)->whereNull('teacher_id')->count();
 
             if($already_secure == 0){
@@ -1188,42 +1338,50 @@ trait ClasseTraits{
         $school_year_model = $this->getSchoolYear($school_year);
 
         if($secure_column){
+
             return $this->securities()->where('school_year_id', $school_year_model->id)->where($secure_column, true)->whereNull('teacher_id')->count() > 0;
         }
+        
         $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed', true)->whereNull('teacher_id')->count();
+       
         $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked', true)->whereNull('teacher_id')->count();
-        $req3 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_classe', true)->whereNull('teacher_id')->count();
-        $req4 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed_classe', true)->whereNull('teacher_id')->count();
-        $req5 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_marks_updating', true)->whereNull('teacher_id')->count();
+        
+        
+        $req3 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_marks_updating', true)->whereNull('teacher_id')->count();
 
-        return $req1 !== 0 || $req2 !== 0 || $req2 !== 0 || $req4 !== 0 || $req5 !== 0;
+        return $req1 !== 0 || $req2 !== 0 || $req3 !== 0 ;
 
     }
 
     public function classeNotSecureFor($teacher_id, $protection = 'closed', $school_year = null)
     {
         $school_year_model = $this->getSchoolYear($school_year);
-        $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($protection . '_classe', true)->count();
-        $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($protection, true)->count();
-        $req3 = $school_year_model->securities()->where('teacher_id', $teacher_id)->where($protection, true)->count();
+        
+        $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($protection, true)->count();
+        
+        
+        $req2 = $school_year_model->securities()->where('teacher_id', $teacher_id)->where($protection, true)->count();
 
-        return $req1 == 0 && $req2 == 0 && $req3 == 0;
+        return $req1 == 0 && $req2 == 0;
     }
 
 
     public function classeWasNotSecureColumn($teacher_id, $secure_column = null, $school_year = null)
     {
         $school_year_model = $this->getSchoolYear($school_year);
+
         if($secure_column){
-            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
-            return $req1 == 0;
+
+            $req = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
+
+            return $req == 0 ? true : false;
         }
         else{
             $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed', true)->where('teacher_id', $teacher_id)->count();
+            
             $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked', true)->where('teacher_id', $teacher_id)->count();
-            $req3 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_classe', true)->where('teacher_id', $teacher_id)->count();
-            $req4 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed_classe', true)->where('teacher_id', $teacher_id)->count();
-            if($req1 == 0 && $req2 == 0 && $req3 == 0 && $req4 == 0){
+            
+            if($req1 == 0 && $req2 == 0){
                 return true;
             }
             return false;
@@ -1238,16 +1396,23 @@ trait ClasseTraits{
     public function classeWasNotSecureForTeacher($teacher_id, $secure_column = null)
     {
         $school_year_model = $this->getSchoolYear();
+
         $classe_id = $this->id;
+
         $teacher = $school_year_model->teachers()->where('teachers.id', $teacher_id)->first();
+
         $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
 
         if($classe && $teacher){
+
             $teacher_classes = auth()->user()->teacher->getTeachersCurrentClasses();
 
             if(array_key_exists($classe->id, $teacher_classes)){
+
                 if(!$classe->hasSecurities()){
+
                     if($classe->classeWasNotSecureColumn($teacher->id)){
+
                         return true;
                     }
                     else{
@@ -1271,17 +1436,18 @@ trait ClasseTraits{
     public function classeWasNotClosedForTeacher($teacher_id, $secure_column = null, $school_year = null)
     {
         $school_year_model = $this->getSchoolYear($school_year);
+
         if($secure_column){
-            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
-            return $req1 == 0;
+
+            $req = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
+
+            return $req == 0 ? true : false;
         }
         else{
-            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed', true)->where('teacher_id', $teacher_id)->count();
-            $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed_classe', true)->where('teacher_id', $teacher_id)->count();
-            if($req1 == 0 && $req2 == 0){
-                return true;
-            }
-            return false;
+
+            $req = $this->securities()->where('school_year_id', $school_year_model->id)->where('closed', true)->where('teacher_id', $teacher_id)->count();
+            
+            return $req == 0 ? true : false;
 
         }
     }
@@ -1290,17 +1456,17 @@ trait ClasseTraits{
     public function classeWasNotLockedForTeacher($teacher_id, $secure_column = null, $school_year = null)
     {
         $school_year_model = $this->getSchoolYear($school_year);
+
         if($secure_column){
-            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
-            return $req1 == 0;
+
+            $req = $this->securities()->where('school_year_id', $school_year_model->id)->where('teacher_id', $teacher_id)->where($secure_column, true)->count();
+
+            return $req == 0;
         }
         else{
-            $req1 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked', true)->where('teacher_id', $teacher_id)->count();
-            $req2 = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked_classe', true)->where('teacher_id', $teacher_id)->count();
-            if($req1 == 0 && $req2 == 0){
-                return true;
-            }
-            return false;
+            $req = $this->securities()->where('school_year_id', $school_year_model->id)->where('locked', true)->where('teacher_id', $teacher_id)->count();
+            
+            return $req == 0 ? true : false;
 
         }
     }
@@ -1496,14 +1662,354 @@ trait ClasseTraits{
             return false;
         }
 
-        
+
+    }
+
+    public function hasAlreadyTeacherForThisSubject($subject_id, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $cursus = $school_year_model->teacherCursus()
+                                 ->where('teacher_cursuses.classe_id', $this->id)
+                                 ->where('teacher_cursuses.subject_id', $subject_id)
+                                 ->whereNull('end')
+                                 ->first();
+
+        return $cursus ? $cursus : null;
+
+    }
+
+
+    public function rankBuilder($data, $widthMaxAndMin = false)
+    {
+
+        $ranksTab = [];
+        $ranksTab_init = [];
+        $ranksTab_init_associative = [];
+
+        foreach ($data as $pupil_id_1 => $average_1) {
+
+            if ($average_1 !== null) {
+
+                $ranksTab_init[$pupil_id_1] = $average_1;
+            }
+
+        }
+
+        if($ranksTab_init){
+
+            $size = count($ranksTab_init);
+
+            $min = min($ranksTab_init);
+
+            $max = max($ranksTab_init);
+
+            if($size > 0){
+
+                $k = 1;
+                while (count($ranksTab_init_associative) < $size) {
+                    $av = max($ranksTab_init);
+                    $pupil_id = array_search($av, $ranksTab_init);
+                    $ranksTab_init_associative[$k] = [
+                        'id' => $pupil_id,
+                        'moy' => $av
+                    ];
+                    unset($ranksTab_init[$pupil_id]);
+                    $k++;
+                }
+
+                if($ranksTab_init_associative !== []){
+                    $size = count($ranksTab_init_associative);
+
+                    $index = 1;
+                    foreach ($ranksTab_init_associative as $key => $pupil_tab) {
+                        $moy = $pupil_tab['moy'];
+                        $id = $pupil_tab['id'];
+
+                        $pupil_model = Pupil::find($id);
+
+                        if($index == 1){
+                            $rank = 1;
+                            $exp = $pupil_model->sexe == 'male' ? 'er' : 'ère';
+                            $base = null;
+                        }
+                        else{
+                            $prev = $ranksTab_init_associative[$prev_index];
+
+                            if ($prev_rank == 1) {
+                                if($moy == $prev_moy){
+                                    $rank = 1;
+                                    $exp = $pupil_model->sexe == 'male' ? 'er' : 'ère';
+                                    $base = 'ex';
+                                }
+                                else{
+                                    if($moy == $prev_moy){
+                                        $rank = $prev_rank;
+                                        $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
+                                        $base = 'ex';
+                                    }
+                                    else{
+                                        $rank = $index;
+                                        $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
+                                        $base = null;
+                                    }
+                                }
+                            }
+                            else{
+                                if($moy == $prev_moy){
+                                    $rank = $prev_rank;
+                                    $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
+                                    $base = 'ex';
+                                }
+                                else{
+                                    $rank = $index;
+                                    $exp = $pupil_model->sexe == 'male' ? 'e' : 'ème';
+                                    $base = null;
+                                }
+
+                            }
+
+                            
+
+                        }
+
+                        $prev_rank = $rank;
+
+                        $prev_moy = $moy;
+
+                        $prev_index = $index;
+
+                        $mention = null;
+
+                        $mention = Tools::getMention($moy);
+
+                        $ranksTab[$id] = [
+                            'rank' => $rank,
+                            'exp' => $exp,
+                            'base' => $base,
+                            'moy' => $moy,
+                            'mention' => $mention,
+                            'id' => $pupil_model->id,
+                            'pupil' => $pupil_model,
+                            'min' => $min,
+                            'max' => $max,
+                        ];
+
+                        $index++;
+                        
+                    }
+
+                }
+
+            }
+            else{
+                return $ranksTab;
+            }
+
+
+            return $ranksTab;
 
         
 
+        }
+        else{
+
+            foreach($data as $pupil_id => $av){
+
+                $pupil_model = Pupil::find($pupil_id);
+
+                $exp = $pupil_model->sexe == "male" ? 'er' : 'ère';
+
+                $ranksTab[$pupil_id] = [
+                    'rank' => 1,
+                    'exp' => 'er',
+                    'base' => 'ex',
+                    'moy' => 0,
+                    'mention' => null,
+                    'id' => $pupil_model->id,
+                    'pupil' => $pupil_model,
+                    'min' => 0,
+                    'max' => 0,
+                ];
 
 
+            }
+
+        }
+        
+    }
+
+
+    public function getBest($data)
+    {
+        $averages = [];
+
+        foreach ($data as $pupil_id => $average) {
+
+            if($average){
+
+                $averages[$pupil_id] = $average;
+
+            }
+
+        }
+
+
+        return max($averages);
 
 
     }
+
+    public function getMin($data)
+    {
+        $averages = [];
+
+        foreach ($data as $pupil_id => $average) {
+
+            if($average){
+
+                $averages[$pupil_id] = $average;
+
+            }
+
+        }
+
+        return min($averages);
+
+    }
+
+
+
+    public function getBestSemestrialAverage($semestre = 1, $school_year = null, $takeBonus = true, $takeSanctions = true)
+    {
+        $data = [];
+        
+        $averages = $this->getClasseSummaryAverage($semestre, $school_year, $takeBonus, $takeSanctions);
+
+        foreach ($averages as $pupil_id => $average) {
+
+            if($average){
+
+                $data[$pupil_id] = $average;
+
+            }
+
+        }
+
+        return $this->getBest($data);
+
+    }
+
+
+    public function pupilsMigraterToClasseForNewSchoolYear($pupils, $school_year = null, $move = false)
+    {
+
+        if(count($pupils) && count($pupils) < 16){
+
+            DB::transaction(function($e) use ($pupils, $school_year, $move){
+
+                $school_year_model = $this->getSchoolYear($school_year);
+
+                $school_year_befor_model = $this->getSchoolYearBefor($school_year);
+
+                foreach($pupils as $pupil){
+
+                    if(is_object($pupil)){
+
+                        $pupil_id = $pupil->id;
+
+                        if($this->isNotPupilOfThisClasseThisSchoolYear($pupil_id)){
+
+                            $make = ClassePupilSchoolYear::create(['classe_id' => $this->id, 'pupil_id' => $pupil_id, 'school_year_id' => $school_year_model->id]);
+
+                            if($make && $school_year_model->isNotPupilOfThisSchoolYear($pupil_id)){
+
+                                $old_cursus = $pupil->cursus()->where('pupil_cursuses.school_year_id', $school_year_befor_model->id)->where('pupil_cursuses.classe_id', $pupil->classe_id)->first();
+
+                                if($old_cursus){
+
+                                    $old_cursus->update(['end' => Carbon::now(), 'fullTime' => true]);
+
+                                }
+                                else{
+
+                                    $cursus = PupilCursus::create(
+                                        [
+                                            'classe_id' => $pupil->classe_id,
+                                            'pupil_id' => $pupil->id,
+                                            'level_id' => $pupil->level_id,
+                                            'school_year_id' => $school_year_befor_model->id,
+                                            'start' => $pupil->created_at,
+                                            'end' => Carbon::now(),
+                                            'fullTime' => true,
+                                        ]
+                                    );
+
+
+                                }
+
+                                $update_classe = $pupil->update(['classe_id' => $this->id]);
+
+                                $attach = $school_year_model->pupils()->attach($pupil_id);
+
+                                PupilCursus::create(
+                                    [
+                                        'classe_id' => $this->id,
+                                        'pupil_id' => $pupil->id,
+                                        'level_id' => $this->level_id,
+                                        'school_year_id' => $school_year_model->id,
+                                        'start' => Carbon::now(),
+                                    ]
+                                );
+
+
+                                if(!$this->isOldPupilOfThisClasse($pupil_id)){
+
+                                    $this->classePupils()->attach($pupil_id);
+                                }
+                            }
+
+
+                        }
+                    }
+
+                }
+
+            });
+
+        }
+        else{
+
+            if(count($pupils) && count($pupils) >= 16){
+
+                dispatch(new JobMigratePupilsToClasse($this, $pupils, $school_year, $move))->delay(Carbon::now()->addSeconds(15));
+            }
+
+
+        }
+
+    }
+
+
+
+    public function isNotPupilOfThisClasseThisSchoolYear($pupil_id, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $has = $this->classePupilSchoolYear()->where('classe_pupil_school_years.school_year_id', $school_year_model->id)->where('classe_pupil_school_years.pupil_id', $pupil_id)->first();
+
+        return $has ? false : true;
+
+    }
+
+
+    public function isOldPupilOfThisClasse($pupil_id)
+    {
+        $has = $this->classePupils()->where('pupils.id', $pupil_id)->first();
+
+        return $has ? true : false;
+
+    }
+
 
 }

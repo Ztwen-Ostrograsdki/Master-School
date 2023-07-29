@@ -17,6 +17,8 @@ class ClassePupilSchoolYear extends Model
 
     use DateFormattor;
 
+    protected $DATABASE_NAME = 'classe_pupil_school_years';
+
     protected $fillable = [
         'classe_id',
         'pupil_id',

@@ -2,21 +2,25 @@
     @if($classe)
         <div class="w-100 my-1 mt-2">
             @if(auth()->user()->isAdminAs('master'))
-                <span wire:click="multiplePupilInsertions" class="btn bg-orange border border-white" title="Ajouter des aprrenants à cette classe">
+                <span wire:click="multiplePupilInsertions" class="btn bg-orange z-scale border border-white" title="Ajouter des aprrenants à cette classe">
                     <span class="fa fa-user-plus"></span>
                     <span>Multiple Ajout</span>
                 </span> 
-                <span wire:click="addNewPupilTo" class="btn btn-primary border border-white" title="Ajouter un aprrenant à cette classe">
+                <span wire:click="addNewPupilTo" class="btn z-scale mx-2 btn-primary border border-white" title="Ajouter un aprrenant à cette classe">
                     <span class="fa fa-user-plus"></span>
                     <span>Ajouter</span>
                 </span>
-                <span wire:click="editClasseSubjects"  class="btn mx-2 btn-secondary border border-white" title="Editer les matières de cette classe">
+                <span wire:click="editClasseSubjects"  class="btn mx-2 z-scale btn-secondary border border-white" title="Editer les matières de cette classe">
                     <span class="fa fa-edit"></span>
-                    <span>Editer</span>
+                    <span>Editer les matières</span>
+                </span>
+                <span wire:click="importPupilsIntoClasse" class="btn mx-2 btn-success border border-white z-scale" title="Importer des aprrenants">
+                    <span class="fa fa-download"></span>
+                    <span>Importer des apprenants</span>
                 </span>
             @endif
             @if($pupils && count($pupils))
-            <a href="{{route('classe_pdf', $classe->id)}}"  class="btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de cette classe...">
+            <a href="{{route('classe_pdf', $classe->id)}}"  class="z-scale btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de cette classe...">
                 <span class="fa fa-print"></span>
                 <span>Impr.</span>
             </a>

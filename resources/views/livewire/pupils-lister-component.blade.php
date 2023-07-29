@@ -2,7 +2,7 @@
     <div class="w-100 m-0 p-0 mx-auto">
         <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark p-3">
             <div class="card-header bg-dark"> 
-                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Effectuer une recherche...</h5>
+                <h5 class="card-title cursor-pointer" data-card-widget="collapse"></h5>
               <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                   <i class="fa fa-minus"></i>
@@ -19,7 +19,7 @@
         <div class="m-0 p-0 w-100">
             <blockquote class="text-warning py-2">
                 <h6 class="m-0 p-0 h6 text-white-50">
-                    Liste complète des apprenant du <span class="text-warning">{{$level}}</span> enregistrés sur la plateforme <span class="text-warning"></span>
+                    Liste complète des apprenant du <span class="text-warning">{{$level ? $level->nameInFrench() : ''}}</span> enregistrés sur la plateforme <span class="text-warning"></span>
 
                     <span class="float-right text-muted"> </span>
                 </h6>

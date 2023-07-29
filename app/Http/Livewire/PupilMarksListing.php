@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Pupil;
+use App\Models\School;
 use Livewire\Component;
 
 class PupilMarksListing extends Component
@@ -20,7 +21,6 @@ class PupilMarksListing extends Component
 
 
     public $pupil_id;
-    public $semestre_type = 'semestre';
     public $school_year;
     public $semestre_selected = 1;
     public $edit_mark_value = 0;
@@ -37,21 +37,62 @@ class PupilMarksListing extends Component
     public function render()
     {
         $pupil = null;
+
+        $effectif = 0;
+        
         $marks = null;
+        
         $pupil_id = $this->pupil_id;
+
         $school_year_model = $this->getSchoolYear();
+
         $devMaxLenght = 2;
+        
         $epeMaxLenght = 2;
+        
         $participMaxLenght = 2;
+        
         $noMarks = false;
+        
         $averageEPETabs = [];
+        
         $averageTabs = [];
+        
         $ranksTabs = [];
+        
         $classeCoefTabs = [];
+        
+        $semestrialAverages = [];
+        
+        $annualAverage = null;
+        
+        $semestre_type = 'Semestre';
+
+        $school = School::first();
+
+        $semestres = [1, 2];
+
+        if($school){
+
+            if($school->trimestre){
+
+                $semestre_type = 'Trimestre';
+
+                $semestres = [1, 2, 3];
+            }
+            else{
+
+                $semestres = [1, 2];
+            }
+        }
+
 
         if(session()->has('semestre_selected') && session('semestre_selected')){
+
             $semestre = intval(session('semestre_selected'));
+
             session()->put('semestre_selected', $semestre);
+
             $this->semestre_selected = $semestre;
         }
         else{
@@ -60,17 +101,25 @@ class PupilMarksListing extends Component
         }
 
         if ($pupil_id) {
+
             $pupil = Pupil::find($pupil_id);
+
             if($pupil){
 
                 $marks = $pupil->getMarks(null, $semestre, $school_year_model->school_year);
+                
                 $classe = $pupil->getCurrentClasse($school_year_model->id);
 
                 if($classe){
+
                     $subjects = $classe->subjects;
 
+                    $effectif = $classe->getEffectif();
+
                     if($subjects){
+
                         foreach ($subjects as $subject) {
+
                             $averageEPETabs[$subject->id] = $classe->getMarksAverage($subject->id, $this->semestre_selected, $school_year_model->school_year, 'epe')[$pupil->id];
 
                             $averageTabs[$subject->id] = $classe->getAverage($subject->id, $this->semestre_selected, $school_year_model->school_year)[$pupil->id];
@@ -78,24 +127,30 @@ class PupilMarksListing extends Component
                             $ranks = $classe->getClasseRank($subject->id, $this->semestre_selected, $school_year_model->school_year);
                             
                             if(isset($ranks[$pupil->id])){
+
                                 $ranksTabs[$subject->id] = $ranks[$pupil->id];
                             }
                             else{
+
                                 $ranksTabs[$subject->id] = null;
                             }
 
                             $classeCoefTabs[$subject->id] = $classe->get_coefs($subject->id, $school_year_model->id, true);
+
                         }
 
                     }
+                    foreach($semestres as $sm){
+
+                        $semestrialAverages[$sm] = $pupil->average($classe->id, $sm, $school_year_model->id);
+
+                    }
+
+
+                    $annualAverage = $pupil->annual_average($classe->id, $school_year_model->id);
+
                 }
 
-
-
-                
-
-
-                
 
                 $devMaxLenght = $pupil->getMarksTypeLenght(null, $semestre, $school_year_model->school_year, 'devoir') + 1;
 
@@ -127,14 +182,17 @@ class PupilMarksListing extends Component
         }
 
 
-        return view('livewire.pupil-marks-listing', compact('pupil', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'classeCoefTabs', 'averageEPETabs', 'averageTabs', 'ranksTabs'));
+        return view('livewire.pupil-marks-listing', compact('pupil', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'classeCoefTabs', 'averageEPETabs', 'averageTabs', 'ranksTabs', 'school_year_model', 'semestre_type', 'semestres', 'semestrialAverages', 'annualAverage', 'classe', 'effectif'));
     }
 
     public function addNewPupil()
     {
         $school_year = session('school_year_selected');
+        
         $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+        
         $classe = $school_year_model->classes()->first();
+        
         if($classe){
             $this->emit('addNewPupilToClasseLiveEvent', $classe->id);
         }

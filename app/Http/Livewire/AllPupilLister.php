@@ -76,7 +76,7 @@ class AllPupilLister extends Component
                     }
                     elseif($classe){
 
-                        $data = $classe->getPupils($school_year_model->id);
+                        $data = $classe->getClasseCurrentPupils($school_year_model->id);
                     }
 
                     if(count($data) > 0){

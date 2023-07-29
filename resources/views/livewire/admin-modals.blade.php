@@ -7,11 +7,14 @@
     @livewire('create-new-classe-group')
     @livewire('edit-classe-group-coeficient')
     @livewire('classe-group-manage')
+    @livewire('migrate-pupils-into-classe')
+    @livewire('move-pupil-to-new-classe')
     
     @livewire('edit-classe-group')
     @livewire('edit-classe-group-data')
     @livewire('create-level')
     @livewire('create-subject')
+    @livewire('defined-classe-teachers')
     
     @livewire('defined-semestres-periods')
     @livewire('event-periods-manager')

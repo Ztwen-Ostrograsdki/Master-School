@@ -2,12 +2,16 @@
 
 namespace App\Http\Livewire;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Jobs\JobUpdateClasseAllSemestresAverageIntoDatabase;
+use App\Jobs\JobUpdateClasseAnnualAverageIntoDatabase;
+use App\Jobs\JobUpdateClasseSemestrialAverageIntoDatabase;
 use App\Models\Classe;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\Mark;
 use App\Models\Pupil;
 use App\Models\Responsible;
 use App\Models\School;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -34,6 +38,18 @@ class ClasseProfil extends Component
     public $classe_subject_selected;
     public $semestre_selected = 1;
     public $search = null;
+
+    public $section_selected = 'marks';
+
+    public $sections = [
+        'liste' => 'Liste des apprenants', 
+        'time_plan' => 'Emploi du temps', 
+        'marks' => 'Les notes', 
+        'related_marks' => 'Les Participations', 
+        'lates_absences' => 'Les absences / retards', 
+        'classe_general_stats' => 'Tableau des stats', 
+        'averages' => 'Les moyennes'
+    ];
 
     public function mount($slug = null)
     {
@@ -69,6 +85,15 @@ class ClasseProfil extends Component
     }
 
 
+    public function updatedSectionSelected($section)
+    {
+        $this->section_selected = $section;
+
+        session()->put('classe_profil_section_selected', $section);
+
+    }
+
+
     public function resetSearch()
     {
         $this->reset('search');
@@ -78,22 +103,14 @@ class ClasseProfil extends Component
 
     public function render()
     {
-        $school = School::first();
 
-        $semestres = [1, 2];
 
-        if($school){
+        $semestres = $this->getSemestres();
 
-            if($school->trimestre){
+        if(count($semestres) == 3){
 
-                $this->semestre_type = 'trimestre';
+            $this->semestre_type = 'trimestre';
 
-                $semestres = [1, 2, 3];
-            }
-            else{
-
-                $semestres = [1, 2];
-            }
         }
 
         $school_year_model = $this->getSchoolYear();
@@ -142,6 +159,20 @@ class ClasseProfil extends Component
         else{
 
             session()->put('semestre_type', $this->semestre_type);
+        }
+
+
+        if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected')){
+
+            $section_selected = session('classe_profil_section_selected');
+
+            session()->put('classe_profil_section_selected', $section_selected);
+
+            $this->section_selected = $section_selected;
+        }
+        else{
+
+            session()->put('classe_profil_section_selected', $this->section_selected);
         }
 
 
@@ -527,8 +558,84 @@ class ClasseProfil extends Component
     }
 
 
-    public function setClasseProfilActiveSection($section)
+    public function optimizeSemestrialAverageFromDatabase($classe_id)
     {
-        session()->put('classe_profil_section_selected', $section);
+        $semestre = session('semestre_selected');
+
+        if($semestre){
+
+            $classe = Classe::find($classe_id);
+
+
+            if($classe && $semestre){
+
+                $school_year_model = $this->getSchoolYear();
+
+                dispatch(new JobUpdateClasseSemestrialAverageIntoDatabase($classe, $semestre, $school_year_model))->delay(Carbon::now()->addSeconds(15));
+
+            }
+
+        }
+        else{
+
+            $semestre_type = strtoupper($this->semestre_type);
+
+            $this->dispatchBrowserEvent('Toast', ['title' => "semestre_type INCONNU", 'message' => "Veuillez sélectionner d'abord le $semestre_type dont vous voudriez charger les données!", 'type' => 'warning']);
+
+
+        }
+
     }
+
+    public function optimizeClasseAveragesIntoDatabase($classe_id)
+    {
+        $semestres = $this->getSemestres();
+
+        $classe = Classe::find($classe_id);
+
+
+        if($classe && $semestres){
+
+            $school_year_model = $this->getSchoolYear();
+
+            dispatch(new JobUpdateClasseAllSemestresAverageIntoDatabase($classe, $semestres, $school_year_model))->delay(Carbon::now()->addSeconds(15));
+
+            dispatch(new JobUpdateClasseAnnualAverageIntoDatabase($classe, $school_year_model))->delay(Carbon::now()->addSeconds(30));
+
+
+        }
+
+    }
+
+    public function addNewsPupils($classe_id)
+    {
+        $school_year = session('school_year_selected');
+
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $classe = $school_year_model->findClasse($classe_id);
+
+        if($classe){
+
+            $this->emit('insertMultiplePupils', $classe->id);
+        }
+        else{
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
+        }
+
+    }
+
+
+    public function importPupilsIntoClasse($classe_id)
+    {
+        $this->emit('ImportPupilsIntoClasse', $classe_id);
+    }
+
+
+    public function movePupilFromThisClasse($classe_id)
+    {
+        // $this->emit('ImportPupilsIntoClasse', $classe_id);
+    }
+
+
 }

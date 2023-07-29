@@ -23,6 +23,7 @@ use App\Models\QotHour;
 use App\Models\RelatedMark;
 use App\Models\Responsible;
 use App\Models\School;
+use App\Models\SchoolHistory;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeacherAbsences;
@@ -307,6 +308,67 @@ class SchoolYear extends Model
         return ['current_period' => $current_period, 'semestre_calendars' => $semestre_calendars];
 
 
+    }
+
+
+    public function findClasse(int $classe_id)
+    {
+    	return $this->classes()->where('classes.id', $classe_id)->first();
+    }
+
+
+    public function findClasses(array $classes_id)
+    {
+    	return $this->classes()->whereIn('classes.id', $classes_id)->get();
+    }
+
+
+    public function findPupil(int $pupil_id)
+    {
+    	return $this->pupils()->where('pupils.id', $pupil_id)->first();
+    }
+
+    public function findPupils($pupils_id)
+    {
+    	return $this->pupils()->whereIn('pupils.id', $pupils_id)->get();
+    }
+
+
+    public function findTeacher(int $teacher_id)
+    {
+    	return $this->teachers()->where('teachers.id', $teacher_id)->first();
+    }
+
+    public function findTeachers(array $teachers_id)
+    {
+    	return $this->teachers()->whereIn('teachers.id', $teachers_id)->get();
+    }
+
+    public function findClasseGroup(int $classe_group_id)
+    {
+    	return $this->classe_groups()->where('classe_groups.id', $classe_group_id)->first();
+    }
+
+
+    public function findClasseGroups(array $classe_groups_id)
+    {
+    	return $this->classe_groups()->whereIn('classe_groups.id', $classe_groups_id)->get();
+    }
+
+
+
+    public function histories()
+    {
+
+        return $this->hasMany(SchoolHistory::class);
+
+    }
+
+    public function isNotPupilOfThisSchoolYear($pupil_id)
+    {
+        $has = $this->findPupil($pupil_id);
+
+        return $has ? false : true;
     }
 
 

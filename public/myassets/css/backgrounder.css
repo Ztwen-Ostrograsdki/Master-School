@@ -29,6 +29,12 @@ hr {
     margin: 0 !important;
 }
 
+label{
+
+    letter-spacing: 1.2px !important;
+
+}
+
 #adminsToggler {
     top: 50%;
 }
@@ -152,12 +158,12 @@ hr {
 
 .hoverable tr:hover, tr:hover{
     opacity: 1 !important;
-    background-color: rgba(10, 10, 40, 0.87) !important;
+    background-color: rgba(100, 100, 40, 0.87) !important;
     cursor: pointer;
 }
 
 .z-scale:hover {
-    transform: scale(1.1);
+    transform: scale(1.04);
 }
 
 .z-rotate:hover {
@@ -327,6 +333,15 @@ hr {
     color: cyan !important;
 }
 
+.text-green-y{
+
+    color: greenyellow !important;
+}
+.text-green-s{
+
+    color: springgreen !important;
+}
+
 .z-modal {
     margin: 0 auto !important;
 }
@@ -380,8 +395,35 @@ hr {
     background-color: rgba(10, 10, 40, 0.87) !important;
 }
 
+
+.bg-secondary-light-0 {
+    background-color: rgba(30, 15, 45, 0.87) !important;
+}
+
+
+.bg-secondary-light-2 {
+    background-color: rgba(9, 15, 20, 0.9) !important;
+}
+
+
+.bg-secondary-light-3 {
+    background-color: rgba(12, 20, 45, 0.91) !important;
+}
+
+.bg-secondary-light-1 {
+    background-color: rgba(12, 15, 30, 0.92) !important;
+}
+
 .z-bg-secondary {
     background-color: #334 !important;
+}
+.bg-green-y {
+    background-color: greenyellow !important;
+}
+
+
+.border-green-y{
+    border-color: greenyellow !important;
 }
 
 .z-secondary {
@@ -571,4 +613,16 @@ form.authentication-form input:focus{
 
 .text-underline{
     text-decoration: underline !important;
+}
+
+[class*=sidebar-dark-] .nav-treeview>.nav-item>.nav-link.active{
+    background-color: rgba(10, 10, 40, 0.7) !important;
+    color: white !important;
+    border: solid thin orange;
+}
+
+.dark-mode .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active, .dark-mode .sidebar-light-primary .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: rgba(12, 14, 40, 0.6) !important;
+    color: white !important;
+    border: solid thin orange;
 }

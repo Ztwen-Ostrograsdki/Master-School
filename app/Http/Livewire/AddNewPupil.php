@@ -6,6 +6,7 @@ use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\Level;
 use App\Models\Pupil;
+use App\Models\PupilCursus;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -53,9 +54,13 @@ class AddNewPupil extends Component
     public function render()
     {
         $classes = [];
+
         $levels = Level::all();
+
         $this->school_year_model = $this->getSchoolYear();
+
         if($this->school_year_model){
+
             $classes = $this->school_year_model->classes;
         }
         return view('livewire.add-new-pupil', compact('levels', 'classes'));
@@ -65,10 +70,15 @@ class AddNewPupil extends Component
     public function addNewPupilToClasseLiveEvent($classe_id)
     {
         $classe = $this->school_year_model->classes()->where('classes.id', $classe_id)->first();
+
         $this->school_year_model = $this->getSchoolYear();
+
         $this->classe = $classe;
+
         $this->classe_id = $classe->id;
+
         $this->level_id = $classe->level_id;
+
         $this->dispatchBrowserEvent('modal-addNewPupilToClasse');
     }
 
@@ -76,21 +86,31 @@ class AddNewPupil extends Component
     public function submit()
     {
         $this->validate();
+
         if($this->classe_id){
-            $classe = $this->school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+
+            $classe = $this->school_year_model->findClasse($this->classe_id);
+
             if($classe->level_id == $this->level_id){
+
                 $pupilNameHasAlreadyTaken = Pupil::where('lastName', $this->lastName)->where('firstName', $this->firstName)->first();
+
                 $last_id = 0;
+
                 $last = Pupil::latest()->first();
+
                 if($last){
+
                     $last_id = $last->id;
                 }
 
                 $matricule = date('Y'). '' .Str::random(3) . 'CSNDA' . ($last_id + 1);
 
                 if(!$pupilNameHasAlreadyTaken){
+
                     DB::transaction(function($e) use ($classe, $matricule) {
                         try {
+
                             $pupil = Pupil::create(
                                 [
                                     'firstName' => strtoupper($this->firstName),
@@ -108,7 +128,9 @@ class AddNewPupil extends Component
                                 ]
                             );
                             if($pupil){
+
                                 try {
+
                                     $joinedToClasseAndSchoolYear = ClassePupilSchoolYear::create(
                                         [
                                             'classe_id' => $this->classe_id,
@@ -116,17 +138,34 @@ class AddNewPupil extends Component
                                             'school_year_id' => $this->school_year_model->id,
                                         ]
                                     );
-                                    if($joinedToClasseAndSchoolYear){
+
+                                    $cursus = PupilCursus::create(
+                                        [
+                                            'classe_id' => $this->classe_id,
+                                            'pupil_id' => $pupil->id,
+                                            'level_id' => $classe->level_id,
+                                            'school_year_id' => $this->school_year_model->id,
+                                            'start' => Carbon::now()
+                                        ]
+                                    );
+
+                                    if($joinedToClasseAndSchoolYear && $cursus){
+
                                         try {
+
                                             $this->school_year_model->pupils()->attach($pupil->id);
+
                                             $classe->classePupils()->attach($pupil->id);
+
                                         } catch (Exception $e3) {
+
                                             $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'apprenant a échoué!", 'type' => 'error']);
                                             
                                         }
                                     }
                                     
                                 } catch (Exception $e2) {
+
                                     $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'apprenant a échoué!", 'type' => 'error']);
                                 }
                             }
@@ -141,19 +180,28 @@ class AddNewPupil extends Component
                     });
 
                     DB::afterCommit(function() use ($classe){
+
                         $firstName = strtoupper($this->firstName);
+
                         $lastName = ucwords($this->lastName);
+
                         $this->dispatchBrowserEvent('hide-form');
+
                         $this->resetErrorBag();
+
                         $this->reset('firstName', 'lastName', 'classe_id', 'contacts', 'sexe', 'nationality', 'birth_city', 'level_id', 'residence', 'last_school_from');
+
                         $this->dispatchBrowserEvent('Toast', ['title' => 'Inscription terminée', 'message' => "l'appreant $firstName $lastName a été ajouté à la classe de $classe->name avec succès! ", 'type' => 'success']);
+
                         $this->emit('classePupilListUpdated');
+
                         $this->emit('newPupilHasBeenAdded');
 
                     });
                 }
                 else{
                     $this->addError('lastName', "Un apprenant est déjà inscrit sous ce nom et prénoms");
+
                     $this->addError('firstName', "Un apprenant est déjà inscrit sous ce nom et prénoms");
                 }
             }
@@ -161,12 +209,6 @@ class AddNewPupil extends Component
                 $this->addError('level_id', 'Le cycle ne correspond pas à la classe sélectionnée');
             }
         }
-
-
-
-
     }
-
-
 
 }

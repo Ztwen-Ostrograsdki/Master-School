@@ -35,14 +35,14 @@
                 @guest
                     @routeHas('registration')
                         <li class="nav-item cursor-pointer">
-                            <a class="nav-link registerModalOpen @isRoute('registration') active disabled @endisRoute " data-toggle="modal" data-dismiss="modal" data-target="#registerModal">S'inscrire
+                            <a href="{{route('registration')}}" class="nav-link registerModalOpen @isRoute('registration') active disabled @endisRoute " >S'inscrire
                             <span class="sr-only">(current)</span>
                             </a>
                         </li> 
                     @endrouteHas
                     @routeHas('connexion')
                         <li class="nav-item cursor-pointer">
-                            <a class="nav-link loginOpen @isRoute('connexion') active disabled @endisRoute " data-toggle="modal" data-dismiss="modal" data-target="#loginModal">Connexion
+                            <a href="{{route('connexion')}}" class="nav-link loginOpen @isRoute('connexion') active disabled @endisRoute " >Connexion
                                 <span class="sr-only">(current)</span>
                             </a>
                         </li> 

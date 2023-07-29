@@ -46,6 +46,26 @@ class Level extends Model
         }
     }
 
+
+    public function nameInFrench()
+    {
+        if($this->name == 'maternal'){
+            return ' Maternelle';
+        }
+        elseif($this->name == 'primary'){
+            return 'Primaire';
+        }
+        elseif($this->name == 'secondary'){
+            return 'Secondaire';
+        }
+        elseif($this->name == 'superior'){
+            return 'Supérieur';
+        }
+        else{
+            return 'Inconnue';
+        }
+    }
+
     public function level_classes($school_year = null)
     {
         $classes = $this->classes;

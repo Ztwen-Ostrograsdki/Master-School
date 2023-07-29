@@ -16,7 +16,7 @@
 
             <span wire:click="disjoinAll" title="Supprimer les données de tous les enseignants relatives à cette année scolaire {{$school_year_model->school_year}} " class="fa bi-trash fx-25 mr-4 text-orange mt-2 cursor-pointer"></span>
 
-            <span wire:click="joinAll" title="Recharger tous les enseignants pour cette année scolaire {{$school_year_model->school_year}} " class="fa fa-recycle fx-25 mr-4 text-info mt-2 cursor-pointer"></span>
+            <span wire:click="joinAll" title="Recharger tous les enseignants pour cette année scolaire {{$school_year_model->school_year}} " class="fa fa-download fx-25 mr-4 text-info mt-2 cursor-pointer"></span>
 
             <span wire:click="resetSelectedData" title="Recharger la page" class="fa fa-recycle fx-25 mr-4 text-secondary mt-2 cursor-pointer"></span>
 

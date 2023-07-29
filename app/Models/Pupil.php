@@ -6,6 +6,7 @@ use App\Helpers\DateFormattor;
 use App\Helpers\ModelTraits\PupilTraits;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Helpers\ZtwenManagers\GaleryManager;
+use App\Models\Averages;
 use App\Models\Classe;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\ClassesSecurity;
@@ -53,6 +54,36 @@ class Pupil extends Model
     ];
 
     public $imagesFolder = 'pupilsPhotos';
+
+    public function averages()
+    {
+        return $this->hasMany(Averages::class);
+    }
+
+
+    public function average($classe_id, $semestre = null, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        return Averages::where('averages.pupil_id', $this->id)
+                        ->where('averages.school_year_id', $school_year_model->id)
+                        ->where('averages.classe_id', $classe_id)
+                        ->where('averages.semestre', $semestre)
+                        ->first();
+    }
+
+
+    public function annual_average($classe_id, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $averages = Averages::where('averages.pupil_id', $this->id)
+                        ->where('averages.school_year_id', $school_year_model->id)
+                        ->where('averages.classe_id', $classe_id)
+                        ->whereNull('averages.semestre')
+                        ->first();
+        return $averages;
+    }
 
     public function securities()
     {
@@ -224,6 +255,11 @@ class Pupil extends Model
 
 
     public function getName()
+    {
+        return $this->firstName . ' ' . $this->lastName;
+    }
+
+    public function getFormatedName()
     {
         return $this->firstName . ' ' . $this->lastName;
     }

@@ -52,10 +52,7 @@ class Mark extends Model
 
     public function school_year()
     {
-        if($this->school_years && count($this->school_years) > 0){
-            return $this->school_years()->first();
-        }
-        return null;
+        return $this->belongsTo(SchoolYear::class);
     }
 
     public function pupil()

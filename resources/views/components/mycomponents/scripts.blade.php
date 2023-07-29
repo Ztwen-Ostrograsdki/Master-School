@@ -12,7 +12,7 @@
 
 <script src="{{asset('registrationVendor/jquery/jquery.js')}}"></script>
 <script src="{{asset('myassets/js/registration/global.js')}}"></script>
-<script src="{{asset('js/ztw.js')}}"></script>
+<script src="{{asset('js/modals.js')}}"></script>
 <script src="{{asset('myassets/js/bootstrap.min.js')}}"></script>
 <script src="{{asset('myassets/js/popper.min.js')}}"></script>
 <script src="{{asset('myassets/js/ztw-animate.js')}}"></script>

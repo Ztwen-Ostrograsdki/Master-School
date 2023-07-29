@@ -2,16 +2,24 @@
 
 namespace App\Helpers\AdminTraits;
 
-use Illuminate\Support\Str;
-use App\Models\UserAdminKey;
+use App\Helpers\DateFormattor;
+use App\Models\ClassesSecurity;
 use App\Models\MyNotifications;
+use App\Models\SchoolHistory;
+use App\Models\UserAdminKey;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 
 /**
  * Manage all about the admins
  */
 trait AdminTrait{
+
+
+    use DateFormattor;
 
 
 
@@ -264,6 +272,95 @@ trait AdminTrait{
             return $notifications->delete();
         }
         
+    }
+
+
+    public function __destroyClasseSecuritiesKeyExpired(array $keys_id = [])
+    {
+
+        if($keys_id !== []){
+
+            $occurence = 0;
+
+            $keys = ClassesSecurity::whereIn('id', $keys_id)->get();
+
+            if(count($keys) > 0){
+
+                DB::transaction(function($e) use ($keys, $occurence){
+
+                    foreach($keys as $key){
+
+                        $duration = $key->duration; // in hours
+
+                        $initial_date = $key->updated_at;
+
+                        $start = Carbon::parse($initial_date)->timestamp;
+
+
+                        $diff_in_seconds = $this->__getTimestampInSecondsBetweenDates($start);
+
+
+                        $diff_in_hours = $diff_in_seconds / 3600;
+
+                        if($diff_in_hours >= $duration){
+
+                            $key->delete();
+
+                            $occurence++;
+
+                        }
+
+                    }
+
+
+                });
+
+                DB::afterCommit(function() use ($occurence){
+
+                    $this->emit('ClasseSecuritiesWasDelete', $occurence);
+
+                });
+
+
+            }
+
+
+        }
+
+
+    }
+
+
+    public function __createHistory($data)
+    {
+        if($data){
+
+            $table = $data['table'];
+            
+            $model_id = $data['model_id'];
+            
+            $content = $data['content'];
+            
+            $description = $data['description'];
+            
+            $school_year_id = $data['school_year_id'];
+            
+            $visibility = $data['visibility'];
+
+            $make = SchoolHistory::create([
+                'table' => $table,
+                'model_id' => $model_id,
+                'content' => $content,
+                'description' => $description,
+                'school_year_id' => $school_year_id,
+                'visibility' => $visibility,
+            ]);
+
+            return $make;
+
+        }
+
+
     }
 
 }

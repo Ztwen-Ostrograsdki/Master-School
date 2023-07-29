@@ -66,7 +66,7 @@ class TeacherListing extends Component
 
     }
 
-     public function addNewTeacher()
+    public function addNewTeacher()
     {
         $this->emit('addNewTeacher');
     }
