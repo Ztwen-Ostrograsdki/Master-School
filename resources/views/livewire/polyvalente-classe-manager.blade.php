@@ -89,6 +89,7 @@
                     </thead>
                     <tbody>
                         @foreach($pupils as $k => $p)
+
                             <tr class="">
                                 <td class="text-center border-right">{{ $loop->iteration }}</td>
                                 <td class="text-capitalize pl-2">
@@ -160,7 +161,7 @@
                                     <span class="">
                                         {{ $cl['root'] }}<sup>{{ $cl['sup'] }} </sup> {{ $cl['idc'] }}
                                     </span>
-                                    <small class="text-white-50 font-italic ml-2">({{ 'en ' . $school_year }})</small>
+                                    <small class="text-white-50 font-italic ml-2">({{ 'en ' . $school_year->school_year }})</small>
                                     @else
                                         <small class="text-white-50 font-italic ml-2">Aucune classe faite</small>
                                     @endif
@@ -189,9 +190,9 @@
                                             <span class="mr-2 {{$moy_an >= 10 ? 'text-green-y' : 'text-danger'}}">
                                                 {{ $moy_an > 9 ? $moy_an : '0' . $moy_an }}
                                             </span>
-                                            <span class="text-orange mx-1">
+                                            (<span class="text-orange mx-1">
                                                 <span>{{$annualAverage->rank}}</span><sup>{{$annualAverage->exp}}</sup><small>{{$annualAverage->base }} </small>
-                                            </span>
+                                            </span>)
                                         @else
 
                                         @endif
@@ -213,30 +214,15 @@
                                 @if(!$editingPupilName)
                                     <td class="text-center w-auto p-0">
                                         <span class="row w-100 m-0 p-0">
-                                            @if ($p->deleted_at)
-                                                <span title="Supprimer définivement {{$p->name}} de la base de donnée" wire:click="forceDeleteAUser({{$p->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
-                                                    <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
-                                                </span>
-                                                <span title="Restaurer {{$p->name}}" wire:click="restoreAUser({{$p->id}})" class="text-success col-4 m-0 p-0 cursor-pointer border-right border-left">
-                                                    <span class="fa fa-reply py-2 px-2"></span>
-                                                </span>
-                                                <span title="Débloquer {{$p->name}}" wire:click="unblockAUser({{$p->id}})" class="text-success col-4 m-0 p-0 cursor-pointer">
-                                                    <span class="fa fa-unlock py-2 px-2"></span>
-                                                </span>
-                                            @else
-                                                <span title="Supprimer définivement {{$p->name}} de la base de donnée" wire:click="forceDeletePupil({{$p->id}})" class="text-danger col-3 m-0 p-0 cursor-pointer">
-                                                    <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
-                                                </span>
-                                                <span title="Envoyer {{$p->name}} dans la corbeile" wire:click="deletePupil({{$p->id}})" class="text-warning border-right border-left col-3 m-0 p-0 cursor-pointer">
-                                                    <span class="cursor-pointer fa fa-trash py-2 px-2"></span>
-                                                </span>
-                                                <span title="Bloquer {{$p->name}}" class="text-info col-3 m-0 p-0 cursor-pointer border-right">
-                                                    <span class="fa fa-lock py-2 px-2"></span>
-                                                </span>
-                                                <span title="Faire migrer l'apprenant {{$p->name}}" class="text-success col-3 m-0 p-0 cursor-pointer border-right">
-                                                    <span class="fa fa-recycle py-2 px-2"></span>
-                                                </span>
-                                            @endif
+                                            <span title="Supprimer définivement {{$p->getName()}} de la base de donnée" wire:click="forceDeletePupil({{$p->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                                <span class="text-danger cursor-pointer z-scale fa fa-trash py-2 px-2"></span>
+                                            </span>
+                                            <span title="Bloquer {{$p->getName()}}" class="text-info col-4 m-0 p-0 cursor-pointer border-left border-right">
+                                                <span class="fa fa-lock py-2 z-scale px-2"></span>
+                                            </span>
+                                            <span wire:click="migrateTo({{$p->id}})" title="Faire migrer l'apprenant {{$p->getName()}}" class="text-success col-4 m-0 p-0 cursor-pointer">
+                                                <span class="fa fa-recycle z-scale py-2 px-2"></span>
+                                            </span>
                                         </span>
                                     </td>
                                 @endif

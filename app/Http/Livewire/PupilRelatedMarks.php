@@ -57,10 +57,13 @@ class PupilRelatedMarks extends Component
 
 
         $pupil_id = $this->pupil_id;
+
         if($pupil_id){
 
             $pupil = Pupil::find($pupil_id);
+
             if($pupil){
+                
                 $related_marks = $school_year_model->related_marks()
                                                    ->where('pupil_id', $pupil_id)
                                                    ->where('semestre', $this->semestre_selected)

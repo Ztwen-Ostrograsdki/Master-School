@@ -43,7 +43,7 @@
                             <col>
                             <colgroup span="2"></colgroup>
                             <col>
-                            <tr class="text-center z-bg-secondary-dark">
+                            <tr class="text-center bg-secondary-light-0">
                                 <td rowspan="2">No</td>
                                 <td rowspan="2">Classe</td>
                                 <th colspan="3" scope="colgroup">Effectif</th>

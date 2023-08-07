@@ -6,6 +6,7 @@ use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\ClasseGroup;
 use App\Models\Pupil;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class MovePupilToNewClasse extends Component
@@ -32,8 +33,12 @@ class MovePupilToNewClasse extends Component
         'just_move' => "Just change the pupil's classe and use they data for the new classe",
         'same_promotion' => "Moove the pupil to a same classe's promotion and use they data for the new classe",
         'migrate' => "Upgrade the pupil to a high classe level like a new school year start",
-        'reset_data' => "Remove the pupil's classe and send it into a polyvalense classe",
+        'reset_data' => "Remove the pupil's classe and send it into a polyvalense classe after clearing all they data",
+        'to_polyvalence' => "Remove the pupil's classe and send it into a polyvalense classe no data will be clear",
     ];
+
+
+    protected $rules = ['move_type' => 'required|string|bail', 'classe_id' => 'required|int'];
 
     public $title = "Définition de la nouvelle classe de l'apprenant";
 
@@ -157,7 +162,7 @@ class MovePupilToNewClasse extends Component
             }
 
         }
-        elseif($this->move_type == 'reset_data'){
+        elseif($this->move_type == 'reset_data' || $this->move_type == 'to_polyvalence'){
 
             $classes = Classe::where('name', 'like', '%polyvalente%')->where('level_id', $this->pupil->level_id)->get();
             
@@ -196,7 +201,7 @@ class MovePupilToNewClasse extends Component
             $classe_groups = $this->school_year_model->classe_groups;
 
         }
-        elseif($this->move_type == 'reset_data'){
+        elseif($this->move_type == 'reset_data' || $this->move_type == 'to_polyvalence'){
 
             $classe_groups = [];
             
@@ -215,7 +220,74 @@ class MovePupilToNewClasse extends Component
 
     public function submit()
     {
+        $this->validate();
 
+        $move_type = $this->move_type;
+
+        DB::transaction(function($e) use ($move_type){
+
+            $pupils = [];
+
+            $pupil = $this->pupil;
+
+            $school_year_model = $this->school_year_model;
+
+            if($move_type == 'reset_data'){
+
+                $pupil->pupilDeleter($school_year_model->id, false);
+
+            }
+            else{
+
+                if(in_array($move_type, ['just_move', 'migrate', 'same_promotion', 'to_polyvalence'])){
+
+                    $juste_move = in_array($move_type, ['just_move', 'same_promotion', 'to_polyvalence']) ? true : false;
+
+                    $pupils[] = $pupil;
+
+                    $classe = $school_year_model->findClasse($this->classe_id);
+
+                    if($classe){
+
+                        if(count($pupils)){
+
+                            $classe->pupilsMigraterToClasseForNewSchoolYear($pupils, $school_year_model->id, $juste_move);
+                        }
+
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('Toast', ['title' => 'ECHEC DE LA MISE A JOUR', 'message' => "La migration a échoué!", 'type' => 'error']);
+
+                    }
+
+                }
+                
+            }
+
+        });
+
+
+        DB::afterCommit(function(){
+
+            $this->emit('GlobalDataUpdated');
+
+            $this->cancel();
+
+            $this->dispatchBrowserEvent('Toast', ['title' => 'MISE A JOUR TERMINEE', 'message' => "La migration été faite avec succès!", 'type' => 'success']);
+
+            $this->emit('GlobalDataUpdated');
+
+
+        });
+    }
+
+
+    public function cancel()
+    {
+        $this->dispatchBrowserEvent('hide-form');
+        
+        $this->reset('move_type', 'current_classe', 'pupil', 'position', 'classe_id', 'classe_group_id', 'school_year_model');
 
     }
+
 }

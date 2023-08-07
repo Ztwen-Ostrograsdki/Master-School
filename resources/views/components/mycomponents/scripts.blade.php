@@ -18,7 +18,8 @@
 <script src="{{asset('myassets/js/ztw-animate.js')}}"></script>
 <script src="{{asset('myassets/js/chat.js')}}"></script>
 <link rel="stylesheet" href="{{ asset('myassets/css/admin/sweetAlert.css')}}">
-
+<script src="{{asset('js/toasters.js')}}"></script>
+<script src="{{asset('js/actions.js')}}"></script>
     @stack('modals')
 
     @livewireScripts

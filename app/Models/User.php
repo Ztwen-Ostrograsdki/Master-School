@@ -18,6 +18,7 @@ use App\Models\Parentable;
 use App\Models\ResetEmailConfirmation;
 use App\Models\Role;
 use App\Models\Teacher;
+use App\Models\Transfer;
 use App\Models\User as ModelsUser;
 use App\Models\UserAdminKey;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -57,6 +58,7 @@ class User extends Authenticatable
         'new_email',
         'password',
         'role_id',
+        'teacher_id',
         'school_year',
         'email_verified_token',
         'new_email_verified_token',
@@ -98,6 +100,12 @@ class User extends Authenticatable
     ];
 
 
+    public function transfers()
+    {
+        return $this->hasMany(Transfer::class);
+    }
+
+
     public $imagesFolder = 'usersPhotos';
 
     
@@ -117,7 +125,9 @@ class User extends Authenticatable
     {
         
         if($this->role_id){
+
             $role = Role::whereId($this->role_id)->first();
+            
             return $role ? $role : null;
         }
         else{
@@ -138,8 +148,16 @@ class User extends Authenticatable
     }
 
 
+    public function getParentable()
+    {
 
-    public function parent()
+        return Parentable::where('user_id', $this->id)->first();
+
+    }
+
+
+
+    public function parentable()
     {
         return $this->hasOne(Parentable::class);
     }

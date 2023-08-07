@@ -22,58 +22,6 @@
                            </div>
                         </div>
                         <hr class="m-0 p-0 bg-white w-100">
-                        <div class="m-0 py-2 px-2 @if($activeTagName == 'panier') z-bg-orange @endif">
-                           <div class="d-flex w-100 justify-content-between cursor-pointer m-0 p-0" wire:click="setActiveTag('panier', 'Panier')">
-                                <span class="bi-cart-check "></span>
-                                <h6 class="w-100 ml-3 d-none d-lg-inline d-xl-inline">Panier</h6>
-                                @if ($carts_counter < 10)
-                                    <span class="">(0{{ $carts_counter }})</span>
-                                @else
-                                    <span class="">({{ $carts_counter }})</span>
-                                @endif
-                                <span class="@if($activeTagName == 'panier') bi-chevron-down @else bi-chevron-right @endif "></span>
-                           </div>
-                        </div>
-                        <hr class="m-0 p-0 bg-white w-100">
-                        <div class="m-0 py-2 px-2 @if($activeTagName == 'demandes') z-bg-orange @endif">
-                           <div class="d-flex justify-content-between w-100 cursor-pointer m-0 p-0" wire:click="setActiveTag('demandes', 'Les demandes envoyées')">
-                                <span class="bi-person-plus"></span>
-                                <h6 class="w-100 ml-3 d-none d-lg-inline d-xl-inline">Demandes envoyées</h6>
-                                @if (count($demandes) < 10)
-                                    <span class="">(0{{ count($demandes) }})</span>
-                                @else
-                                    <span class="">({{ count($demandes) }})</span>
-                                @endif
-                                <span class="@if($activeTagName == 'demandes') bi-chevron-down @else bi-chevron-right @endif "></span>
-                           </div>
-                        </div>
-                        <hr class="m-0 p-0 bg-white w-100">
-                        <div class="m-0 py-2 px-2 @if($activeTagName == 'followers') z-bg-orange @endif">
-                            <div class="d-flex justify-content-between w-100 cursor-pointer m-0 p-0" wire:click="setActiveTag('followers', 'Les amis qui me suivent')">
-                                <span class="bi-people-fill"></span>
-                                <h6 class="w-100 ml-3 d-none d-lg-inline d-xl-inline">Followers</h6>
-                                @if (count($myFollowers) < 10)
-                                    <span class="">(0{{ count($myFollowers) }})</span>
-                                @else
-                                    <span class="">({{ count($myFollowers) }})</span>
-                                @endif
-                                <span class="@if($activeTagName == 'followers') bi-chevron-down @else bi-chevron-right @endif "></span>
-                            </div>
-                        </div>
-                        <hr class="m-0 p-0 bg-white w-100">
-                        <div class="m-0 py-2 px-2 @if($activeTagName == 'friends') z-bg-orange @endif">
-                            <div class="d-flex justify-content-between w-100 cursor-pointer m-0 p-0" wire:click="setActiveTag('friends', 'Vos Amis')">
-                                <span class="bi-person-heart"></span>
-                                <h6 class="w-100 d-none d-lg-inline d-xl-inline ml-3">Mes Amis</h6>
-                                @if (count($myFriends) < 10)
-                                    <span class="">(0{{ count($myFriends) }})</span>
-                                @else
-                                    <span class="">({{ count($myFriends) }})</span>
-                                @endif
-                                <span class="@if($activeTagName == 'friends') bi-chevron-down @else bi-chevron-right @endif "></span>
-                            </div>
-                        </div>
-                        <hr class="m-0 p-0 bg-white w-100">
                         <div class="m-0 py-2 px-2">
                             <div class="d-flex flex-column w-100 cursor-pointer m-0 p-0 justify-content-around">
                                 <span title="Détruire la clé de session d'administration" wire:click="destroyAdminSessionKey" class="cursor-pointer py-1 border rounded px-2">
@@ -150,8 +98,11 @@
                      <div class="border mt-3 p-3">
                         <div class="mx-auto justify-center d-flex w-100">
                            <h5 class=" text-white w-100">
-                               <span class="float-left text-uppercase">{{$activeTagTitle}}</span>
-                               <a class="float-right text-white btn bg-primary border-white border" href="#">
+                               <a href="{{route('upload_epreuves')}}" class="float-left text-white border h6 p-2 bg-primary z-scale border-white border">
+                                   <span class="">Envoyez mes épreuves</span>
+                                   <strong class="fa fa-upload text-white "></strong>
+                               </a>                              
+                               <a class="float-right text-white btn bg-orange border-white border" href="#">
                                    <span class="">Optimiser le profil</span>
                                    <strong class="bi-person-badge text-white "></strong>
                                </a>

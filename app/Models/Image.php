@@ -14,6 +14,7 @@ class Image extends Model
 {
     use HasFactory;
     use SoftDeletes;
+    
     const DEFAULT_PROFIL_PHOTO_PATH = "/myassets/images/product_02.jpg";
 
     protected $fillable = [

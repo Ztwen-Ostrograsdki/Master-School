@@ -20,6 +20,7 @@ class PolyvalenteClasseManager extends Component
         'classeUpdated' => 'reloadClasseData',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
         'UpdatedGlobalSearch' => 'reloadClasseDataOnSearch',
+        'GlobalDataUpdated' => 'reloadClasseData',
     ];
     
     
@@ -112,16 +113,15 @@ class PolyvalenteClasseManager extends Component
         return view('livewire.polyvalente-classe-manager', compact('classe', 'pupils', 'school_year_model'));
     }
 
-    public function deletePupil($pupil_id)
+    public function migrateTo($pupil_id)
     {
-        return false;
         $pupil = Pupil::find($pupil_id);
+
         if($pupil){
-            $pupil->delete();
+
+            $this->emit('MovePupilToNewClasse', $pupil->id);
         }
-        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "l'apprenant $pupil->name envoyé dans la corbeille!", 'type' => 'success']);
-        $this->emit('classeUpdated');
-        $this->emit('classePupilListUpdated');
+        
     }
 
 
@@ -137,60 +137,38 @@ class PolyvalenteClasseManager extends Component
 
     public function forceDeletePupil($pupil_id)
     {
-        return false;
         $pupil = Pupil::find($pupil_id);
+
         if($pupil){
-            DB::transaction(function($e) use ($pupil){
-                $school_year_model = $this->getSchoolYear();
-                $marks = $pupil->marks;
-                $classes = $pupil->classes;
 
-                $pupil->marks()->each(function($mark) use ($school_year_model){
-                    $school_year_model->marks()->detach($mark->id);
-                    $mark->delete();
-                });
-
-
-                $pupil->classes()->each(function($classe) use ($pupil){
-                    $classe->classePupils()->detach($pupil->id);
-                });
-
-                $pupil->related_marks()->each(function($r){
-                    $r->delete();
-                });
-
-                $pupil->absences()->delete();
-                $pupil->lates()->delete();
-                $school_year_model->pupils()->detach($pupil->id);
-                $pupil->forceDelete();
-
-            });
-            DB::afterCommit(function() use ($pupil){
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "l'apprenant $pupil->name a été supprimé définitivement!", 'type' => 'success']);
-                $this->emit('classeUpdated');
-                $this->emit('classePupilListUpdated');
-            });
+            $pupil->pupilDeleter(null, true);
         }
-        
     }
 
-   
 
     public function changePupilSexe($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
+
         if($pupil){
+
             $sexe = $pupil->sexe;
+
             if($pupil->sexe == 'male'){
+
                 $pupil->update(['sexe' => 'female']);
             }
             else{
+
                 $pupil->update(['sexe' => 'male']);
             }
+
             $this->emit('classeUpdated');
+
             $this->emit('classePupilListUpdated');
         }
         else{
+            
             $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Une ereure est survenue!", 'type' => 'error']);
         }
     } 

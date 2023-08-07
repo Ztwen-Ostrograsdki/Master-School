@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DRIVER', 'local'),
+    'default' => env('FILESYSTEM_DRIVER', 'public'),
 
     /*
     |--------------------------------------------------------------------------
@@ -61,6 +61,11 @@ return [
             'root' => public_path().('/teachersPhotos'),
             'visibility' => 'public',
         ],
+        'epreuvesFolder' => [
+            'driver' => 'local',
+            'root' => public_path().('epreuvesFolder'),
+            'visibility' => 'public',
+        ],
 
         's3' => [
             'driver' => 's3',
@@ -92,6 +97,7 @@ return [
         public_path('storage/pupilsPhotos') => storage_path('app/pupilsPhotos'),
         public_path('storage/classesPhotos') => storage_path('app/classesPhotos'),
         public_path('storage/teachersPhotos') => storage_path('app/teachersPhotos'),
+        public_path('storage/epreuvesFolder') => storage_path('app/epreuvesFolder'),
 
     ],
 

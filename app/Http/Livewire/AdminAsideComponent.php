@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\ClasseGroup;
 use App\Models\Level;
+use App\Models\Parentable;
 use App\Models\School;
 use App\Models\SchoolYear;
 use Livewire\Component;
@@ -47,6 +48,8 @@ class AdminAsideComponent extends Component
 
         $pupils = [];
 
+        $parents = [];
+
         $teachers = [];
 
         $classe_groups = [];
@@ -69,11 +72,13 @@ class AdminAsideComponent extends Component
 
             $teachers = $school_year_model->teachers;
 
+            $parents = Parentable::all();
+
         }
 
         
 
-        return view('livewire.admin-aside-component', compact('levels', 'pupils', 'teachers', 'classes', 'school_name', 'classe_groups', 'school_year_model'));
+        return view('livewire.admin-aside-component', compact('levels', 'pupils', 'teachers', 'classes', 'school_name', 'classe_groups', 'school_year_model', 'parents'));
     }
 
     public function addNewPupil()

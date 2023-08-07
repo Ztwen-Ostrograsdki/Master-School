@@ -19,7 +19,7 @@
                     <colgroup span="3"></colgroup>
                     <col>
                     <col>
-                    <tr class="text-center">
+                    <tr class="text-center bg-secondary-light-0">
                         <th rowspan="2" scope="colgroup">No</th>
                         <th rowspan="2" scope="colgroup">Les matières</th>
                         <th colspan="{{$epeMaxLenght}}" scope="colgroup">Les interrogations</th>
@@ -31,7 +31,7 @@
                             <span class="bi-tools"></span>
                         </td>
                     </tr>
-                    <tr class="text-center">
+                    <tr class="text-center bg-secondary-light-2">
                         @for ($e = 1; $e <= $epeMaxLenght; $e++)
                             <th scope="col" class="epe{{$e}}">EPE {{ $e }}</th>
                         @endfor

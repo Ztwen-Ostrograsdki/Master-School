@@ -98,8 +98,12 @@ class ClassePupilsLister extends Component
 
     public function forceDeletePupil($pupil_id)
     {
-        
-        
+        $pupil = Pupil::find($pupil_id);
+
+        if($pupil){
+
+            $pupil->pupilDeleter(null, true);
+        }
     }
 
     public function editClasseSubjects($classe_id = null)
@@ -133,12 +137,17 @@ class ClassePupilsLister extends Component
     public function addNewPupilTo()
     {
         $school_year = session('school_year_selected');
+
         $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+
         $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+
         if($classe){
+
             $this->emit('addNewPupilToClasseLiveEvent', $classe->id);
         }
         else{
+
             $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
         }
 
@@ -147,15 +156,22 @@ class ClassePupilsLister extends Component
     public function changePupilSexe($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
+
         if($pupil){
+
             $sexe = $pupil->sexe;
+
             if($pupil->sexe == 'male'){
+
                 $pupil->update(['sexe' => 'female']);
             }
             else{
+
                 $pupil->update(['sexe' => 'male']);
             }
+
             $this->emit('classeUpdated');
+
             $this->emit('classePupilListUpdated');
         }
         else{
@@ -166,12 +182,17 @@ class ClassePupilsLister extends Component
     public function multiplePupilInsertions()
     {
         $school_year = session('school_year_selected');
+
         $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+
         $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+
         if($classe){
+
             $this->emit('insertMultiplePupils', $classe->id);
         }
         else{
+
             $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
         }
 
@@ -180,13 +201,19 @@ class ClassePupilsLister extends Component
     public function editPupilName($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
+
         if($pupil){
+
             $this->pupil_id = $pupil->id;
+
             $this->pupilFirstName = $pupil->firstName;
+
             $this->pupilLastName = $pupil->lastName;
+
             $this->editingPupilName = true;
         }
         else{
+
             $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "L'apprenant est introuvable!", 'type' => 'error']);
         }
     }
@@ -198,8 +225,11 @@ class ClassePupilsLister extends Component
     public function updatePupilName()
     {
         $pupilNameHasAlreadyTaken = Pupil::where('lastName', $this->pupilLastName)->where('firstName', $this->pupilFirstName)->first();
+
         $pupil = Pupil::find($this->pupil_id);
+
         if(!$pupilNameHasAlreadyTaken && $pupil){
+
             $p = $pupil->update(
                 [
                     'firstName' => strtoupper($this->pupilFirstName),
@@ -207,9 +237,13 @@ class ClassePupilsLister extends Component
                 ]
             );
             if($p){
+
                 $this->reset('pupil_id', 'editingPupilName', 'pupilFirstName', 'pupilLastName');
+
                 $this->resetErrorBag();
+
                 $this->emit('classeUpdated');
+
                 $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "Opération déroulée avec succès!", 'type' => 'success']);
             }
         }
@@ -222,6 +256,50 @@ class ClassePupilsLister extends Component
     public function importPupilsIntoClasse()
     {
         $this->emit('ImportPupilsIntoClasse', $this->classe_id);
+    }
+
+    public function migrateTo($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+
+        if($pupil){
+
+            $this->emit('MovePupilToNewClasse', $pupil->id);
+        }
+        
+    }
+    
+    public function lockMarksUpdating($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+
+        $pupil->lockPupilMarksUpdating();
+
+    }
+
+
+    public function unlockMarksUpdating($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+
+        $pupil->unlockPupilMarksUpdating();
+
+    }
+
+    public function lockMarksInsertion($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+
+        $pupil->lockPupilMarksInsertion();
+
+    }
+
+    public function unlockMarksInsertion($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+        
+        $pupil->unlockPupilMarksInsertion();
+
     }
 
 

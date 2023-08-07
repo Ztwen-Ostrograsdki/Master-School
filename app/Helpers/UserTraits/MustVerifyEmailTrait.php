@@ -2,13 +2,14 @@
 
 namespace App\Helpers\UserTraits;
 
-use Illuminate\Support\Str;
-use Illuminate\Support\Carbon;
 use App\Notifications\ResetEmail;
-use Illuminate\Support\Facades\URL;
+use App\Notifications\SentEmailVerificationToUser;
+use App\Notifications\SentParentKeyToUserNotification;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Notifications\SentEmailVerificationToUser;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use phpDocumentor\Reflection\Types\Boolean;
 
 trait MustVerifyEmailTrait
@@ -91,6 +92,17 @@ trait MustVerifyEmailTrait
     public function sendEmailVerificationNotification()
     {
         $this->notify(new SentEmailVerificationToUser);
+    }
+
+
+    /**
+     * Send the email verification notification.
+     *
+     * @return void
+     */
+    public function sendParentableKeyNotification($key)
+    {
+        $this->notify(new SentParentKeyToUserNotification($key));
     }
 
 

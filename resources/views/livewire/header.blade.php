@@ -14,10 +14,10 @@
                     <x-z-linker :routeName="'visitation'" :isActive="request()->routeIs('visitation')">
                         {{ __('Visiter') }}
                     </x-z-linker>
-                    <x-z-linker :routeName="'parents'" :isActive="request()->routeIs('parents')">
-                        {{ __('Parents') }}
-                    </x-z-linker>
                     @auth
+                        <x-z-linker :params="['id' => auth()->user()->id]" :routeName="'parent_profil'" :isActive="request()->routeIs('parent_profil')">
+                            {{ __('Espace Parents') }}
+                        </x-z-linker>
                         @isAdmin(Auth::user())
                         <x-z-linker :routeName="'admin'" :isActive="request()->routeIs('admin')">
                             {{ __('Administration') }}

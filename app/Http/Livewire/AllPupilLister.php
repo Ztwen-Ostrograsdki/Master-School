@@ -17,6 +17,7 @@ class AllPupilLister extends Component
         'UpdatedGlobalSearch' => 'updatedSearch',
         'pupilUpdated' => 'reloadData',
         'UpdatedSchoolYearData' => 'reloadData',
+        'GlobalDataUpdated' => 'reloadData',
     ];
 
     public $counter = 0;
@@ -290,7 +291,7 @@ class AllPupilLister extends Component
 
 
 
-     public function resetSearch()
+    public function resetSearch()
     {
         $this->reset('search');
     }

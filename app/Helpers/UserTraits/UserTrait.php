@@ -265,5 +265,426 @@ trait UserTrait{
             return $this;
         });
     }
+
+
+    public function getUsers($search = null, $blocked = false, $email_verified_token = null, $pseudo = null, $roles = [], $sexe = null, $teacher = null)
+    {
+        // where s : => pseudo - role - sexe - email_verified_token - blocked - teacher
+        $users = [];
+
+        if($search){
+
+
+        }
+
+
+
+        return $users;
+
+    }
+
+
+    /**
+     * @return only ids
+     */
+    public function getUsersWithoutSearch($blocked = false, $email_verified_token = null, $pseudo = null, $roles = [], $sexe = null, $teacher = null)
+    {
+        $users = [];
+
+        if($blocked){
+
+            if($email_verified_token){
+
+                if($pseudo){
+
+                    if($roles){
+
+                        if($sexe){
+
+                            if($teacher){
+
+                                //b e p r s t
+
+                            }
+                            else{
+
+                                //b e p r s
+
+
+                            }
+
+
+                        }
+                        elseif($teacher){
+
+                            //b e p r t
+
+                        }
+                        else{
+
+                            //b e p r
+
+                        }
+
+                    }
+                    elseif($sexe){
+
+                        if($teacher){
+
+                            //b e p s t
+
+                        }
+                        else{
+
+                            //b e p s
+
+                        }
+
+                    }
+                    elseif($teacher){
+
+                        //b e p t
+
+                    }
+                    else{
+
+                        //b e p
+
+                    }
+
+                }
+                elseif($roles){
+
+                    if($sexe){
+
+                        if($teacher){
+
+                            //b e p s t
+
+                        }
+                        else{
+
+                            //b e r s
+
+
+                        }
+
+                    }
+                    elseif($teacher){
+
+                        //b e r t
+
+                    }
+                    else{
+
+                        //b e r
+
+
+                    }
+
+                }
+                elseif($sexe){
+
+                    if($teacher){
+
+                        //b e s t
+
+
+                    }
+                    else{
+                        //b e s
+
+                    }
+
+                }
+                elseif($teacher){
+
+                    //b e t
+
+                }
+                else{
+
+                    //b e
+
+
+                }
+
+            }
+            elseif($pseudo){
+
+                if($roles){
+
+                    if($sexe){
+
+                        if($teacher){
+                            //b p r s t
+
+                        }
+                        else{
+
+                            //b p r s
+
+
+                        }
+
+
+                    }
+                    elseif($teacher){
+                        //b p r t
+
+                    }
+                    else{
+                        //b p r
+
+                    }
+
+
+                }
+                elseif($sexe){
+
+                    if($teacher){
+                        //b p s t
+
+
+                    }
+                    else{
+
+                        //b p s
+
+
+                    }
+
+                }
+                elseif($teacher){
+                    //b p t
+
+                }
+                else{
+
+                    //b p
+
+
+                }
+
+            }
+            elseif($roles){
+
+                if($sexe){
+
+                    if($teacher){
+                        //b r s t
+
+                    }
+                    else{
+
+                        //b r s
+
+                    }
+
+                }
+                elseif($teacher){
+                    //b r t
+
+                }
+                else{
+                    //b r s t
+
+                }
+
+            }
+            elseif($sexe){
+
+                if($teacher){
+
+                    //b s t
+
+                }
+                else{
+                    //b s
+
+                }
+
+            }
+            elseif($teacher){
+                //b t
+
+            }
+            else{
+
+                //b
+
+
+            }
+
+        }
+        else{
+
+            if($email_verified_token){
+
+                if($pseudo){
+
+
+                }
+                elseif($roles){
+
+                    if($sexe){
+
+                        if($teacher){
+                            //e r s t
+
+                        }
+                        else{
+                            //e r s
+
+                        }
+
+                    }
+                    elseif($teacher){
+                        //e r t
+
+
+                    }
+                    else{
+                        //e r
+
+                    }
+
+
+                }
+                elseif($sexe){
+
+                    if($teacher){
+                        //e s t
+
+
+                    }
+                    else{
+                        //e s
+
+                    }
+
+
+                }
+                elseif($teacher){
+                    //e t
+
+
+                }
+                else{
+                    //e
+
+
+                }
+
+            }
+            elseif($pseudo){
+
+                if($roles){
+
+                    if($sexe){
+
+                        if($teacher){
+                            //p r s t
+
+                        }
+                        else{
+                            //p r s
+
+                        }
+
+                    }
+                    elseif($teacher){
+                        //p r t
+
+
+                    }
+                    else{
+                        //p r
+
+                    }
+
+                }
+                elseif($sexe){
+
+                    if($teacher){
+                        //p s t
+
+                    }
+                    else{
+                        //p s
+
+                    }
+
+                }
+                elseif($teacher){
+                    //p t
+
+
+                }
+                else{
+                    //p
+
+                }
+            }
+            elseif($roles){
+
+                if($sexe){
+
+                    if($teacher){
+                        //r s t
+
+                    }
+                    else{
+                        //r s
+
+                    }
+
+
+                }
+                elseif($teacher){
+                    //r t
+
+
+                }
+                else{
+                    //r
+
+                }
+
+            }
+            elseif($sexe){
+
+                if($teacher){
+
+                    //s t
+
+                }
+                else{
+                    //s
+
+
+                }
+
+            }
+            elseif($teacher){
+                //t
+
+            }
+            else{
+                //
+
+
+            }
+
+        }
+
+
+
+        return $users;
+
+
+
+
+    }
     
 }

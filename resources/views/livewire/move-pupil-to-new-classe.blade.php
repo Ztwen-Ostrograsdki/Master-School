@@ -30,11 +30,12 @@
                         <div class="col-8 m-0 p-0 mb-2">
                             <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Choisissez comment le déplacement doit être fait</label>
                             <select wire:model="move_type" class="px-2 form-select custom-select text-white z-bg-secondary w-100" >
-                                <option disabled class="" value="{{null}}">Choisissez</option>
+                                <option disabled class="disabled" value="{{null}}">Choisissez</option>
                                 <option value="same_promotion"> Juste changer de classe vers la même promotion et conserver les données vers la nouvelle classe </option>
                                 <option value="just_move"> Juste changer de classe et conserver les données vers la nouvelle classe </option>
                                 <option value="migrate"> Faire passer en classe supérieure </option>
                                 <option value="reset_data"> Pas de classe définie - les données seront perdues </option>
+                                <option value="to_polyvalence"> Transferer vers la classe polyvalente - les données des classes antérieures seront conservées </option>
                             </select>
                         </div>
 
@@ -51,7 +52,7 @@
                             </select>
                         </div>
 
-                        @if($classe_group_id || in_array($move_type, ['migrate', 'reset_data']))
+                        @if($classe_group_id || in_array($move_type, ['migrate', 'reset_data', 'to_polyvalence']))
                             <div class="col-7 m-0 p-0 mb-2">
                                 <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Choisissez la classe </label>
                                 <select wire:model="classe_id" class="px-2 form-select custom-select text-white z-bg-secondary w-100" >

@@ -110,6 +110,11 @@ class Classe extends Model
         return $this->hasMany(TimePlan::class);
     }
 
+    public function pupils()
+    {
+        return $this->hasMany(Pupil::class);
+    }
+
 
     public function classePupilSchoolYear()
     {
@@ -143,7 +148,7 @@ class Classe extends Model
 
         if($cursuses){
 
-            $pupils = Pupil::whereIn('id', $cursuses)->orderBy('pupils.firstName', 'asc')->orderBy('pupils.lastName', 'asc')->get();
+            $pupils = $this->pupils()->whereIn('id', $cursuses)->orderBy('pupils.firstName', 'asc')->orderBy('pupils.lastName', 'asc')->get();
 
         }
 
@@ -170,37 +175,41 @@ class Classe extends Model
 
                 if($sexe){
 
-                    $pupils = Pupil::whereIn('id', $pupils_ids)
+                    $pupils = $this->pupils()
                              ->where('sexe', $sexe)
                              ->where('firstName', 'like', '%' . $search . '%')
                              ->orWhere('lastName', 'like', '%' . $search . '%')
                              ->orderBy('firstName', 'asc')
-                             ->orderBy('lastName', 'asc');
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
                 }
                 else{
 
-                    $pupils = Pupil::whereIn('id', $pupils_ids)
+                    $pupils = $this->pupils()
                              ->where('firstName', 'like', '%' . $search . '%')
                              ->orWhere('lastName', 'like', '%' . $search . '%')
                              ->orderBy('firstName', 'asc')
-                             ->orderBy('lastName', 'asc');
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
                 }
             }
             else{
 
                 if($sexe){
 
-                    $pupils = Pupil::whereIn('id', $pupils_ids)
-                            ->where('sexe', $sexe)
+                    $pupils = $this->pupils()
+                             ->where('sexe', $sexe)
                              ->orderBy('firstName', 'asc')
-                             ->orderBy('lastName', 'asc');
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
 
                 }
                 else{
 
-                    $pupils = Pupil::whereIn('id', $pupils_ids)
+                    $pupils = $this->pupils()
                              ->orderBy('firstName', 'asc')
-                             ->orderBy('lastName', 'asc');
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
                 }
             }
 
@@ -320,10 +329,6 @@ class Classe extends Model
         return $this->hasMany(PupilCursus::class);
     }
 
-    public function pupils()
-    {
-        return $this->hasMany(Pupil::class);
-    }
     
     public function responsibles()
     {
@@ -726,6 +731,58 @@ class Classe extends Model
         $quota = $this->qotHours()->where('qot_hours.school_year_id', $school_year_model->id)->where('qot_hours.subject_id', $subject_id)->first();
 
         return $quota ? $quota : false;
+
+
+    }
+
+
+    public function getTimePlanInsertPourcentage($subject_id = null, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $quotas_som = 0;
+
+        $hours_insert = 0;
+
+        $percentage = 0;
+
+
+        if($subject_id){
+
+
+        }
+        else{
+
+            $subjects = $this->subjects;
+
+            $quotas = $this->qotHours()->where('qot_hours.school_year_id', $school_year_model->id)->pluck('quota')->toArray();
+
+            $times_plans = $this->timePlans()->where('time_plans.school_year_id', $school_year_model->id)->pluck('duration')->toArray();
+
+            if($quotas && $times_plans){
+
+                $hours_insert = array_sum($times_plans);
+
+                $quotas_som = array_sum($quotas);
+                
+            }
+
+            if($quotas_som){
+
+                $percentage = floatval(number_format(($hours_insert / $quotas_som) * 100, 2));
+            }
+            else{
+
+                $percentage = floatval(number_format(($hours_insert / 1) * 100, 2));
+
+            }
+
+
+
+
+        }
+
+        return $percentage;
 
 
     }

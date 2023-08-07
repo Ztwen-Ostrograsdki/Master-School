@@ -47,6 +47,7 @@
                         <colgroup span="{{count($semestres) + 1}}"></colgroup>
                         <colgroup span="3"></colgroup>
                         <col>
+                        <col>
                         <tr class="text-center bg-secondary-light-1 ">
                             <th rowspan="2">No</th>
                             <th rowspan="2">Nom et Prénoms </th>
@@ -54,6 +55,7 @@
                             <th rowspan="2">Contacts</th>
                             <th colspan="{{count($semestres) + 1}}" scope="colgroup">Moyennes</th>
                             <th rowspan="2">Actions</th>
+                            <th rowspan="2">Suppr.</th>
                         </tr>
                         <tr class="text-center bg-secondary-light-3">
                             @foreach($semestres as $s)
@@ -178,9 +180,45 @@
                                     @endif
 
                                 </th>
-                                <th>
-                                    <span class="fa fa-edit"></span>
-                                </th>
+                                    <th class="text-center w-auto p-0">
+                                        <span class="row w-100 m-0 p-0">
+                                            @if ($p->inPolyvalenceClasse())
+                                                <span title="Définir la nouvelle classe de  l'apprenant {{$p->name}}" wire:click="migrateTo({{$p->id}})" class="text-danger col-12 m-0 p-0 cursor-pointer">
+                                                    <span class="text-primary cursor-pointer fa bi-tools py-2 px-2"></span>
+                                                </span>
+                                            @else
+                                                @if($p->canUpdateMarksOfThisPupil())
+                                                    <span title="Verrouiller édtion des notes de l'apprenant {{$p->name}}" wire:click="lockMarksUpdating({{$p->id}})" class="text-danger border-right col-4 m-0 p-0 cursor-pointer">
+                                                        <span class="cursor-pointer fa fa-lock py-2 px-2"></span>
+                                                    </span>
+                                                @else
+                                                    <span title="déverrouiller édtion des notes de l'apprenant {{$p->name}}" wire:click="unlockMarksUpdating({{$p->id}})" class="text-success border-right col-4 m-0 p-0 cursor-pointer">
+                                                        <span class="cursor-pointer fa fa-unlock py-2 px-2"></span>
+                                                    </span>
+
+                                                @endif
+
+                                                @if($p->canInsertOrUpdateMarksOfThisPupil())
+                                                    <span wire:click="lockMarksInsertion({{$p->id}})" title="Verrouiller la gestion des notes de l'apprenant {{$p->name}}" class="text-info col-4 m-0 p-0 cursor-pointer border-right">
+                                                        <span class="fa fa-lock py-2 px-2"></span>
+                                                    </span>
+
+                                                @else
+                                                    <span wire:click="unlockMarksInsertion({{$p->id}})" title="déverrouiller la gestion des notes de l'apprenant {{$p->name}}" class="text-info col-4 m-0 p-0 cursor-pointer border-right">
+                                                        <span class="fa fa-unlock py-2 px-2"></span>
+                                                    </span>
+                                                @endif
+                                                <span wire:click="migrateTo({{$p->id}})" title="Faire migrer l'apprenant {{$p->name}} vers une nouvelle classe" class="text-success col-4 m-0 p-0 cursor-pointer">
+                                                    <span class="fa fa-recycle py-2 px-2"></span>
+                                                </span>
+                                            @endif
+                                        </span>
+                                    </th>
+                                    <th class="text-center">
+                                        <span wire:click="forceDelete({{$p->id}})" title="Supprimer définitivement l'apprenant {{$p->name}}" class="text-danger m-0 p-0 cursor-pointer">
+                                            <span class="fa fa-trash py-2 px-2"></span>
+                                        </span>
+                                    </th>
                             </tr>
                         @endforeach
                     </table>

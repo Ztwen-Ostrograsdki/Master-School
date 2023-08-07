@@ -12,8 +12,11 @@ class Parentable extends Model
     protected $fillable = [
         'user_id',
         'status',
+        'key',
         'job',
         'residence',
+        'authorized',
+        'name',
         'contacts',
         'blocked',
     ];

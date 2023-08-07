@@ -13,6 +13,10 @@ window.addEventListener('modal-manageAdminStatus', function(e) {
     $('#adminManagerModal').modal('show');
 });
 
+window.addEventListener('modal-parentFollowPupil', function(e) {
+    $('#ParentFollowPupilModal').modal('show');
+});
+
 window.addEventListener('modal-quotaManager', function(e) {
     $('#quotaManager').modal('show');
 });

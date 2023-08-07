@@ -9,6 +9,7 @@
         @livewire('insert-time-plan')
     @endif
     @livewire('mark-manager')
+    @livewire('parent-follow-new-pupil')
     @livewire('insert-pupil-marks')
     @livewire('profil-image-editor')
     

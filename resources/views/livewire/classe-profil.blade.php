@@ -123,7 +123,13 @@
                                 <span class="info-box-icon"><i class="fa fa-cloud-download-alt"></i></span>
                                 <div class="info-box-content">
                                     <span class="info-box-text">Emploi du temps</span>
-                                    <span class="info-box-number">45%</span>
+                                    <span class="info-box-number">
+                                        @if($classe && $classe->getTimePlanInsertPourcentage())
+                                            {{ $classe->getTimePlanInsertPourcentage() }}%
+                                        @else
+                                            <small class="text-white-50 font-italic">Données indisponibles</small>
+                                        @endif
+                                    </span>
                                 </div>
                             </div>
                         </div>

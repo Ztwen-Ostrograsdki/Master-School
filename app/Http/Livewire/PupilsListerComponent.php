@@ -19,6 +19,7 @@ class PupilsListerComponent extends Component
         'classePupilListUpdated' => 'reloadClasseData',
         'classeUpdated' => 'reloadClasseData',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
+        'GlobalDataUpdated' => 'reloadClasseData',
     ];
     
     
@@ -40,6 +41,7 @@ class PupilsListerComponent extends Component
     public $theLevel;
     public $slug;
     public $level;
+    public $taking = 30;
     public $editingPupilName = false;
 
     public $levels = [];
@@ -197,49 +199,15 @@ class PupilsListerComponent extends Component
         $this->search = $value;
     }
 
-    public function deletePupil($pupil_id)
+    public function forceDeletePupil($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
 
         if($pupil){
 
-            DB::transaction(function($e) use ($pupil){
-
-                $school_year_model = $this->getSchoolYear();
-
-                $marks = $pupil->marks;
-
-                $classes = $pupil->classes;
-
-                $pupil->marks()->each(function($mark) use ($school_year_model){
-                    $school_year_model->marks()->detach($mark->id);
-                    $mark->delete();
-                });
-
-
-                $pupil->classes()->each(function($classe) use ($pupil){
-                    $classe->classePupils()->detach($pupil->id);
-                });
-
-                $pupil->related_marks()->each(function($r){
-                    $r->delete();
-                });
-
-                $pupil->absences()->delete();
-                $pupil->lates()->delete();
-                $school_year_model->pupils()->detach($pupil->id);
-                $pupil->forceDelete();
-
-            });
-            DB::afterCommit(function() use ($pupil){
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "l'apprenant $pupil->name a été supprimé définitivement!", 'type' => 'success']);
-                $this->emit('classeUpdated');
-                $this->emit('classePupilListUpdated');
-            });
+            $pupil->pupilDeleter(null, true);
         }
-        
     }
-
    
 
 
@@ -317,11 +285,17 @@ class PupilsListerComponent extends Component
     }
 
 
-    public function classed($pupil_id)
+    public function migrateTo($pupil_id)
     {
+        $pupil = Pupil::find($pupil_id);
 
+        if($pupil){
 
+            $this->emit('MovePupilToNewClasse', $pupil->id);
+        }
+        
     }
+
 
     public function unclassed($pupil_id)
     {
@@ -332,6 +306,7 @@ class PupilsListerComponent extends Component
     public function lockMarksUpdating($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
+
         $pupil->lockPupilMarksUpdating();
 
     }
@@ -340,6 +315,7 @@ class PupilsListerComponent extends Component
     public function unlockMarksUpdating($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
+
         $pupil->unlockPupilMarksUpdating();
 
     }
@@ -347,6 +323,7 @@ class PupilsListerComponent extends Component
     public function lockMarksInsertion($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
+
         $pupil->lockPupilMarksInsertion();
 
     }
@@ -354,6 +331,7 @@ class PupilsListerComponent extends Component
     public function unlockMarksInsertion($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
+        
         $pupil->unlockPupilMarksInsertion();
 
     }

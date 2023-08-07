@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('new_email')->nullable()->default(null);
             
             $table->unsignedBigInteger('role_id')->default(1);
+            $table->unsignedBigInteger('teacher_id')->nullable()->default(null);
             $table->foreign('role_id')
                   ->references('id')
                   ->on('roles')

@@ -4,6 +4,7 @@ namespace App\Helpers\ModelTraits;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Helpers\Tools\Tools;
 use App\Jobs\JobMigratePupilsToClasse;
+use App\Jobs\JobUpdatePupilMarksClasseIdAfterMovingToNewClasse;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\ClassesSecurity;
 use App\Models\Pupil;
@@ -1901,12 +1902,14 @@ trait ClasseTraits{
     }
 
 
-    public function pupilsMigraterToClasseForNewSchoolYear($pupils, $school_year = null, $move = false)
+    public function pupilsMigraterToClasseForNewSchoolYear($pupils, $school_year = null, $juste_move = false)
     {
 
         if(count($pupils) && count($pupils) < 16){
 
-            DB::transaction(function($e) use ($pupils, $school_year, $move){
+            DB::transaction(function($e) use ($pupils, $school_year, $juste_move){
+
+                $fulltime = !$juste_move;
 
                 $school_year_model = $this->getSchoolYear($school_year);
 
@@ -1928,7 +1931,7 @@ trait ClasseTraits{
 
                                 if($old_cursus){
 
-                                    $old_cursus->update(['end' => Carbon::now(), 'fullTime' => true]);
+                                    $old_cursus->update(['end' => Carbon::now(), 'fullTime' => $fulltime]);
 
                                 }
                                 else{
@@ -1941,14 +1944,11 @@ trait ClasseTraits{
                                             'school_year_id' => $school_year_befor_model->id,
                                             'start' => $pupil->created_at,
                                             'end' => Carbon::now(),
-                                            'fullTime' => true,
+                                            'fullTime' => $fulltime,
                                         ]
                                     );
 
-
                                 }
-
-                                $update_classe = $pupil->update(['classe_id' => $this->id]);
 
                                 $attach = $school_year_model->pupils()->attach($pupil_id);
 
@@ -1966,14 +1966,24 @@ trait ClasseTraits{
                                 if(!$this->isOldPupilOfThisClasse($pupil_id)){
 
                                     $this->classePupils()->attach($pupil_id);
+
+                                    if($juste_move && $this->isNotPolyvalente()){
+
+                                        dispatch(new JobUpdatePupilMarksClasseIdAfterMovingToNewClasse($this, $pupil, $school_year_model))->delay(Carbon::now()->addSeconds(15));
+
+                                    }
                                 }
                             }
+
+
+                            $update_classe = $pupil->update(['classe_id' => $this->id]);
 
 
                         }
                     }
 
                 }
+
 
             });
 
@@ -1982,11 +1992,12 @@ trait ClasseTraits{
 
             if(count($pupils) && count($pupils) >= 16){
 
-                dispatch(new JobMigratePupilsToClasse($this, $pupils, $school_year, $move))->delay(Carbon::now()->addSeconds(15));
+                dispatch(new JobMigratePupilsToClasse($this, $pupils, $school_year, $juste_move))->delay(Carbon::now()->addSeconds(15));
             }
 
 
         }
+
 
     }
 

@@ -278,13 +278,14 @@
                   <p>
                      Les parents
                     <i class="fas fa-angle-left right"></i>
+                    <span class="badge badge-secondary right">{{ count($parents) }}</span>
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{route('parents_listing')}}" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Tous</p>
+                      <p>Liste complète</p>
                     </a>
                   </li>
                   <li class="nav-item">
@@ -446,13 +447,14 @@
                   <p>
                     Parents
                     <i class="fas fa-angle-left right"></i>
+
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
                     <a href="#" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Tous</p>
+                      <p>Liste complète</p>
                     </a>
                   </li>
                   <li class="nav-item">
@@ -469,59 +471,31 @@
                   </li>
                 </ul>
               </li>
-              <li class="nav-header text-uppercase text-primary">Gestionnaire des notes</li>
+              <li class="nav-header text-uppercase text-primary">Gestionnaires epreuves</li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-tree"></i>
+                  <i class="nav-icon fas fa-book-open"></i>
                   <p>
-                    Classes
+                    De composition
                     <i class="fas fa-angle-left right"></i>
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
+                  @foreach($levels as $l)
                   <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{route('epreuves_de_composition_envoyes')}}" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
-                      <p>Maternelle</p>
+                      <p>{{$l->getName()}}</p>
                     </a>
                   </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Primaire</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Secondaire</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Superieure</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Nouvelles</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-circle nav-icon"></i>
-                      <p>Fermées</p>
-                    </a>
-                  </li>
+                  @endforeach
                 </ul>
               </li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-edit"></i>
+                  <i class="nav-icon fas bi-bank"></i>
                   <p>
-                    Parents
+                    Banques
                     <i class="fas fa-angle-left right"></i>
                   </p>
                 </a>
@@ -546,7 +520,7 @@
                   </li>
                 </ul>
               </li>
-              <li class="nav-header text-uppercase">Outils</li>
+              <li class="nav-header text-uppercase text-warning">Outils</li>
               <li class="nav-item">
                 <a href="{{route('data_manager_primary')}}" class="nav-link @isRoute('data_manager_primary') active @endisRoute">
                   <i class="nav-icon fas fa-school"></i>

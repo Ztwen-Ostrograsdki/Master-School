@@ -2,12 +2,14 @@
 namespace App\Helpers\ModelTraits;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Jobs\JobPupilDeleterFromDatabase;
 use App\Models\Classe;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\PupilAbsences;
 use App\Models\PupilLates;
 use App\Models\School;
 use App\Models\SchoolYear;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -31,43 +33,46 @@ trait PupilTraits{
 
     public function pupilDeleter($school_year = null, $destroy = false)
     {
-        $school_year_model = $this->getSchoolYear($school_year);
+        
+        if(!$destroy){
 
-        $pupil = $this;
+            $school_year_model = $this->getSchoolYear($school_year);
 
-        $pupil->lates()->where('pupil_lates.school_year_id', $school_year_model->id)->each(function($late){
-            $late->delete();
+            $pupil = $this;
 
-        });
+            $pupil->lates()->where('pupil_lates.school_year_id', $school_year_model->id)->each(function($late){
+                $late->delete();
 
-        $pupil->absences()->where('pupil_absences.school_year_id', $school_year_model->id)->each(function($abs){
-            $abs->delete();
-        });
+            });
 
-        $pupil->marks()->where('marks.school_year_id', $school_year_model->id)->each(function($mark){
-            $mark->delete();
-        });
+            $pupil->absences()->where('pupil_absences.school_year_id', $school_year_model->id)->each(function($abs){
+                $abs->delete();
+            });
 
-        $pupil->related_marks()->where('related_marks.school_year_id', $school_year_model->id)->each(function($r_m){
-            $r_m->delete();
-        });
+            $pupil->marks()->where('marks.school_year_id', $school_year_model->id)->each(function($mark){
+                $mark->delete();
+            });
+
+            $pupil->related_marks()->where('related_marks.school_year_id', $school_year_model->id)->each(function($r_m){
+                $r_m->delete();
+            });
 
 
-        $classe = $this->getCurrentClasse($school_year_model->id);
+            $classe = $this->getCurrentClasse($school_year_model->id);
 
-        if($classe){
+            if($classe){
 
-            $pupil->pupilClassesHistoriesBySchoolYears()->where('classe_pupil_school_years.school_year_id', $school_year_model->id)
-              ->where('classe_pupil_school_years.classe_id', $classe->id)
-              ->first()
-              ->delete();
+                $pupil->pupilClassesHistoriesBySchoolYears()->where('classe_pupil_school_years.school_year_id', $school_year_model->id)
+                  ->where('classe_pupil_school_years.classe_id', $classe->id)
+                  ->first()
+                  ->delete();
 
-            $classe->classePupils()->detach($pupil->id);
+                $classe->classePupils()->detach($pupil->id);
 
-            if(!$destroy){
                 $classeVolante = $this->polyvalenteClasse();
 
                 if($classeVolante){
+
                     ClassePupilSchoolYear::create(
                         [
                             'classe_id' => $classeVolante->id,
@@ -75,20 +80,23 @@ trait PupilTraits{
                             'school_year_id' => $school_year_model->id,
                         ]
                     );
+
                     $pupil->update(['classe_id' => $classeVolante->id]);
+
                     $classeVolante->classePupils()->attach($pupil->id);
                 }
 
             }
-            else{
-                $pupil->forceDelete();
 
-            }
+
         }
+        else{
 
+            dispatch(new JobPupilDeleterFromDatabase($this))->delay(Carbon::now()->addSeconds(30));
+
+        }
         
     }
-
 
     public function pupilDestroyer($school_year)
     {
@@ -106,7 +114,6 @@ trait PupilTraits{
     {
 
     }
-
 
     public function unlockPupilMarksUpdating($classe_id = null, $subject_id = null, $school_year = null)
     {
@@ -1004,7 +1011,12 @@ trait PupilTraits{
 
                 $school_year_model = $c_s_y->school_year;
 
-                if($classe->isNotPolyvalente() && $school_year_model->id !== $current_school_year_model->id){
+                $not_same_school_year = $school_year_model->id !== $current_school_year_model->id;
+
+                $not_same_school_year = true;
+
+
+                if($classe->isNotPolyvalente() && $not_same_school_year){
 
                     $index = array_sum(explode(' - ', $school_year_model->school_year));
 
@@ -1022,9 +1034,9 @@ trait PupilTraits{
 
                 $classe = $cl['classe'];
 
-                $sy_model = $classe['school_year'];
+                $sy_model = $cl['school_year'];
 
-                if($index >= $max){
+                if($index >= $max && $classe->isNotPolyvalente()){
 
                     $max = $index;
 
@@ -1035,7 +1047,6 @@ trait PupilTraits{
             }
 
         }
-
 
         return $last_classe;
 

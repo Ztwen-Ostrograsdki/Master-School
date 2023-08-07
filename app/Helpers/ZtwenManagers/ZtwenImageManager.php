@@ -81,6 +81,7 @@ class ZtwenImageManager {
     public function setPathName($path)
     {
         $this->pathName = $path;
+        
         return $this;
     }
 
@@ -92,7 +93,9 @@ class ZtwenImageManager {
     public function setImageName($extension)
     {
         $name = getdate()['year'].''.getdate()['mon'].''.getdate()['mday'].''.getdate()['hours'].''.getdate()['minutes'].''.getdate()['seconds']. '' .  Str::random(20) . '.' . $extension;
+        
         $this->name = $name;
+
         return $this;
     }
 

@@ -2,14 +2,18 @@
 
 namespace App\Providers;
 
+use App\Events\LocalTransfertCreatedEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\PaymentSystemEvent;
+use App\Listeners\CreatedTransferBatchListener;
 use App\Listeners\NewProductCreatedListener;
 use App\Listeners\PaymentSystemListener;
 use App\Models\Classe;
+use App\Models\ClassesSecurity;
 use App\Models\Mark;
 use App\Models\Pupil;
 use App\Observers\ClasseObserver;
+use App\Observers\ClassesSecurityObserver;
 use App\Observers\MarkObserver;
 use App\Observers\PupilObserver;
 use Illuminate\Auth\Events\Registered;
@@ -37,6 +41,9 @@ class EventServiceProvider extends ServiceProvider
         PaymentSystemEvent::class => [
             PaymentSystemListener::class,
         ],
+        LocalTransfertCreatedEvent::class => [
+            CreatedTransferBatchListener::class,
+        ],
     ];
 
     /**
@@ -47,6 +54,8 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         Pupil::observe(PupilObserver::class);
+
+        ClassesSecurity::observe(ClassesSecurityObserver::class);
 
         Mark::observe(MarkObserver::class);
 

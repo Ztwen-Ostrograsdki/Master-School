@@ -265,6 +265,8 @@ class AddNewTeacher extends Component
 
                             $subject->teachers()->attach($teacher->id);
 
+                            $this->user->update(['teacher_id' => $teacher->id]);
+
                         }
                     } catch (Exception $e) {
 

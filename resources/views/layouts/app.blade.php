@@ -59,6 +59,9 @@
             <script src="//{{Request::getHost()}}:6001/socket.io/socket.io.js" ></script>
             <script src="{{ mix('js/app.js') }}" defer></script>
             <script>
+                window.User = { 
+                    id: {{optional(auth()->user())->id}},
+                }
             </script>
             @include("components.mycomponents.scripts") {{-- chargement des scripts js --}}
         </body>
@@ -149,6 +152,9 @@
         <script src="//{{Request::getHost()}}:6001/socket.io/socket.io.js" ></script>
         <script src="{{ mix('js/app.js') }}" defer></script>
         <script>
+            window.User = { 
+                id: {{optional(auth()->user())->id}},
+            }
         </script>
         @include("components.mycomponents.adminScripts") {{-- chargement des styles --}}
     </body>

@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 
+use App\Events\NewMarkInsertEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Mark;
@@ -62,6 +63,8 @@ class MarkManager extends Component
 
     public function editPupilMark(int $mark_id)
     {
+        // broadcast(new NewMarkInsertEvent());
+
         if($mark_id){
             $school_year_model = $this->getSchoolYear();
             $user = auth()->user();
@@ -172,9 +175,15 @@ class MarkManager extends Component
     public function submitMark()
     {
         $semestre = $this->semestre_id;
+        
         $type = $this->type;
+        
         $mark = $this->mark;
+        
+        $classe_id = $this->markModel->classe_id;
+        
         $pupil = $this->pupil;
+        
         $mark_index = $this->mark_index;
 
         $mark_index_was_existed = $pupil->marks()->where('classe_id', $this->markModel->classe_id)->where('subject_id', $this->markModel->subject_id)->where('semestre', $this->markModel->semestre)->where('type', $type)->where('mark_index', $this->mark_index)->where('id', '<>', $this->markModel->id)->first();
@@ -187,7 +196,7 @@ class MarkManager extends Component
         }
 
 
-        $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($mark->classe_id);
+        $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe_id);
         if($not_secure){
             if($semestre && $type && $mark && $pupil){
                 DB::transaction(function($e) use ($mark, $pupil, $semestre, $type, $mark_index){

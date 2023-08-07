@@ -19,8 +19,12 @@ class CreateParentablesTable extends Migration
             $table->string('status')->nullable()->default(null);
             $table->string('job')->nullable()->default(null);
             $table->string('phone')->nullable()->default(null);
+             $table->string('key')->nullable()->default(null);
+            $table->string('name');
+            $table->string('contacts')->nullable()->default(null);
             $table->string('residence')->nullable()->default(null);
             $table->boolean('blocked')->default(0);
+            $table->boolean('authorized')->default(0);
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')
                   ->references('id')

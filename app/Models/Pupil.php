@@ -333,7 +333,7 @@ class Pupil extends Model
             $classe = $relation->classe;
         }
 
-        return $classe;
+        return $classe ? ( $classe->id == $this->classe_id ? $classe : null ) : null;
 
 
     }

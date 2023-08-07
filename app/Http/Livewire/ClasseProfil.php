@@ -39,7 +39,7 @@ class ClasseProfil extends Component
     public $semestre_selected = 1;
     public $search = null;
 
-    public $section_selected = 'marks';
+    public $section_selected = 'liste';
 
     public $sections = [
         'liste' => 'Liste des apprenants', 

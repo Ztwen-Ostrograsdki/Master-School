@@ -37,8 +37,6 @@ class Subject extends Model
         return $this->hasMany(QotHour::class);
     }
 
-
-
     public function images()
     {
         return $this->morphToMany(Image::class, 'imageable');

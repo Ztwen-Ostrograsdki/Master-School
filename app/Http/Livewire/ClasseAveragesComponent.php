@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\Pupil;
 use App\Models\School;
 use App\Models\SchoolYear;
 use Livewire\Component;
@@ -78,13 +79,39 @@ class ClasseAveragesComponent extends Component
 
                 if(!$this->targetToOrder){
 
+                    $pupils_ids = [];
+
                     $averages = $classe->averages()->where('averages.school_year_id', $school_year_model->id)->whereNull('averages.semestre')->orderBy('moy', 'desc')->get();
+
+                    if($this->sexe_selected && $this->search){
+
+                        $pupils_ids = $classe->getPupils($school_year_model->id, $this->search, $this->sexe_selected, true);
+
+                    }
+                    elseif($this->sexe_selected){
+
+                        $pupils_ids = $classe->getPupils($school_year_model->id, null, $this->sexe_selected, true);
+
+                    }
+                    elseif($this->search){
+
+                        $pupils_ids = $classe->getPupils($school_year_model->id, $this->search, null, true);
+
+                    }
+                    else{
+                        $pupils_ids = [];
+
+                    }
 
                     if(count($averages)){
 
                         foreach($averages as $av){
 
-                            $pupils[] = $av->pupil;
+                            if($pupils_ids && in_array($av->pupil_id, $pupils_ids)){
+
+                                $pupils[] = $av->pupil;
+
+                            }
 
                         }
 
@@ -99,11 +126,37 @@ class ClasseAveragesComponent extends Component
 
                     $averages = $classe->averages()->where('averages.school_year_id', $school_year_model->id)->where('averages.semestre', $this->targetToOrder)->orderBy('moy', 'desc')->get();
 
+                    $pupils_ids = [];
+                    
+                    if($this->sexe_selected && $this->search){
+
+                        $pupils_ids = $classe->getPupils($school_year_model->id, $this->search, $this->sexe_selected, true);
+
+                    }
+                    elseif($this->sexe_selected){
+
+                        $pupils_ids = $classe->getPupils($school_year_model->id, null, $this->sexe_selected, true);
+
+                    }
+                    elseif($this->search){
+
+                        $pupils_ids = $classe->getPupils($school_year_model->id, $this->search, null, true);
+
+                    }
+                    else{
+                        $pupils_ids = [];
+
+                    }
+
                     if(count($averages)){
 
                         foreach($averages as $av){
 
-                            $pupils[] = $av->pupil;
+                            if($pupils_ids && in_array($av->pupil_id, $pupils_ids)){
+
+                                $pupils[] = $av->pupil;
+
+                            }
 
                         }
 
@@ -125,11 +178,64 @@ class ClasseAveragesComponent extends Component
     }
 
 
+    public function forceDeletePupil($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+
+        if($pupil){
+
+            $pupil->pupilDeleter(null, true);
+        }
+    }
+public function migrateTo($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+
+        if($pupil){
+
+            $this->emit('MovePupilToNewClasse', $pupil->id);
+        }
+        
+    }
+
+    public function lockMarksUpdating($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+
+        $pupil->lockPupilMarksUpdating();
+
+    }
+
+
+    public function unlockMarksUpdating($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+
+        $pupil->unlockPupilMarksUpdating();
+
+    }
+
+    public function lockMarksInsertion($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+
+        $pupil->lockPupilMarksInsertion();
+
+    }
+
+    public function unlockMarksInsertion($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+        
+        $pupil->unlockPupilMarksInsertion();
+
+    }
+
+
     public function getJobsOk($event)
     {
         $this->reloadClasseData();
 
-        dd($event);
     }
 
     public function updatedSearch($search)

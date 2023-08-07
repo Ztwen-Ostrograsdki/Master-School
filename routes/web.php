@@ -9,9 +9,13 @@ use App\Http\Livewire\AuthRedirections;
 use App\Http\Livewire\ClasseGroupProfil;
 use App\Http\Livewire\ClasseProfil;
 use App\Http\Livewire\ClasseTableList;
+use App\Http\Livewire\EpreuvesDeCompositionEnvoyees;
 use App\Http\Livewire\ForceEmailVerifyNotification;
 use App\Http\Livewire\Home;
+use App\Http\Livewire\ManageEpreuvesTransfers;
 use App\Http\Livewire\MultiplePupilInsertion;
+use App\Http\Livewire\ParentProfil;
+use App\Http\Livewire\ParentsListerComponent;
 use App\Http\Livewire\PolyvalenteClasseManager;
 use App\Http\Livewire\PupilProfil;
 use App\Http\Livewire\PupilsListerComponent;
@@ -58,12 +62,14 @@ Route::group(['prefix' => '/administration', 'middleware' => ['auth', 'admin']],
     Route::get('/tous-les-enseignants', TeacherListing::class)->name('teacher_listing');
     Route::get('/tous-les-enseignants-de-la/{slug}', TeacherListingByClasse::class)->name('classe_teachers');
     Route::get('/securisation/enseignants', AdminTeacherSecurityActions::class)->name('admin_teacher_security_actions');
+    Route::get('/gestionnaire/liste/epreuves-de-composition', EpreuvesDeCompositionEnvoyees::class)->name('epreuves_de_composition_envoyes');
     Route::get('/gestionnaire/base-de-données/Secondaire', SchoolYearableComponent::class)->name('data_manager_secondary');
     Route::get('/gestionnaire/base-de-données/Primaire', SchoolYearableComponent::class)->name('data_manager_primary');
     Route::get('/calendrier-scolaire/{school_year}', SchoolCalendar::class)->name('school_calendar');
     Route::get('/emploi-du-temps/{school_year}', TimePlansComponent::class)->name('time_plans');
     
     Route::get('/tous-les-apprenant/cycle/{slug}', PupilsListerComponent::class)->name('pupil_listing');
+    Route::get('/tous-les-parents/', ParentsListerComponent::class)->name('parents_listing');
     Route::get('/tous-les-apprenant-de-la/{slug}', PupilsListingByClasse::class)->name('classe_pupils');
     Route::get('/toutes-les-classes', ClasseTableList::class)->name('classe_listing');
     Route::get('/classe-polyvalente/cycle/{slug}', PolyvalenteClasseManager::class)->name('polyvalente_classe');
@@ -74,7 +80,9 @@ Route::group(['prefix' => '/administration', 'middleware' => ['auth', 'admin']],
     Route::get('/inscription-élèves/inscription-multiple', MultiplePupilInsertion::class)->name('multiple_pupil_insertion');
 });
 
+Route::get('/Enseignant/envoi-des-epreuves-de-composition', ManageEpreuvesTransfers::class)->name('upload_epreuves')->middleware(['auth']);
 Route::get('/compte/mon-compte/{id}', UserProfil::class)->name('user_profil')->middleware(['user.self', 'notBlockedUser']);
+Route::get('/espace-parent/mon-compte-parent/{id}', ParentProfil::class)->name('parent_profil')->middleware(['auth']);
 Route::get('/mon-compte/enseignant/{id}/{classe_id}/{slug}', TeacherProfilAsUser::class)->name('teacher_profil_as_user')->middleware(['user.teacher', 'classeNotClosedForTeacher']);
 
 
