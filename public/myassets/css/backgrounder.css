@@ -162,9 +162,10 @@ label{
 
 .hoverable tr:hover, tr:hover{
     opacity: 1 !important;
-    background-color: rgba(100, 100, 40, 0.87) !important;
+    background-color: rgba(100, 100, 40, 0.35) !important;
     cursor: pointer;
 }
+
 
 .z-scale:hover {
     transform: scale(1.04);
@@ -430,6 +431,31 @@ label{
     background-color: rgba(12, 15, 30, 0.92) !important;
 }
 
+.text-light-0 {
+    color: rgba(30, 15, 45, 0.87) !important;
+}
+
+
+.text-light-2 {
+    color: rgba(9, 15, 20, 0.9) !important;
+}
+
+
+.text-light-3 {
+    color: rgba(12, 20, 45, 0.91) !important;
+}
+
+.text-light-1 {
+    color: rgba(12, 15, 30, 0.92) !important;
+}
+
+.text-black-0 {
+    color: black !important;
+}
+
+
+
+
 .z-bg-secondary {
     background-color: #334 !important;
 }
@@ -641,4 +667,83 @@ form.authentication-form input:focus{
     background-color: rgba(12, 14, 40, 0.6) !important;
     color: white !important;
     border: solid thin orange;
+}
+
+
+
+
+.border-cyan{
+
+    border-top: thin solid cyan;
+    
+}
+.border-0-cyan{
+    opacity: 0.99;
+    border-top: thin solid none;
+    box-shadow: 3px 3px 3px cyan;
+
+}
+
+.border-1-cyan{
+    /*box-shadow: -3px -3px 3px cyan;*/
+
+}
+
+.border-0-cyan:hover{
+    opacity: 1;
+    transition: scale 1s;
+}
+
+
+.rounded-o{
+    border-radius: 30px;
+
+}
+
+
+.link-hover:hover{
+    border-radius: 30px;
+    color: black !important;
+    background: cyan;
+    transform: scale(1.2);
+}
+
+.btn-hover:hover{
+    /*transform: translate(10px);*/
+    box-shadow: 4px 4px 4px 4px cyan;
+    opacity: 1 !important;
+    border: none;
+    transition: opacity 1s;
+}
+
+.text-shadow{
+    /*transform: translate(10px);*/
+    text-shadow: -1px -1px 1px cyan;
+    border: none;
+}
+
+
+.link-1{
+    border-bottom: thin solid cyan;
+    border-radius: 100px;
+}
+
+.link-0:hover{
+    transform: scale(1.06);
+}
+
+.socials{
+    cursor: pointer;
+}
+
+.socials:hover{
+    transform: scale(1.2);
+}
+.image-1:hover{
+    transform: rotate(-20deg);
+}
+
+.image-1{
+    border-radius: 50%;
+    box-shadow: 7px -6px 6px cyan;
 }

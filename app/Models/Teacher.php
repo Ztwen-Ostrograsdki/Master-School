@@ -16,6 +16,7 @@ use App\Models\TeacherAbsences;
 use App\Models\TeacherCursus;
 use App\Models\TeacherLates;
 use App\Models\TimePlan;
+use App\Models\TransferFile;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -47,6 +48,11 @@ class Teacher extends Model
 
 
     public $imagesFolder = 'teachersPhotos';
+
+    public function epreuves()
+    {
+        return $this->hasMany(TransferFile::class);
+    }
 
     public function school_years()
     {

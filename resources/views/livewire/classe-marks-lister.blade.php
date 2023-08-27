@@ -18,13 +18,13 @@
             </small>
             <span class="text-dark float-right btn btn-secondary border mx-1">
                 @if(!$computedRank)
-                    <span wire:click="displayRank" title="Afficher les rangs" class="d-inline-block w-100 cursor-pointer">
+                    <span wire:click="displayRank" title="Afficher les rangs" class="d-inline-block z-scale w-100 cursor-pointer">
                         <small>Le rang</small>
                         <span class="bi-eye text-dark"></span>
 
                     </span>
                 @else
-                    <span wire:click="hideRank" title="Masquer les rangs" class="d-inline-block w-100 cursor-pointer">
+                    <span wire:click="hideRank" title="Masquer les rangs" class="d-inline-block z-scale w-100 cursor-pointer">
                         <small>Masquer rang</small>
                         <span class="bi-eye-slash  text-black-50"></span>
                     </span>
@@ -34,20 +34,20 @@
                 @if($hasModalities)
                     <span class="text-warning float-right btn btn-secondary border">
                         @if($modalitiesActivated)
-                            <span wire:click="diseableModalities" title="Désactiver tamporairement les modalités" class="d-inline-block w-100 cursor-pointer">
+                            <span wire:click="diseableModalities" title="Désactiver tamporairement les modalités" class="d-inline-block w-100 cursor-pointer z-scale">
                                 <small>Désactiver</small>
                                 <span class="bi-key text-warning"></span>
 
                             </span>
                         @else
-                            <span wire:click="activateModalities" title="Réactiver les modalités" class="d-inline-block w-100 cursor-pointer">
+                            <span wire:click="activateModalities" title="Réactiver les modalités" class="d-inline-block w-100 cursor-pointer z-scale">
                                 <small>Activer</small>
                                 <span class="bi-unlock text-success"></span>
                             </span>
                         @endif
                     </span>
                 @endif
-                <span wire:click="manageModality" class="btn btn-primary border border-white float-right mx-1" title="Editer les modalités de calcule de moyenne dans la matière sélectionnée dans cette classe">
+                <span wire:click="manageModality" class="btn btn-primary z-scale border border-white float-right mx-1" title="Editer les modalités de calcule de moyenne dans la matière sélectionnée dans cette classe">
                     <span class="fa bi-pen"></span>
                     <span class="fa bi-calculator"></span>
                     <span>Editer</span>
@@ -56,12 +56,16 @@
         @endif
         @if(auth()->user()->isAdminAs('master'))
             @if(!$teacher_profil && $classe)
-                <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right" title="Ajouter une matière à cette classe">
+                <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right mx-1 z-scale" title="Ajouter une matière à cette classe">
                     <span class="fa fa-bookmark"></span>
                     <span>Ajouter</span>
                 </span>
             @endif
         @endif
+        <span wire:click="insertClasseMarks" class="btn btn-primary border z-scale border-white mx-2 float-right" title="Insérer des notes de classe">
+            <span class="fa fa-upload"></span>
+            <span>Insérer notes</span>
+        </span>
         <hr class="w-100 bg-warning text-warning p-0 m-0 mt-3">
     </div>
     <div class="my-2">

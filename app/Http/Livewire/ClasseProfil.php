@@ -414,34 +414,30 @@ class ClasseProfil extends Component
     }
 
 
-    public function resetMarks($school_year = null, $semestre = null, $subject_id = null, $type = null, $classe_id = null)
+    public function refreshClasseMarks($classe_id)
     {
         if ($classe_id) {
+
             $classe = Classe::find($classe_id);
         }
         else{
             $classe = Classe::whereSlug($this->slug)->first();
         }
         if ($classe) {
+
             $school_year_model = $this->getSchoolYear();
+
             $semestre = $this->semestre_selected;
+
             if (session()->has('semestre_selected') && session('semestre_selected')) {
+
                 $semestre = session('semestre_selected');
             }
+
             $subject_id = session('classe_subject_selected');
 
-            $done = $classe->resetAllMarks($school_year_model->id, $semestre, $subject_id, $type);
+            $this->emit('ThrowClasseMarksDeleterLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject_id);
 
-            if($done){
-
-                $this->emit('classeUpdated');
-                
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "la classe  $classe->name a été mise à jour avec succès! Les notes ont été rafraîchies!", 'type' => 'success']);
-            }
-            else{
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "Le rafraichissement des notes de la classe  $classe->name a échoué. Veuillez réessayer!", 'type' => 'error']);
-            }
-            $this->emit('classeUpdated');
         }
         
     }
@@ -549,6 +545,11 @@ class ClasseProfil extends Component
     public function editClasseGroup($classe_id)
     {
         $this->emit('editClasseGroupLiveEvent', $classe_id);
+    }
+
+    public function insertClasseMarks()
+    {
+        $this->emit('InsertClassePupilsMarksTogetherLiveEvent', $this->classe_id);
     }
 
 

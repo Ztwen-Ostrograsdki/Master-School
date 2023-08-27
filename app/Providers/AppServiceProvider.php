@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Events\JobFinisched;
+use App\Events\JobFinischedEvent;
 use App\Models\FollowingSystem;
 use App\Models\UserOnlineSession;
+use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,6 +32,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        Blade::if('isTeacher', function($user = null){
+            if(Auth::user()){
+                if($user == null){
+                    $user = Auth::user();
+                }
+                if($user->teacher){
+                    return true;
+                }
+                return false;
+            }
+            return false;
+
+        });
+
         Blade::if('isAdmin', function($user = null){
             if(Auth::user()){
                 if($user == null){
@@ -162,6 +180,16 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
 
+        });
+
+
+
+        Queue::after(function(JobProcessed $event){
+
+            $user = auth()->user();
+
+            JobFinisched::dispatch($user, $event);
+        
         });
 
     }

@@ -190,13 +190,5 @@ trait DateFormattor{
                 $this->__getTimestampInSecondsBetweenDates($start, $end) / (3600*24*7);
     }
 
-
-
-
-
-    
-
-
-
     
 }

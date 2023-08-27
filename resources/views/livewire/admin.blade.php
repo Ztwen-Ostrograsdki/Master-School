@@ -68,7 +68,7 @@
                     </span>
                     <span class="btn btn-info text-left p-2 my-1 col-12 border border-white">
                         <span class="bi-person-plus"></span>
-                        <span>Inséser un enseignant</span>
+                        <span>Insérer un enseignant</span>
                     </span>
                     <span wire:click="createNewSubject" class="btn btn-warning text-left p-2 my-1 col-12 border border-white">
                         <span class="fa fa-bookmark"></span>

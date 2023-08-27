@@ -22,6 +22,7 @@ class ClasseMarksLister extends Component
         'classeUpdated' => 'reloadData',
         'semestreWasChanged',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
+        'UpdatedRelaodNowLiveEvent' => 'updatedRelaodNow',
     ];
     public $classe_id;
     public $pupil_id;
@@ -42,6 +43,7 @@ class ClasseMarksLister extends Component
     public $search = null;
     public $computedRank = false;
     public $teacher_profil = false;
+    public $relaodNow = false;
 
 
     public function mount()
@@ -348,6 +350,12 @@ class ClasseMarksLister extends Component
         }
     }
 
+
+    public function insertClasseMarks()
+    {
+        $this->emit('InsertClassePupilsMarksTogetherLiveEvent', $this->classe_id);
+    }
+
     public function insertRelatedMark($pupil_id, $semestre = null, $school_year = null)
     {
         $subject_id = session('classe_subject_selected');
@@ -400,5 +408,11 @@ class ClasseMarksLister extends Component
     public function reloadData($data = null)
     {
         $this->count = 1;
+    }
+
+
+    public function updatedRelaodNow($value = true)
+    {
+        $this->reloadData();
     }
 }

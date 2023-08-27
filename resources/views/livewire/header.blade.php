@@ -18,6 +18,11 @@
                         <x-z-linker :params="['id' => auth()->user()->id]" :routeName="'parent_profil'" :isActive="request()->routeIs('parent_profil')">
                             {{ __('Espace Parents') }}
                         </x-z-linker>
+                        @isTeacher()
+                            <x-z-linker :routeName="'upload_epreuves'" :isActive="request()->routeIs('upload_epreuves')">
+                                {{ __('Envoi Epreuves') }}
+                            </x-z-linker>
+                        @endif
                         @isAdmin(Auth::user())
                         <x-z-linker :routeName="'admin'" :isActive="request()->routeIs('admin')">
                             {{ __('Administration') }}

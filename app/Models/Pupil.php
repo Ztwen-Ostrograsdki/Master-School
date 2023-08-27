@@ -34,7 +34,6 @@ class Pupil extends Model
     protected $fillable = [
         'firstName',
         'lastName',
-        'matricule',
         'classe_id',
         'contacts',
         'abandonned',
@@ -52,6 +51,27 @@ class Pupil extends Model
         'minus_counter',
         'last_related_mark',
     ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array
+     */
+    protected $secure = [
+        'educmaster',
+        'matricule',
+    ];
+
+
+    public function updatePupilEducmaster($value)
+    {
+        return $this->forceFill(['educmaster' => $value,])->save();
+    }
+
+    public function updatePupilMatricule($value)
+    {
+        return $this->forceFill(['matricule' => $value,])->save();
+    }
 
     public $imagesFolder = 'pupilsPhotos';
 
@@ -324,10 +344,12 @@ class Pupil extends Model
 
         }
         else{
+
             $school_year_model = $this->getSchoolYear($school_year);
         }
 
-        $relation = $this->classesSchoolYears()->where('school_year_id', $school_year_model->id)->first();
+        $relation = $this->classesSchoolYears()->where('school_year_id', $school_year_model->id)->orderBy('classe_pupil_school_years.id', 'desc')->first();
+
         if($relation){
 
             $classe = $relation->classe;

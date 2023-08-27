@@ -65,6 +65,12 @@ class ClasseGroup extends Model
         return $this->coeficients()->where('subject_id', $subject_id)->first();
     }
 
+    public function getSlug()
+    {
+        return str_replace(' ', '-', $this->name);
+    }
+
+
 
     public function hasThisSubject($subject_id)
     {

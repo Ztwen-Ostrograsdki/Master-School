@@ -3,7 +3,11 @@
 namespace App\Http\Livewire;
 
 use App\Events\LocalTransfertCreatedEvent;
+use App\Events\NewEpreuveWasUploadedEvent;
+use App\Events\TeacherFileWasSentWithSuccessEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\Classe;
+use App\Models\ClasseGroup;
 use App\Models\TransferFile;
 use Livewire\Component;
 use Livewire\TemporaryUploadedFile;
@@ -12,19 +16,70 @@ use Livewire\WithFileUploads;
 class ManageEpreuvesTransfers extends Component
 {
     public $tables = [
-        "Mano" => "15 Mb",
-        "Belgarod" => "1 Mb",
-        "Faotef" => "150 Mb",
-        "Telsph" => "11 Mb",
-        "Destch" => "25 Mb",
-        "Updalings" => "2.25 Mb",
-        "Gifraree" => "150 Mb"
+        "1er Devoir du Second semestre" => "150 Mb"
 
     ];
+
+
+    public $targets = ['devoir' => 'Devoir', 'epe' => 'interrogation', 'bac' => "Examen BAC", 'bepc' => "Examen BEPC"];
 
     public $pendingFiles = [];
 
     public $semestre = 1;
+
+    public $index = '';
+
+    public $subject_id;
+
+    public $semestre_type = 'Semestre';
+
+    public $teacher_id;
+
+    public $classe_id;
+
+    public $classe_group_id;
+
+    public $school_year_id;
+
+    public $duration = 3;
+
+    public $level_id;
+
+    public $school_year;
+
+    public $target = 'devoir';
+
+    public $description = 'Une epreuve de composition';
+
+    public $exam_name;
+
+    public $session;
+
+
+    protected $rules = [
+
+        'pendingFiles.*' => 'file|mimes:docx,pdf|max:1000',
+        'subject_id' => 'required|int',
+        'duration' => 'required|int|max:6',
+        'target' => 'required|string',
+    ];
+
+    protected $listeners = ['FileWasSendWithSuccess' => 'dataSentSuccessfully'];
+
+
+    public function mount()
+    {
+        $user = auth()->user();
+
+        if(!$user || !$user->teacher){
+
+            return abort('403', "Vous n'êtes pas authorisé à accéder à cette page ou elle n'est pas encore disponible!");
+
+        }
+
+
+
+    }
 
 
     use WithFileUploads;
@@ -34,22 +89,44 @@ class ManageEpreuvesTransfers extends Component
 
     public function render()
     {
-        $semestre_type = 'Semestre';
-
         $semestres = $this->getSemestres();
 
         if(count($semestres) == 3){
 
-            $semestre_type = 'Trimestre';
+            $this->semestre_type = 'Trimestre';
 
         }
 
+        $classes = [];
+
+        $classe_groups = [];
+
+        $user = auth()->user();
+
         $school_year_model = $this->getSchoolYear();
+
+        $this->school_year_id = $school_year_model->id;
+
+        $this->school_year = $school_year_model->school_year;
 
         $subjects = $school_year_model->subjects;
 
+        if($user){
 
-        return view('livewire.manage-epreuves-transfers', compact('semestres', 'semestre_type', 'school_year_model'));
+            $this->subject_id = $user->teacher->speciality()->id;
+
+            $this->level_id = $user->teacher->level_id;
+
+            $this->teacher_id = $user->teacher->id;
+
+            $classes = $school_year_model->classes()->where('classes.level_id', $user->teacher->level_id)->get();
+
+            $classe_groups = $school_year_model->classe_groups()->where('classe_groups.level_id', $user->teacher->level_id)->get();
+
+        }
+
+
+        return view('livewire.manage-epreuves-transfers', compact('semestres', 'school_year_model', 'classes', 'classe_groups', 'user', 'subjects'));
     }
 
 
@@ -57,43 +134,70 @@ class ManageEpreuvesTransfers extends Component
     {
         $user = auth()->user();
 
-        $this->validate(['pendingFiles.*' => ['file', 'mimes:docx,pdf', 'max:1000']]);
+        $folder = config('app.epreuvesFolder');
 
+        $this->validate();
+
+        if(!$this->classe_group_id){
+
+            $this->validate(['classe_id' => 'required|int']);
+        }
+        else{
+
+            $this->validate(['classe_group_id' => 'required|int']);
+
+        }
 
         $transfer = $user->transfers()->create();
 
         $transfer->files()->saveMany(
-            collect($this->pendingFiles)->map(function(TemporaryUploadedFile $pendFile) use($user){
+            collect($this->pendingFiles)->map(function(TemporaryUploadedFile $pendFile) use($folder, $user){
 
-                $school_year_model = $this->getSchoolYear();
+                $sub = '';
 
-                $subject = $user->teacher->speciality();
+                $cln = '';
 
-                $level_id = $user->teacher->speciality()->level_id;
+                if($this->subject_id){
 
-                $subject_id = $subject->id;
+                    $sub = $user->teacher->speciality()->name;
 
-                $classe_id = 3;
+                }
 
-                $semestre = 1;
+                if($this->classe_id){
 
-                $teacher_id = $user->teacher->id;
+                    $classe = Classe::find($this->classe_id);
 
-                $name = $semestre . 'D' . str_replace(' ', '', $school_year_model->school_year) . getdate()['year'].''.getdate()['mon'].''.getdate()['mday'].''.getdate()['hours'].''.getdate()['minutes'].''.getdate()['seconds']. '.' . $pendFile->extension();
+                    $cln = $classe->getSlug();
 
-                $file = $pendFile->storeAs('epreuvesFolder/', $name);
+                }
+                elseif($this->classe_group_id){
+
+                    $classe_group = ClasseGroup::find($this->classe_group_id);
+
+                    $cln = $classe_group->getSlug();
+
+                }
+
+                $time = time();
+
+                $name = $this->index. 'e-' . $this->target . '-' . $this->semestre . '' . substr($this->semestre_type, 0, 1) . '-' . $cln. '-' . $sub . '-' . str_replace(' ', '', $this->school_year) . 'fichier-' . $time . '.' . $pendFile->extension();
+
+                $file = $pendFile->storeAs($folder, $name);
 
                 return new TransferFile([
 
-                    'path' => $pendFile->getRealPath(),
+                    'path' => str_replace('//', '/', $pendFile->getPath()),
                     'size' => $pendFile->getSize(),
                     'name' => $name,
-                    'subject_id' => $subject_id,
-                    'classe_id' => $classe_id,
-                    'target' => 'devoir',
-                    'semestre' => $semestre,
-                    'teacher_id' => $teacher_id,
-                    'level_id' => $level_id,
+                    'subject_id' => $this->subject_id,
+                    'classe_id' => $this->classe_id,
+                    'school_year_id' => $this->school_year_id,
+                    'classe_group_id' => $this->classe_group_id,
+                    'target' => $this->target,
+                    'semestre' => $this->semestre,
+                    'teacher_id' => $this->teacher_id,
+                    'level_id' => $this->level_id,
+                    'duration' => $this->duration,
                 ]);
 
             })
@@ -102,10 +206,19 @@ class ManageEpreuvesTransfers extends Component
 
         $this->pendingFiles = [];
 
-        
-        LocalTransfertCreatedEvent::dispatch($transfer);
+        NewEpreuveWasUploadedEvent::dispatch($transfer);
+
+        TeacherFileWasSentWithSuccessEvent::dispatch($transfer, $user);
+
+        // LocalTransfertCreatedEvent::dispatch($transfer);
         
 
+    }
+
+    public function dataSentSuccessfully()
+    {
+        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'EPREUVE ENVOYEE', 'message' => "Votre épreuve a été soumise avec succès!", 'type' => 'success']);
+        
     }
 
 

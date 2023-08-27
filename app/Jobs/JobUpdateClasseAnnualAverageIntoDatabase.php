@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\Averages;
 use App\Models\Classe;
 use App\Models\SchoolYear;
+use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 class JobUpdateClasseAnnualAverageIntoDatabase implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 protected $classe;
 
     protected $school_year_model;

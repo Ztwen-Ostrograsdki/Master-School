@@ -95,6 +95,7 @@
                                     <x-ztitle-liner :smallTitle=" '(à ' . $pupil->birth_city . ')'" classe="text-capitalize" :icon="'bi-calendar'" :useIcon="true" :value="$pupil->__getDateAsString($pupil->birth_day, null)"></x-ztitle-liner>
                                     <x-ztitle-liner :icon="'bi-phone'" :useIcon="true" :value="$pupil->contacts"></x-ztitle-liner>
                                     <x-ztitle-liner :icon="'bi-house'" :useIcon="true" :value="$pupil->residence"></x-ztitle-liner>
+                                    <x-ztitle-liner class="text-orange" :smallTitle="'(Numéro EducMaster)'" :icon="'bi-person-badge text-orange'" :useIcon="true" :value="$pupil->educmaster ? $pupil->educmaster : 'Non renseigné'"></x-ztitle-liner>
                                 </div>
                             </div>
                         </div>

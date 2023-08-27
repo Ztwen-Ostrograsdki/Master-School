@@ -19,10 +19,10 @@
                </div>
 
                <div class="d-flex row justify-between m-0 p-0">
-                    <div class="col-7">
+                    <div class="col-7 m-0 p-0">
                         <x-z-input :type="'text'" :error="$errors->first('last_school_from')" :modelName="'last_school_from'" :labelTitle="'Ecole de provénance'" ></x-z-input>
                     </div>
-                    <div class="col-4">
+                    <div class="col-4 m-0 p-0">
                         <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer" for="">Le Sexe </label>
                         <select class="px-2 form-select custom-select text-white z-bg-secondary w-100 @error('sexe') text-danger border border-danger @enderror" wire:model.defer="sexe" name="sexe" id="">
                             <option disabled class="" value="{{null}}">Choisissez le Sexe</option>
@@ -30,6 +30,16 @@
                             <option  value="female">Féminin</option>
                         </select>
                         @error('sexe')
+                            <small class="py-1 z-text-orange">{{$message}}</small>
+                        @enderror
+                    </div>
+               </div>
+
+               <div class="d-flex row justify-between m-0 p-0">
+                    <div class="p-0 m-0 row col-12">
+                        <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">N° EducMaster</label>
+                        <input autofocus="autofocus" placeholder="Numéro éducMaster de l'apprenant octroyé par le ministère" class="text-white form-control bg-transparent border border-white px-2 z-focus @error('educmaster') text-danger border-danger @enderror" wire:model.defer="educmaster" type="text" name="educmaster">
+                        @error('educmaster')
                             <small class="py-1 z-text-orange">{{$message}}</small>
                         @enderror
                     </div>

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Helpers\DateFormattor;
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -14,7 +16,11 @@ class TransferFile extends Model
 {
     use HasFactory;
 
-    protected $table_name = 'epreuves';
+    use DateFormattor;
+
+    use ModelQueryTrait;
+
+    protected $table_name = 'transfer_files';
 
     public $imagesFolder = 'epreuvesFolder';
 
@@ -24,6 +30,15 @@ class TransferFile extends Model
 
 
     protected $casts = ['disk' => 'string', 'path' => 'string', 'size' => 'integer'];
+
+    public function getDateAgoFormated($created_at = false)
+    {
+        $this->__setDateAgo();
+        if($created_at){
+            return $this->dateAgoToString;
+        }
+        return $this->dateAgoToStringForUpdated;
+    }
 
 
 
@@ -53,7 +68,6 @@ class TransferFile extends Model
 
     public function transfer()
     {
-
         return $this->belongsTo(Transfer::class);
 
     }

@@ -55,6 +55,8 @@ class ClasseAveragesComponent extends Component
 
         $semestres = [1, 2];
 
+        $additional = [];
+
         if($school){
 
             if($school->trimestre){
@@ -71,7 +73,6 @@ class ClasseAveragesComponent extends Component
 
 
         if($classe){
-
 
             if($this->order){
 
@@ -99,7 +100,8 @@ class ClasseAveragesComponent extends Component
 
                     }
                     else{
-                        $pupils_ids = [];
+
+                        $pupils_ids = $classe->getPupils($school_year_model->id, null, null, true);
 
                     }
 
@@ -109,7 +111,7 @@ class ClasseAveragesComponent extends Component
 
                             if($pupils_ids && in_array($av->pupil_id, $pupils_ids)){
 
-                                $pupils[] = $av->pupil;
+                                $pupils[$av->pupil_id] = $av->pupil;
 
                             }
 
@@ -144,7 +146,8 @@ class ClasseAveragesComponent extends Component
 
                     }
                     else{
-                        $pupils_ids = [];
+
+                        $pupils_ids = $classe->getPupils($school_year_model->id, null, null, true);
 
                     }
 
@@ -154,10 +157,9 @@ class ClasseAveragesComponent extends Component
 
                             if($pupils_ids && in_array($av->pupil_id, $pupils_ids)){
 
-                                $pupils[] = $av->pupil;
+                                $pupils[$av->pupil_id] = $av->pupil;
 
                             }
-
                         }
 
                     }
@@ -173,6 +175,22 @@ class ClasseAveragesComponent extends Component
 
                 $pupils = $classe->getPupils($school_year_model->id, $this->search, $this->sexe_selected);
             }
+
+            if($this->order){
+
+                $additional = $classe->getPupils($school_year_model->id);
+
+                foreach($additional as $p){
+
+                    if(!array_key_exists($p->id, $pupils)){
+
+                        $pupils[$p->id] = $p;
+
+                    }
+
+                }
+
+            }
         }
         return view('livewire.classe-averages-component', compact('pupils', 'school_year_model', 'semestres', 'classe', 'semestre_selected'));
     }
@@ -187,7 +205,7 @@ class ClasseAveragesComponent extends Component
             $pupil->pupilDeleter(null, true);
         }
     }
-public function migrateTo($pupil_id)
+    public function migrateTo($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
 
@@ -253,6 +271,7 @@ public function migrateTo($pupil_id)
         $this->order = 'desc';
 
         $target ? $this->targetToOrder = $target : $this->targetToOrder = null;
+        // dd($this);
 
     }
 

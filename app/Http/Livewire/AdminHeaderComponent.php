@@ -4,6 +4,8 @@ namespace App\Http\Livewire;
 
 use App\Models\Classe;
 use App\Models\School;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Route;
 use Livewire\Component;
 
 class AdminHeaderComponent extends Component

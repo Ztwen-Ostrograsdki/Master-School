@@ -8706,21 +8706,54 @@ e["private"]('user.' + window.ClientUser.id).listen('ParentRequestAcceptedEvent'
   Livewire.emit('NotifyMeWhenMyRequestAccepted', e.user);
 }).listen('ParentAccountBlockedEvent', function (e) {
   Livewire.emit('UpdateParentAccountAfterBlocked', e.user);
+}).listen('TeacherFileWasSentWithSuccessEvent', function (e) {
+  Livewire.emit('FileWasSendWithSuccess', e.user);
 }).listen('ParentAccountDeletedEvent', function (e) {
   window.location.reload();
 });
 e["private"]('master').listen('NewAddParentRequestEvent', function (e) {
   Livewire.emit('NewParentRequest');
-});
-e["private"]('mark').listen('NewMarkInsertEvent', function (e) {
+}).listen('NewEpreuveWasUploadedEvent', function (e) {
+  Livewire.emit('NewEpreuveWasUploadedLiveEvent');
+}).listen('ClasseMarksWasFailedEvent', function (e) {
   Swal.fire({
-    icon: 'success',
-    title: "Demande Acceptée",
+    icon: 'error',
+    title: "Le traitement des notes a échoué",
     text: " Votre demande a été Accepté",
     toast: true,
     showConfirmButton: false
-  }); // Livewire.emit('NewParentRequest');
-}); // e.join('online')
+  });
+});
+e["private"]('reloadMarkChannel.' + window.ClientUser.id).listen('ClasseMarksWasCompletedEvent', function (e) {
+  Swal.fire({
+    icon: 'success',
+    title: "NOUVELLES NOTES INSEREES!",
+    text: 'Les notes insérées ont été traité',
+    toast: true,
+    position: 'center',
+    showConfirmButton: false,
+    className: "text-dark",
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: function didOpen(toast) {
+      toast.addEventListener('mouseenter', Swal.stopTimer);
+      toast.addEventListener('mouseleave', Swal.resumeTimer);
+    }
+  });
+  Livewire.emit('NewClasseMarksInsert');
+}); // e.private('classe.marks.insert.user.' + window.ClientUser.id)
+//     .listen('JobFinisched', function(u) {
+//         // console.log(u);
+//         Swal.fire({
+//             icon: 'success',
+//             title: "Demande Acceptée",
+//             text: " Votre demande a été Accepté",
+//             toast: true,
+//             showConfirmButton: false,
+//         });
+//         // Livewire.emit('NewParentRequest');
+//     })
+// e.join('online')
 //     .here(function(users) {
 //         // console.log('users on line', users);
 //     })

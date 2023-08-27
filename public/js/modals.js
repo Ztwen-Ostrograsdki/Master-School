@@ -103,6 +103,16 @@ window.addEventListener('modal-insertTimePlan', function(e) {
     $('#insertTimePlanModal').modal('show');
 });
 
+window.addEventListener('modal-classeMarksDeleter', function(e) {
+    $('#classeMarksDeleterModal').modal('show');
+});
+
+window.addEventListener('modal-insertClassePupilsMarksTogether', function(e) {
+    $('#insertClassePupilsMarksTogether').modal('show', function(ex) {
+        
+    });
+});
+
 window.addEventListener('modal-insertPupilMarks', function(e) {
     $('#insertPupilMarks').modal('show', function(ex) {
         $(this).find('.z-focus').focus();
@@ -125,6 +135,7 @@ window.addEventListener('modal-openSingleChatModal', function(e) {
     $('#singleChatModal').modal('show');
     $("#singleChatModal .chat-input").focus();
 });
+
 window.addEventListener('modal-adminAuthenticationModal', function(e) {
     $('#adminAuthenticationModal').modal('show');
     $("#adminAuthenticationModal input").focus();

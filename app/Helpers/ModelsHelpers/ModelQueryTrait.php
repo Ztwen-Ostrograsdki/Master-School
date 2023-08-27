@@ -45,14 +45,17 @@ trait ModelQueryTrait{
                 $school_year = intval(date('Y') - 1) . ' - ' . intval(date('Y'));
             }
             if(session()->has('school_year_selected') && session('school_year_selected')){
+
                 $school_year = session('school_year_selected');
+
                 session()->put('school_year_selected', $school_year);
             }
             else{
+
                 session()->put('school_year_selected', $school_year);
             }
 
-            $this->__setSemestreIndex();
+            $this->__setSemestreIndex($school_year);
 
             return SchoolYear::where('school_year', $school_year)->first();
 
@@ -62,56 +65,78 @@ trait ModelQueryTrait{
 
 
 
-    public function __setSemestreIndex()
+    public function __setSemestreIndex($school_year = null)
     {
         $semestre_type = 'Semestre';
-        $school_year = session('school_year_selected');
+
+        // $school_year = session('school_year_selected');
+
         $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+
         $semestre = session('semestre_selected');
 
         $school = School::first();
+
         if($school && $school_year_model){
+
             $semestre_calendars = $school_year_model->periods()->where('periods.target', 'semestre-trimestre')->get();
+
             if(session()->has('semestre_type') && session('semestre_type')){
+
                 $semestre_type = session('semestre_type');
+
                 session()->put('semestre_type', $semestre_type);
             }
             else{
+
                 if($school->trimestre){
+
                     $semestre_type = 'Trimestre';
                 }
                 session()->put('semestre_type', $semestre_type);
             }
 
             if(session()->has('semestre_selected') && session('semestre_selected')){
+
                 $semestre = session('semestre_selected');
+
             }
             else{
+
                 if($semestre_calendars){
 
                     foreach($semestre_calendars as $calendar){
+
                         $is_current = $this->thisDateIsBetween($calendar->start, $calendar->end);
+
                         if($is_current){
+
                             $semestre = str_replace($semestre_type . ' ', '', $calendar->object);
                         }
                     }
                 }
                 else{
+
                     $current_month_index = intval(date('m'));
 
                     if ($semestre_type == 'Semestre') {
+
                         if(in_array($current_month_index, [10, 11, 12, 1, 2]) ){
+
                             $semestre = 1;
                         }
                         else{
+
                             $semestre = 2;
                         }
                     }
                     else{
                         if(in_array($current_month_index, [10, 11, 12, 1]) ){
+
                             $semestre = 1;
                         }
                         elseif (in_array($current_month_index, [2, 3, 4])) {
+
                             $semestre = 2;
                         }
                         else{

@@ -12,6 +12,7 @@ use App\Models\Level;
 use App\Models\QotHour;
 use App\Models\SchoolYear;
 use App\Models\Teacher;
+use App\Models\TransferFile;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -30,6 +31,12 @@ class Subject extends Model
 
     public $tables = [
     ];
+
+
+    public function epreuves()
+    {
+        return $this->hasMany(TransferFile::class);
+    }
 
 
     public function qotHours()

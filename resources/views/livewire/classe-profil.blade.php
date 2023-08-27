@@ -26,11 +26,11 @@
                             <a class="dropdown-item" wire:click="optimizeClasseAveragesIntoDatabase({{$classe->id}})" tabindex="-1" href="#">Optimiser les moyennes en base de données</a>
                             <a class="dropdown-item" wire:click="optimizeSemestrialAverageFromDatabase({{$classe->id}})" tabindex="-1" href="#">Charger les moyennes semestrielles</a>
                             <a class="dropdown-item" wire:click="deleteAllPupil({{$classe->id}})" tabindex="-1" href="#">Rafraichir la classe</a>
-                            <a class="dropdown-item" tabindex="-1" wire:click="refreshAllMarks" href="#">Vider toutes les notes de cette classe</a>
+                            <a class="dropdown-item" tabindex="-1" wire:click="refreshClasseMarks('{{$classe->id}}')" href="#">Vider les notes de cette classe</a>
                             <a class="dropdown-item @if(session()->has('classe_subject_selected') && session('classe_subject_selected')) d-none @endif " tabindex="-1" wire:click="resetMarks" href="#">Rafraichir les notes de cette matière</a>
                             <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
                             <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Rafraichir les retards</a>
-                            <a class="dropdown-item" tabindex="-1" href="#">Créer une nouvelle classe</a>
+                            <a class="dropdown-item" wire:click="insertClasseMarks"  tabindex="-1" href="#">Insérer des notes de classe</a>
                             <a class="dropdown-item" wire:click="createNewClasse" tabindex="-1" href="#">Créer une classe</a>
                             <a class="dropdown-item" wire:click="editClasseGroup({{$classe->id}})" tabindex="-1" href="#">Modifier la promotion</a>
                             <a wire:click="editClasseSubjects({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Définir les matières</a>

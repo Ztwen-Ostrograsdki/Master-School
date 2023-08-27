@@ -7,10 +7,12 @@
         @livewire('manage-classe-modalities')
         @livewire('add-new-teacher')
         @livewire('insert-time-plan')
+        @livewire('classe-marks-deleter-component')
     @endif
     @livewire('mark-manager')
     @livewire('parent-follow-new-pupil')
     @livewire('insert-pupil-marks')
+    @livewire('insert-classe-pupils-marks-together')
     @livewire('profil-image-editor')
     
     

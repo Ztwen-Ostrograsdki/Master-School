@@ -659,7 +659,9 @@ trait ClasseTraits{
         }
 
         if(count($subjects) > 0){
+
             foreach ($subjects as $subject) {
+
                 $averagesTab = $this->getClasseRank($subject->id, $semestre, $school_year, $takeBonus, $takeSanctions);
                 $bestGirl = null;
                 $weakGirl = null;
@@ -708,10 +710,12 @@ trait ClasseTraits{
                 $failed_boys = [];
                 $succeed_boys = [];
 
-                if(count($averagesTab) > 0){
+                if($averagesTab){
+
                     foreach ($averagesTab as $pupil_id => $average) {
                         
                         if($average['pupil']->sexe == 'male'){
+
                             $boys[$pupil_id] = $average;
                         }
                         else{
@@ -720,7 +724,6 @@ trait ClasseTraits{
                     }
 
                 }
-
 
 
                 if($girls !== []){

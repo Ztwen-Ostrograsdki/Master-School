@@ -2,12 +2,16 @@
 
 namespace App\Providers;
 
+use App\Events\ClasseMarksInsertionCreatedEvent;
 use App\Events\LocalTransfertCreatedEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\PaymentSystemEvent;
+use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
+use App\Listeners\ClasseMarksInsertionBatchListener;
 use App\Listeners\CreatedTransferBatchListener;
 use App\Listeners\NewProductCreatedListener;
 use App\Listeners\PaymentSystemListener;
+use App\Listeners\UpdateClasseAveragesIntoDatabaseBatcherListener;
 use App\Models\Classe;
 use App\Models\ClassesSecurity;
 use App\Models\Mark;
@@ -43,6 +47,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         LocalTransfertCreatedEvent::class => [
             CreatedTransferBatchListener::class,
+        ],
+        ClasseMarksInsertionCreatedEvent::class => [
+            ClasseMarksInsertionBatchListener::class,
+        ],
+        UpdateClasseAveragesIntoDatabaseEvent::class => [
+            UpdateClasseAveragesIntoDatabaseBatcherListener::class,
         ],
     ];
 

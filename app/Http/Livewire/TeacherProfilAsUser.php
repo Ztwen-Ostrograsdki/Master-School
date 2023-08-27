@@ -11,7 +11,8 @@ use Livewire\Component;
 
 class TeacherProfilAsUser extends Component
 {
-    protected $listeners = ['schoolYearChangedLiveEvent' => 'reloadData'];
+    protected $listeners = ['schoolYearChangedLiveEvent' => 'reloadData', 'NewClasseMarksInsert' => 'cleanRelaodNow'];
+
     use ModelQueryTrait;
 
     public $user;
@@ -117,6 +118,12 @@ class TeacherProfilAsUser extends Component
     public function reloadData()
     {
         $this->counter = rand(0, 21);
+
+    }
+
+    public function cleanRelaodNow($value = true)
+    {
+        $this->emit('UpdatedRelaodNowLiveEvent');
     }
 
 

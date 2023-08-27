@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Jobs\JobUpdateClasseAnnualAverageIntoDatabase;
 use App\Jobs\JobUpdateClasseSemestrialAverageIntoDatabase;
 use App\Jobs\UpdateAverageTable;
@@ -77,9 +78,9 @@ class MarkObserver
 
         if($classe && $semestre){
 
-            dispatch(new JobUpdateClasseSemestrialAverageIntoDatabase($classe, $semestre, $school_year_model))->delay(Carbon::now()->addSeconds(15));
+            $user = $mark->user;
 
-            dispatch(new JobUpdateClasseAnnualAverageIntoDatabase($classe, $school_year_model))->delay(Carbon::now()->addSeconds(30));
+            UpdateClasseAveragesIntoDatabaseEvent::dispatch($user, $classe, $semestre, $school_year_model);
 
         }
 

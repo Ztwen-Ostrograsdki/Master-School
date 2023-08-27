@@ -1,9 +1,9 @@
 <div>
-    <div class="px-2">
+    <div class="px-2" x-data="{all: null}">
         <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
             
             <div class="card-header bg-dark my-2"> 
-                <h5 style="letter-spacing: 1.2px;" class="card-title cursor-pointer text-uppercase text-cursive text-orange" data-card-widget="collapse">Détails sur les épreuves de composition déjà envoyées</h5>
+                <h5 style="letter-spacing: 1.2px;" class="card-title cursor-pointer text-uppercase text-cursive text-orange" data-card-widget="collapse"> Détails sur les épreuves de composition déjà envoyées</h5>
                   <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
                       <i class="fa fa-minus"></i>
@@ -20,7 +20,7 @@
                             Reglages <span class="caret"></span>
                           </a>
                           <div class="dropdown-menu">
-                            <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Tout approuver</a>
+                            <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Tout télécharger</a>
                             <a class="dropdown-item" tabindex="-1" href="#">Tous réfuser</a>
                             <a class="dropdown-item" tabindex="-1" href="#">Vérouiller les épreuves</a>
                             <a class="dropdown-item" tabindex="-1" href="#">Signaler les retardataires</a>
@@ -46,9 +46,12 @@
                             </form>
                             <form class="d-inline mx-2 " action="">
                                 @csrf()
-                                <select style="letter-spacing: 1.2px;" wire:model="section_selected" class="form-select text-uppercase font-weight-bold border border-orange custom-select ml-3">
-                                  <option value="{{null}}">Veuillez sélectionner une section</option>
-
+                                <select style="letter-spacing: 1.2px;" wire:model="target_selected" class="form-select text-uppercase font-weight-bold border border-orange custom-select ml-3">
+                                    <option value="{{null}}">Veuillez sélectionner une section</option>
+                                    <option value="{{2000}}">Toutes sortes</option>
+                                    @foreach($epreuves_targets as $target => $title)
+                                        <option value="{{$target}}" class="">Epreuves: {{$title}}</option>
+                                    @endforeach
                                 </select>
                             </form>
                         </div>
@@ -68,6 +71,7 @@
                                 <th rowspan="2">Matières / Atélier</th>
                                 <th rowspan="2">Prof. chargé (AE)</th>
                                 <th colspan="2" >Epreuves</th>
+                                <th rowspan="2">Classe</th>
                                 <th rowspan="2">Date d'envoie</th>
                                 <th rowspan="2">Statut</th>
                                 <th rowspan="2">Action</th>
@@ -76,23 +80,45 @@
                                 <th scope="colgroup">Attendues</th>
                                 <th scope="colgroup">Réçues</th>
                             </tr>
-                            @foreach($subjects as $subject)
+                            @foreach($epreuves as $epreuve)
+
+                                @php
+                                    $classe = null;
+
+                                    $cl = $epreuve->classe;
+
+                                    if($cl){
+
+                                        $classe = $cl->getNumericName();
+                                    }
+
+                                    
+                                @endphp
 
                                 <tr>
                                     <th>{{$loop->iteration}}</th>
-                                    <th class="py-2 pl-2 text-left">{{$subject->name}}</th>
-                                    <th> - </th>
-                                    <th> - </th>
-                                    <th> - </th>
-                                    <th> - </th>
+                                    <th class="py-2 pl-2 text-left">{{$epreuve->subject->name}}</th>
+                                    <th> {{$epreuve->teacher->getFormatedName()}} </th>
+                                    <th> 01 </th>
+                                    <th> 01 </th>
                                     <th> 
-                                        <span class="btn btn-success w-100">
-                                            <span class="fa fa-check"></span>
-                                            <span class="">Envoyé</span>
+                                    <span class="">
+                                        @if($classe)
+                                            {{  $classe['root'] }}<sup>{{ $classe['sup'] }} </sup> {{ $classe['idc'] }}
+                                        @else
+                                            <span> <small>Non renseignée!</small></span>  
+                                        @endif
+                                    </span>
+                                    </th>
+                                    <th class=""> {{$epreuve->__to($epreuve->created_at, true)}} </th>
+                                    <th wire:click="ztwen('{{$epreuve->name}}')"> 
+                                        <span title="Télécharger l'épreuve {{$epreuve->name}}"  class="btn btn-success text-light-0 w-100">
+                                            <span class="fa fa-download"></span>
+                                            <span class="">Télécharger</span>
                                         </span>
                                     </th>
                                     <th>
-                                        <span class="btn btn-danger w-100">
+                                        <span title="Supprimer l'épreuve {{$epreuve->name}}" wire:click="delete({{$epreuve->name}})" class="btn btn-danger w-100">
                                             <span class="fa fa-trash"></span>
                                             <span class="">Réfusé</span>
                                         </span>
@@ -101,8 +127,9 @@
                             @endforeach
                             <tr class="bg-secondary-light-0 fx-20 font-italic" style="letter-spacing: 1.2px;">
                                 <th colspan="3" class="py-3"> Total </th>
-                                <th> 12 </th>
-                                <th> 10 </th>
+                                <th> <small class="letter-spacing-12">Inconnue</small> </th>
+                                <th> {{count($epreuves)}} </th>
+                                <td> - </td>
                                 <td> - </td>
                                 <td> - </td>
                                 <td> - </td>

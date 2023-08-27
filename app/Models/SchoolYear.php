@@ -30,6 +30,7 @@ use App\Models\TeacherAbsences;
 use App\Models\TeacherCursus;
 use App\Models\TeacherLates;
 use App\Models\TimePlan;
+use App\Models\TransferFile;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -62,6 +63,11 @@ class SchoolYear extends Model
 
 		return true;
 	}
+
+    public function epreuves()
+    {
+        return $this->hasMany(TransferFile::class);
+    }
 
 
     public function marks_stopped()

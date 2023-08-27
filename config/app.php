@@ -147,6 +147,20 @@ return [
         'Autre',
     ],
 
+    'local_epreuves_targets' => [
+        'devoir' => 'Devoir',
+        'epe' => 'Interrogation', 
+        'bac' => "Examen BAC", 
+        'dt' => "Examen DT", 
+        'cap' => "Examen CAP", 
+        // 'licence' => "Examen Licence", 
+        'bepc' => "Examen BEPC",
+        null => "Juste une épreuve",
+    ],
+
+
+    'epreuvesFolder' => "epreuvesFolder/",
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
