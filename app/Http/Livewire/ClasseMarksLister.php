@@ -23,7 +23,11 @@ class ClasseMarksLister extends Component
         'semestreWasChanged',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
         'UpdatedRelaodNowLiveEvent' => 'updatedRelaodNow',
+        'NewClasseMarksInsert' => 'reloadData',
+        'InitiateClasseDataUpdatingLiveEvent' => 'loadingDataStart',
+        'ClasseDataLoadedSuccessfully' => 'dataWasLoaded',
     ];
+
     public $classe_id;
     public $pupil_id;
     public $semestre_type = 'Semestre';
@@ -44,6 +48,7 @@ class ClasseMarksLister extends Component
     public $computedRank = false;
     public $teacher_profil = false;
     public $relaodNow = false;
+    public $is_loading = false;
 
 
     public function mount()
@@ -59,6 +64,16 @@ class ClasseMarksLister extends Component
     public function updatedSearch($value)
     {
         $this->search = $value;
+    }
+
+    public function dataWasLoaded()
+    {
+        $this->is_loading = false;
+    }
+
+    public function loadingDataStart()
+    {
+        $this->is_loading = true;
     }
 
     public function render()
@@ -414,5 +429,34 @@ class ClasseMarksLister extends Component
     public function updatedRelaodNow($value = true)
     {
         $this->reloadData();
+    }
+
+
+    public function refreshClasseMarks($classe_id)
+    {
+        if ($classe_id) {
+
+            $classe = Classe::find($classe_id);
+        }
+        else{
+            $classe = Classe::whereSlug($this->slug)->first();
+        }
+        if ($classe) {
+
+            $school_year_model = $this->getSchoolYear();
+
+            $semestre = $this->semestre_selected;
+
+            if (session()->has('semestre_selected') && session('semestre_selected')) {
+
+                $semestre = session('semestre_selected');
+            }
+
+            $subject_id = session('classe_subject_selected');
+
+            $this->emit('ThrowClasseMarksDeleterLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject_id);
+
+        }
+        
     }
 }

@@ -25,18 +25,31 @@ class UpdateClasseAveragesIntoDatabaseEvent implements ShouldBroadcast
 
     public $school_year_model;
 
+    public $allSemestres = false;
+
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(User $user, Classe $classe, $semestre, SchoolYear $school_year_model)
+    public function __construct(User $user, Classe $classe, $semestre, SchoolYear $school_year_model, bool $allSemestres = false)
     {
         $this->user = $user;
 
         $this->classe = $classe;
 
-        $this->semestre = $semestre;
+        $this->allSemestres = $allSemestres;
+
+        if($semestre == 'all'){
+
+            $this->semestre = 1;
+
+        }
+        else{
+            
+            $this->semestre = $semestre;
+
+        }
 
         $this->school_year_model = $school_year_model;
     }

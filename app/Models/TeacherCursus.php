@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Helpers\DateFormattor;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\Classe;
 use App\Models\SchoolYear;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -40,6 +41,11 @@ class TeacherCursus extends Model
     public function teacher()
     {
         return $this->belongsTo(Teacher::class);
+    }
+
+    public function classe()
+    {
+        return $this->belongsTo(Classe::class);
     }
 
 

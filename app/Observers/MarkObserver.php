@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Events\FlushAveragesIntoDataBaseEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Jobs\JobUpdateClasseAnnualAverageIntoDatabase;
 use App\Jobs\JobUpdateClasseSemestrialAverageIntoDatabase;
@@ -19,7 +20,7 @@ class MarkObserver
      */
     public function created(Mark $mark)
     {
-        $this->doJob($mark);
+        // $this->doJob($mark);
     }
 
     /**
@@ -80,7 +81,7 @@ class MarkObserver
 
             $user = $mark->user;
 
-            UpdateClasseAveragesIntoDatabaseEvent::dispatch($user, $classe, $semestre, $school_year_model);
+            // FlushAveragesIntoDataBaseEvent::dispatch($user, $classe, $semestre, $school_year_model);
 
         }
 

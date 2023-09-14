@@ -25,7 +25,7 @@ class ClasseMarksWasFailedEvent implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(User $user, Classe $classe, Subject $subject)
+    public function __construct(User $user, Classe $classe, $subject = null)
     {
         $this->user = $user;
 
@@ -41,6 +41,6 @@ class ClasseMarksWasFailedEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('master');
+        return new PrivateChannel('user.' . $this->user->id);
     }
 }

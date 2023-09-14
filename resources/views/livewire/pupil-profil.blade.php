@@ -22,9 +22,9 @@
                           </a>
                           <div class="dropdown-menu">
                             <a class="dropdown-item" tabindex="-1" wire:click="moveToNewClasse" href="#">Changer de classe</a>
-                            <a class="dropdown-item" tabindex="-1" wire:click="resetMarks" href="#">Rafraichir les notes</a>
+                            <a class="dropdown-item" tabindex="-1" wire:click="refreshPupilMarks" href="#">Rafraichir les notes</a>
                             <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
-                            <a class="dropdown-item" tabindex="-1" href="#">Rafraichir les notes relatives</a><a class="dropdown-item" wire:click="resetMarks" tabindex="-1" href="#">Rafraichir les retards</a>
+                            <a class="dropdown-item" wire:click="refreshPupilRelatedsMarks" tabindex="-1" href="#">Rafraichir les notes relatives: Bonus et sanctions</a><a class="dropdown-item" wire:click="resetMarks" tabindex="-1" href="#">Rafraichir les retards</a>
                             <a class="dropdown-item" tabindex="-1" href="#">Mettre à jour</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
@@ -155,13 +155,29 @@
                             <div class="dropdown-menu">
                                 @if($pupil->getArchives())
                                     @foreach($pupil->getArchives() as $archive)
-                                        <a class="dropdown-item" tabindex="-1" href="#"> 
+                                        @php
+                                            if(isset($archive['school_year']) && isset($archive['school_year']->school_year) && $archive['school_year']->school_year){
+
+                                                $sch_yr = $archive['school_year']->school_year;
+
+                                            }
+                                            else{
+
+                                                $sch_yr = null;
+
+                                            }
+
+                                        @endphp
+
+                                        @if($sch_yr)
+                                        <a wire:click="putArchiveTo('{{$sch_yr}}')" class="dropdown-item" tabindex="-1" href="#"> 
                                             <span>{{ $archive['classe']->name }}</span>
                                             <small> en </small>
                                             <small class="text-warning">
-                                                ({{ $archive['school_year']->school_year }})
+                                                ({{ $sch_yr }})
                                             </small>
-                                         </a>
+                                        </a>
+                                        @endif
                                     @endforeach
                                 @endif
                                 <div class="dropdown-divider"></div>

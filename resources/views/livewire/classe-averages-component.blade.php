@@ -30,12 +30,24 @@
                     <span>Bulletins</span>
                 </span>
 
+                @if($classe && is_object($classe))
+                    <span wire:click="optimizeClasseAveragesIntoDatabase({{$classe->id}})" class="btn mx-2 bg-success border border-white float-right px-2 z-scale" title="Recharger les moyennes de classe...">
+                        <span class="fa fa-recycle"></span>
+                        <span>Recharger</span>
+                    </span>
+                @endif
+
                 <span wire:click="refreshOrder" class="btn {{(!$order && !$targetToOrder) ? 'd-none' : ''}} mx-2 btn-warning border border-white float-right px-2 z-scale" title="Ordonner par liste alphabétique...">
                     <span class="fa fa-filter"></span>
                     <span>A - Z</span>
                 </span>
                 @endif
             </div>
+            @if($is_loading)
+            <div class="w-100 d-flex justify-content-center flex-column">
+                @livewire('loader-component')  
+            </div>
+            @else
             <div class="w-100 m-0 p-0 mt-3">
                 @if($pupils && count($pupils) > 0)
 
@@ -239,6 +251,7 @@
                     </div>
                 @endif
             </div>
+            @endif
         </div>
     </div>
 </div>

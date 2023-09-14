@@ -747,3 +747,59 @@ form.authentication-form input:focus{
     border-radius: 50%;
     box-shadow: 7px -6px 6px cyan;
 }
+
+
+@keyframes loading_rotater{
+
+    0%{transform: rotate(0deg);}
+    100%{transform: rotate(360deg);}
+}
+
+
+.loading_rotate{
+    -o-animation: loading_rotater 1s ease infinite;
+    -webkit-animation: loading_rotater 1s ease infinite;
+    -ms-animation: loading_rotater 1s ease infinite;
+    animation: loading_rotater 1s ease infinite;
+}
+
+@keyframes loading_translater{
+
+    from{transform: translateY(-30px); opacity: 1;}
+    to{transform: translateY(20px); opacity: 0.001;}
+}
+
+
+.loading_translate{
+    -o-animation: loading_translater 1s infinite;
+    -webkit-animation: loading_translater 1s infinite;
+    -ms-animation: loading_translater 1s infinite;
+    animation: loading_translater 1s infinite;
+}
+
+@keyframes doter{
+
+    from{opacity: 1;}
+    to{opacity: 0.001;}
+}
+
+.doter1{
+    -o-animation: doter 1s infinite;
+    -webkit-animation: doter 1s infinite;
+    -ms-animation: doter 1s infinite;
+    animation: doter 1s infinite;
+}
+
+.doter2{
+    -o-animation: doter 3s infinite;
+    -webkit-animation: doter 3s infinite;
+    -ms-animation: doter 3s infinite;
+    animation: doter 3s infinite;
+}
+
+.doter3{
+    -o-animation: doter 5s infinite;
+    -webkit-animation: doter 5s infinite;
+    -ms-animation: doter 5s infinite;
+    animation: doter 5s infinite;
+}

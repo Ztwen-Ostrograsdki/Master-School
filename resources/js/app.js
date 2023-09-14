@@ -37,6 +37,10 @@ e.private('user.' + window.ClientUser.id)
 
         Livewire.emit('NotifyMeWhenMyRequestAccepted', e.user);
     })
+    .listen('InitiateClasseDataUpdatingEvent', function(e) {
+        
+        Livewire.emit('InitiateClasseDataUpdatingLiveEvent');
+    }) 
     .listen('ParentAccountBlockedEvent', function(e) {
         
         Livewire.emit('UpdateParentAccountAfterBlocked', e.user);
@@ -49,6 +53,16 @@ e.private('user.' + window.ClientUser.id)
 
         window.location.reload();
 
+    })
+    .listen('ClasseMarksWasFailedEvent', function(e) {
+
+        Swal.fire({
+            icon: 'error',
+            title: "Le traitement des notes a échoué",
+            text: "Une erreure est survenue lors du traitement!",
+            toast: true,
+            showConfirmButton: true,
+        });
     })
 
 e.private('master')
@@ -73,26 +87,15 @@ e.private('master')
     })
 
 e.private('reloadMarkChannel.' + window.ClientUser.id)
-    .listen('ClasseMarksWasCompletedEvent', function(e) {
+   
+e.private('reloader.' + window.ClientUser.id)
 
-        Swal.fire({
-            icon: 'success',
-            title: "NOUVELLES NOTES INSEREES!",
-            text: 'Les notes insérées ont été traité',
-            toast: true,
-            position: 'center',
-            showConfirmButton: false,
-            className: "text-dark",
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer);
-                toast.addEventListener('mouseleave', Swal.resumeTimer);
-            }
+    .listen('ClasseMarksWasUpdatedIntoDBSuccessfullyEvent', function(e) {
 
-        });
+        Livewire.emit('ClasseDataLoadedSuccessfully');
 
         Livewire.emit('NewClasseMarksInsert');
+        
     })
 
 // e.private('classe.marks.insert.user.' + window.ClientUser.id)

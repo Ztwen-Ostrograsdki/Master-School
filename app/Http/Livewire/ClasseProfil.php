@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Livewire;
+use App\Events\FreshAveragesIntoDBEvent;
+use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Jobs\JobUpdateClasseAllSemestresAverageIntoDatabase;
 use App\Jobs\JobUpdateClasseAnnualAverageIntoDatabase;
@@ -26,6 +28,7 @@ class ClasseProfil extends Component
         'classeUpdated' => 'reloadClasseData',
         'newLevelCreated' => 'reloadClasseData',
         'timePlanTablesWasUpdatedLiveEvent' => 'reloadClasseData',
+        'NewClasseMarksInsert' => 'reloadClasseData',
     ];
 
     public $slug;
@@ -436,15 +439,25 @@ class ClasseProfil extends Component
 
             $subject_id = session('classe_subject_selected');
 
-            $this->emit('ThrowClasseMarksDeleterLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject_id);
+            $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe->id);
+
+            if($not_secure){
+
+                $this->emit('ThrowClasseMarksDeleterLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject_id);
+
+            }
+            else{
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE TEMPORAIREMENT', 'message' => "Vous ne pouvez pas supprimer les notes!", 'type' => 'warning']);
+            }
 
         }
         
-    }
+    } 
 
-    public function refreshAllMarks($classe_id = null)
+    public function restorMarks($classe_id)
     {
         if ($classe_id) {
+
             $classe = Classe::find($classe_id);
         }
         else{
@@ -452,16 +465,28 @@ class ClasseProfil extends Component
         }
         if ($classe) {
 
-            $done = $classe->resetAllMarks(null, null, null, null);
+            $school_year_model = $this->getSchoolYear();
 
-            if($done){
-                
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "Toutes les notes de la $classe->name de toutes les années ont été rafraîchies!", 'type' => 'success']);
+            $semestre = $this->semestre_selected;
+
+            if (session()->has('semestre_selected') && session('semestre_selected')) {
+
+                $semestre = session('semestre_selected');
+            }
+
+            $subject_id = session('classe_subject_selected');
+
+            $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe->id);
+
+            if($not_secure){
+
+                $this->emit('ThrowMarksRestorationLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject_id);
+
             }
             else{
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "Le rafraichissement des notes de la classe  $classe->name a échoué. Veuillez réessayer!", 'type' => 'error']);
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE TEMPORAIREMENT', 'message' => "Vous ne pouvez pas supprimer les notes!", 'type' => 'warning']);
             }
-            $this->emit('classeUpdated');
+
         }
         
     }
@@ -559,7 +584,7 @@ class ClasseProfil extends Component
     }
 
 
-    public function optimizeSemestrialAverageFromDatabase($classe_id)
+    public function optimizeSemestrialAverageFromDatabase($classe_id, $semestre = 1)
     {
         $semestre = session('semestre_selected');
 
@@ -567,13 +592,14 @@ class ClasseProfil extends Component
 
             $classe = Classe::find($classe_id);
 
+            $user = auth()->user();
 
-            if($classe && $semestre){
+            if($classe && $user){
 
                 $school_year_model = $this->getSchoolYear();
 
-                dispatch(new JobUpdateClasseSemestrialAverageIntoDatabase($classe, $semestre, $school_year_model))->delay(Carbon::now()->addSeconds(15));
-
+                FreshAveragesIntoDBEvent::dispatch($user, $classe, $school_year_model, $semestre);
+                
             }
 
         }
@@ -590,20 +616,19 @@ class ClasseProfil extends Component
 
     public function optimizeClasseAveragesIntoDatabase($classe_id)
     {
+        $classe = Classe::find($classe_id);
+
         $semestres = $this->getSemestres();
 
-        $classe = Classe::find($classe_id);
+        $user = auth()->user();
 
 
         if($classe && $semestres){
 
             $school_year_model = $this->getSchoolYear();
 
-            dispatch(new JobUpdateClasseAllSemestresAverageIntoDatabase($classe, $semestres, $school_year_model))->delay(Carbon::now()->addSeconds(15));
-
-            dispatch(new JobUpdateClasseAnnualAverageIntoDatabase($classe, $school_year_model))->delay(Carbon::now()->addSeconds(30));
-
-
+            FreshAveragesIntoDBEvent::dispatch($user, $classe, $school_year_model, null);
+            
         }
 
     }

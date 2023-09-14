@@ -9,6 +9,10 @@ window.addEventListener('reloadPage', function(e) {
 window.addEventListener('modal-confirmation', function(e) {
     $('#confirmatorModal').modal('show');
 });
+
+window.addEventListener('modal-ConfirmClasseMarksDeletion', function(e) {
+    $('#confirmClasseMarksDeletionModal').modal('show');
+});
 window.addEventListener('modal-manageAdminStatus', function(e) {
     $('#adminManagerModal').modal('show');
 });
@@ -105,6 +109,9 @@ window.addEventListener('modal-insertTimePlan', function(e) {
 
 window.addEventListener('modal-classeMarksDeleter', function(e) {
     $('#classeMarksDeleterModal').modal('show');
+});
+window.addEventListener('modal-classeMarksRestorer', function(e) {
+    $('#marksRestorerModal').modal('show');
 });
 
 window.addEventListener('modal-insertClassePupilsMarksTogether', function(e) {

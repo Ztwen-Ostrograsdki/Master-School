@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\DB;
 class JobUpdateClasseAnnualAverageIntoDatabase implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-protected $classe;
+    
+    protected $classe;
 
     protected $school_year_model;
 
@@ -46,7 +47,6 @@ protected $classe;
         $classe = $this->classe;
 
         $school_year_id = $this->school_year_model->id;
-
 
         DB::transaction(function($ee) use($classe, $school_year_id){
 
@@ -93,28 +93,23 @@ protected $classe;
 
                     if($an_average){
 
-                        $data_an = ['moy' => $moy_an, 'rank' => $rank_an, 'base' => $base_an, 'exp' => $exp_an, 'mention' => $mention_an, 'min' => $min_an, 'max' => $max_an];
-
-                        $an_average->update($data_an);
+                        $an_average->delete();
 
                     }
-                    else{
-
-                        Averages::create([
-                            'classe_id' => $classe->id,
-                            'school_year_id' => $school_year_id, 
-                            'semestre' => null, 
-                            'moy' => $moy_an, 
-                            'rank' => $rank_an, 
-                            'base' => $base_an, 
-                            'exp' => $exp_an, 
-                            'pupil_id' => $pupil_an->id, 
-                            'mention' => $mention_an, 
-                            'min' => $min_an, 
-                            'max' => $max_an
-                        ]);
-
-                    }
+                    
+                    Averages::create([
+                        'classe_id' => $classe->id,
+                        'school_year_id' => $school_year_id, 
+                        'semestre' => null, 
+                        'moy' => $moy_an, 
+                        'rank' => $rank_an, 
+                        'base' => $base_an, 
+                        'exp' => $exp_an, 
+                        'pupil_id' => $pupil_an->id, 
+                        'mention' => $mention_an, 
+                        'min' => $min_an, 
+                        'max' => $max_an
+                    ]);
                 }
 
 

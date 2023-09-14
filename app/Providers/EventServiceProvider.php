@@ -2,13 +2,23 @@
 
 namespace App\Providers;
 
+use App\Events\ClasseMarksDeletionCreatedEvent;
 use App\Events\ClasseMarksInsertionCreatedEvent;
+use App\Events\FlushAveragesIntoDataBaseEvent;
+use App\Events\FreshAveragesIntoDBEvent;
+use App\Events\InitiateSettingsOnMarksEvent;
 use App\Events\LocalTransfertCreatedEvent;
+use App\Events\MarksRestorationEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\PaymentSystemEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
+use App\Listeners\ClasseMarksDeletionBatcherListener;
 use App\Listeners\ClasseMarksInsertionBatchListener;
 use App\Listeners\CreatedTransferBatchListener;
+use App\Listeners\FlushAveragesIntoDataBaseBatcherListener;
+use App\Listeners\FreshAveragesIntoDBBatcherListener;
+use App\Listeners\InitiateSettingsOnMarksBatcherListener;
+use App\Listeners\MarksRestorationBatcherListener;
 use App\Listeners\NewProductCreatedListener;
 use App\Listeners\PaymentSystemListener;
 use App\Listeners\UpdateClasseAveragesIntoDatabaseBatcherListener;
@@ -39,20 +49,45 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+
         NewProductCreatedEvent::class => [
             NewProductCreatedListener::class,
         ],
+
         PaymentSystemEvent::class => [
             PaymentSystemListener::class,
         ],
+
         LocalTransfertCreatedEvent::class => [
             CreatedTransferBatchListener::class,
         ],
+
         ClasseMarksInsertionCreatedEvent::class => [
             ClasseMarksInsertionBatchListener::class,
         ],
+
         UpdateClasseAveragesIntoDatabaseEvent::class => [
             UpdateClasseAveragesIntoDatabaseBatcherListener::class,
+        ],
+
+        ClasseMarksDeletionCreatedEvent::class => [
+            ClasseMarksDeletionBatcherListener::class,
+        ],
+
+        FlushAveragesIntoDataBaseEvent::class => [
+            FlushAveragesIntoDataBaseBatcherListener::class,
+        ],
+
+        FreshAveragesIntoDBEvent::class => [
+            FreshAveragesIntoDBBatcherListener::class,
+        ],
+        
+        InitiateSettingsOnMarksEvent::class => [
+            InitiateSettingsOnMarksBatcherListener::class,
+        ],
+
+        MarksRestorationEvent::class => [
+            MarksRestorationBatcherListener::class,
         ],
     ];
 

@@ -4,7 +4,10 @@ namespace App\Listeners;
 
 use App\Events\ClasseMarksInsertionCreatedEvent;
 use App\Events\ClasseMarksWasCompletedEvent;
+use App\Events\InitiateClasseDataUpdatingEvent;
 use App\Events\NewAddParentRequestEvent;
+use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
+use App\Jobs\JobFlushAveragesIntoDataBase;
 use App\Jobs\JobInsertClassePupilMarksTogether;
 use Illuminate\Bus\Batch;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,22 +34,27 @@ class ClasseMarksInsertionBatchListener
      */
     public function handle(ClasseMarksInsertionCreatedEvent $event)
     {
+        InitiateClasseDataUpdatingEvent::dispatch($event->user, $event->classe);
 
-        $batch = Bus::batch([new JobInsertClassePupilMarksTogether($event->data)])
+        $batch = Bus::batch([
 
-                    ->then(function(Batch $batch) use ($event){
+            new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, $event->semestre),
 
-                        // ClasseMarksWasCompletedEvent::dispatch($event->user, $event->classe, $event->subject);
-                    })
-                    ->catch(function(Batch $batch, Throwable $er){
+            new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, null),
 
-                        ClasseMarksWasFailedEvent::dispatch($event->user, $event->classe, $event->subject);
+            new JobInsertClassePupilMarksTogether($event->data)
 
-                    })
+            ])->then(function(Batch $batch) use ($event){
 
-                    ->finally(function(Batch $batch){
+                UpdateClasseAveragesIntoDatabaseEvent::dispatch($event->user, $event->classe, $event->semestre, $event->school_year_model);
+
+            })->catch(function(Batch $batch, Throwable $er){
+
+                ClasseMarksWasFailedEvent::dispatch($event->user, $event->classe, $event->subject);
+                
+            })->finally(function(Batch $batch){
 
 
-                    })->dispatch();
+        })->dispatch();
     }
 }

@@ -29,6 +29,14 @@ Broadcast::channel('mark', function ($user) {
     return true;
 });
 
+Broadcast::channel('reloader.{id}', function ($auth, $id) {
+    if((int) $auth->id === (int) $id || $auth->isAdminAs('master')){
+
+        return ['user' => $auth];
+
+    }
+});
+
 Broadcast::channel('reloadMarkChannel.{id}', function ($auth, $id) {
     if((int) $auth->id === (int) $id || $auth->isAdminAs('master')){
 

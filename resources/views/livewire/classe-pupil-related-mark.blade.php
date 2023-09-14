@@ -7,11 +7,11 @@
             </span>
 
             <span class="justify-content-between">
-                <span wire:click="deleteAllRelatedMarks" title="Ajouter une note relative : Sanction ou Bonus" class="float-right btn btn-primary mr-2 border">
+                <span wire:click="refreshClasseRelatedsMarks({{$classe->id}})" title="Supprimer toutes les notes de participation - Bonus - Sanctions" class="float-right z-scale btn btn-primary mr-2 border">
                     <span class="bi-trash text-orange"></span>
                     <span class="ml-1">Vider</span>
                 </span>
-                <span wire:click="makeRelatedMarkTogether({{$classe->id}})" title="Ajouter une note collective à toute la classe de {{$classe->name}} : Sanction ou Bonus à toute la classe" class="float-right btn btn-warning mr-2 border">
+                <span wire:click="makeRelatedMarkTogether({{$classe->id}})" title="Ajouter une note collective à toute la classe de {{$classe->name}} : Sanction ou Bonus à toute la classe" class="float-right btn btn-warning mr-2 border z-scale">
                     <span class="ml-1 text-dark">
                         <span>+ / -</span> 
                         <span class="fa-people"></span>
@@ -53,7 +53,7 @@
                                 <span title="Supprimer la Dernière note" class="col-4 m-0 p-0 cursor-pointer">
                                     <span class="text-warning cursor-pointer fa fa-trash py-2 px-2"></span>
                                 </span>
-                                <span wire:click="deleteAllPupilRelatedMarks({{$p->id}})" title="Supprimer toutes les notes" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                <span wire:click="refreshPupilRelatedsMarks({{$p->id}})" title="Supprimer toutes les notes bonus - sanctions de l'apprenant {{$p->getName()}}" class="text-danger col-4 m-0 p-0 cursor-pointer">
                                     <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
                                 </span>
                                 <span wire:click="insertRelatedMark({{$p->id}})" title="Faire un bonus ou une sanction à {{$p->getName()}}" class="text-danger col-4 m-0 p-0 cursor-pointer">

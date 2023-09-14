@@ -2,10 +2,12 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\ClasseMarksDeletionCreatedEvent;
 use App\Helpers\DateFormattor;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\SchoolYear;
+use App\Models\Subject;
 use Illuminate\Support\Carbon;
 use Livewire\Component;
 
@@ -19,7 +21,15 @@ class ClasseMarksDeleterComponent extends Component
 
     public $targeted_pupil;
 
+    public $school_year_model;
+
+    public $school_year_id;
+
     public $subject_id;
+
+    public $pupil_id;
+
+    public $pupil;
 
     public $marks = [];
 
@@ -60,13 +70,15 @@ class ClasseMarksDeleterComponent extends Component
         $types_of_marks = [
             'devoir' => 'Devoirs',
             'epe' => 'Interrogations',
-            'participation' => 'Participations'
+            'participation' => 'Participations',
+            'bonus' => 'Bonus',
+            'sanction' => 'Sanctions',
 
         ];
 
         $pupils = [];
 
-        $period_string = 'Indéfinie...';
+        $period_string = null;
 
         $subjects = [];
 
@@ -99,9 +111,18 @@ class ClasseMarksDeleterComponent extends Component
 
     public function updatedSubjectId($subject_id)
     {
-        $subject = Subject::find($subject_id);
+        if($subject_id == 'all'){
 
-        $this->subject = $subject;
+            $this->subject = 'all';
+
+        }
+        else{
+
+            $subject = Subject::find($subject_id);
+
+            $this->subject = $subject;
+
+        }
 
     }
 
@@ -114,37 +135,81 @@ class ClasseMarksDeleterComponent extends Component
     }
 
 
-    public function openModal($classe_id, $school_year, $semestre, $subject, $type = null)
+    public function openModal($classe_id, $school_year, $semestre, $subject, $type = null, $pupil_id = null)
     {
-
-        $school_year_model = $this->getSchoolYear($school_year);
-
-        $classe = $school_year_model->findClasse($classe_id);
-
-        $this->years = explode(' - ', $school_year_model->school_year);
-
-        if($classe){
-
-            $this->classe = $classe;
-
-            $this->classe_id = $classe->id;
-
-            $this->school_year_id = $school_year_model->id;
-
-            $teacher = auth()->user()->teacher;
-
-            $subject = $teacher->speciality();
-
-            $this->subject = $subject;
-
-            $this->subject_id = $subject->id;
-
-            $this->semestre_id = session('semestre_selected');
-
-            // $this->end = Carbon::now()->timestamp;
+        $auth = auth()->user();
 
 
-            $this->dispatchBrowserEvent('modal-classeMarksDeleter');
+        if($auth->isAdminAs('master') || $auth->teacher){
+
+            $school_year_model = $this->getSchoolYear($school_year);
+
+            $classe = $school_year_model->findClasse($classe_id);
+
+            $this->years = explode(' - ', $school_year_model->school_year);
+
+            if($classe){
+
+                $not_secure = $auth->ensureThatTeacherCanAccessToClass($classe_id);
+
+                if($not_secure){
+
+                    $this->classe = $classe;
+
+                    $this->classe_id = $classe->id;
+
+                    $this->pupil_id = $pupil_id;
+
+                    $this->school_year_model = $school_year_model;
+
+                    $this->school_year_id = $school_year_model->id;
+
+                    $teacher = auth()->user()->teacher;
+
+                    $subject = $teacher->speciality();
+
+                    $this->subject = $subject;
+
+                    $this->type = $type;
+
+                    $this->subject_id = $subject->id;
+
+                    $this->end = Carbon::today()->toDateString();
+
+                    $this->semestre_id = session('semestre_selected');
+
+                    if($pupil_id){
+
+                        $pupil = $school_year_model->findPupil($pupil_id);
+
+                        if($pupil){
+
+                            $this->pupil = $pupil;
+
+                            $this->pupil_id = $pupil_id;
+
+                            $this->title = "Rafraichissement des notes de classe de l'apprenant " . $pupil->getName();
+
+                        }
+
+                    }
+
+                    $this->dispatchBrowserEvent('modal-classeMarksDeleter');
+
+
+                }
+                else{
+
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'ACCES REFUSE!', 'message' => "Vous nêtes pas authorisé à accéder à cette page! ", 'type' => 'warning']);
+
+                }
+
+            }
+
+        }
+        else{
+
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'ACCES NON AUTHORISE', 'message' => "Vous nêtes pas authorisé à accéder à cette page! ", 'type' => 'warning']);
 
         }
 
@@ -216,10 +281,28 @@ class ClasseMarksDeleterComponent extends Component
 
         if($this->classe){
 
-            
+            $classe = $this->classe;
 
+            $school_year_model = $this->school_year_model;
+
+            $semestre = $this->semestre_id;
+
+            $subject = $this->subject;
+
+            $type = $this->type;
+
+            $start = $this->start;
+
+            $end = $this->end;
+
+            $pupil_id = $this->pupil_id;
+
+            $this->dispatchBrowserEvent('hide-form');
+
+            $this->emit('ConfirmClasseMarksDeletionLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject, $type, $start, $end, $pupil_id);
 
         }
-
     }
+
+
 }

@@ -16,20 +16,22 @@
                     <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, toutes les notes seront prises en comptes!
                 @endif
             </small>
-            <span class="text-dark float-right btn btn-secondary border mx-1">
-                @if(!$computedRank)
-                    <span wire:click="displayRank" title="Afficher les rangs" class="d-inline-block z-scale w-100 cursor-pointer">
-                        <small>Le rang</small>
-                        <span class="bi-eye text-dark"></span>
+            @if($classe && $pupils && $marks)
+                <span class="text-dark float-right btn btn-secondary border mx-1">
+                    @if(!$computedRank)
+                        <span wire:click="displayRank" title="Afficher les rangs" class="d-inline-block z-scale w-100 cursor-pointer">
+                            <small>Le rang</small>
+                            <span class="bi-eye text-dark"></span>
 
-                    </span>
-                @else
-                    <span wire:click="hideRank" title="Masquer les rangs" class="d-inline-block z-scale w-100 cursor-pointer">
-                        <small>Masquer rang</small>
-                        <span class="bi-eye-slash  text-black-50"></span>
-                    </span>
-                @endif
-            </span>
+                        </span>
+                    @else
+                        <span wire:click="hideRank" title="Masquer les rangs" class="d-inline-block z-scale w-100 cursor-pointer">
+                            <small>Masquer rang</small>
+                            <span class="bi-eye-slash  text-black-50"></span>
+                        </span>
+                    @endif
+                </span>
+            @endif
             @if($classe && $classe->classeWasNotClosedForTeacher(auth()->user()->teacher->id) && $classe->classeWasNotLockedForTeacher(auth()->user()->teacher->id))
                 @if($hasModalities)
                     <span class="text-warning float-right btn btn-secondary border">
@@ -62,12 +64,25 @@
                 </span>
             @endif
         @endif
+        @if($classe && $pupils)
+            @if($marks)
+            <span wire:click="refreshClasseMarks('{{$classe->id}}')" class="btn btn-danger border z-scale border-white mx-2 float-right" title="Vider des notes de cette classe">
+                <span class="fa fa-trash"></span>
+                <span>Vider notes</span>
+            </span>
+            @endif
         <span wire:click="insertClasseMarks" class="btn btn-primary border z-scale border-white mx-2 float-right" title="Insérer des notes de classe">
             <span class="fa fa-upload"></span>
             <span>Insérer notes</span>
         </span>
+        @endif
         <hr class="w-100 bg-warning text-warning p-0 m-0 mt-3">
     </div>
+    @if($is_loading)
+    <div class="w-100 d-flex justify-content-center flex-column">
+        @livewire('loader-component')  
+    </div>
+    @else
     <div class="my-2">
         @if($pupils && $classe_subject_selected && count($pupils) > 0)
         <div>
@@ -312,6 +327,20 @@
                     @endforeach
                 </table>                                                     
             </div>
+        @else
+            <div>
+                <div class="d-flex justify-content-center mx-auto mt-4  w-100">
+                    <span class="fa fa-trash text-muted fa-8x"></span>
+                </div>
+                <div class="d-flex justify-content-center mx-auto mt-3 w-100">
+                    <h4 class="letter-spacing-12 font-italic text-orange">OUUUPPPS, aucune note n'a été trouvé!!!</h4>
+                </div>
+                <blockquote class="text-warning">
+                    <span class="float-right border-top border-white w-100 d-inline-block text-right">
+                        <i class="text-warning small">OUPPPS pas de notes!!!!!</i>
+                    </span>
+                </blockquote>
+            </div>
         @endif
         @if($noMarks || !$pupils)
         <div class="my-2 p-2 text-center border rounded text-white-50">
@@ -331,5 +360,6 @@
         </div>
         @endif
     </div>
+    @endif
 
 </div>

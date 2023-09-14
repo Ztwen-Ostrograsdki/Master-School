@@ -29,16 +29,23 @@ class ClassePupilRelatedMark extends Component
     public function render()
     {
         $school_year = session('school_year_selected');
+
         $school_year_model = $this->getSchoolYear();
 
-        $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+        $classe = $school_year_model->findClasse($this->classe_id);
+
         $school_years = SchoolYear::all();
+
         $pupils = [];
 
         if(session()->has('classe_subject_selected') && session('classe_subject_selected')){
+
             $subject_id = intval(session('classe_subject_selected'));
+
             if($classe && in_array($subject_id, $classe->subjects->pluck('id')->toArray())){
+
                 session()->put('classe_subject_selected', $subject_id);
+
                 $classe_subject_selected = $subject_id;
             }
             else{
@@ -50,6 +57,7 @@ class ClassePupilRelatedMark extends Component
         }
 
         if($classe){
+
             $pupils = $classe->getPupils($school_year_model->id);
         }
 
@@ -61,9 +69,13 @@ class ClassePupilRelatedMark extends Component
     public function insertRelatedMark($pupil_id, $semestre = null, $school_year = null)
     {
         $subject_id = session('classe_subject_selected');
+
         if($subject_id){
+
             $semestre = session('semestre_selected');
+
             $school_year_model = $this->getSchoolYear();
+
             $this->emit('insertRelatedMarkLiveEvent', $pupil_id, $subject_id, $semestre, $school_year_model->id);
         }
         else{
@@ -74,10 +86,15 @@ class ClassePupilRelatedMark extends Component
     public function makeRelatedMarkTogether($classe_id = null, $semestre = null, $school_year = null, $together = true)
     {
         $classe_id ? $id = $classe_id : $id = $this->classe_id;
+
         $subject_id = session('classe_subject_selected');
+
         if($subject_id){
+
             $semestre = session('semestre_selected');
+
             $school_year_model = $this->getSchoolYear();
+
             $this->emit('insertRelatedMarkLiveEvent', $id, $subject_id, $semestre, $school_year_model->id, $together);
         }
         else{
@@ -86,59 +103,86 @@ class ClassePupilRelatedMark extends Component
     }
 
 
-    public function deleteAllRelatedMarks()
+    
+    public function refreshClasseRelatedsMarks($classe_id)
     {
-        $subject_id = session('classe_subject_selected');
-        if($subject_id){
-            $semestre = session('semestre_selected');
-            $school_year_model = $this->getSchoolYear();
-            $classe = Classe::find($this->classe_id);
-            if($classe){
-                $del = $classe->deleteAllRelatedMarks($subject_id, $semestre, $school_year_model->id);
-                if($del !== false){
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Supression réussie', 'message' => "Les notes ont été bien rafraîchi!", 'type' => 'success']);
-                }
-                elseif($del == false){
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Une erreure inconnue s'est produite. Veuillez réessayer!", 'type' => 'error']);
-                }
-            }
-            else{
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une classe valider!", 'type' => 'error']);
-            }
+        if ($classe_id) {
+
+            $classe = Classe::find($classe_id);
         }
         else{
-            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une matière en premier!", 'type' => 'error']);
+            $classe = Classe::whereSlug($this->slug)->first();
         }
+        if ($classe) {
+
+            $school_year_model = $this->getSchoolYear();
+
+            if (session()->has('semestre_selected') && session('semestre_selected')) {
+
+                $semestre = session('semestre_selected');
+            }
+
+            $subject_id = session('classe_subject_selected');
+
+            if($semestre && $subject_id){
+
+                $this->emit('ThrowClasseMarksDeleterLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject_id, 'bonus');
+            }
+            else{
+                $this->dispatchBrowserEvent('Toast', ['title' => 'FORMULAIRE EST INVALIDE', 'message' => "Le formulaire n'est pas valide et ne peut être soumis!", 'type' => 'error']);
+            }
+
+
+        }
+        else{
+            $this->dispatchBrowserEvent('Toast', ['title' => 'CLASSE INTROUVABLE', 'message' => "La classe est introuvable!", 'type' => 'error']);
+        }
+        
     }
 
-    public function deleteAllPupilRelatedMarks($pupil_id)
+    public function refreshPupilRelatedsMarks($pupil_id)
     {
-        if($pupil_id){
-            $subject_id = session('classe_subject_selected');
-            if($subject_id){
+        if ($pupil_id) {
+
+            $pupil = Pupil::find($pupil_id);
+        }
+        if ($pupil) {
+
+            $school_year_model = $this->getSchoolYear();
+
+            $classe = $school_year_model->findClasse($this->classe_id);
+
+            if (session()->has('semestre_selected') && session('semestre_selected')) {
+
                 $semestre = session('semestre_selected');
-                $school_year_model = $this->getSchoolYear();
-                $pupil = $school_year_model->pupils()->where('pupils.id', $pupil_id)->first();
-                if($pupil){
-                    $del = $pupil->deleteAllPupilRelatedMarks($this->classe_id, $subject_id, $semestre, $school_year_model->id);
-                    if($del){
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Supression réussie', 'message' => "Les notes ont été bien rafraîchi!", 'type' => 'success']);
-                    }
-                    else{
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Une erreure inconnue s'est produite. Veuillez réessayer!", 'type' => 'error']);
-                    }
+            }
+
+            $subject_id = session('classe_subject_selected');
+
+            if($semestre && $subject_id && $classe && $pupil){
+
+                $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe->id);
+
+                if($not_secure){
+
+                    $this->emit('ThrowClasseMarksDeleterLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject_id, 'bonus', $pupil->id);
+
                 }
                 else{
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "L'apprenant est introuvable!", 'type' => 'error']);
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE TEMPORAIREMENT', 'message' => "Vous ne pouvez pas supprimer les notes!", 'type' => 'warning']);
                 }
+
             }
             else{
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une matière en premier!", 'type' => 'error']);
+                $this->dispatchBrowserEvent('Toast', ['title' => 'FORMULAIRE EST INVALIDE', 'message' => "Le formulaire n'est pas valide et ne peut être soumis!", 'type' => 'error']);
             }
+
+
         }
         else{
-            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une classe valide en premier!", 'type' => 'error']);
+            $this->dispatchBrowserEvent('Toast', ['title' => 'CLASSE INTROUVABLE', 'message' => "La classe est introuvable!", 'type' => 'error']);
         }
+        
     }
 
 

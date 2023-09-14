@@ -15,6 +15,8 @@
     @livewire('create-level')
     @livewire('create-subject')
     @livewire('defined-classe-teachers')
+    @livewire('confirm-classe-marks-deletion')
+    @livewire('marks-restorer-component')
     
     @livewire('defined-semestres-periods')
     @livewire('event-periods-manager')

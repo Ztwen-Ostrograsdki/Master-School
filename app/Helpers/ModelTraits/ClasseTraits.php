@@ -412,7 +412,6 @@ trait ClasseTraits{
         }
 
 
-
         return $averageTab;
 
     }
@@ -575,9 +574,9 @@ trait ClasseTraits{
                     $classeCoefTabs[$subject->id] = $this->get_coefs($subject->id, $school_year, true);
                 }
 
-
                 foreach ($pupils as $pupil){
 
+                    $pupil_average_sum = 0;
 
                     foreach($subjectAverages as $sub_id => $sub_averages){
 
@@ -590,7 +589,7 @@ trait ClasseTraits{
                             $coef_total = $coef_total + $classeCoefTabs[$sub_id];
 
                         }
-
+                        
                     }
 
 
@@ -1712,22 +1711,31 @@ trait ClasseTraits{
 
                 $k = 1;
                 while (count($ranksTab_init_associative) < $size) {
+
                     $av = max($ranksTab_init);
+
                     $pupil_id = array_search($av, $ranksTab_init);
+
                     $ranksTab_init_associative[$k] = [
                         'id' => $pupil_id,
                         'moy' => $av
                     ];
+
                     unset($ranksTab_init[$pupil_id]);
+
                     $k++;
                 }
 
                 if($ranksTab_init_associative !== []){
+
                     $size = count($ranksTab_init_associative);
 
                     $index = 1;
+
                     foreach ($ranksTab_init_associative as $key => $pupil_tab) {
+
                         $moy = $pupil_tab['moy'];
+
                         $id = $pupil_tab['id'];
 
                         $pupil_model = Pupil::find($id);

@@ -143,7 +143,21 @@
                     </tr>
                 @endforeach
             </tbody>
-        </table>   
+        </table>  
+        @else
+            <div>
+                <div class="d-flex justify-content-center mx-auto mt-4  w-100">
+                    <span class="fa fa-trash text-muted fa-8x"></span>
+                </div>
+                <div class="d-flex justify-content-center mx-auto mt-3 w-100">
+                    <h4 class="letter-spacing-12 font-italic text-orange">OUUUPPPS, la classe est vide!!!</h4>
+                </div>
+                <blockquote class="text-warning">
+                    <span class="float-right border-top border-white w-100 d-inline-block text-right">
+                        <i class="text-warning small">OUPPPS la classe est vide!!!!!</i>
+                    </span>
+                </blockquote>
+            </div>
         @endif
         @if(!$pupils)
             <div class="my-2 p-2 text-center border rounded text-white-50">

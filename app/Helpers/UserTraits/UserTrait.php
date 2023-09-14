@@ -191,11 +191,15 @@ trait UserTrait{
 
         $school_year_model = $this->getSchoolYear();
 
+        $not_secure0 = $this->teacher;
+
+        $not_secure3 = $this->teacher->getTeachersCurrentClasses(null, $school_year_model->id, $classe_id);
+
         $not_secure1 = $this->classeWasNotClosedForTeacher($classe_id);
 
         $not_secure2 = $this->classeWasNotLockedForTeacher($classe_id);
 
-        if($not_secure1 && $not_secure2){
+        if($not_secure0 && $not_secure1 && $not_secure2 && $not_secure3 || $this->isAdminAs('master')){
 
             return true;
         }

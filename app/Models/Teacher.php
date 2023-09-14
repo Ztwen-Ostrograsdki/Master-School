@@ -127,9 +127,25 @@ class Teacher extends Model
 
    
 
-    public function getTeachersCurrentClasses($withDuration = false, $school_year = null)
+    public function getTeachersCurrentClasses($withDuration = false, $school_year = null, $classe_id = null)
     {
         $school_year_model = $this->getSchoolYear($school_year);
+
+        if($classe_id){
+
+            $classe = null;
+
+            $cursus = $school_year_model->teacherCursus()->where('teacher_id', $this->id)->where('classe_id', $classe_id)->whereNull('end')->first();
+
+            if($cursus){
+
+                $classe = $cursus->classe;
+
+            }
+
+            return $classe;
+
+        }
 
         $current_classes = [];
         

@@ -23,6 +23,10 @@ class ClasseMarksInsertionCreatedEvent implements ShouldBroadcast
 
     public $user;
 
+    public $school_year_model;
+
+    public $semestre = 1;
+
 
 
 
@@ -33,7 +37,6 @@ class ClasseMarksInsertionCreatedEvent implements ShouldBroadcast
      */
     public function __construct($data)
     {
-        // $this->data = new ClasseMarksInsertionDriver($data);
         $this->data = $data;
 
         $this->classe = $data['classe'];
@@ -41,6 +44,10 @@ class ClasseMarksInsertionCreatedEvent implements ShouldBroadcast
         $this->subject = $data['subject'];
 
         $this->user = $data['user'];
+
+        $this->school_year_model = $data['school_year_model'];
+
+        $this->semestre = $data['semestre'];
 
 
     }

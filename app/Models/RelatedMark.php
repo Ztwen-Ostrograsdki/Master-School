@@ -10,10 +10,11 @@ use App\Models\SchoolYear;
 use App\Models\Subject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class RelatedMark extends Model
 {
-    use DateFormattor;
+    use DateFormattor, SoftDeletes;
     
     protected $fillable = [
         'value', 

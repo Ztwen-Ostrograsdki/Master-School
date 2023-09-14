@@ -2,7 +2,9 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\FreshAveragesIntoDBEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\Classe;
 use App\Models\Pupil;
 use App\Models\School;
 use App\Models\SchoolYear;
@@ -18,8 +20,11 @@ class ClasseAveragesComponent extends Component
         'classeUpdated' => 'reloadClasseData',
         'newLevelCreated' => 'reloadClasseData',
         'timePlanTablesWasUpdatedLiveEvent' => 'reloadClasseData',
+        'NewClasseMarksInsert' => 'reloadClasseData',
         'UpdatedGlobalSearch' => 'updatedSearch',
         'JobProcessedWorks' => 'getJobsOk',
+        'InitiateClasseDataUpdatingLiveEvent' => 'loadingDataStart',
+        'ClasseDataLoadedSuccessfully' => 'dataWasLoaded',
     ];
 
     public $classe_id;
@@ -39,6 +44,8 @@ class ClasseAveragesComponent extends Component
     public $sexe_selected;
 
     public $search = null;
+
+    public $is_loading = false;
 
 
     public function render()
@@ -196,6 +203,17 @@ class ClasseAveragesComponent extends Component
     }
 
 
+    public function dataWasLoaded()
+    {
+        $this->is_loading = false;
+    }
+
+    public function loadingDataStart()
+    {
+        $this->is_loading = true;
+    }
+
+
     public function forceDeletePupil($pupil_id)
     {
         $pupil = Pupil::find($pupil_id);
@@ -279,6 +297,27 @@ class ClasseAveragesComponent extends Component
     public function refreshOrder()
     {
         $this->reset('targetToOrder', 'order');
+    }
+
+
+    public function optimizeClasseAveragesIntoDatabase($classe_id)
+    {
+        $classe = Classe::find($classe_id);
+
+        $semestres = $this->getSemestres();
+
+        $user = auth()->user();
+
+        if($classe && $semestres){
+
+            $school_year_model = $this->getSchoolYear();
+
+            $semestre = session('semestre_selected');
+
+            FreshAveragesIntoDBEvent::dispatch($user, $classe, $school_year_model, $semestre, true);
+            
+        }
+
     }
 
 

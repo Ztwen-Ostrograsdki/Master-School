@@ -4,7 +4,11 @@ namespace App\Listeners;
 
 use App\Events\ClasseMarksWasCompletedEvent;
 use App\Events\ClasseMarksWasFailedEvent;
+use App\Events\ClasseMarksWasUpdatedIntoDBSuccessfullyEvent;
+use App\Events\InitiateClasseDataUpdatingEvent;
+use App\Events\ParentAccountBlockedEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
+use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Jobs\JobUpdateClasseAnnualAverageIntoDatabase;
 use App\Jobs\JobUpdateClasseSemestrialAverageIntoDatabase;
 use Illuminate\Bus\Batch;
@@ -15,15 +19,8 @@ use Illuminate\Support\Facades\Bus;
 
 class UpdateClasseAveragesIntoDatabaseBatcherListener
 {
-    /**
-     * Create the event listener.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
+    use ModelQueryTrait;
+    
 
     /**
      * Handle the event.
@@ -33,27 +30,42 @@ class UpdateClasseAveragesIntoDatabaseBatcherListener
      */
     public function handle(UpdateClasseAveragesIntoDatabaseEvent $event)
     {
+        // InitiateClasseDataUpdatingEvent::dispatch($event->user, $event->classe);
 
-        $batch = Bus::batch(
-            [
+        $jobs = [];
+
+        if($event->allSemestres){
+
+            $semestres = $this->getSemestres();
+
+            foreach($semestres as $sem){
+
+                $jobs[] = new JobUpdateClasseSemestrialAverageIntoDatabase($event->classe, $sem, $event->school_year_model);
+            }
+
+            $jobs[] = new JobUpdateClasseAnnualAverageIntoDatabase($event->classe, $event->school_year_model);
+
+        }
+        else{
+
+            $jobs = [
                 new JobUpdateClasseSemestrialAverageIntoDatabase($event->classe, $event->semestre, $event->school_year_model),
-                new JobUpdateClasseAnnualAverageIntoDatabase($event->classe, $event->school_year_model),
-            ])
 
-            ->then(function(Batch $batch) use ($event){
+                new JobUpdateClasseAnnualAverageIntoDatabase($event->classe, $event->school_year_model)
+            ];
 
-                ClasseMarksWasCompletedEvent::dispatch($event->user, $event->classe, $event->subject);
-            })
-            ->catch(function(Batch $batch, Throwable $er){
+        }
 
-                ClasseMarksWasFailedEvent::dispatch($event->user, $event->classe, $event->subject);
+        $batch = Bus::batch($jobs)->then(function(Batch $batch) use ($event){
 
-            })
+                ClasseMarksWasUpdatedIntoDBSuccessfullyEvent::dispatch($event->user);
 
-            ->finally(function(Batch $batch){
+            })->catch(function(Batch $batch, Throwable $er){
 
-                // NewAddParentRequestEvent::dispatch();
+                ClasseMarksWasFailedEvent::dispatch($event->user, $event->classe, null);
 
-            })->dispatch();
+            })->finally(function(Batch $batch){
+
+        })->dispatch();
     }
 }

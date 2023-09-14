@@ -72,6 +72,8 @@ class JobUpdateClasseSemestrialAverageIntoDatabase implements ShouldQueue
 
                 foreach($semestrialAverages as $pupil_id => $sm_av){
 
+                    $data = [];
+
                     $pupil_sm = $sm_av['pupil'];
 
                     $moy = $sm_av['moy'];
@@ -94,30 +96,27 @@ class JobUpdateClasseSemestrialAverageIntoDatabase implements ShouldQueue
 
                     if($sm_average){
 
-                        $data = ['moy' => $moy, 'rank' => $rank, 'base' => $base, 'exp' => $exp, 'mention' => $mention, 'min' => $min, 'max' => $max];
-
-                        $sm_average->update($data);
+                        $sm_average->delete();
 
                     }
-                    else{
+                    
+                    $data = [
+                        'classe_id' => $classe->id,
+                        'school_year_id' => $school_year_id, 
+                        'semestre' => $semestre, 
+                        'moy' => $moy, 
+                        'rank' => $rank, 
+                        'base' => $base, 
+                        'exp' => $exp, 
+                        'pupil_id' => $id_sm, 
+                        'mention' => $mention, 
+                        'min' => $min, 
+                        'max' => $max
+                    ];
 
-                        $data = [
-                            'classe_id' => $classe->id,
-                            'school_year_id' => $school_year_id, 
-                            'semestre' => $semestre, 
-                            'moy' => $moy, 
-                            'rank' => $rank, 
-                            'base' => $base, 
-                            'exp' => $exp, 
-                            'pupil_id' => $id_sm, 
-                            'mention' => $mention, 
-                            'min' => $min, 
-                            'max' => $max
-                        ];
+                    Averages::create($data);
 
-                        Averages::create($data);
-
-                    }
+                    $data = [];
                 }
 
             }
