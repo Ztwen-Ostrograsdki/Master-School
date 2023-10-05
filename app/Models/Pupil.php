@@ -200,7 +200,7 @@ class Pupil extends Model
     }
 
 
-    public function getLastRelatedMark(int $classe_id, $subject_id, int $semestre, $school_year, $signed = false)
+    public function getLastRelatedMark(int $classe_id, $subject_id, $semestre, $school_year, $signed = false)
     {
         if($classe_id && $subject_id && $semestre && $school_year){
             if(is_numeric($school_year)){
@@ -217,7 +217,7 @@ class Pupil extends Model
 
     }
 
-    public function getLastRelatedMarkValue(int $classe_id, $subject_id, int $semestre, $school_year, $signed = false)
+    public function getLastRelatedMarkValue(int $classe_id, $subject_id, $semestre, $school_year, $signed = false)
     {
         $mark = $this->getLastRelatedMark($classe_id, $subject_id, $semestre, $school_year);
         if($mark){
@@ -227,7 +227,7 @@ class Pupil extends Model
 
     }
 
-    public function getLastRelatedMarkDate(int $classe_id, $subject_id, int $semestre, $school_year)
+    public function getLastRelatedMarkDate(int $classe_id, $subject_id, $semestre, $school_year)
     {
         $mark = $this->getLastRelatedMark($classe_id, $subject_id, $semestre, $school_year);
         if($mark){
@@ -237,7 +237,7 @@ class Pupil extends Model
 
     } 
 
-    public function getLastRelatedMarkHoraire(int $classe_id, $subject_id, int $semestre, $school_year)
+    public function getLastRelatedMarkHoraire(int $classe_id, $subject_id, $semestre, $school_year)
     {
         $mark = $this->getLastRelatedMark($classe_id, $subject_id, $semestre, $school_year);
         if($mark){
@@ -436,6 +436,23 @@ class Pupil extends Model
     {
 
 
+
+    }
+
+
+    public function getClasseAndYear($classe_id = null, $school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $school_year_classe_pupil = ClassePupilSchoolYear::where('classe_pupil_school_years.classe_id', $classe_id)->where('classe_pupil_school_years.pupil_id', $this->id)->where('classe_pupil_school_years.school_year_id', $school_year_model->id)->first();
+
+        if($school_year_classe_pupil){
+
+            return $school_year_classe_pupil;
+
+        }
+
+        return null;
 
     }
 

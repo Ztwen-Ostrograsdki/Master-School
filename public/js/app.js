@@ -8720,6 +8720,17 @@ e["private"]('user.' + window.ClientUser.id).listen('ParentRequestAcceptedEvent'
     toast: true,
     showConfirmButton: true
   });
+}).listen('DataMigratedToTheNewSchoolYearEvent', function (e) {
+  console.log(e);
+  Livewire.emit('DataMigratedToTheNewSchoolYearLiveEvent');
+}).listen('TeachersDataUploadingEvent', function (e) {
+  Livewire.emit('InitiateTeachersDataUploadingLiveEvent');
+}).listen('TeachersToTheCurrentYearCompletedEvent', function (e) {
+  Livewire.emit('OldsTeachersUploadingCompletedLiveEvent');
+}).listen('ClassePupilsListUpdatingEvent', function (e) {
+  Livewire.emit('ClassePupilsListUpdatingLiveEvent');
+}).listen('ClassePupilsListUpdatedEvent', function (e) {
+  Livewire.emit('ClassePupilsListUpdatedLiveEvent');
 });
 e["private"]('master').listen('NewAddParentRequestEvent', function (e) {
   Livewire.emit('NewParentRequest');

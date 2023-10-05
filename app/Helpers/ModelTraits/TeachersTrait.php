@@ -230,6 +230,12 @@ trait TeachersTrait{
         return $is ? true : false;
     }
 
+    public function isNotTeacherOfThisYear($school_year = null)
+    {
+        
+        return !($this->isTeacherOfThisYear($school_year));
+    }
+
 
     public function teacherDeleter($destroy = false)
     {

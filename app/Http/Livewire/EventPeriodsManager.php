@@ -16,19 +16,31 @@ class EventPeriodsManager extends Component
     protected $listeners = ['definedPeriodsLiveEvent' => 'openModal', 'editPeriodsLiveEvent' => 'openUpdate'];
 
     use ModelQueryTrait;
+
     use DateFormattor;
 
     public $semestres = [1, 2];
+
     public $semestre_type = 'Semestre';
+
     public $semestre_id = 1;
+
     public $hasErrorsHere = false;
+
     public $looked = 'CREATION';
+
     public $years;
+
     public $school_year;
+
     public $start;
+
     public $end;
+
     public $object;
+
     public $target;
+
     public $period;
     
 
@@ -44,22 +56,32 @@ class EventPeriodsManager extends Component
     public function render()
     {
         $period_weeks = null;
+
         $events = config('app.local_events');
 
         $school = School::first();
+
         if($school){
+
             if($school->trimestre){
+
                 $this->semestre_type = 'Trimestre';
+
                 $this->semestres = [1, 2, 3];
             }
             else{
+
                 $this->semestres = [1, 2];
             }
 
             if($this->start && $this->end){
+
                 $period_string = 'Du '. $this->__getDateAsString($this->start, false) . ' Au ' . $this->__getDateAsString($this->end, false);
+
                 $week = Carbon::parse($this->start)->floatDiffInRealWeeks($this->end);
+
                 $day = floor(($week - floor($week)) * 7);
+
                 $period_weeks = floor($week) . ' Semaines ' . $day . ' Jours';
             }
             else{
@@ -73,30 +95,39 @@ class EventPeriodsManager extends Component
     public function openModal()
     {
         $this->school_year_model = $this->getSchoolYear();
+
         $semestre_calendars = $this->school_year_model->periods()->where('target', 'semestre-trimestre')->orderBy('object')->get();
+
         if(count($semestre_calendars)){
+
             $school_year = $this->school_year_model->school_year;
 
             $this->semestre_id = session('semestre_selected');
 
             if(!$school_year){
+
                 $current_month_index = intval(date('m'));
+
                 if($current_month_index >= 10){
+
                     $school_year = date('Y') . ' - ' . intval(date('Y') + 1);
                 }
                 else{
+
                     $school_year = intval(date('Y') - 1) . ' - ' . intval(date('Y'));
                 }
             }
 
             $years = explode(' - ', $school_year);
+
             $this->years = $years;
+
             $this->looked = 'CREATION';
 
             $this->dispatchBrowserEvent('modal-eventPeriodManager');
         }
         else{
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur!', 'message' => "Veuillez d'abord définir le calendrier trimestriel ou semestriel avant d'ajouter un évnènement!", 'type' => 'warning']);
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'ERREURE: SEMESTRE/TRIMESTRE NON DEFINI!', 'message' => "Veuillez d'abord définir le calendrier trimestriel ou semestriel avant d'ajouter un évènement!", 'type' => 'warning']);
 
         }
     }
@@ -234,7 +265,11 @@ class EventPeriodsManager extends Component
 
             if($this->semestre_id){
 
-                $periodsExisted = $this->school_year_model->periods()->where('target', 'semestre-trimestre')->where('object', $this->semestre_type . ' ' . $this->semestre_id)->first();
+                $the_target = "semestre-trimestre";
+
+                $the_object = $this->semestre_type . ' ' . $this->semestre_id;
+
+                $periodsExisted = $this->school_year_model->getPeriod($the_target, $the_object);
 
                 if($periodsExisted){
 

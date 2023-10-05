@@ -213,13 +213,38 @@ class Classe extends Model
                 }
             }
 
+
             if($onlyIds){
 
-                return $pupils->pluck('id')->toArray();
+                if($pupils && count($pupils) > 0){
+
+                    return $pupils->pluck('id')->toArray();
+
+                }
+
+                else{
+
+                    return [];
+
+                }
 
             }
 
-            return $pupils->get();
+
+            if($pupils && $pupils->count() > 0){
+
+                return $pupils->get();
+            }
+            else{
+
+                return [];
+
+            }
+        }
+        else{
+
+            return [];
+
         }
 
     }

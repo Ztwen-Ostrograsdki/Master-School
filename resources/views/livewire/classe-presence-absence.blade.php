@@ -67,7 +67,7 @@
     <span class="text-white mt-2 h6">
         Gestionnaire de la présence de cette classe à l'année {{ session('school_year_selected') }} en <span class="text-warning"> {{ $subject_selected->name }}</span>
     </span>
-    <span wire:click="throwPresence" class="float-right cursor-pointer btn btn-primary border mb-2">
+    <span wire:click="throwPresence({{$classe->id}})" class="float-right cursor-pointer btn btn-primary border mb-2">
         Faire la présence
         <span class="bi-clock"></span>
     </span>

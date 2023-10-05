@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\StartNewsPupilsInsertionEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\Level;
@@ -15,22 +16,38 @@ class MultiplePupilInsertion extends Component
 {
     use ModelQueryTrait;
     protected $listeners = ['insertMultiplePupils' => 'openModal'];
+
     public $pupil;
+
     public $firstName;
-    public $firstNames;
+
     public $lastName;
-    public $lastNames;
+
     public $sexe = 'male';
+
     public $level_id;
+
     public $birth_day;
+
     public $contacts = '01010101';
+
     public $nationality = 'Béninoise';
+
     public $birth_city = 'Ville de naissance';
+
     public $residence = 'Ma résidence';
+
     public $last_school_from = 'Mon ancienne école';
+
     public $school_year_model;
+
     public $classe_id;
+
     public $classe;
+
+    public $pupils = [];
+
+    public $pupilsTableToShow = [];
 
     protected $rules = [
         'firstName' => 'required|string|min:2',
@@ -55,9 +72,13 @@ class MultiplePupilInsertion extends Component
     public function render()
     {
         $classes = [];
+
         $levels = Level::all();
+
         $this->school_year_model = $this->getSchoolYear();
+
         if($this->school_year_model){
+
             $classes = $this->school_year_model->classes;
         }
         return view('livewire.multiple-pupil-insertion', compact('levels', 'classes'));
@@ -67,129 +88,116 @@ class MultiplePupilInsertion extends Component
     public function openModal($classe_id)
     {
         $classe = $this->school_year_model->classes()->where('classes.id', $classe_id)->first();
+
         $this->school_year_model = $this->getSchoolYear();
+
         $this->classe = $classe;
+
         $this->classe_id = $classe->id;
+
         $this->level_id = $classe->level_id;
+
         $this->dispatchBrowserEvent('modal-insertMultiplePupils');
+    }
+
+
+    public function retrieveFrom($pupil_index = null)
+    {
+        $pupils = $this->pupils;
+
+        if(count($pupils) > 0){
+
+            if($pupil_index){
+
+                unset($pupils[$pupil_index]);
+
+            }
+            else{
+
+                $last = count($pupils);
+
+                array_pop($pupils);
+
+            }
+
+            $this->pupils = $pupils;
+        }
+
+
+    }
+
+
+    public function pushInto()
+    {
+        $pupils = $this->pupils;
+
+        $counter = count($pupils);
+
+        $this->resetErrorBag();
+
+        $pupil_counter = 0;
+
+        $data = [];
+
+        $pupilNameHasAlreadyTaken = Pupil::where('lastName', $this->lastName)->where('firstName', $this->firstName)->first();
+
+        if(!$pupilNameHasAlreadyTaken){
+
+            $data = [
+                'firstName' => trim(strtoupper($this->firstName)),
+                'lastName' => trim(ucwords($this->lastName)),
+                'classe_id' => $this->classe_id,
+                'contacts' => $this->contacts,
+                'sexe' => $this->sexe,
+                'birth_day' => $this->birth_day,
+                'nationality' => $this->nationality,
+                'birth_city' => $this->birth_city,
+                'level_id' => $this->classe->level_id,
+                'residence' => $this->residence,
+                'last_school_from' => $this->last_school_from
+
+            ];
+
+            $pupil_counter = $counter + 1;
+
+            $pupils[$pupil_counter] = $data;
+
+            $this->pupils = $pupils;
+
+            $this->reset('lastName', 'firstName', 'contacts', 'sexe');
+
+        }
+
+
     }
 
 
     public function submit()
     {
+        $pupils = $this->pupils;
 
-        $firstNames = explode(';', trim($this->firstNames));
-        $lastNames = explode(';', trim($this->lastNames));
+        if($pupils && count($pupils) > 0){
 
-        $pupils = [];
+            $user = auth()->user();
 
-        if($this->classe_id){
-            $this->classe = $this->school_year_model->classes()->where('classes.id', $this->classe_id)->first();
-            if($this->classe->level_id == $this->level_id){
-                if($firstNames && $lastNames && count($lastNames) && count($firstNames) && count($lastNames) == count($firstNames)){
-                    $size = count($lastNames);
+            $school_year_model = $this->school_year_model;
 
-                    DB::transaction(function($e) use ($lastNames, $firstNames, $size){
-                        for ($i=0; $i < $size; $i++) { 
-                            $this->firstName = $firstNames[$i];
-                            $this->lastName = $lastNames[$i];
-                            $last_id = 0;
-                            $last = Pupil::latest()->first();
-                            if($last){
-                                $last_id = $last->id;
-                            }
+            $classe = $this->classe;
 
-                            $matricule = date('Y'). '' .Str::random(3) . 'CSNDA' . ($last_id + 1);
-                            $pupilNameHasAlreadyTaken = Pupil::where('lastName', $this->lastName)->where('firstName', $this->firstName)->first();
-                            if(!$pupilNameHasAlreadyTaken){
-                                try {
-                                    $pupil = Pupil::create(
-                                        [
-                                            'firstName' => trim(strtoupper($this->firstName)),
-                                            'lastName' => trim(ucwords($this->lastName)),
-                                            'classe_id' => $this->classe_id,
-                                            'contacts' => $this->contacts,
-                                            'sexe' => $this->sexe,
-                                            'matricule' => $matricule,
-                                            'birth_day' => $this->birth_day,
-                                            'nationality' => $this->nationality,
-                                            'birth_city' => $this->birth_city,
-                                            'level_id' => $this->classe->level_id,
-                                            'residence' => $this->residence,
-                                            'last_school_from' => $this->last_school_from
-                                        ]
-                                    );
-                                    if($pupil){
-                                        try {
-                                            $joinedToClasseAndSchoolYear = ClassePupilSchoolYear::create(
-                                                [
-                                                    'classe_id' => $this->classe_id,
-                                                    'pupil_id' => $pupil->id,
-                                                    'school_year_id' => $this->school_year_model->id,
-                                                ]
-                                            );
-                                            if($joinedToClasseAndSchoolYear){
-                                                try {
-                                                    $this->school_year_model->pupils()->attach($pupil->id);
-                                                    $this->classe->classePupils()->attach($pupil->id);
-                                                } catch (Exception $e3) {
-                                                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'apprenant a échoué!", 'type' => 'error']);
-                                                    
-                                                }
-                                            }
-                                            
-                                        } catch (Exception $e2) {
-                                            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'apprenant a échoué!", 'type' => 'error']);
-                                        }
-                                    }
-                                    else{
-                                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'apprenant a échoué!", 'type' => 'error']);
-                                    }
-                                    
-                                } catch (Exception $e1) {
-                                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'apprenant a échoué!", 'type' => 'error']);
-                                    
-                                }
+            StartNewsPupilsInsertionEvent::dispatch($user, $school_year_model, $classe, $pupils);
 
-                            }
+            $this->dispatchBrowserEvent('hide-form');
 
-                            
-                        }
-                    });
-                    DB::afterCommit(function(){
-                        $this->dispatchBrowserEvent('hide-form');
-                        $this->resetErrorBag();
-                        $this->reset('firstNames', 'lastNames', 'lastName', 'firstName', 'classe_id', 'contacts', 'sexe', 'nationality', 'birth_city', 'level_id', 'residence', 'last_school_from');
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Inscription terminée', 'message' => "La classe a été mise à jour avec succès! ", 'type' => 'success']);
-                        $this->emit('classePupilListUpdated');
-                        $this->emit('newPupilHasBeenAdded');
+            $this->dispatchBrowserEvent('Toast', ['title' => 'PROCESSUS LANCE', 'message' => "Le processus d'insertion des apprenants dans la base de données a été lancé et est en cours d'exécution!", 'type' => 'success']);
 
-                    });
+            $this->resetErrorBag();
 
-                }
-
-
-
-
-
-
-            }
-
-
-
-
-
+            $this->reset('lastName', 'firstName', 'contacts', 'sexe', 'pupils', 'school_year_model', 'classe', 'classe_id', 'level_id');
 
         }
 
-
-
-
-
-
-
-
-
+        
+        
 
     }
 

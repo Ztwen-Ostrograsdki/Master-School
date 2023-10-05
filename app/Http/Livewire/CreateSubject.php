@@ -250,28 +250,45 @@ class CreateSubject extends Component
     public function subjectCreator()
     {
         $school_year_model = $this->school_year_model;
+
         $old_name = $school_year_model->subjects()->where('subjects.name', $this->name)->get();
+
         DB::transaction(function($e) use ($school_year_model, $old_name){
+
             if(count($old_name) == 0){
+
                 $subject = Subject::create(['name' => $this->name, 'level_id' => $this->level_id]);
+
                 if($subject){
+
                     $this->dispatchBrowserEvent('hide-form');
+
                     $this->resetErrorBag();
+
                     if($this->joined){
+
                         $school_years = SchoolYear::all();
+
                         if (count($school_years) > 0) {
+
                             foreach ($school_years as $school_year) {
+
                                 $school_year->subjects()->attach($subject->id);
                             }
                         }
                     }
                     else{
+
                         $school_year_model->subjects()->attach($subject->id);
                     }
                     $message = "La matière " . $this->name . " a été mise à jour avec succès!";
+
                     $this->resetErrorBag();
+
                     $this->dispatchBrowserEvent('hide-form');
+
                     $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à de la matière terminée', 'message' => $message, 'type' => 'success']);
+                    
                     $this->resetor();
                 }
                 else{

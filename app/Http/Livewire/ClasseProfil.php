@@ -85,6 +85,7 @@ class ClasseProfil extends Component
         session()->put('semestre_selected', $semestre);
 
         $this->emit('semestreWasChanged', $semestre);
+
     }
 
 

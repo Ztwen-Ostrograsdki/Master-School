@@ -168,36 +168,43 @@
 
                                                 @endphp
 
-                                                @foreach($teachers as $tt)
+                                                @if($teachers && count($teachers) > 0)
 
-                                                    @if($tt)
+                                                    @foreach($teachers as $tt)
 
-                                                        <div class="d-flex justify-content-start p-1">
-                                                            <h6 class="text-white-50 pt-2 pb-1">
-                                                                <span class="bi-person"></span>
-                                                                <span class="text-warning">Prof:</span> {{  $tt->getFormatedName() }}
-                                                                (<span class="text-orange">{{  $tt->speciality()->name }}</span>)
-                                                            </h6>
-                                                            <h6 class="text-white-50 pt-2 pb-1 mx-4">
-                                                                <span class="bi-person-badge"></span>
-                                                                <span class="text-warning">Compte:</span> 
-                                                                <a class="text-white-50" href="{{route('user_profil', $tt->user->id)}}">
-                                                                    {{  $tt->user->pseudo . '  (' .  $tt->user->email . ')' }}
-                                                                </a>
-                                                            </h6>
-                                                            <span class="d-flex ml-3 justify-content-between flex-column">
-                                                                @foreach($tt->teacherHasCourseAtThisTime($classe->id) as $tp)
-                                                                    <small class="text-white-50 font-italic pt-1">
-                                                                        {{ $tp }}
-                                                                    </small>
-                                                                @endforeach
-                                                            </span>
-                                                        </div>
+                                                        @if($tt)
 
-                                                    @endif
-                                                    <hr class="bg-secondary text-secondary m-0 p-0 w-100">
+                                                            <div class="d-flex justify-content-start p-1">
+                                                                <h6 class="text-white-50 pt-2 pb-1">
+                                                                    <span class="bi-person"></span>
+                                                                    <span class="text-warning">Prof:</span> {{  $tt->getFormatedName() }}
+                                                                    (<span class="text-orange">{{  $tt->speciality()->name }}</span>)
+                                                                </h6>
+                                                                <h6 class="text-white-50 pt-2 pb-1 mx-4">
+                                                                    <span class="bi-person-badge"></span>
+                                                                    <span class="text-warning">Compte:</span> 
+                                                                    <a class="text-white-50" href="{{route('user_profil', $tt->user->id)}}">
+                                                                        {{  $tt->user->pseudo . '  (' .  $tt->user->email . ')' }}
+                                                                    </a>
+                                                                </h6>
+                                                                <span class="d-flex ml-3 justify-content-between flex-column">
+                                                                    @foreach($tt->teacherHasCourseAtThisTime($classe->id) as $tp)
+                                                                        <small class="text-white-50 font-italic pt-1">
+                                                                            {{ $tp }}
+                                                                        </small>
+                                                                    @endforeach
+                                                                </span>
+                                                            </div>
 
-                                                @endforeach
+                                                        @endif
+                                                        <hr class="bg-secondary text-secondary m-0 p-0 w-100">
+
+                                                    @endforeach
+                                                @else
+
+                                                    <span class="p-2 text-warning float-right text-right">La liste est vide : Aucun enseignant n'a encore été désigné pour tenir cette classe!</span>
+
+                                                @endif
 
                                                 
                                             </div>

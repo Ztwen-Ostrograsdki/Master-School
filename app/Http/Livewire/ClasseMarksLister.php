@@ -225,6 +225,8 @@ class ClasseMarksLister extends Component
 
             if($this->semestre_selected && $this->subject_selected){
 
+                $semestre = $this->semestre_selected;
+
                 $modality = $this->subject_selected->getAverageModalityOf($classe->id, $school_year_model->school_year, $semestre);
 
                 $modalitiesActivated = $classe->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->where('activated', true)->count() > 0;

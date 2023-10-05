@@ -1,0 +1,88 @@
+
+/*div.sun-body{
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: black;
+    overflow: hidden;
+}*/
+.sun-body .container{
+    font-size: 10px;
+    width: 40em;
+    height: 40em;
+    position: relative;
+}
+.sun-body .sun{
+    position: absolute;
+    top: 15em;
+    left: 15em;
+    width: 10em;
+    height: 10em;
+    background-color: yellow;
+    border-radius: 50%;
+    box-shadow: 0 0 3em white;
+}
+.sun-body .earth, .sun-body .moon{
+    position: absolute;
+    border-style: solid;
+    border-color: white transparent transparent;
+    border-width: 0.1em 0.1em 0 0;
+    border-radius: 50%;
+}
+.sun-body .earth{
+    top: 5em;
+    left: 5em;
+    width: 30em;
+    height: 30em;
+    animation: orbit 36.5s linear infinite;
+}
+.sun-body .moon{
+    top: 0;
+    right: 0;
+    width: 8em;
+    height: 8em;
+    animation: orbit 2.7s linear infinite;
+}
+.sun-body .earth::before,
+.sun-body .moon::before {
+    content:'';
+    position: absolute;
+    border-radius: 50%;
+}
+.sun-body .earth::before{
+    top: 2.8em;
+    right: 2.8em;
+    width: 3em;
+    height: 3em;
+    background-color: aqua;
+}
+.sun-body .moon::before {
+    top: 0.8em;
+    right: 0.2em;
+    width: 1.2em;
+    height: 1.2em;
+    background-color: silver;
+}
+
+.the-title{
+    animation: titler 5s linear infinite;
+}
+
+@keyframes orbit{
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+@keyframes titler{
+    from {
+        transform: scale(0.8);
+    }
+
+    to {
+        transform: scale(1.1);
+    }
+}

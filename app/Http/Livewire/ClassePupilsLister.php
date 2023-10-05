@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\DetachPupilsFromSchoolYearEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Pupil;
 use App\Models\SchoolYear;
@@ -19,6 +20,8 @@ class ClassePupilsLister extends Component
         'classeUpdated' => 'reloadClasseData',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
         'UpdatedGlobalSearch' => 'reloadClasseDataOnSearch',
+        'ClassePupilsListUpdatingLiveEvent' => 'the_loading',
+        'ClassePupilsListUpdatedLiveEvent' => 'the_loaded',
     ];
     
     
@@ -29,32 +32,46 @@ class ClassePupilsLister extends Component
     public $selected;
 
     public $selectedAction;
+
     public $checkeds = [];
+
     public $selecteds = [];
+
     public $activeData = [];
+
     public $download_pdf_z = false;
+
     public $search = null;
 
     public $pupilFirstName;
+
     public $pupilLastName;
+
     public $pupil_id;
+
     public $editingPupilName = false;
+
+    public $is_loading = false;
 
 
     public function render()
     {
         $school_year_model = $this->getSchoolYear();
 
-        $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+        $classe = $school_year_model->findClasse($this->classe_id);
         
         $school_years = SchoolYear::all();
         
         $pupils = [];
 
         if(session()->has('classe_subject_selected') && session('classe_subject_selected')){
+
             $subject_id = intval(session('classe_subject_selected'));
+
             if($classe && in_array($subject_id, $classe->subjects->pluck('id')->toArray())){
+
                 session()->put('classe_subject_selected', $subject_id);
+
                 $classe_subject_selected = $subject_id;
             }
             else{
@@ -86,6 +103,22 @@ class ClassePupilsLister extends Component
     }
 
 
+    public function the_loading()
+    {
+        $this->is_loading = true;
+    }
+
+
+    public function the_loaded()
+    {
+        $this->is_loading = false;
+
+        $this->counter = rand(14, 20);
+
+        $this->emit('classeUpdated');
+    }
+
+
     public function reloadClasseDataOnSearch($value)
     {
         $this->search = $value;
@@ -109,8 +142,11 @@ class ClassePupilsLister extends Component
     public function editClasseSubjects($classe_id = null)
     {
         $school_year = session('school_year_selected');
+
         $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+
         $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+
         if($classe){
             $this->emit('manageClasseSubjectsLiveEvent', $classe->id);
         }
@@ -181,9 +217,7 @@ class ClassePupilsLister extends Component
 
     public function multiplePupilInsertions()
     {
-        $school_year = session('school_year_selected');
-
-        $school_year_model = SchoolYear::where('school_year', $school_year)->first();
+        $school_year_model = $this->getSchoolYear();
 
         $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
 
@@ -302,8 +336,6 @@ class ClassePupilsLister extends Component
 
     }
 
-
-
     public function printClasseList()
     {
 
@@ -312,7 +344,35 @@ class ClassePupilsLister extends Component
     public function reloadClasseData($school_year = null)
     {
         $this->reset('pupil_id', 'editingPupilName', 'pupilFirstName', 'pupilLastName');
+
         $this->counter = 1;
+    }
+
+    public function detachPupil($pupil_id)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        $pupil = $school_year_model->findPupil($pupil_id);
+
+        $pupils = [];
+
+        if($pupil){
+
+            $user = auth()->user();
+
+            $classe = $school_year_model->findClasse($this->classe_id);
+
+            $pupils[] = $pupil;
+
+            $name = $pupil->getName();
+
+            DetachPupilsFromSchoolYearEvent::dispatch($user, $school_year_model, $classe, $pupils);
+
+            $this->dispatchBrowserEvent('Toast', ['title' => 'SUPPRESSION LANCEE', 'message' => "Le retrait de l'apprenant $name de la classe a été lancée avec succès!", 'type' => 'success']);
+
+        }
+
+
     }
 
 }

@@ -19,7 +19,7 @@
                             Options <span class="caret"></span>
                           </a>
                           <div class="dropdown-menu">
-                            <a class="dropdown-item" tabindex="-1" href="#">Rafraichir la classe</a>
+                            <a class="dropdown-item" tabindex="-1" href="#">Rafraichir le calendrier scolaire</a>
                             
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
@@ -74,45 +74,7 @@
                 </div>
             </div>
         </div>
-        <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
-            <div class="card-header bg-dark"> 
-                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Effectuer une recherche...</h5>
-              <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                  <i class="fa fa-minus"></i>
-                </button>
-                <button type="button" class="btn btn-tool" data-card-widget="remove">
-                  <i class="fa fa-times"></i>
-                </button>
-              </div>
-                <div class="card-tools">
-                    
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="container-fluid m-0 p-0 w-100">
-                    <div class="card-deck w-100 p-0 m-0">
-                        <div class="card active" href="#tab_1" data-toggle="tab">
-                            <div class="info-box m-0 p-0 bg-transparent">
-                                <span class="info-box-icon"><i class="fa bi-search"></i></span>
-                                <div class="info-box-content">
-                                    <div class="d-flex justify-content-between">
-                                        <form action="" class="col-8">
-                                            <input placeholder="Veuillez entrer un mot clé ..." class="form-control bg-transparent py-1" type="text" name="search">
-                                        </form>
-                                        <div data-card-widget="collapse" class="btn-secondary rounded text-center p-1 cursor-pointer border border-white col-4">
-                                            <span>Annuler</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                    </div>
-                    
-                </div>
-            </div>
-        </div>
+        
     </div>
 
     <div class="row w-100 mx-auto mt-1 p-2">

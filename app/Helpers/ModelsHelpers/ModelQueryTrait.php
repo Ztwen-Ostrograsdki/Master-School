@@ -14,14 +14,16 @@ trait ModelQueryTrait{
 
     }
 
-
     /**
      * @return SchoolYear Model::class;
      */
     public function getSchoolYear($school_year = null)
     {
+
         if($school_year){
+
             if(is_numeric($school_year)){
+                
                 $school_year_model = SchoolYear::where('id', $school_year)->first();
             }
             else{
@@ -36,7 +38,7 @@ trait ModelQueryTrait{
 
             $current_month_index = intval(date('m'));
 
-            if($current_month_index >= 10){
+            if($current_month_index >= 9){
 
                 $school_year = date('Y') . ' - ' . intval(date('Y') + 1);
             }
@@ -55,9 +57,26 @@ trait ModelQueryTrait{
                 session()->put('school_year_selected', $school_year);
             }
 
-            $this->__setSemestreIndex($school_year);
+            $model = SchoolYear::where('school_year', $school_year)->first();
 
-            return SchoolYear::where('school_year', $school_year)->first();
+            if($school_year && $model){
+
+                $this->__setSemestreIndex($school_year);
+
+                $school_year_model = $model;
+
+            }
+            else{
+
+                $school_year_model = $this->getLastYear();
+
+                $this->__setSemestreIndex($school_year_model->school_year);
+
+            }
+
+            session()->put('school_year_selected', $school_year_model->school_year);
+
+            return $school_year_model;
 
         }
 
@@ -69,13 +88,13 @@ trait ModelQueryTrait{
     {
         $semestre_type = 'Semestre';
 
-        // $school_year = session('school_year_selected');
-
         $school_year_model = SchoolYear::where('school_year', $school_year)->first();
 
         $semestre = session('semestre_selected');
 
         $school = School::first();
+
+        $no_current_calendar = true;
 
         if($school && $school_year_model){
 
@@ -105,6 +124,10 @@ trait ModelQueryTrait{
 
                 if($semestre_calendars){
 
+                    $semestre = null;
+
+                    $calend = null;
+
                     foreach($semestre_calendars as $calendar){
 
                         $is_current = $this->thisDateIsBetween($calendar->start, $calendar->end);
@@ -112,7 +135,17 @@ trait ModelQueryTrait{
                         if($is_current){
 
                             $semestre = str_replace($semestre_type . ' ', '', $calendar->object);
+
+                            $calend = $calendar;
+
+                            $no_current_calendar = false;
                         }
+                    }
+
+                    if($no_current_calendar == true){
+
+                        
+
                     }
                 }
                 else{
@@ -147,6 +180,8 @@ trait ModelQueryTrait{
                 }
             }
         }
+
+
         session()->put('semestre_selected', $semestre);
     }
 
@@ -154,17 +189,49 @@ trait ModelQueryTrait{
     public function thisDateIsBetween($start, $end, $date = null)
     {
         if(!$date){
+
             $date = Carbon::now();
         }
 
         if($start && $end && $date){
+
             $timestamp_of_date = Carbon::parse($date)->timestamp;
+
             $timestamp_start = Carbon::parse($start)->timestamp;
+
             $timestamp_end = Carbon::parse($end)->timestamp;
             
             if($timestamp_of_date >= $timestamp_start &&  $timestamp_of_date <= $timestamp_end){
+
                 return true;
             }
+
+            return false;
+        }
+
+        return false;
+    }
+
+    public function theSemestreWasPassed($start, $end, $date = null)
+    {
+        if(!$date){
+
+            $date = Carbon::now();
+        }
+
+        if($start && $end && $date){
+
+            $timestamp_of_date = Carbon::parse($date)->timestamp;
+
+            $timestamp_start = Carbon::parse($start)->timestamp;
+
+            $timestamp_end = Carbon::parse($end)->timestamp;
+            
+            if($timestamp_of_date >= $timestamp_start &&  $timestamp_of_date >= $timestamp_end){
+
+                return true;
+            }
+
             return false;
         }
 
@@ -211,6 +278,32 @@ trait ModelQueryTrait{
         }
 
         return $semestres;
+
+    }
+
+    public function assetIfTheSemestresWasAllPassed($school_year = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $semestre_calendars = $school_year_model->periods()->where('periods.target', 'semestre-trimestre')->get();
+
+        foreach($semestre_calendars as $calendar){
+
+            // $is_between = $this->thisDateIsBetween($calendar->start, $calendar->end);
+
+            $is_passed = $this->theSemestreWasPassed($calendar->start, $calendar->end);
+
+            if($is_passed){
+
+                $passed = true;
+            }
+            else{
+
+                $passed = false;
+
+            }
+        }
+
 
     }
 

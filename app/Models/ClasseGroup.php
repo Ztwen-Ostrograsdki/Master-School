@@ -98,7 +98,7 @@ class ClasseGroup extends Model
             
                 $classe_pupils = $classe->getPupils($school_year, $search, $sexe, $onlyIds);
 
-                if(count($classe_pupils) > 0){
+                if($classe_pupils && count($classe_pupils) > 0){
 
                     foreach($classe_pupils as $pupil){
 
@@ -110,7 +110,7 @@ class ClasseGroup extends Model
 
         }
 
-        return $pupils;
+        return $pupils ? $pupils : [];
 
     }
 

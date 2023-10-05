@@ -35,6 +35,12 @@ class SemestreCalendars extends Component
         
         $this->school_year_model = $this->getSchoolYear($this->school_year);
 
+        $semestre_calendars = [];
+
+        $current_period = [];
+
+        $school_calendars = [];
+
         $school_year_model = $this->school_year_model;
 
         $calendar_profiler = $school_year_model->calendarProfiler();

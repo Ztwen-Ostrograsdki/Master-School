@@ -10,6 +10,10 @@ window.addEventListener('modal-confirmation', function(e) {
     $('#confirmatorModal').modal('show');
 });
 
+window.addEventListener('modal-makeClassePresenceLate', function(e) {
+    $('#classePresenceLateModal').modal('show');
+});
+
 window.addEventListener('modal-ConfirmClasseMarksDeletion', function(e) {
     $('#confirmClasseMarksDeletionModal').modal('show');
 });

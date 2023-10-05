@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\ImportRegistredTeachersToTheCurrentYearEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Level;
@@ -54,6 +55,8 @@ class AllTeacherLister extends Component
     {
         $school_year_model = $this->getSchoolYear();
 
+        $school_year_befor_model = $this->getSchoolYearBefor();
+
         $lastYear = $this->getLastYear();
 
         if(session()->has('teacher_list_on_teaching')){
@@ -101,7 +104,7 @@ class AllTeacherLister extends Component
             session()->put('teacher_subject_list_selected', $this->subject_id_selected);
 
         }
-        return view('livewire.all-teacher-lister', compact('teachers', 'subjects', 'classes', 'school_year_model', 'lastYear'));
+        return view('livewire.all-teacher-lister', compact('teachers', 'subjects', 'classes', 'school_year_model', 'lastYear', 'school_year_befor_model'));
     }
 
 
@@ -400,6 +403,25 @@ class AllTeacherLister extends Component
 
         }
 
+    }
+
+
+    public function importLastYearTeachersToThisYear()
+    {
+        $user = auth()->user();
+
+        $school_year_model = $this->getSchoolYear();
+
+        if($user && $user->isAdminAs('master')){
+
+            ImportRegistredTeachersToTheCurrentYearEvent::dispatch($user, $school_year_model);
+
+        }
+        else{
+
+            $this->dispatchBrowserEvent('Toast', ['type' => 'warning', 'title' => 'ACTION NON AUTHORISEE',  'message' => "Vous n'êtes pas authorisé à exécuter une telle opération!"]);
+
+        }
     }
 
 

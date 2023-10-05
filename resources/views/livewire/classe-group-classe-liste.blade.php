@@ -32,9 +32,23 @@
                                 {{ $classe->name }}
                             </a>
                         </th>
-                        <th scope="row" class="text-center">{{ count($classe->getClassePupilsOnGender('female', (session('school_year_selected')))) }}</th>
-                        <th scope="row" class="text-center">{{ count($classe->getClassePupilsOnGender('male', (session('school_year_selected')))) }}</th>
-                        <th scope="row" class="text-center">{{ count($classe->getPupils((session('school_year_selected')))) }}</th>
+
+                        @php
+
+                            $female = count($classe->getClassePupilsOnGender('female', (session('school_year_selected'))));
+
+                            $male = count($classe->getClassePupilsOnGender('male', (session('school_year_selected'))));
+
+                            $eff = count($classe->getPupils((session('school_year_selected'))));
+
+                        @endphp
+
+                        <th scope="row" class="text-center">{{ $female }}</th>
+
+                        <th scope="row" class="text-center">{{ $male }}</th>
+
+                        <th scope="row" class="text-center">{{ $eff }}</th>
+
                         <th scope="row" class="text-center cursor-pointer">
                             <span wire:click="removeClasseFromThisGroup({{$classe->id}})" title="Retirer la classe de {{$classe->name}} définitivement de ce groupe ou de cette promotion" class="col-4 m-0 p-0 cursor-pointer">
                                 <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>

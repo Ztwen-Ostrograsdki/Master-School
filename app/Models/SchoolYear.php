@@ -311,6 +311,7 @@ class SchoolYear extends Model
 
             }
         }
+
         return ['current_period' => $current_period, 'semestre_calendars' => $semestre_calendars];
 
 
@@ -375,6 +376,12 @@ class SchoolYear extends Model
         $has = $this->findPupil($pupil_id);
 
         return $has ? false : true;
+    }
+
+
+    public function getPeriod($target, $object)
+    {
+        return $this->periods()->where('target', $target)->where('object', $object)->first();
     }
 
 

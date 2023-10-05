@@ -4,23 +4,31 @@ namespace App\Providers;
 
 use App\Events\ClasseMarksDeletionCreatedEvent;
 use App\Events\ClasseMarksInsertionCreatedEvent;
+use App\Events\DetachPupilsFromSchoolYearEvent;
 use App\Events\FlushAveragesIntoDataBaseEvent;
 use App\Events\FreshAveragesIntoDBEvent;
+use App\Events\ImportRegistredTeachersToTheCurrentYearEvent;
 use App\Events\InitiateSettingsOnMarksEvent;
 use App\Events\LocalTransfertCreatedEvent;
 use App\Events\MarksRestorationEvent;
+use App\Events\MigrateDataToTheNewSchoolYearEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\PaymentSystemEvent;
+use App\Events\StartNewsPupilsInsertionEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Listeners\ClasseMarksDeletionBatcherListener;
 use App\Listeners\ClasseMarksInsertionBatchListener;
 use App\Listeners\CreatedTransferBatchListener;
+use App\Listeners\DataMigrationToTheNewSchoolYearBatcherListener;
+use App\Listeners\DetachPupilsFromSchoolYearBatcherListener;
 use App\Listeners\FlushAveragesIntoDataBaseBatcherListener;
 use App\Listeners\FreshAveragesIntoDBBatcherListener;
+use App\Listeners\ImportRegistredTeachersToTheCurrentYearBatcherListener;
 use App\Listeners\InitiateSettingsOnMarksBatcherListener;
 use App\Listeners\MarksRestorationBatcherListener;
 use App\Listeners\NewProductCreatedListener;
 use App\Listeners\PaymentSystemListener;
+use App\Listeners\ProcessingNewsPupilsInsertionBatcherListener;
 use App\Listeners\UpdateClasseAveragesIntoDatabaseBatcherListener;
 use App\Models\Classe;
 use App\Models\ClassesSecurity;
@@ -88,6 +96,22 @@ class EventServiceProvider extends ServiceProvider
 
         MarksRestorationEvent::class => [
             MarksRestorationBatcherListener::class,
+        ],
+
+        MigrateDataToTheNewSchoolYearEvent::class => [
+            DataMigrationToTheNewSchoolYearBatcherListener::class,
+        ],
+
+        ImportRegistredTeachersToTheCurrentYearEvent::class => [
+            ImportRegistredTeachersToTheCurrentYearBatcherListener::class,
+        ],
+        
+        StartNewsPupilsInsertionEvent::class => [
+            ProcessingNewsPupilsInsertionBatcherListener::class,
+        ],
+
+        DetachPupilsFromSchoolYearEvent::class => [
+            DetachPupilsFromSchoolYearBatcherListener::class,
         ],
     ];
 

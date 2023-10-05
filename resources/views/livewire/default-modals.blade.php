@@ -14,6 +14,7 @@
     @livewire('insert-pupil-marks')
     @livewire('insert-classe-pupils-marks-together')
     @livewire('profil-image-editor')
+    @livewire('presence-late-modal')
     
     
 </div>
