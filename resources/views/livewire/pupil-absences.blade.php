@@ -60,7 +60,7 @@
             <blockquote class="">
                 <h6 class="h6 text-white-50">
                     La fiche des absences de <span class="text-warning">{{ $pupil->getName()}} </span> au cours de l'année scolaire {{ session('school_year_selected')}} est viège. <br>
-                    Il est donc fort probable que ce dernier n'a encore enregistré aucune absence.
+                    Il est donc fort probable que ce dernier n'ait encore enregistré aucune absence.
                 </h6>
                 <span class="float-right border-top border-white w-100 d-inline-block text-right">
                     <span class="fa fa-heart text-danger"></span>

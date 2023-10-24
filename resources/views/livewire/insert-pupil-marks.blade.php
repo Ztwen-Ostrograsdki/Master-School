@@ -41,7 +41,7 @@
                         </div>
                         <div class="col-3 m-0 p-0">
                             <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Choisissez l'année </label>
-                            <select class="px-2 form-select text-white z-bg-secondary w-100 @error('school_year') text-danger border border-danger @enderror" wire:model.defer="school_year" name="school_year">
+                            <select disabled class="px-2 form-select text-white z-bg-secondary w-100 @error('school_year') text-danger border border-danger @enderror" wire:model.defer="school_year" name="school_year">
                                 <option disabled class="" value="{{null}}">Choisissez l'année</option>
                                 @foreach ($school_years as $s_y)
                                     <option value="{{$s_y->id}}">{{$s_y->school_year}}</option>

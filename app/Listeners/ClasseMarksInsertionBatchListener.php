@@ -16,16 +16,7 @@ use Illuminate\Support\Facades\Bus;
 
 class ClasseMarksInsertionBatchListener
 {
-    /**
-     * Create the event listener.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
+    
     /**
      * Handle the event.
      *
@@ -42,7 +33,7 @@ class ClasseMarksInsertionBatchListener
 
             new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, null),
 
-            new JobInsertClassePupilMarksTogether($event->data)
+            new JobInsertClassePupilMarksTogether($event->data, $event->related, $event->related_data)
 
             ])->then(function(Batch $batch) use ($event){
 

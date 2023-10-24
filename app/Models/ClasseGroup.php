@@ -60,9 +60,11 @@ class ClasseGroup extends Model
     }
 
 
-    public function getCoef($subject_id)
+    public function getCoef($subject_id, $school_year = null)
     {
-        return $this->coeficients()->where('subject_id', $subject_id)->first();
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        return $this->coeficients()->where('subject_id', $subject_id)->where('coeficients.school_year_id', $school_year_model->id)->first();
     }
 
     public function getSlug()

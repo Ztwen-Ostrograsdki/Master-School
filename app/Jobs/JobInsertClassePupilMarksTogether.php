@@ -2,8 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Events\ClasseMarksWasUpdatedIntoDBSuccessfullyEvent;
 use App\Models\Classe;
 use App\Models\Mark;
+use App\Models\Pupil;
+use App\Models\RelatedMark;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Bus\Batchable;
@@ -33,14 +36,22 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
 
     public $school_year_model;
 
+    public $related = false;
+
+    public $related_data = [];
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(array $data)
+    public function __construct(array $data, $related = false, $related_data = [])
     {
         $this->data = $data;
+
+        $this->related = $related;
+
+        $this->related_data = $related_data;
 
         $this->classe = $data['classe'];
 
@@ -62,7 +73,20 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
      */
     public function handle()
     {
-        $this->doJob();
+        $user = $this->user;
+
+        $not_secure = $user->ensureThatTeacherCanAccessToClass($this->classe->id);
+
+        if($not_secure){
+
+            $this->doJob();
+
+        }
+        else{
+
+            ClasseMarksWasUpdatedIntoDBSuccessfullyEvent::dispatch($user);
+
+        }
     }
 
 
@@ -87,178 +111,186 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
 
             $user = $this->user;
 
+            $related = $this->related;
 
-            if($classe && $marks && $semestre && $school_year_model && $subject){
+            $related_data = $this->related_data;
 
-                if(true){
 
-                    foreach($marks as $pupil_id => $data){
+            if(!$related){
 
-                        $pupil = $school_year_model->findPupil($pupil_id);
+                if($classe && $marks && $semestre && $school_year_model && $subject){
 
-                        $pupil_id = $pupil_id;
+                    if(true){
 
-                        $epe_marks = $data['epe'];
+                        foreach($marks as $pupil_id => $data){
 
-                        $dev_marks = $data['devoir'];
+                            $pupil = $school_year_model->findPupil($pupil_id);
 
-                        if($epe_marks || $dev_marks){
+                            $pupil_id = $pupil_id;
 
-                            $epes = [];
+                            $epe_marks = $data['epe'];
 
-                            $devs = [];
+                            $dev_marks = $data['devoir'];
 
-                            if($epe_marks){
-                                $epes = explode('-', $epe_marks);
-                            } 
+                            if($epe_marks || $dev_marks){
 
-                            if($dev_marks){
-                                $devs = explode('-', $dev_marks);
-                            }
-                            
-                            $tabs = [];
+                                $epes = [];
 
-                            $epe_tabs = [];
+                                $devs = [];
 
-                            $dev_tabs = [];
+                                if($epe_marks){
+                                    $epes = explode('-', $epe_marks);
+                                } 
 
-                            $epe_key_index = 1;
-
-                            $dev_key_index = 1;
-
-                            
-                            if($epes !== []){
-                                $has_epe_marks_index = $school_year_model->marks()
-                                                                         ->where('pupil_id', $pupil->id)
-                                                                         ->where('classe_id', $classe_id)
-                                                                         ->where('subject_id', $subject_id)
-                                                                         ->where('semestre', $semestre)
-                                                                         ->where('type', 'epe')
-                                                                         ->pluck('mark_index')
-                                                                         ->toArray();
-
-                                if(count($has_epe_marks_index) > 0){
-
-                                    $epe_mark_index = max($has_epe_marks_index) + 1;
+                                if($dev_marks){
+                                    $devs = explode('-', $dev_marks);
                                 }
-                                else{
+                                
+                                $tabs = [];
 
-                                   $epe_mark_index = 1;
-                                }
+                                $epe_tabs = [];
 
-                                $epe_key_index = $epe_mark_index;
+                                $dev_tabs = [];
 
-                                foreach($epes as $epe){
+                                $epe_key_index = 1;
 
-                                    $mark_index_was_existed = $pupil->marks()
-                                                                    ->where('classe_id', $classe_id)
-                                                                    ->where('subject_id', $subject_id)
-                                                                    ->where('marks.school_year_id', $school_year_model->id)
-                                                                    ->where('semestre', $semestre)->where('type', "epe")
-                                                                    ->where('mark_index', $epe_key_index)
-                                                                    ->first();
+                                $dev_key_index = 1;
 
-                                    if(!$mark_index_was_existed){
+                                
+                                if($epes !== []){
+                                    $has_epe_marks_index = $school_year_model->marks()
+                                                                             ->where('pupil_id', $pupil->id)
+                                                                             ->where('classe_id', $classe_id)
+                                                                             ->where('subject_id', $subject_id)
+                                                                             ->where('semestre', $semestre)
+                                                                             ->where('type', 'epe')
+                                                                             ->pluck('mark_index')
+                                                                             ->toArray();
 
-                                        $epe_tabs[$epe_key_index] = floatval($epe);
+                                    if(count($has_epe_marks_index) > 0){
 
-                                        $epe_key_index++;
-
+                                        $epe_mark_index = max($has_epe_marks_index) + 1;
                                     }
-                                }
+                                    else{
 
-                            }
-
-                            if($devs !== []){
-                                $has_dev_marks_index = $school_year_model->marks()
-                                                                         ->where('pupil_id', $pupil->id)
-                                                                         ->where('classe_id', $classe_id)
-                                                                         ->where('subject_id', $subject_id)
-                                                                         ->where('semestre', $semestre)
-                                                                         ->where('type', 'devoir')
-                                                                         ->pluck('mark_index')
-                                                                         ->toArray();
-
-                                if(count($has_dev_marks_index) > 0){
-
-                                    $dev_mark_index = max($has_dev_marks_index) + 1;
-                                }
-                                else{
-                                   $dev_mark_index = 1;
-                                }
-
-                                $dev_key_index = $dev_mark_index;
-
-                                foreach($devs as $dev){
-
-                                    $mark_index_was_existed = $pupil->marks()
-                                                                    ->where('classe_id', $classe_id)->where('subject_id', $subject_id)
-                                                                    ->where('semestre', $semestre)
-                                                                    ->where('marks.school_year_id', $school_year_model->id)
-                                                                    ->where('type', "devoir")
-                                                                    ->where('mark_index', $dev_key_index)
-                                                                    ->first();
-
-                                    if(!$mark_index_was_existed){
-
-                                        $dev_tabs[$dev_key_index] = floatval($dev);
-
-                                        $dev_key_index++;
-
+                                       $epe_mark_index = 1;
                                     }
-                                    
+
+                                    $epe_key_index = $epe_mark_index;
+
+                                    foreach($epes as $epe){
+
+                                        $mark_index_was_existed = $pupil->marks()
+                                                                        ->where('classe_id', $classe_id)
+                                                                        ->where('subject_id', $subject_id)
+                                                                        ->where('marks.school_year_id', $school_year_model->id)
+                                                                        ->where('semestre', $semestre)->where('type', "epe")
+                                                                        ->where('mark_index', $epe_key_index)
+                                                                        ->first();
+
+                                        if(!$mark_index_was_existed){
+
+                                            $epe_tabs[$epe_key_index] = floatval($epe);
+
+                                            $epe_key_index++;
+
+                                        }
+                                    }
+
                                 }
-                            }
 
-                            if($epe_tabs !== []){
-                                    
-                                foreach($epe_tabs as $epe_k_index => $validEpe){
+                                if($devs !== []){
+                                    $has_dev_marks_index = $school_year_model->marks()
+                                                                             ->where('pupil_id', $pupil->id)
+                                                                             ->where('classe_id', $classe_id)
+                                                                             ->where('subject_id', $subject_id)
+                                                                             ->where('semestre', $semestre)
+                                                                             ->where('type', 'devoir')
+                                                                             ->pluck('mark_index')
+                                                                             ->toArray();
 
-                                    $epe_mark = Mark::create([
-                                        'value' => $validEpe, 
-                                        'pupil_id' => $pupil->id, 
-                                        'user_id' => $user->id, 
-                                        'creator' => $user->id, 
-                                        'subject_id' => $subject_id, 
-                                        'school_year_id' => $school_year_model->id, 
-                                        'classe_id' => $classe_id, 
-                                        'semestre' => $semestre, 
-                                        'type' => 'epe', 
-                                        'mark_index' => $epe_k_index, 
-                                        'level_id' => $pupil->level_id, 
-                                    ]);
+                                    if(count($has_dev_marks_index) > 0){
 
-                                    if ($epe_mark) {
+                                        $dev_mark_index = max($has_dev_marks_index) + 1;
+                                    }
+                                    else{
+                                       $dev_mark_index = 1;
+                                    }
+
+                                    $dev_key_index = $dev_mark_index;
+
+                                    foreach($devs as $dev){
+
+                                        $mark_index_was_existed = $pupil->marks()
+                                                                        ->where('classe_id', $classe_id)->where('subject_id', $subject_id)
+                                                                        ->where('semestre', $semestre)
+                                                                        ->where('marks.school_year_id', $school_year_model->id)
+                                                                        ->where('type', "devoir")
+                                                                        ->where('mark_index', $dev_key_index)
+                                                                        ->first();
+
+                                        if(!$mark_index_was_existed){
+
+                                            $dev_tabs[$dev_key_index] = floatval($dev);
+
+                                            $dev_key_index++;
+
+                                        }
                                         
-                                        $school_year_model->marks()->attach($epe_mark->id);
                                     }
-
                                 }
-                            }
 
-                            if($dev_tabs !== []){
-                                    
-                                foreach($dev_tabs as $dev_k_index => $validDev){
+                                if($epe_tabs !== []){
+                                        
+                                    foreach($epe_tabs as $epe_k_index => $validEpe){
 
-                                    $dev_mark = Mark::create([
-                                        'value' => $validDev, 
-                                        'pupil_id' => $pupil->id, 
-                                        'user_id' => $user->id, 
-                                        'creator' => $user->id, 
-                                        'school_year_id' => $school_year_model->id, 
-                                        'subject_id' => $subject_id, 
-                                        'classe_id' => $classe_id, 
-                                        'semestre' => $semestre, 
-                                        'type' => 'devoir', 
-                                        'mark_index' => $dev_k_index, 
-                                        'level_id' => $pupil->level_id, 
-                                    ]);
-                                    if ($dev_mark) {
+                                        $epe_mark = Mark::create([
+                                            'value' => $validEpe, 
+                                            'pupil_id' => $pupil->id, 
+                                            'user_id' => $user->id, 
+                                            'creator' => $user->id, 
+                                            'subject_id' => $subject_id, 
+                                            'school_year_id' => $school_year_model->id, 
+                                            'classe_id' => $classe_id, 
+                                            'semestre' => $semestre, 
+                                            'type' => 'epe', 
+                                            'mark_index' => $epe_k_index, 
+                                            'level_id' => $pupil->level_id, 
+                                        ]);
 
-                                        $school_year_model->marks()->attach($dev_mark->id);
+                                        if ($epe_mark) {
+                                            
+                                            $school_year_model->marks()->attach($epe_mark->id);
+                                        }
+
                                     }
-
                                 }
+
+                                if($dev_tabs !== []){
+                                        
+                                    foreach($dev_tabs as $dev_k_index => $validDev){
+
+                                        $dev_mark = Mark::create([
+                                            'value' => $validDev, 
+                                            'pupil_id' => $pupil->id, 
+                                            'user_id' => $user->id, 
+                                            'creator' => $user->id, 
+                                            'school_year_id' => $school_year_model->id, 
+                                            'subject_id' => $subject_id, 
+                                            'classe_id' => $classe_id, 
+                                            'semestre' => $semestre, 
+                                            'type' => 'devoir', 
+                                            'mark_index' => $dev_k_index, 
+                                            'level_id' => $pupil->level_id, 
+                                        ]);
+                                        if ($dev_mark) {
+
+                                            $school_year_model->marks()->attach($dev_mark->id);
+                                        }
+
+                                    }
+                                }
+
                             }
 
                         }
@@ -268,8 +300,105 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
                 }
 
             }
+            elseif($related && $related_data){
+
+                if($classe && $marks && $semestre && $school_year_model && $subject){
+
+                    $marks = $related_data['marks'];
+
+                    if($marks){
+
+
+                        if(isset($related_data['pupil_id']) && $related_data['pupil_id']){
+
+                            $pupil_id = $related_data['pupil_id'];
+
+                            $pupil = Pupil::find($pupil_id);
+
+                            if($pupil){
+
+                                foreach($marks as $mark){
+
+                                    $this->markInserter($pupil, $related_data);
+
+                                }
+
+                            }
+                        }
+                        else{
+
+                            $together = $related_data['together'];
+
+                            if($together){
+
+                                $pupils = $classe->getPupils($school_year_model->id);
+
+                                foreach($pupils as $p){
+
+                                    $this->markInserter($p, $related_data);
+
+                                }
+
+                            }
+
+                        }
+                        
+                    }
+
+                }
+            }
 
         });
+
+    }
+
+
+
+    public function markInserter($pupil, $related_data)
+    {
+
+        $school_year_model = $this->school_year_model;
+
+        $values = $related_data['marks'];
+
+        $subject_id = $related_data['subject_id'];
+
+        $semestre = $related_data['semestre'];
+
+        $motif = $related_data['motif'];
+
+        $horaire = $related_data['horaire'];
+
+        $type = $related_data['type'];
+
+        $date = $related_data['date'];
+
+        $classe = $this->classe;
+
+        foreach($values as $value){
+
+            $related_mark = RelatedMark::create([
+                'value' => $value, 
+                'pupil_id' => $pupil->id, 
+                'subject_id' => $subject_id, 
+                'school_year_id' => $school_year_model->id, 
+                'classe_id' => $classe->id, 
+                'semestre' => $semestre, 
+                'type' => $type, 
+                'level_id' => $pupil->level_id, 
+                'horaire' => $horaire,
+                'motif' => $motif,
+                'date' => $date,
+            ]);
+
+            if($related_mark){
+
+                $school_year_model->related_marks()->attach($related_mark->id);
+
+            }
+
+        }
+
         
 
     }

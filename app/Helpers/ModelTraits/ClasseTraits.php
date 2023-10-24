@@ -557,12 +557,6 @@ trait ClasseTraits{
 
         $pupils = $this->getClasseCurrentPupils($school_year);
 
-        $pupil_average = 0;
-
-        $pupil_average_sum = 0;
-
-        $coef_total = 0;
-
         if(count($pupils) > 0){
 
             if(count($subjects) > 0){
@@ -575,6 +569,8 @@ trait ClasseTraits{
                 }
 
                 foreach ($pupils as $pupil){
+
+                    $coef_total = 0;
 
                     $pupil_average_sum = 0;
 
@@ -592,8 +588,11 @@ trait ClasseTraits{
                         
                     }
 
+                    $pupil_average = 0;
+
 
                     if($pupil_average_sum && $coef_total > 0){
+
 
                         $pupil_average = floatval(number_format(($pupil_average_sum /($coef_total)), 2));
 

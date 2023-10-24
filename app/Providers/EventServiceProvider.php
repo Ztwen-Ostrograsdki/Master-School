@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Events\AbsencesAndLatesDeleterEvent;
 use App\Events\ClasseMarksDeletionCreatedEvent;
 use App\Events\ClasseMarksInsertionCreatedEvent;
 use App\Events\DetachPupilsFromSchoolYearEvent;
@@ -10,12 +11,14 @@ use App\Events\FreshAveragesIntoDBEvent;
 use App\Events\ImportRegistredTeachersToTheCurrentYearEvent;
 use App\Events\InitiateSettingsOnMarksEvent;
 use App\Events\LocalTransfertCreatedEvent;
+use App\Events\MakeClassePresenceLateEvent;
 use App\Events\MarksRestorationEvent;
 use App\Events\MigrateDataToTheNewSchoolYearEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\PaymentSystemEvent;
 use App\Events\StartNewsPupilsInsertionEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
+use App\Listeners\AbsencesAndLatesDeleterBatcherListener;
 use App\Listeners\ClasseMarksDeletionBatcherListener;
 use App\Listeners\ClasseMarksInsertionBatchListener;
 use App\Listeners\CreatedTransferBatchListener;
@@ -25,6 +28,7 @@ use App\Listeners\FlushAveragesIntoDataBaseBatcherListener;
 use App\Listeners\FreshAveragesIntoDBBatcherListener;
 use App\Listeners\ImportRegistredTeachersToTheCurrentYearBatcherListener;
 use App\Listeners\InitiateSettingsOnMarksBatcherListener;
+use App\Listeners\MakeClassePresenceLateBatcherListener;
 use App\Listeners\MarksRestorationBatcherListener;
 use App\Listeners\NewProductCreatedListener;
 use App\Listeners\PaymentSystemListener;
@@ -34,10 +38,12 @@ use App\Models\Classe;
 use App\Models\ClassesSecurity;
 use App\Models\Mark;
 use App\Models\Pupil;
+use App\Models\RelatedMark;
 use App\Observers\ClasseObserver;
 use App\Observers\ClassesSecurityObserver;
 use App\Observers\MarkObserver;
 use App\Observers\PupilObserver;
+use App\Observers\RelatedMarkObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -113,6 +119,14 @@ class EventServiceProvider extends ServiceProvider
         DetachPupilsFromSchoolYearEvent::class => [
             DetachPupilsFromSchoolYearBatcherListener::class,
         ],
+
+        MakeClassePresenceLateEvent::class => [
+            MakeClassePresenceLateBatcherListener::class,
+        ],
+
+        AbsencesAndLatesDeleterEvent::class => [
+            AbsencesAndLatesDeleterBatcherListener::class,
+        ],
     ];
 
     /**
@@ -129,6 +143,8 @@ class EventServiceProvider extends ServiceProvider
         Mark::observe(MarkObserver::class);
 
         Classe::observe(ClasseObserver::class);
+
+        RelatedMark::observe(RelatedMarkObserver::class);
 
     }
 

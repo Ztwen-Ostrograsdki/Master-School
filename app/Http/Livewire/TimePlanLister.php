@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\ClasseGroup;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class TimePlanLister extends Component
@@ -187,6 +188,71 @@ class TimePlanLister extends Component
             $this->classesToShow = $this->getClasses(null, null, null, null, null);
 
         }
+    }
+
+
+    public function deleteClasseTimePlans($classe_id = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        if($classe_id){
+
+            $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
+
+            if($classe){
+
+                $classe_name = $classe->name;
+
+                DB::transaction(function($e) use($classe, $school_year_model, $teacher){
+
+                    $times_plans = $classe->timePlans()->where('time_plans.school_year_id', $school_year_model->id)->each(function($time_plan){
+
+                        $time_plan->delete();
+                    });
+                });
+
+                DB::afterCommit(function() use($classe_name){
+
+                    $this->emit('RefreshTimePlanLiveEvent');
+
+                    $this->dispatchBrowserEvent('Toast', ['type' => 'success', 'title' => 'SUPPRESSION REUSSIE',  'message' => "Les emplois du temps de la classe de $classe_name ont été rafraîchies avec succès!"]);
+
+                    $this->reloadData();
+                });
+
+            }
+            else{
+                $this->dispatchBrowserEvent('Toast', ['title' => 'CLASSE INTROUVABLE', 'message' => "Cette classe est inconnue ou a été supprimé ou bloqué momentanement!", 'type' => 'warning']);
+            }
+        }
+        else{
+
+            DB::transaction(function($e) use($school_year_model){
+
+                    $classes = $this->getClasses();
+
+                    foreach($classes as $classe){
+
+                        $classe->timePlans()->where('time_plans.school_year_id', $school_year_model->id)->each(function($time_plan){
+
+                            $time_plan->delete();
+                        });
+                        
+                    }
+                });
+
+            DB::afterCommit(function(){
+
+                $this->emit('RefreshTimePlanLiveEvent');
+
+                $this->dispatchBrowserEvent('Toast', ['type' => 'success', 'title' => 'SUPPRESSION REUSSIE',  'message' => "La table des emplois du temps des classes sélectionnées a été rafraîchies avec succès!"]);
+
+                $this->reloadData();
+            });
+
+
+        }
+            
     }
 
 

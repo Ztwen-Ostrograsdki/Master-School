@@ -40,19 +40,10 @@
                         <td class="text-center"> {{ $mark->motif }}</td>
                         <td class="text-center"> 
                             <span class="row w-100 m-0 p-0">
-                                <span title="Supprimer cette note" wire:click="delete({{$mark->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                <span title="Supprimer cette note" wire:click="delete({{$mark->id}})" class="text-danger col-6 m-0 p-0 cursor-pointer border-right">
                                     <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
                                 </span>
-                                @if($mark->justified)
-                                    <span title="Marquer comme non justifié" class="text-warning col-4 m-0 p-0 cursor-pointer border-right border-left">
-                                    <span class="fa bi-person-x-fill py-2 px-2"></span>
-                                </span>
-                                @else
-                                    <span title="Marquer comme justifié" class="text-success col-4 m-0 p-0 cursor-pointer border-right border-left">
-                                        <span class="fa fa-check py-2 px-2"></span>
-                                    </span>
-                                @endif
-                                <span title="Editer" wire:click="edit({{$mark->id}})" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                <span title="Editer cette note" wire:click="editRelatedMark({{$mark->id}})" class="text-danger col-6 m-0 p-0 cursor-pointer">
                                     <span class="text-primary cursor-pointer fa fa-edit py-2 px-2"></span>
                                 </span>
                             </span>
@@ -67,13 +58,10 @@
             <blockquote class="">
                 <h6 class="h6 text-white-50">
                     La fiche des notes relatives de <span class="text-warning">{{ $pupil->getName()}} </span> au cours de l'année scolaire {{ session('school_year_selected')}} est viège. <br>
-                    Il est donc fort probable que ce dernier n'a encore enregistré aucune comportement particulier.
+                    Il est donc fort probable que ce dernier n'a encore enregistré aucun comportement particulier.
                 </h6>
                 <span class="float-right border-top border-white w-100 d-inline-block text-right">
-                    <span class="fa bi-clock text-success"></span>
-                    <span class="fa bi-clock text-success"></span>
-                    <span class="fa bi-clock text-success"></span>
-                    <i class="text-warning small">On a donc affaire à un apprenant plus ou moins timide!!!</i>
+                    <i class="text-warning small">Un apprenant particulièrement timide peut-être!!!</i>
                 </span>
             </blockquote>
         </div>

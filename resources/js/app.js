@@ -66,8 +66,6 @@ e.private('user.' + window.ClientUser.id)
     })
     .listen('DataMigratedToTheNewSchoolYearEvent', function(e) {
 
-        console.log(e);
-        
         Livewire.emit('DataMigratedToTheNewSchoolYearLiveEvent');
     })
     .listen('TeachersDataUploadingEvent', function(e) {
@@ -85,6 +83,10 @@ e.private('user.' + window.ClientUser.id)
     .listen('ClassePupilsListUpdatedEvent', function(e) {
         
         Livewire.emit('ClassePupilsListUpdatedLiveEvent');
+    }) 
+    .listen('ClassePresenceLateWasCompletedEvent', function(e) {
+        
+        Livewire.emit('PresenceLateWasUpdated');
     }) 
 
 e.private('master')

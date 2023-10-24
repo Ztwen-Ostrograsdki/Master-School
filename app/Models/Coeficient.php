@@ -10,6 +10,8 @@ class Coeficient extends Model
     use HasFactory;
     protected $fillable = ['coef', 'classe_group_id', 'subject_id', 'school_year_id'];
 
+    private $table_name = 'coeficients';
+
 
     public function subject()
     {

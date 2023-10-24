@@ -22,23 +22,41 @@ class InsertTimePlan extends Component
     use ModelQueryTrait;
 
     public $start = 7;
+    
     public $time_plan = null;
+    
     public $end = 8;
+    
     public $duration = 1;
+    
     public $classe_id = null;
+    
     public $for_classe = false;
+    
     public $hasErrors = false;
+    
     public $teacher_with_classe = false;
+    
     public $classe;
+    
     public $targetClasse;
+    
     public $subject;
+    
     public $teacher = null;
+    
     public $subject_id = null;
+    
     public $teacher_id = null;
+    
     public $level_id = null;
+    
     public $school_year_id = null;
+    
     public $day = null;
+    
     public $times_plans = [];
+
     public $days = [
         1 => 'Lundi',
         2 => 'Mardi', 

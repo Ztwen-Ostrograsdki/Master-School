@@ -16,12 +16,19 @@ class TimePlansComponent extends Component
     protected $listeners = ['schoolYearChangedLiveEvent' => 'reloadSchoolYear', 'timePlanTablesWasUpdatedLiveEvent' => 'reloadData'];
 
     public $search = 6;
+    
     public $counter = 0;
+    
     public $data = [];
+    
     public $classe_group_id_selected;
+    
     public $subject_id_selected;
+    
     public $classe_id_selected;
+    
     public $level_id_selected;
+    
     public $randomSubjectsTab = ['SVT', 'MATHS', 'HG', 'EPS', 'ANG', 'PHILO', 'PCT', 'ECO'];
 
 

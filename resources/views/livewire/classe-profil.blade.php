@@ -34,6 +34,7 @@
                             <a wire:click="editClasseSubjects({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Définir les matières</a>
                             <a wire:click="settingsOnMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Effectuer une opération sur les notes</a>
                             <a wire:click="restorMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Restaurer des notes de classe</a>
+                            <a wire:click="throwPresence({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Faire la présence de la classe</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
                           </div>
@@ -188,7 +189,7 @@
                                                                     </a>
                                                                 </h6>
                                                                 <span class="d-flex ml-3 justify-content-between flex-column">
-                                                                    @foreach($tt->teacherHasCourseAtThisTime($classe->id) as $tp)
+                                                                    @foreach($tt->getTeacherTodayCourses($classe->id) as $tp)
                                                                         <small class="text-white-50 font-italic pt-1">
                                                                             {{ $tp }}
                                                                         </small>
@@ -275,6 +276,12 @@
                                   <div class="w-100">
                                     <x-z-input :type="'text'" :error="$errors->first('classeName')" :modelName="'classeName'" :labelTitle="'Le Nom de la classe'" ></x-z-input>
                                   </div>
+                                </div>
+                                <div class="mt-3 ml-2">
+                                    <span title="Valider la mise à jour du nom de la classe" wire:click="updateClasseName" class="d-flex justify-content-between btn btn-primary px-3 cursor-pointer border">
+                                        <span class="fa fa-check mt-1 mr-2"></span>
+                                        <span>OK</span>
+                                  </span>
                                 </div>
                                 <div class="d-inline-block float-right text-right zw-20">
                                   <span wire:click="cancelEditingName" title="Fermer la fenêtre d'édition" class="fa cursor-pointer text-danger p-2">X</span>

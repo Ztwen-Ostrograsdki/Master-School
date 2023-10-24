@@ -17,6 +17,8 @@ class PupilRelatedMarks extends Component
         'schoolYearChangedLiveEvent' => 'reloadPupilData',
         'classePupilListUpdated' => 'reloadPupilData',
         'pupilUpdated' => 'reloadPupilData',
+        'ClasseDataLoadedSuccessfully' => 'reloadPupilData',
+        'NewClasseMarksInsert' => 'reloadPupilData',
         'semestreWasChanged',
     ];
 
@@ -79,79 +81,81 @@ class PupilRelatedMarks extends Component
     }
 
 
-    public function justified($late_id)
-    {
-        return false;
-        if($late_id){
-            $late = Lates::find($late_id);
-            if($late){
-                $m = $late->update(['justified' => true, 'motif' => 'Justifié!']);
-                if($m){
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Mise à jour réussie avec succès!", 'type' => 'success']);
-                }
-                else{
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Mise à jour échouée!", 'type' => 'error']);
-
-                }
-                $this->emit('pupilUpdated', $late->pupil_id);
-            }
-        }
-    }
-
-    public function unjustified($late_id)
-    {
-        return false;
-        if($late_id){
-            $late = Lates::find($late_id);
-            if($late){
-                $m = $late->update(['justified' => false, 'motif' => 'Sans motif']);
-                if($m){
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Mise à jour réussie avec succès!", 'type' => 'success']);
-                }
-                else{
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Mise à jour échouée!", 'type' => 'error']);
-
-                }
-                $this->emit('pupilUpdated', $late->pupil_id);
-            }
-        }
-    }
-
 
     public function insertRelatedMark()
     {
         $subject_id = session('classe_subject_selected');
+
+        $semestre = session('semestre_selected');
+
+        $school_year_model = $this->getSchoolYear();
+
         if($subject_id){
-            $semestre = session('semestre_selected');
-            $school_year_model = $this->getSchoolYear();
 
             $this->emit('insertRelatedMarkLiveEvent', $this->pupil_id, $subject_id, $semestre, $school_year_model->id);
         }
         else{
-            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir une matière en premier!", 'type' => 'error']);
+            if(!$subject_id && $semestre){
+
+                $user = auth()->user();
+
+                if($user->teacher){
+
+                    $subject_id = $user->teacher->speciality()->id;
+
+                    $this->emit('insertRelatedMarkLiveEvent', $this->pupil_id, $subject_id, $semestre, $school_year_model->id);
+                }
+                else{
+
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Vous devez choisir la matière et le semestre en premier!", 'type' => 'error']);
+
+                }
+
+            }
+            else{
+
+                $this->dispatchBrowserEvent('Toast', ['title' => 'ERREURE: AUCUN SEMESTRE/TRIMESTRE EN SESSION', 'message' => "Veuillez choisir le semestre/trimestre en premier!", 'type' => 'error']);
+
+            }
 
         }
+    }
+
+
+    public function editRelatedMark($related_mark_id)
+    {
+        $this->emit('UpdatePupilRelatedMark', $related_mark_id);
     }
 
     public function delete($mark_id)
     {
         if($mark_id){
+
             $mark = RelatedMark::find($mark_id);
+
             if($mark){
+
                 DB::transaction(function($e) use ($mark){
-                    $school_year_model = $mark->school_year();
+
+                    $school_year_model = $mark->school_year;
+
                     $detach = $school_year_model->related_marks()->detach($mark->id);
 
                     if($detach){
+
                         $m = $mark->delete();
                     }
                     else{
                         $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure', 'message' => "Mise à jour échouée!", 'type' => 'error']);
                     }
                 });
+                
                 DB::afterCommit(function(){
+
                     $this->emit('pupilUpdated');
+
                     $this->emit('classeUpdated');
+
                     $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "Mise à jour réussie avec succès!", 'type' => 'success']);
 
                 });

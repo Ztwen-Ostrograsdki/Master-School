@@ -97,8 +97,11 @@ class UserProfil extends Component
         $school_year_model = $this->getSchoolYear();
         $user = User::find($this->user_id);
         $teacher = $user->teacher;
+        
         if($classe_id){
+
             $classe = $school_year_model->classes()->where('classes.id', $classe_id)->first();
+
             DB::transaction(function($e) use($classe, $school_year_model, $teacher){
                 $times_plans = $classe->timePlans()->where('time_plans.school_year_id', $school_year_model->id)->where('time_plans.subject_id', $teacher->speciality()->id)->each(function($time_plan){
                     $time_plan->delete();

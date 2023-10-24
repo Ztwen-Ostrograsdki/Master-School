@@ -64,7 +64,7 @@
             <blockquote class="">
                 <h6 class="h6 text-white-50">
                     La fiche des retards de <span class="text-warning">{{ $pupil->getName()}} </span> au cours de l'année scolaire {{ session('school_year_selected')}} est viège. <br>
-                    Il est donc fort probable que ce dernier n'a encore enregistré aucun retard.
+                    Il est donc fort probable que ce dernier n'ait encore enregistré aucun retard.
                 </h6>
                 <span class="float-right border-top border-white w-100 d-inline-block text-right">
                     <span class="fa bi-clock text-success"></span>

@@ -2,29 +2,30 @@
 
 namespace App\Listeners;
 
+use App\Events\AbsencesAndLatesDeleterEvent;
 use App\Events\ClasseMarksWasFailedEvent;
 use App\Events\ClassePresenceLateWasCompletedEvent;
-use App\Events\MakeClassePresenceLateEvent;
-use App\Jobs\JobMakeClassePresenceLate;
+use App\Jobs\JobDeleteAbsencesAndLates;
 use Illuminate\Bus\Batch;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Bus;
 
-class MakeClassePresenceLateBatcherListener
+class AbsencesAndLatesDeleterBatcherListener
 {
-    
+   
+
     /**
      * Handle the event.
      *
      * @param  object  $event
      * @return void
      */
-    public function handle(MakeClassePresenceLateEvent $event)
+    public function handle(AbsencesAndLatesDeleterEvent $event)
     {
-        $batch = Bus::batch([
+         $batch = Bus::batch([
 
-            new JobMakeClassePresenceLate($event->user, $event->classe, $event->data)
+            new JobDeleteAbsencesAndLates($event->user, $event->classe, $event->semestre, $event->school_year_model, $event->subject_id, $event->pupil_id, $event->target)
 
             ])->then(function(Batch $batch) use ($event){
 

@@ -247,6 +247,30 @@
                 </div>
                 @endif
                 @if($pupil && $joinedToThisYear)
+
+                    <div class="w-100 my-1 d-flex justify-content-end text-warning cursive">
+
+                        @php
+
+                            $classe = $pupil->getCurrentClasse();
+
+                        @endphp
+
+                        @if($classe)
+                            @php
+                                $cl = $classe->getNumericName();
+                            @endphp
+                            <a title="Cliquer pour charger le profil de la classe de {{$classe->name}}" class="text-warning" href="{{route('classe_profil', ['slug' => $classe->slug])}}">
+                                <span class="fx-20 font-weight-bold">
+                                    {{ $cl['root'] }}<sup>{{ $cl['sup'] }} </sup> {{ $cl['idc'] }}
+                                </span>
+                            </a>
+                        @else
+                            <span>Classe inconnue</span>
+                        @endif
+                    </div>
+
+
                     <div class="tab-pane les-notes-de-eleve @if(session()->has('pupil_profil_section_selected') && session('pupil_profil_section_selected') == 'marks') active @elseif(!session()->has('pupil_profil_section_selected')) active @endif" id="tab_1">
                         @livewire('pupil-marks-listing', ['pupil_id' => $pupil->id])
                     </div>
@@ -267,6 +291,4 @@
         </div>
         <!-- /.col -->
       </div>
-    }
-
 </div>

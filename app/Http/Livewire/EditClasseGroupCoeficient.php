@@ -39,10 +39,15 @@ class EditClasseGroupCoeficient extends Component
     public function submit()
     {
         $this->validate();
+
         if ($this->subject_id) {
+
             if ($this->coeficient) {
+
                 $updated = $this->coeficient->update(['subject_id' => $this->subject_id, 'coef' => $this->value]);
+
                 if($updated){
+
                     $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour réussie', 'message' => "La table des coéfiscients a été mise à jour avec succès!", 'type' => 'success']);
                     $this->dispatchBrowserEvent('hide-form');
                     $this->reset('value', 'subject_id');
@@ -53,7 +58,9 @@ class EditClasseGroupCoeficient extends Component
                 }
             }
             else{
+
                 $school_year_model = $this->getSchoolYear();
+
                 $coeficient = Coeficient::create([
                     'classe_group_id' => $this->classe_group->id,
                     'subject_id' => $this->subject_id,
@@ -63,6 +70,7 @@ class EditClasseGroupCoeficient extends Component
                 ]);
 
                 if ($coeficient) {
+
                     $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour réussie', 'message' => "La table des coéfiscients a été mise à jour avec succès!", 'type' => 'success']);
                     $this->dispatchBrowserEvent('hide-form');
                     $this->emit('classeGroupUpdated');
@@ -84,9 +92,12 @@ class EditClasseGroupCoeficient extends Component
     public function deleteCoef()
     {
         if($this->coeficient){
+
             $del = $this->coeficient->delete();
+
             if($del){
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Opération réussie', 'message' => "La mise à jour a été effective!", 'type' => 'success']);
+
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Opération réussie: Coeficient Supprimé!', 'message' => "La mise à jour a été effective!", 'type' => 'success']);
                 $this->dispatchBrowserEvent('hide-form');
                 $this->emit('classeGroupUpdated');
                 $this->reset('value', 'subject_id', 'coeficient');

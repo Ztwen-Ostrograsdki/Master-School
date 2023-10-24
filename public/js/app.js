@@ -8721,7 +8721,6 @@ e["private"]('user.' + window.ClientUser.id).listen('ParentRequestAcceptedEvent'
     showConfirmButton: true
   });
 }).listen('DataMigratedToTheNewSchoolYearEvent', function (e) {
-  console.log(e);
   Livewire.emit('DataMigratedToTheNewSchoolYearLiveEvent');
 }).listen('TeachersDataUploadingEvent', function (e) {
   Livewire.emit('InitiateTeachersDataUploadingLiveEvent');
@@ -8731,6 +8730,8 @@ e["private"]('user.' + window.ClientUser.id).listen('ParentRequestAcceptedEvent'
   Livewire.emit('ClassePupilsListUpdatingLiveEvent');
 }).listen('ClassePupilsListUpdatedEvent', function (e) {
   Livewire.emit('ClassePupilsListUpdatedLiveEvent');
+}).listen('ClassePresenceLateWasCompletedEvent', function (e) {
+  Livewire.emit('PresenceLateWasUpdated');
 });
 e["private"]('master').listen('NewAddParentRequestEvent', function (e) {
   Livewire.emit('NewParentRequest');

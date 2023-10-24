@@ -81,7 +81,7 @@ class MarkObserver
 
             $user = $mark->user;
 
-            // FlushAveragesIntoDataBaseEvent::dispatch($user, $classe, $semestre, $school_year_model);
+            FlushAveragesIntoDataBaseEvent::dispatch($user, $classe, $semestre, $school_year_model);
 
         }
 

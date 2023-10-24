@@ -27,6 +27,10 @@ class ClasseMarksInsertionCreatedEvent implements ShouldBroadcast
 
     public $semestre = 1;
 
+    public $related = false;
+
+    public $related_data = [];
+
 
 
 
@@ -35,7 +39,7 @@ class ClasseMarksInsertionCreatedEvent implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct($data)
+    public function __construct($data, $related = false, $related_data = [])
     {
         $this->data = $data;
 
@@ -49,6 +53,9 @@ class ClasseMarksInsertionCreatedEvent implements ShouldBroadcast
 
         $this->semestre = $data['semestre'];
 
+        $this->related = $related;
+
+        $this->related_data = $related_data;
 
     }
 

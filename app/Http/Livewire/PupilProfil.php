@@ -19,6 +19,8 @@ class PupilProfil extends Component
         'classePupilListUpdated' => 'reloadPupilData',
         'pupilUpdated' => 'reloadPupilData',
         'updatedImages' => 'reloadPupilData',
+        'NewClasseMarksInsert' => 'reloadPupilData',
+        'PresenceLateWasUpdated' => 'reloadPupilData',
     ];
 
     public $slug;

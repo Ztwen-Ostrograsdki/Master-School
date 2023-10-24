@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Livewire;
+use App\Events\AbsencesAndLatesDeleterEvent;
 use App\Events\FreshAveragesIntoDBEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
@@ -29,6 +30,7 @@ class ClasseProfil extends Component
         'newLevelCreated' => 'reloadClasseData',
         'timePlanTablesWasUpdatedLiveEvent' => 'reloadClasseData',
         'NewClasseMarksInsert' => 'reloadClasseData',
+        'PresenceLateWasUpdated' => 'reloadClasseData',
     ];
 
     public $slug;
@@ -53,6 +55,8 @@ class ClasseProfil extends Component
         'classe_general_stats' => 'Tableau des stats', 
         'averages' => 'Les moyennes'
     ];
+
+    protected $rules = ['classeName' => 'required|string'];
 
     public function mount($slug = null)
     {
@@ -243,20 +247,44 @@ class ClasseProfil extends Component
     public function updateClasseName()
     {
         $classeNameHasBeenTaken = Classe::where('name', $this->classeName)->first();
+
         $classe = Classe::where('id', $this->classe_id)->first();
+
         if(!$classeNameHasBeenTaken && $classe){
+
+            $this->validate();
+
             $c = $classe->update(
                 [
                     'name' => $this->classeName,
                     'slug' => str_replace(' ', '-', $this->classeName),
                 ]
             );
+
             if($c){
-                $this->reset('editingClasseName');
+
                 $this->resetErrorBag();
+
+                $this->reset('editingClasseName');
+
                 $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "la classe  $classe->name a été mise à jour avec succès!", 'type' => 'success']);
+
+                $this->reloadClasseData();
+                
                 return redirect()->route('classe_profil', [urlencode($classe->slug)]);
             }
+        }
+        elseif($this->classeName == $classe->name){
+
+            $this->resetErrorBag();
+
+            $this->reset('editingClasseName');
+
+        }
+        else{
+
+            $this->addError('classeName', "Une erreure est survenue!");
+
         }
     }    
 
@@ -348,7 +376,7 @@ class ClasseProfil extends Component
     }
 
 
-    public function resetAbsences($classe_id = null)
+    public function resetAbsences($classe_id = null, $pupil_id = null)
     {
         if ($classe_id) {
 
@@ -359,6 +387,8 @@ class ClasseProfil extends Component
             $classe = Classe::whereSlug($this->slug)->first();
         }
         if ($classe) {
+
+            $user = auth()->user();
 
             $school_year_model = $this->getSchoolYear();
 
@@ -371,19 +401,18 @@ class ClasseProfil extends Component
 
             $subject_id = session('classe_subject_selected');
 
-            $classe->deleteClasseAbsences($semestre, $school_year_model->id, $subject_id);
+            AbsencesAndLatesDeleterEvent::dispatch($user, $classe, $semestre, $school_year_model, $subject_id, $pupil_id, 'absences');
+
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'PROCESSUS LANCE', 'message' => "Le processus a été lancé avec succès en arrière plan!", 'type' => 'success']);
+
+
         }
-        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "la classe  $classe->name a été mise à jour avec succès! Les absences ont été rafraîchies!", 'type' => 'success']);
-
-        $this->emit('classeUpdated');
-
-        $this->makePresence = true;
-
+        
     }
 
 
 
-    public function resetLates($classe_id = null)
+    public function resetLates($classe_id = null, $pupil_id = null)
     {
         $school_year_model = $this->getSchoolYear();
 
@@ -408,12 +437,11 @@ class ClasseProfil extends Component
 
             $subject_id = session('classe_subject_selected');
 
-            $classe->deleteClasseLates($semestre, $school_year_model->id, $subject_id);
+            AbsencesAndLatesDeleterEvent::dispatch($user, $classe, $semestre, $school_year_model, $subject_id, $pupil_id, 'lates');
+
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'PROCESSUS LANCE', 'message' => "Le processus a été lancé avec succès en arrière plan!", 'type' => 'success']);
+
         }
-
-        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "la classe  $classe->name a été mise à jour avec succès! Les retards ont été rafraîchies!", 'type' => 'success']);
-
-        $this->counter = 1;
 
     }
 
@@ -491,6 +519,18 @@ class ClasseProfil extends Component
         }
         
     }
+
+    public function throwPresence($classe_id)
+    {
+        $teacher = auth()->user()->teacher;
+
+        if($teacher){
+
+            $this->emit('makeClassePresence', $classe_id);
+
+        }
+    }
+
 
 
     public function deleteClasseTimePlans($classe_id = null)
