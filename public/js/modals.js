@@ -99,6 +99,13 @@ window.addEventListener('modal-marksSettings', function(e) {
     $('#marksSettingsModal').modal('show');
 });
 
+window.addEventListener('modal-marksNullActionsConfirmation', function(e) {
+    $('#marksNullActionsConfirmation').modal('show');
+});
+window.addEventListener('modal-resetAbsencesAndLatesConfirmation', function(e) {
+    $('#resetAbsencesAndLatesConfirmation').modal('show');
+});
+
 window.addEventListener('modal-eventPeriodManager', function(e) {
     $('#eventPeriodManagerModal').modal('show');
 });

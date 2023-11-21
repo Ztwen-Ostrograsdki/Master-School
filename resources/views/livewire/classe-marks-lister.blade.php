@@ -15,6 +15,7 @@
                 @else
                     <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de {{$subject_selected->name}}, toutes les notes seront prises en comptes!
                 @endif
+
             </small>
             @if($classe && $pupils && $marks)
                 <span class="text-dark float-right btn btn-secondary border mx-1">
@@ -33,6 +34,23 @@
                 </span>
             @endif
             @if($classe && $classe->classeWasNotClosedForTeacher(auth()->user()->teacher->id) && $classe->classeWasNotLockedForTeacher(auth()->user()->teacher->id))
+                @if($classe && $subject_selected)
+                    <span class="text-warning float-right btn btn-secondary border">
+                        @if($classe->hasSubjectsSanctions(session('semestre_selected'), $subject_selected->id, $school_year_model->id , true))
+                            <span wire:click="desactivated({{$classe->id}})" title="Ne pas prendre en compte les sanctions" class="d-inline-block w-100 cursor-pointer z-scale">
+                                <small>Pas tenir</small>
+                                <span class="bi-exclamation-triangle text-warning"></span>
+
+                            </span>
+                        @else
+                            <span wire:click="activated({{$classe->id}})" title="Prendre en compte les sanctions" class="d-inline-block w-100 cursor-pointer z-scale">
+                                <small>Tenir compte</small>
+                                <span class="bi-exclamation-triangle text-success"></span>
+                            </span>
+                        @endif
+                    </span>
+                @endif
+
                 @if($hasModalities)
                     <span class="text-warning float-right btn btn-secondary border">
                         @if($modalitiesActivated)
@@ -87,7 +105,7 @@
         @if($pupils && $classe_subject_selected && count($pupils) > 0)
         <div>
             <hr class="w-100 text-white p-0 m-0 my-1">
-            <blockquote class="text-primary">
+            <blockquote class="text-primary w-100 m-0">
                 <h5 class="m-0 p-0 text-white-50 h6 w-100 d-flex justify-content-between flex-column">
                     <span class="d-flex justify-content-between">
                         <span>Les détails sur les notes</span>
@@ -125,6 +143,12 @@
                     </span>
                 </h5>
             </blockquote>
+            <h6 class="m-0 mx-auto text-right p-1 text-danger bg-orange">
+                @if($classe && session()->has('classe_subject_selected') && session('classe_subject_selected') && $classe->hasNullsMarks(session('semestre_selected'), null, session('classe_subject_selected')))
+                    <span class="bi-exclamation-triangle"></span>
+                    <small class="text-danger mr-1"></small>Plusieurs apprenants de cette classe ont eu la note <b class="text-warning">00 / 20 </b>!
+                @endif
+            </h6>
         </div>
         <div class="w-100 m-0 p-0 mt-3">
             <table class="w-100 m-0 p-0 table-striped table-bordered z-table hoverable text-white text-center">
@@ -199,7 +223,7 @@
                                 {{-- LES EPE --}}
                                 @if($marks[$p->id]['epe'])
                                     @foreach ($marks[$p->id]['epe'] as $m => $epe)
-                                        <td title="interrogation No {{$epe->mark_index}}" wire:click="setTargetedMark({{$epe->id}})" class="text-center cursor-pointer">
+                                        <td title="interrogation No {{$epe->mark_index}}" wire:click="setTargetedMark({{$epe->id}})" class="text-center cursor-pointer @if($epe->value == 0) text-warning @endif ">
                                             <span class="w-100 cursor-pointer @if($epe->forget) text-dark @endif  @if($epe->forced_mark) text-white-50 @endif" @if($epe->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($epe->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
                                         </td>
                                     @endforeach
@@ -221,7 +245,7 @@
                                 {{-- LES PARTICIPATIONS --}}
                                 @if($marks[$p->id]['participation'])
                                     @foreach ($marks[$p->id]['participation'] as $l => $part)
-                                        <td wire:click="setTargetedMark({{$part->id}})" class="text-center cursor-pointer">
+                                        <td wire:click="setTargetedMark({{$part->id}})" class="text-center cursor-pointer @if($part->value == 0) text-warning @endif ">
                                             <span class="w-100 cursor-pointer @if($part->forget) text-black-50  @endif  @if($part->forced_mark) text-white-50 @endif" @if($part->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($part->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $part->value >= 10 ? $part->value : '0'.$part->value}} </span>
                                         </td>
                                     @endforeach
@@ -244,7 +268,7 @@
                                 @if ($marks[$p->id]['dev'])
                                     @foreach ($marks[$p->id]['dev'] as $q => $dev)
                                         <td title="Devoir No {{$dev->mark_index}}" wire:click="setTargetedMark({{$dev->id}}, 'devoir')" class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer @if($dev && $dev->value && $dev->value < 10) text-danger  @else text-primary @endif b"> {{ $dev->value >= 10 ? $dev->value : '0'.$dev->value }} </span>
+                                            <span class="w-100 cursor-pointer @if($dev && $dev->value && $dev->value < 10) text-danger  @else text-primary @endif "> {{ $dev->value >= 10 ? $dev->value : '0'.$dev->value }} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['dev'] && count($marks[$p->id]['dev']) < $devMaxLenght)

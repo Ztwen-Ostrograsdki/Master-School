@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Models\Parentable;
+use App\Models\Pupil;
 use Livewire\Component;
 
 class ParentFollowNewPupil extends Component
@@ -11,6 +12,8 @@ class ParentFollowNewPupil extends Component
 
 
     public $parentable;
+
+    public $target;
 
     public $auth_key;
 
@@ -21,6 +24,8 @@ class ParentFollowNewPupil extends Component
     public $title = "Demande de suivi d'un apprenant";
 
     public $identify;
+
+    public $to_confirm = false;
 
 
     protected $rules = [
@@ -54,6 +59,23 @@ class ParentFollowNewPupil extends Component
     public function submit()
     {
 
+        $this->validate();
+
+        
+
+
+    }
+
+
+    public function confirm()
+    {
+
+
+    }
+
+
+    public function to_cancel()
+    {
 
     }
 }

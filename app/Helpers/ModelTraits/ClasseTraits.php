@@ -269,31 +269,43 @@ trait ClasseTraits{
         $modality = $this->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->where('subject_id', $subject_id)->first();
 
         foreach ($marksEPEs as $pupil_id => $epeMarks) {
+
             $epeSom = 0;
+
             $partSom = 0;
+
             $forcedSom = 0;
+
             $total = 0;
 
             $pupilMaxMarksCount = count($epeMarks);
+
             $max = $pupilMaxMarksCount;
 
 
 
             if($modality && $modality->activated && $modality->modality < $pupilMaxMarksCount){
+
                 $max = $modality->modality;
 
                 $epeBestMarksAll = [];
+
                 $epeBestMarks = [];
 
 
                 foreach ($epeMarks as $epe_b) {
+
                     $epeBestMarksAll[$epe_b->id] = $epe_b->value;
                 }
 
                 while (count($epeBestMarks) < $max) {
+                    
                     $m = max($epeBestMarksAll);
+                    
                     $key = array_search($m, $epeBestMarksAll);
+                    
                     $epeBestMarks[$key] = $m;
+                    
                     unset($epeBestMarksAll[$key]);
                 }
 
@@ -311,15 +323,18 @@ trait ClasseTraits{
 
 
             $partsMarks = $allMarks[$pupil_id]['participation'];
+
             $forced_marks = $allMarks[$pupil_id]['forced_marks'];
 
             $max  = $max + count($partsMarks) + count($forced_marks);
 
             foreach ($partsMarks as $part) {
+
                 $partSom = $partSom + $part->value;
             }
 
             foreach ($forced_marks as $forced_m) {
+
                 $forcedSom = $forcedSom + $forced_m->value;
             }
 
@@ -329,9 +344,36 @@ trait ClasseTraits{
 
             if($type == 'epe'){
 
-                $bonus_counter =  array_sum($school_year_model->related_marks()->where('pupil_id', $pupil_id)->where('classe_id', $this->id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', 'bonus')->pluck('value')->toArray());
+                $takeSanction = $this->subject_sanctions($semestre, $subject_id, $school_year_model->id, true);
+
+                $minus_counter = 0;
+
+                if($takeSanction){
+
+                    $minus_counter =  array_sum(
+                        $school_year_model->related_marks()
+                                          ->where('pupil_id', $pupil_id)
+                                          ->where('classe_id', $this->id)
+                                          ->where('subject_id', $subject_id)
+                                          ->where('semestre', $semestre)
+                                          ->where('type', 'minus')
+                                          ->pluck('value')
+                                          ->toArray()
+                    );
+
+                }
+
+                $bonus_counter =  array_sum(
+                    $school_year_model->related_marks()
+                                      ->where('pupil_id', $pupil_id)
+                                      ->where('classe_id', $this->id)
+                                      ->where('subject_id', $subject_id)
+                                      ->where('semestre', $semestre)
+                                      ->where('type', 'bonus')
+                                      ->pluck('value')
+                                      ->toArray()
+                    );
                 
-                $minus_counter =  array_sum($school_year_model->related_marks()->where('pupil_id', $pupil_id)->where('classe_id', $this->id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', 'minus')->pluck('value')->toArray());
 
             }
 
@@ -381,25 +423,33 @@ trait ClasseTraits{
         foreach ($devsMarks as $pupil_id => $devs) {
 
             $epeAperage = null;
+
             $max = count($devs);
+
             if(count($epeAperages) > 0){
+
                 $epeAperage = $epeAperages[$pupil_id];
             }
 
             $pupilDevsMarks = [];
 
             if(count($devs) > 0){
+
                 foreach ($devs as $dev) {
+
                     $pupilDevsMarks[$dev->id] = $dev->value;
                 }
             }
 
             if($epeAperage !== null){
+
                 $max = $max + 1;
+
                 $total = $epeAperage;
             }
 
             if($max == 0){
+                
                 $averageTab[$pupil_id] = null;
             }
             else{
@@ -443,9 +493,6 @@ trait ClasseTraits{
         $semestrialAverages = [];
 
         $pupils = $this->getClasseCurrentPupils($school_year);
-
-
-        
 
         if(count($pupils) > 0){
 
@@ -522,7 +569,6 @@ trait ClasseTraits{
                 }
 
             }
-
 
         }
 
@@ -2031,6 +2077,48 @@ trait ClasseTraits{
         return $has ? true : false;
 
     }
+
+
+
+    public function getClasseNullMarks($semestre, $school_year = null, $subject_id = null, $pupil_id = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        if($pupil_id){
+
+            $marks = $this->marks()->where('marks.school_year_id', $school_year_model->id)
+                               ->where('marks.subject_id', $subject_id)
+                               ->where('marks.pupil_id', $pupil_id)
+                               ->where('marks.semestre', $semestre)
+                               ->where('marks.value', 0)
+                               ->get();
+
+        }
+        else{
+            $marks = $this->marks()->where('marks.school_year_id', $school_year_model->id)
+                               ->where('marks.subject_id', $subject_id)
+                               ->where('marks.semestre', $semestre)
+                               ->where('marks.value', 0)
+                               ->get();
+
+        }
+
+        return $marks;
+
+    }
+
+    /**
+     * Assert if a classe or pupil of a classe has nulls marks for a specific subject with subject_id
+     */
+    public function hasNullsMarks($semestre, $school_year = null, $subject_id, $pupil_id = null)
+    {
+
+        $marks = $this->getClasseNullMarks($semestre, $school_year, $subject_id, $pupil_id);
+
+        return count($marks) > 0;
+
+    }
+
 
 
 }

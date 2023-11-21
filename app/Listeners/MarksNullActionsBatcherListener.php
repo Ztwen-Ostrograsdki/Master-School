@@ -2,19 +2,34 @@
 
 namespace App\Listeners;
 
-use App\Events\ClasseMarksDeletionCreatedEvent;
+use App\Events\ClasseMarksWasFailedEvent;
 use App\Events\ClasseMarksWasUpdatedIntoDBSuccessfullyEvent;
 use App\Events\InitiateClasseDataUpdatingEvent;
-use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
-use App\Jobs\JobClasseMarksDeleter;
+use App\Events\MarksNullActionsEvent;
 use App\Jobs\JobFlushAveragesIntoDataBase;
+use App\Jobs\JobMarksNullActionsManager;
 use Illuminate\Bus\Batch;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Bus;
 
-class ClasseMarksDeletionBatcherListener
+class MarksNullActionsBatcherListener
 {
+
+    public $pupil;
+
+    public $classe;
+
+    public $subject;
+
+    public $user;
+
+    public $school_year_model;
+
+    public $semestre = 1;
+
+    public $action;
+
 
     /**
      * Handle the event.
@@ -22,13 +37,13 @@ class ClasseMarksDeletionBatcherListener
      * @param  object  $event
      * @return void
      */
-    public function handle(ClasseMarksDeletionCreatedEvent $event)
+    public function handle(MarksNullActionsEvent $event)
     {
         InitiateClasseDataUpdatingEvent::dispatch($event->user, $event->classe);
         
         $batch = Bus::batch([
 
-            new JobClasseMarksDeleter($event->classe, $event->school_year_model, $event->data),
+            new JobMarksNullActionsManager($event->action, $event->classe, $event->semestre, $event->subject, $event->school_year_model, $event->pupil, $event->user),
 
             new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, $event->semestre),
 

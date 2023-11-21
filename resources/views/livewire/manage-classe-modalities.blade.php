@@ -5,7 +5,7 @@
             <div class="mt-0 mb-2 col-11 mx-auto">
                <div class="d-flex row">
                     <div class="col-12 d-flex justify-content-between row m-0 p-0">
-                        <div x-show="$wire.modality" class="col-10 mx-auto justify-content-center m-0 p-0 my-1">
+                        <div x-show="$wire.modality" class="col-12 mx-auto justify-content-center m-0 p-0 my-1">
                             <span wire:click="deleteThisModality" title="Supprimer définitivement cette note" class="cursor-pointer btn btn-danger w-100 border py-2 text-center">
                                 <span class="bi-trash mx-2"></span>
                                 <span >Juste supprimer cette modalité</span>
@@ -13,7 +13,7 @@
                         </div>
                         <div class="col-6 m-0 p-0">
                             <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">L'année scolaire </label>
-                            <select class="px-2 form-select text-white z-bg-secondary w-100 @error('school_year') text-danger border border-danger @enderror" wire:model.defer="school_year" name="school_year">
+                            <select disabled class="px-2 form-select custom-select text-white z-bg-secondary w-100 @error('school_year') text-danger border border-danger @enderror" wire:model.defer="school_year" name="school_year">
                                 <option disabled class="" value="{{null}}">Choisissez une année</option>
                                 @foreach ($school_years as $school_year)
                                     <option  value="{{$school_year->id}}">{{$school_year->school_year}}</option>
@@ -25,7 +25,7 @@
                         </div>
                         <div class="col-5 m-0 p-0">
                             <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Choisissez le semestre </label>
-                            <select class="px-2 form-select text-white z-bg-secondary w-100 @error('semestre_id') text-danger border border-danger @enderror" wire:model.defer="semestre_id" name="semestre_id">
+                            <select disabled class="px-2 custom-select form-select text-white z-bg-secondary w-100 @error('semestre_id') text-danger border border-danger @enderror" wire:model.defer="semestre_id" name="semestre_id">
                                 <option disabled value="{{null}}">Veuillez sélectionner le {{$semestre_type}}</option>
                                   @foreach ($semestres as $semestre)
                                       <option value="{{$semestre}}">{{$semestre_type . ' ' . $semestre}}</option>
@@ -41,7 +41,7 @@
                             </div>
                             <div class="col-4">
                                 <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer" for="">La classe </label>
-                                <select class="px-2 form-select text-white z-bg-secondary w-100 @error('classe_id') text-danger border border-danger @enderror" wire:model.defer="classe_id" name="classe_id">
+                                <select disabled class="px-2 custom-select form-select text-white z-bg-secondary w-100 @error('classe_id') text-danger border border-danger @enderror" wire:model.defer="classe_id" name="classe_id">
                                     <option disabled class="" value="{{null}}">Choisissez la classe</option>
                                     @foreach ($classes as $classe)
                                         <option  value="{{$classe->id}}">{{$classe->name}}</option>

@@ -52,8 +52,9 @@ class ConfirmClasseMarksDeletion extends Component
 
         $school_year_model = $this->getSchoolYear($this->school_year);
 
+        $user = auth()->user();
 
-        ClasseMarksDeletionCreatedEvent::dispatch($this->classe, $school_year_model, $this->semestre, $this->subject, $this->type, $this->start, $this->end, $this->pupil_id);
+        ClasseMarksDeletionCreatedEvent::dispatch($user, $this->classe, $school_year_model, $this->semestre, $this->subject, $this->type, $this->start, $this->end, $this->pupil_id);
     }
 
 

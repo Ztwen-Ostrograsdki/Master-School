@@ -8,6 +8,7 @@ use App\Models\AverageModality;
 use App\Models\Averages;
 use App\Models\ClasseGroup;
 use App\Models\ClassePupilSchoolYear;
+use App\Models\ClasseSanctionables;
 use App\Models\ClassesSecurity;
 use App\Models\Coeficient;
 use App\Models\Image;
@@ -48,6 +49,33 @@ class Classe extends Model
         'locked',
         'teacher_id'
     ];
+
+    public function sanctions()
+    {
+        return $this->hasMany(ClasseSanctionables::class);
+    }
+
+    public function subject_sanctions($semestre, $subject_id, $school_year_id = null, $activated = true)
+    {
+        if($school_year_id == null){
+
+            $school_year_id = $this->getSchoolYear()->id;
+
+        }
+
+        return $this->sanctions()
+                    ->where('classe_sanctionables.school_year_id', $school_year_id)
+                    ->where('classe_sanctionables.semestre', $semestre)
+                    ->where('classe_sanctionables.subject_id', $subject_id)
+                    ->where('classe_sanctionables.activated', $activated)
+                    ->first();
+
+    }
+
+    public function hasSubjectsSanctions($semestre, $subject_id, $school_year_id, $activated = true)
+    {
+        return $this->subject_sanctions($semestre, $subject_id, $school_year_id, $activated) !== null;
+    }
 
     public function averages()
     {

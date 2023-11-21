@@ -12,12 +12,14 @@ use App\Events\ImportRegistredTeachersToTheCurrentYearEvent;
 use App\Events\InitiateSettingsOnMarksEvent;
 use App\Events\LocalTransfertCreatedEvent;
 use App\Events\MakeClassePresenceLateEvent;
+use App\Events\MarksNullActionsEvent;
 use App\Events\MarksRestorationEvent;
 use App\Events\MigrateDataToTheNewSchoolYearEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\PaymentSystemEvent;
 use App\Events\StartNewsPupilsInsertionEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
+use App\Events\UpdateClasseSanctionsEvent;
 use App\Listeners\AbsencesAndLatesDeleterBatcherListener;
 use App\Listeners\ClasseMarksDeletionBatcherListener;
 use App\Listeners\ClasseMarksInsertionBatchListener;
@@ -29,11 +31,13 @@ use App\Listeners\FreshAveragesIntoDBBatcherListener;
 use App\Listeners\ImportRegistredTeachersToTheCurrentYearBatcherListener;
 use App\Listeners\InitiateSettingsOnMarksBatcherListener;
 use App\Listeners\MakeClassePresenceLateBatcherListener;
+use App\Listeners\MarksNullActionsBatcherListener;
 use App\Listeners\MarksRestorationBatcherListener;
 use App\Listeners\NewProductCreatedListener;
 use App\Listeners\PaymentSystemListener;
 use App\Listeners\ProcessingNewsPupilsInsertionBatcherListener;
 use App\Listeners\UpdateClasseAveragesIntoDatabaseBatcherListener;
+use App\Listeners\UpdateClasseSanctionsListener;
 use App\Models\Classe;
 use App\Models\ClassesSecurity;
 use App\Models\Mark;
@@ -127,6 +131,16 @@ class EventServiceProvider extends ServiceProvider
         AbsencesAndLatesDeleterEvent::class => [
             AbsencesAndLatesDeleterBatcherListener::class,
         ],
+
+        UpdateClasseSanctionsEvent::class => [
+            UpdateClasseSanctionsListener::class,
+        ],
+
+        MarksNullActionsEvent::class => [
+            MarksNullActionsBatcherListener::class,
+        ],
+
+    
     ];
 
     /**

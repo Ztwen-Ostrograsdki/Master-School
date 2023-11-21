@@ -195,6 +195,11 @@ class User extends Authenticatable
         return $this->isAdmin() && ($this->administrator && $this->administrator->authorized && $this->administrator->canManage);
     }
 
+    public function authorizedAsSecretary()
+    {
+        
+    }
+
 
 
 

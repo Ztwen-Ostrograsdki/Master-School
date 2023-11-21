@@ -114,7 +114,7 @@ class InsertClassePupilsMarksTogether extends Component
 
                 if($this->pupils){
 
-                    if($not_secure){
+                    if($not_secure || ($user->isAdminAs('master'))){
 
                         if(auth()->user()->teacher){
 
@@ -128,6 +128,16 @@ class InsertClassePupilsMarksTogether extends Component
 
                             $this->semestre_id = session('semestre_selected');
 
+                        }
+                        elseif($user->isAdminAs('master')){
+
+                            $subject = $this->subjects->first();
+
+                            $this->subject = $subject;
+
+                            $this->subject_id = $subject->id;
+
+                            $this->semestre_id = session('semestre_selected');
 
                         }
 
@@ -203,6 +213,10 @@ class InsertClassePupilsMarksTogether extends Component
 
                     $this->reset('classe_id', 'semestre_id', 'subject_id', 'subject', 'marks', 'school_year', 'classe', 'targeted_pupil');
                    
+                }
+                else{
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'ACCES REFUSE', 'message' => "Vous ne pouvez effectuer une telle requête!", 'type' => 'error']);
+
                 }
 
             }

@@ -2,8 +2,10 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\FreshAveragesIntoDBEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\AverageModality;
+use App\Models\Classe;
 use App\Models\School;
 use App\Models\SchoolYear;
 use App\Models\Subject;
@@ -115,23 +117,33 @@ class ManageClasseModalities extends Component
         $this->validate();
 
         if($this->modality){
+
             $updated = $this->modality->update([
                 'modality' => $this->value
             ]);
+
             if($updated){
+
                 $this->dispatchBrowserEvent('hide-form');
+
                 $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "La mise à jour s'est déroulée avec succès!", 'type' => 'success']);
+
                 $this->emit('classeUpdated');
+
                 $this->reset('classe_id', 'subject_id', 'modality', 'value', 'school_year', 'semestre_id');
-            }else{
+            }
+            else{
+
                 return $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour interrompue', 'message' => "Une erreure inconnue s'est produite!", 'type' => 'error']);
             }                       
 
         }
         else{
+
             $school_year = SchoolYear::find($this->school_year);
 
             if($school_year){
+
                 $this->modality = AverageModality::create([
                     'modality' => $this->value,
                     'classe_id' => $this->classe_id,
@@ -141,9 +153,13 @@ class ManageClasseModalities extends Component
 
                 ]);
                 if($this->modality){
+
+                    $this->optimizeSemestrialAverageFromDatabase($this->classe_id);
+
                     $this->dispatchBrowserEvent('hide-form');
+
                     $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "La mise à jour s'est déroulée avec succès!", 'type' => 'success']);
-                    $this->emit('classeUpdated');
+
                     $this->reset('classe_id', 'subject_id', 'modality', 'value', 'school_year', 'semestre_id');
                 }
                 else{
@@ -159,15 +175,54 @@ class ManageClasseModalities extends Component
     }
 
 
+    public function optimizeSemestrialAverageFromDatabase($classe_id, $semestre = 1)
+    {
+        $semestre = session('semestre_selected');
+
+        if($semestre){
+
+            $classe = $this->classe;
+
+            $user = auth()->user();
+
+            if($classe && $user){
+
+                $school_year_model = $this->getSchoolYear();
+
+                FreshAveragesIntoDBEvent::dispatch($user, $classe, $school_year_model, $semestre);
+                
+            }
+
+        }
+        else{
+
+            $semestre_type = strtoupper($this->semestre_type);
+
+            $this->dispatchBrowserEvent('Toast', ['title' => "semestre_type INCONNU", 'message' => "Veuillez sélectionner d'abord le $semestre_type dont vous voudriez charger les données!", 'type' => 'warning']);
+
+
+        }
+
+    }
+
+
     public function deleteThisModality()
     {
         if($this->modality){
+            
             $del = $this->modality->delete();
+            
             if($del){
+
+                $this->optimizeSemestrialAverageFromDatabase($this->classe_id);
+
                 $this->dispatchBrowserEvent('hide-form');
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "La mise à jour s'est déroulée avec succès!", 'type' => 'success']);
-                    $this->emit('classeUpdated');
-                    $this->reset('classe_id', 'subject_id', 'modality', 'value', 'school_year', 'semestre_id');
+
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "La mise à jour s'est déroulée avec succès!", 'type' => 'success']);
+
+                $this->emit('classeUpdated');
+
+                $this->reset('classe_id', 'subject_id', 'modality', 'value', 'school_year', 'semestre_id');
             }
             else{
                 return $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour interrompue', 'message' => "Une erreure inconnue s'est produite!", 'type' => 'error']);

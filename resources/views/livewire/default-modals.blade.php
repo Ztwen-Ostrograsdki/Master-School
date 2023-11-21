@@ -8,13 +8,19 @@
         @livewire('add-new-teacher')
         @livewire('insert-time-plan')
         @livewire('classe-marks-deleter-component')
+        @livewire('mark-manager')
+        @livewire('presence-late-modal')
+        @livewire('marks-null-actions-confirmation')
+        @livewire('reset-absences-and-lates-confirmation')
+        @livewire('insert-pupil-marks')
+        @livewire('insert-classe-pupils-marks-together')
+
     @endif
-    @livewire('mark-manager')
+    
     @livewire('parent-follow-new-pupil')
-    @livewire('insert-pupil-marks')
-    @livewire('insert-classe-pupils-marks-together')
+    
     @livewire('profil-image-editor')
-    @livewire('presence-late-modal')
+    
     
     
 </div>

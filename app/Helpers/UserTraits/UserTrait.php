@@ -4,6 +4,7 @@ namespace App\Helpers\UserTraits;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\MyNotifications;
+use App\Models\Parentable;
 use App\Models\Product;
 use App\Models\SeenLikeProductSytem;
 use App\Models\ShoppingBag;
@@ -682,13 +683,29 @@ trait UserTrait{
 
         }
 
-
-
         return $users;
 
+    }
 
 
+    public function parentable_creator($contacts, $job, $name, $residence)
+    {
+        return Parentable::create([
 
+            'user_id' => $this->id,
+            'name' => ucwords($name),
+            'contacts' => str_replace(' ', '/', trim($contacts)),
+            'job' => $job,
+            'residence' => $residence,
+            'key' => $this->parentable_password_generator()
+
+        ]);
+    }
+
+
+    public function parentable_password_generator()
+    {
+        return Hash::make('0000E');
     }
     
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\UpdateClasseSanctionsEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Mark;
@@ -22,6 +23,7 @@ class ClasseMarksLister extends Component
         'classeUpdated' => 'reloadData',
         'semestreWasChanged',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
+        'UpdatedGlobalSearch' => 'reloadClasseDataOnSearch',
         'UpdatedRelaodNowLiveEvent' => 'updatedRelaodNow',
         'NewClasseMarksInsert' => 'reloadData',
         'InitiateClasseDataUpdatingLiveEvent' => 'loadingDataStart',
@@ -112,7 +114,7 @@ class ClasseMarksLister extends Component
 
         $school_year_model = $this->getSchoolYear();
 
-        $classe = $school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+        $classe = $school_year_model->findClasse($this->classe_id);
 
         if($classe){
 
@@ -257,7 +259,7 @@ class ClasseMarksLister extends Component
                     compact(
                         'classe',
                         'current_period',
-                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects'
+                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model'
                     )
                 );
     }
@@ -336,18 +338,26 @@ class ClasseMarksLister extends Component
     {
 
         $school_year_model = $this->getSchoolYear();
-        $classe_id = $this->classe_id;
+
+        $classe = $school_year_model->findClasse($this->classe_id);
+
         $subject_id = session('classe_subject_selected');
+
         $semestre = session('semestre_selected');
 
         $modalities = $classe->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre);
 
         if($modalities->get()->count() > 0){
+
             $updated = $modalities->each(function($modality) use ($activated){
+
                 $modality->update(['activated' => $activated]);
             });
+
             if($updated){
+
                 $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour', 'message' => "C'est fait!", 'type' => 'success']);
+
                 $this->emit('classeUpdated');
             }
         }
@@ -357,9 +367,13 @@ class ClasseMarksLister extends Component
     public function insertMarks($pupil_id, $type = 'epe')
     {
         $subject_id = session('classe_subject_selected');
+
         if($subject_id){
+
             $semestre = session('semestre_selected');
+
             $school_year_model = $this->getSchoolYear();
+
             $this->emit('addNewsMarksLiveEvent', $pupil_id, $this->classe_id, $subject_id, $semestre, $school_year_model->id, $type);
         }
         else{
@@ -460,5 +474,38 @@ class ClasseMarksLister extends Component
 
         }
         
+    }
+
+
+    public function activated($classe_id)
+    {
+
+        $user = auth()->user();
+
+        $school_year_model = $this->getSchoolYear();
+
+        $subject = $this->subject_selected;
+
+        $semestre = session('semestre_selected');
+
+        $classe = $school_year_model->findClasse($classe_id);
+
+        UpdateClasseSanctionsEvent::dispatch($classe, $user, $school_year_model, $semestre, $subject, true);
+    }
+
+
+    public function desactivated($classe_id)
+    {
+        $user = auth()->user();
+
+        $school_year_model = $this->getSchoolYear();
+
+        $subject = $this->subject_selected;
+
+        $semestre = session('semestre_selected');
+
+        $classe = $school_year_model->findClasse($classe_id);
+
+        UpdateClasseSanctionsEvent::dispatch($classe, $user, $school_year_model, $semestre, $subject, false);
     }
 }

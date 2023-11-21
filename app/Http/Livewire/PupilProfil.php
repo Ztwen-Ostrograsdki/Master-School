@@ -30,7 +30,7 @@ class PupilProfil extends Component
     public $pupilName;
     public $counter = 0;
     public $editingPupilName = false;
-    public $semestre_type = 'semestre';
+    public $semestre_type = 'Semestre';
     public $school_year;
     public $classe_subject_selected;
     public $semestre_selected = 1;
@@ -42,12 +42,17 @@ class PupilProfil extends Component
     public function mount(int $id)
     {
         $pupil_id = $id;
+
         if ($pupil_id) {
+
             $pupil = Pupil::find($pupil_id);
+
             if($pupil){
+
                 $this->pupil_id = $pupil_id;
             }
             else{
+
                 return abort(404);
             }
         }
@@ -61,11 +66,19 @@ class PupilProfil extends Component
     public function render()
     {
         $school = School::find(1);
+
         $semestres = [1, 2];
+
         $classes = [];
+
+        $current_classe = null;
+
         if($school){
+
             if($school->trimestre){
-                $this->semestre_type = 'trimestre';
+
+                $this->semestre_type = 'Trimestre';
+
                 $semestres = [1, 2, 3];
             }
             else{
@@ -73,17 +86,24 @@ class PupilProfil extends Component
             }
         }
         $school_year_model = $this->getSchoolYear();
+
         $school_year = session('school_year_selected');
 
         if(session()->has('semestre_selected') && session('semestre_selected')){
+
             $semestre = intval(session('semestre_selected'));
+
             session()->put('semestre_selected', $semestre);
+
             $this->semestre_selected = $semestre;
         }
         else{
+
             $this->semestre_selected = 1;
+
             session()->put('semestre_selected', $this->semestre_selected);
         }
+
         $pupil_id = $this->pupil_id;
 
         if($pupil_id){
@@ -102,6 +122,8 @@ class PupilProfil extends Component
 
                 $classes = Classe::where('classes.level_id', $pupil->level_id)->get();
 
+                $current_classe = $pupil->getCurrentClasse();
+
                 if($joined){
 
                     $this->joinedToThisYear = true;
@@ -117,7 +139,7 @@ class PupilProfil extends Component
                 $pupil = null;
             }
         }
-        return view('livewire.pupil-profil', compact('semestres', 'pupil', 'classes', 'marks_counter', 'succeeds_marks_counter', 'best'));
+        return view('livewire.pupil-profil', compact('semestres', 'pupil', 'classes', 'marks_counter', 'succeeds_marks_counter', 'best', 'current_classe'));
     }
 
     
@@ -125,7 +147,9 @@ class PupilProfil extends Component
     public function editPupilName($pupil_id = null)
     {
         $classe = Pupil::find($this->pupil_id);
+
         $this->pupilName = $classe->firstName;
+
         $this->editingPupilName = true;
     }
 
@@ -137,12 +161,16 @@ class PupilProfil extends Component
     public function updatePupilName()
     {
         $classeNameHasBeenTaken = Pupil::where('firstName', $this->pupilName)->first();
+
         $classe = Pupil::find($this->pupil_id);
+
         if(!$classeNameHasBeenTaken && $classe){
             
             if(true){
                 $this->reset('editingPupilName');
+
                 $this->resetErrorBag();
+
                 $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour terminée', 'message' => "....a été mise à jour avec succès!", 'type' => 'success']);
             }
         }
@@ -191,6 +219,7 @@ class PupilProfil extends Component
     public function resetLates($allyears = false)
     {
         $pupil = Pupil::find($this->pupil_id);
+
         if ($pupil) {
 
             $school_year_model = $this->getSchoolYear();
@@ -228,14 +257,22 @@ class PupilProfil extends Component
     public function joinPupilToSchoolYear()
     {
         if($this->classe_id){
+
             $classe = Classe::find($this->classe_id);
+
             if($classe){
+
                 $school_year_model = $this->getSchoolYear();
+
                 $pupil = Pupil::find($this->pupil_id);
+
                 $year_yet = $school_year_model->pupils()->where('pupils.id', $this->pupil_id)->first();
                 $classe_yet = $classe->pupils()->where('pupils.id', $this->pupil_id)->first();
+
                 if(!$year_yet && !$classe_yet && $pupil){
+
                     DB::transaction(function($e) use ($school_year_model, $pupil, $classe){
+
                         if($classe->alreadyJoinedToThisYear($school_year_model->id)){
                             
                             $joinedToClasseAndSchoolYear = ClassePupilSchoolYear::create(
@@ -247,7 +284,9 @@ class PupilProfil extends Component
                             );
 
                             if($joinedToClasseAndSchoolYear){
+
                                 $school_year_model->pupils()->attach($pupil->id);
+
                                 $classe->classePupils()->attach($pupil->id);
                             }
                            
@@ -398,6 +437,7 @@ class PupilProfil extends Component
     public function editPupilProfilImage()
     {
         $class = "App\Models\Pupil";
+
         $this->emit('editImageEvent', $this->pupil_id, $class);
     }
 
@@ -416,7 +456,9 @@ class PupilProfil extends Component
     public function changeSemestre()
     {
         $this->count = 1;
+
         session()->put('semestre_selected', $this->semestre_selected);
+
         $this->emit('semestreWasChanged', $this->semestre_selected);
     }
 
@@ -425,6 +467,89 @@ class PupilProfil extends Component
     {
         session()->put('pupil_profil_section_selected', $section);
     }
+
+    public function activateNullMarks()
+    {
+        $action = 'a';
+
+        $this->nullsMarksProcessorForPupil($action);
+
+    }
+
+
+    public function desactivateNullMarks()
+    {
+        $action = 'd';
+
+        $this->nullsMarksProcessorForPupil($action);
+
+    }
+
+    public function deleteNullMarks()
+    {
+        $action = 'dl';
+
+        $this->nullsMarksProcessorForPupil($action);
+
+    }
+
+    public function normalizeNullMarks()
+    {
+        $action = 's';
+
+        $this->nullsMarksProcessorForPupil($action);
+    }
+
+
+    public function nullsMarksProcessorForPupil($action)
+    {
+        $semestre = session('semestre_selected');
+
+        $subject_id = session('classe_subject_selected');
+
+        $pupil = Pupil::find($this->pupil_id);
+
+        if($semestre && $pupil && $subject_id && $semestre){
+
+            $user = auth()->user();
+
+            $classe = $pupil->getCurrentClasse();
+
+            if($user && $classe){
+
+                if($user->isAdminAs('master') || $user->teacher){
+
+                    $teacher_can = $user->teacher->teacherCanUpdateMarksInThisClasse($classe_id);
+
+                    if($teacher_can || $user->isAdminAs('master')){
+
+                        $this->emit('MarksNullActionsConfirmationEvent', $action, $classe->id, $semestre, $subject_id, $pupil->id);
+
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('Toast', ['title' => "ACCES REFUSE", 'message' => "Vous n'êtes pas authorisé à effectué cette requête!", 'type' => 'warning']);
+                    }
+
+                }
+                else{
+                    $this->dispatchBrowserEvent('Toast', ['title' => "ACCES REFUSE", 'message' => "Vous n'êtes pas authorisé à effectué cette requête!", 'type' => 'warning']);
+                }
+
+            }
+
+        }
+        else{
+
+            $semestre_type = strtoupper($this->semestre_type);
+
+            $this->dispatchBrowserEvent('Toast', ['title' => "semestre_type INCONNU", 'message' => "Veuillez sélectionner d'abord le $semestre_type dont vous voudriez charger les données!", 'type' => 'warning']);
+
+        }
+
+    }
+
+
+
 }
 
 

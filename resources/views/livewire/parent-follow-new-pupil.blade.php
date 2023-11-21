@@ -11,17 +11,17 @@
                             {{$parentable->name }} 
                         </span>
                     </span>
-
                 </blockquote>
             @endif
             <div class="mt-0 mb-2 col-11 mx-auto">
                 
+                @if(!$to_confirm)
                 <div class="d-flex row justify-between">
 
                     <div class="col-7 m-0 p-0">
                         <div class="p-0 m-0 mt-0 mb-2 row">
                             <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Matricule de l'apprenant</label>
-                            <input autofocus="autofocus" placeholder="Le matricule de l'apprenant" class="text-white form-control bg-transparent border border-white px-2 mt-1 z-focus @error('matricule') text-danger border-danger @enderror" wire:model.defer="matricule" type="text" name="matricule">
+                            <input autofocus="autofocus" placeholder="Le matricule de l'apprenant ou son numero educMaster" class="text-white form-control bg-transparent border border-white px-2 mt-1 z-focus @error('matricule') text-danger border-danger @enderror" wire:model.defer="matricule" type="text" name="matricule">
                             @error('matricule')
                                 <small class="py-1 z-text-orange">{{$message}}</small>
                             @enderror
@@ -52,10 +52,39 @@
                     </div>
                     
                 </div>
+                @else
+                    <div class="justify-content-center d-flex flex-column mx-auto p-2">
+                        <div class="col-10">
+                            <span class="text-white-50 h6">
+                                <span class="m-2 text-white-50">
+                                Nous avons trouvé un(e) apprenant(e) correspondant à votre demande!<br>
+                                </span>
+                                <span class="text-white">
+                                    Il s'agit de l'apprenant(e) <span class="text-warning">{{ $target ?  $target->getName() : "Inconnu" }}</span>
+                                </span>
+                                <span class="text-white">
+                                    voudriez-vous confirmer la demande?
+                                </span>
+                            </span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-3">
+                            <span wire:click="confirm" class="btn btn-success col-5 border z-scale">
+                                <span class="bi-person-check fx-18"></span>
+                                <span>Confirmer ma demande</span>
+                            </span>
+
+                            <span wire:click="to_cancel" class="btn btn-danger col-5 border z-scale">
+                                <span class="bi-person-x fx-18"></span>
+                                <span>Annuler ma demande</span>
+                            </span>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
-        <div class="p-0 m-0 mx-auto d-flex justify-content-center pb-1 pt-1">
-            <x-z-button :bg="'btn-primary'" class="text-dark">Valider</x-z-button>
+        <div class="p-0 m-0 mx-auto w-100 d-flex justify-content-center pb-1 pt-1">
+            <span wire:click="submit" class="btn btn-primary border z-scale p-2 col-6">Valider la demande</span>
         </div>
     </form>
 </x-z-modal-generator>

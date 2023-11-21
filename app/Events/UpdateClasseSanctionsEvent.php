@@ -4,73 +4,51 @@ namespace App\Events;
 
 use App\Models\Classe;
 use App\Models\SchoolYear;
+use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ClasseMarksDeletionCreatedEvent implements ShouldBroadcastNow
+class UpdateClasseSanctionsEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $classe;
 
-    public $pupil_id;
-
-    public $school_year_model;
-
-    public $semestre = 'all';
-
-    public $subject = 'all';
-
-    public $type = 'all';
-
-    public $start;
-
-    public $end;
+    public $subject;
 
     public $user;
 
-    public $data = [];
+    public $school_year_model;
+
+    public $semestre = 1;
+
+    public $activated = true;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(User $user, Classe $classe, SchoolYear $school_year_model, $semestre = 'all', $subject = 'all', $type = 'all', $start = null, $end = null, $pupil_id = null)
+    public function __construct(Classe $classe, User $user, SchoolYear $school_year_model, $semestre = 1, Subject $subject, bool $activated = true)
     {
+        $this->activated = $activated;
+
         $this->classe = $classe;
 
         $this->subject = $subject;
+
+        $this->user = $user;
 
         $this->school_year_model = $school_year_model;
 
         $this->semestre = $semestre;
 
-        $this->type = $type;
-
-        $this->end;
-
-        $this->start = $start;
-
-        $this->pupil_id = $pupil_id;
-
-        $this->user = $user;
-
-        $this->data = [
-            'subject' => $subject,
-            'semestre' => $semestre,
-            'type' => $type,
-            'start' => $start,
-            'end' => $end,
-            'pupil_id' => $pupil_id,
-        ];
     }
 
     /**

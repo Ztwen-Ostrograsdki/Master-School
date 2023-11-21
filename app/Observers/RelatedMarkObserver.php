@@ -39,7 +39,7 @@ class RelatedMarkObserver
      */
     public function deleted(RelatedMark $relatedMark)
     {
-        $this->doJob($relatedMark);
+        // $this->doJob($relatedMark);
     }
 
     /**
@@ -61,7 +61,7 @@ class RelatedMarkObserver
      */
     public function forceDeleted(RelatedMark $relatedMark)
     {
-        $this->doJob($relatedMark);
+        // $this->doJob($relatedMark);
     }
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Helpers\UserTraits;
 
+use App\Models\Parentable;
 use App\Notifications\ResetEmail;
 use App\Notifications\SentEmailVerificationToUser;
 use App\Notifications\SentParentKeyToUserNotification;
@@ -238,5 +239,8 @@ trait MustVerifyEmailTrait
             );
         }
     }
+
+
+
 
 }

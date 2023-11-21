@@ -1051,5 +1051,63 @@ trait PupilTraits{
         return $last_classe;
 
     }
+
+
+    public function getPupilNullMarks($classe_id, $semestre, $school_year = null, $subject_id = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $marks = [];
+
+        if(!$classe_id){
+
+            $classe = $this->getCurrentClasse();
+
+            if($classe){
+
+                $classe_id = $classe->id;
+
+            }
+
+        }
+
+        if($classe_id){
+
+            if($subject_id){
+
+                $marks = $this->marks()->where('marks.school_year_id', $school_year_model->id)
+                                   ->where('marks.subject_id', $subject_id)
+                                   ->where('marks.classe_id', $classe_id)
+                                   ->where('marks.semestre', $semestre)
+                                   ->where('marks.value', 0)
+                                   ->get();
+
+            }
+            else{
+                $marks = $this->marks()->where('marks.school_year_id', $school_year_model->id)
+                                   ->where('marks.classe_id', $classe_id)
+                                   ->where('marks.semestre', $semestre)
+                                   ->where('marks.value', 0)
+                                   ->get();
+
+            }
+
+       }
+
+        return $marks;
+
+    }
+
+    /**
+     * Assert if a classe or pupil of a classe has nulls marks for a specific subject with subject_id
+     */
+    public function hasNullsMarks($classe_id, $semestre, $school_year = null, $subject_id = null)
+    {
+
+        $marks = $this->getPupilNullMarks($classe_id, $semestre, $school_year, $subject_id);
+
+        return count($marks) > 0;
+
+    }
     
 }

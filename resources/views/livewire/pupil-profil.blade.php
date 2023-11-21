@@ -25,6 +25,11 @@
                             <a class="dropdown-item" tabindex="-1" wire:click="refreshPupilMarks" href="#">Rafraichir les notes</a>
                             <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
                             <a class="dropdown-item" wire:click="refreshPupilRelatedsMarks" tabindex="-1" href="#">Rafraichir les notes relatives: Bonus et sanctions</a><a class="dropdown-item" wire:click="resetMarks" tabindex="-1" href="#">Rafraichir les retards</a>
+                            @if($current_classe && session()->has('classe_subject_selected') && session('classe_subject_selected') && $pupil->hasNullsMarks($current_classe->id, session('semestre_selected'), null, session('classe_subject_selected')))
+                                <a wire:click="deleteNullMarks"  class="dropdown-item" tabindex="-1" href="#">Supprimer les notes zéros</a>
+                                <a wire:click="desactivateNullMarks"  class="dropdown-item" tabindex="-1" href="#">Désactiver les zéros</a>
+                                <a wire:click="normalizeNullMarks"  class="dropdown-item" tabindex="-1" href="#">Normaliser les notes zéros</a><a wire:click="activateNullMarks"  class="dropdown-item" tabindex="-1" href="#">Activer les zéros</a>
+                            @endif
                             <a class="dropdown-item" tabindex="-1" href="#">Mettre à jour</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" tabindex="-1" href="#">Autres</a>

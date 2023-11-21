@@ -31,7 +31,7 @@ class MarkObserver
      */
     public function updated(Mark $mark)
     {
-        $this->doJob($mark);
+        $mark->value > 0 ? $this->doJob($mark) : $this->doNotJob();
     }
 
     /**
@@ -42,7 +42,7 @@ class MarkObserver
      */
     public function deleted(Mark $mark)
     {
-        $this->doJob($mark);
+        $mark->value > 0 ? $this->doJob($mark) : $this->doNotJob();
     }
 
     /**
@@ -53,7 +53,7 @@ class MarkObserver
      */
     public function restored(Mark $mark)
     {
-        $this->doJob($mark);
+        $mark->value > 0 ? $this->doJob($mark) : $this->doNotJob();
     }
 
     /**
@@ -64,7 +64,7 @@ class MarkObserver
      */
     public function forceDeleted(Mark $mark)
     {
-        $this->doJob($mark);
+        $mark->value > 0 ? $this->doJob($mark) : $this->doNotJob();
     }
 
 
@@ -81,9 +81,14 @@ class MarkObserver
 
             $user = $mark->user;
 
-            FlushAveragesIntoDataBaseEvent::dispatch($user, $classe, $semestre, $school_year_model);
+            FlushAveragesIntoDataBaseEvent::dispatch($user, $classe, $school_year_model, $semestre);
 
         }
 
+    }
+
+    public function doNotJob()
+    {
+        //DO ANYTHINK
     }
 }

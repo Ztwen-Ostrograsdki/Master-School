@@ -102,16 +102,7 @@ class ParentProfil extends Component
 
                 DB::transaction(function($e){
 
-
-                    $make = Parentable::create([
-
-                        'user_id' => $this->user->id,
-                        'name' => ucwords($this->name),
-                        'contacts' => str_replace(' ', '/', trim($this->contacts)),
-                        'job' => $this->job,
-                        'residence' => $this->residence,
-
-                    ]);
+                    $make = $this->user->parentable_creator($this->contacts, $this->job, $this->name, $this->residence);
 
                     if($make){
 
@@ -130,7 +121,6 @@ class ParentProfil extends Component
                         $this->dispatchBrowserEvent('Toast', ['title' => 'UNE ERREURE EST SURVENUE', 'message' => "Votre demande n'a pu être soumise. Veuillez vérifier votre formulaire!", 'type' => 'error']);
 
                     }
-
                 });
 
         }

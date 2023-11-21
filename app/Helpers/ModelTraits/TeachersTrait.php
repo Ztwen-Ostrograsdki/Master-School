@@ -225,7 +225,7 @@ trait TeachersTrait{
 
                 if($start_timestamp < $now_timestamp && ($start_timestamp + $duration) < $now_timestamp){
 
-                    $time_plans[$time->id] = "Le prof a fait cours aujourd'hui de $s à $e ! ($d)";
+                    $time_plans[$time->id] = "Le prof fera cours aujourd'hui de $s à $e ! ($d)";
 
                 }
                 elseif($start_timestamp <= $now_timestamp && $end_timestamp >= $now_timestamp){
@@ -235,7 +235,7 @@ trait TeachersTrait{
                 }
                 elseif($start_timestamp > $now_timestamp){
 
-                    $time_plans[$time->id] = "Le prof fera cours aujourd'hui de $s à $e ! ($d)";
+                    $time_plans[$time->id] = "Le prof a fait cours aujourd'hui de $s à $e ! ($d)";
 
                 }
             }

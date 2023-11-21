@@ -34,6 +34,11 @@
                             <a wire:click="editClasseSubjects({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Définir les matières</a>
                             <a wire:click="settingsOnMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Effectuer une opération sur les notes</a>
                             <a wire:click="restorMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Restaurer des notes de classe</a>
+                            @if(session()->has('classe_subject_selected') && session('classe_subject_selected') && $classe->hasNullsMarks(session('semestre_selected'), null, session('classe_subject_selected')) )
+                                <a wire:click="deleteNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Supprimer les notes zéros</a>
+                                <a wire:click="desactivateNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Désactiver les zéros</a>
+                                <a wire:click="normalizeNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Normaliser les notes zéros</a><a wire:click="activateNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Activer les zéros</a>
+                            @endif
                             <a wire:click="throwPresence({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Faire la présence de la classe</a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" tabindex="-1" href="#">Autres</a>

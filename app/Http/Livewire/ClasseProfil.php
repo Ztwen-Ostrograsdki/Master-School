@@ -31,17 +31,27 @@ class ClasseProfil extends Component
         'timePlanTablesWasUpdatedLiveEvent' => 'reloadClasseData',
         'NewClasseMarksInsert' => 'reloadClasseData',
         'PresenceLateWasUpdated' => 'reloadClasseData',
+        'selectedClasseSubjectChangeLiveEvent' => 'reloadClasseSubjectSelected',
     ];
 
     public $slug;
+
     public $classe_id;
+
     public $classeName;
+
     public $counter = 0;
+
     public $editingClasseName = false;
+
     public $semestre_type = 'Semestre';
+
     public $school_year;
+
     public $classe_subject_selected;
+
     public $semestre_selected = 1;
+
     public $search = null;
 
     public $section_selected = 'liste';
@@ -99,6 +109,24 @@ class ClasseProfil extends Component
 
         session()->put('classe_profil_section_selected', $section);
 
+    }
+
+    public function reloadClasseSubjectSelected($subject_id)
+    {
+        session()->put('classe_subject_selected', $subject_id);
+
+        if($subject_id !== null){
+
+            $this->classe_subject_selected = $subject_id;
+
+        }
+        else{
+
+            $this->classe_subject_selected = null;
+
+            session()->forget('classe_subject_selected');
+
+        }
     }
 
 
@@ -254,10 +282,12 @@ class ClasseProfil extends Component
 
             $this->validate();
 
+            $name = trim(ucfirst($this->classeName));
+
             $c = $classe->update(
                 [
-                    'name' => $this->classeName,
-                    'slug' => str_replace(' ', '-', $this->classeName),
+                    'name' => $name,
+                    'slug' => str_replace(' ', '-', $name),
                 ]
             );
 
@@ -292,9 +322,12 @@ class ClasseProfil extends Component
     public function settingsOnMarks($classe_id = null)
     {
         if($classe_id == null){
+            
             $classe_id = $this->classe_id;
         }
+
         $classe = Classe::where('id', $this->classe_id)->first();
+
         $this->emit('onMarksSettingsEvent', $classe_id, session('semestre_selected'), session('classe_subject_selected'));
     }
 
@@ -378,41 +411,19 @@ class ClasseProfil extends Component
 
     public function resetAbsences($classe_id = null, $pupil_id = null)
     {
-        if ($classe_id) {
-
-            $classe = Classe::find($classe_id);
-        }
-        else{
-
-            $classe = Classe::whereSlug($this->slug)->first();
-        }
-        if ($classe) {
-
-            $user = auth()->user();
-
-            $school_year_model = $this->getSchoolYear();
-
-            $semestre = $this->semestre_selected;
-
-            if (session()->has('semestre_selected') && session('semestre_selected')) {
-
-                $semestre = session('semestre_selected');
-            }
-
-            $subject_id = session('classe_subject_selected');
-
-            AbsencesAndLatesDeleterEvent::dispatch($user, $classe, $semestre, $school_year_model, $subject_id, $pupil_id, 'absences');
-
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'PROCESSUS LANCE', 'message' => "Le processus a été lancé avec succès en arrière plan!", 'type' => 'success']);
-
-
-        }
-        
+        $this->absencesAndLatesProcessor($classe_id, $pupil_id, 'absences');
     }
 
 
 
     public function resetLates($classe_id = null, $pupil_id = null)
+    {
+        $this->absencesAndLatesProcessor($classe_id, $pupil_id, 'lates');
+    }
+
+
+
+    public function absencesAndLatesProcessor($classe_id, $pupil_id = null, string $target)
     {
         $school_year_model = $this->getSchoolYear();
 
@@ -426,24 +437,38 @@ class ClasseProfil extends Component
         }
         if ($classe) {
 
-            $school_year_model = $this->getSchoolYear();
+            $user = auth()->user();
 
-            $semestre = $this->semestre_selected;
+            if($user && $user->isAdminAs('master')){
 
-            if (session()->has('semestre_selected') && session('semestre_selected')) {
+                $school_year_model = $this->getSchoolYear();
 
-                $semestre = session('semestre_selected');
+                $semestre = $this->semestre_selected;
+
+                if (session()->has('semestre_selected') && session('semestre_selected')) {
+
+                    $semestre = session('semestre_selected');
+                }
+
+                $subject_id = session('classe_subject_selected');
+
+                $this->emit('ConfirmAbsencesAndLatesReset', $target, $classe->id, $semestre, $subject_id, $pupil_id);
+
+
             }
+            else{
 
-            $subject_id = session('classe_subject_selected');
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'ACCES REFUSE', 'message' => "Vous ne pouvez pas effectuer une telle opération!", 'type' => 'warning']);
 
-            AbsencesAndLatesDeleterEvent::dispatch($user, $classe, $semestre, $school_year_model, $subject_id, $pupil_id, 'lates');
-
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'PROCESSUS LANCE', 'message' => "Le processus a été lancé avec succès en arrière plan!", 'type' => 'success']);
+            }
 
         }
 
+
     }
+
+
+
 
 
     public function refreshClasseMarks($classe_id)
@@ -640,7 +665,6 @@ class ClasseProfil extends Component
                 $school_year_model = $this->getSchoolYear();
 
                 FreshAveragesIntoDBEvent::dispatch($user, $classe, $school_year_model, $semestre);
-                
             }
 
         }
@@ -654,6 +678,9 @@ class ClasseProfil extends Component
         }
 
     }
+
+
+
 
     public function optimizeClasseAveragesIntoDatabase($classe_id)
     {
@@ -682,12 +709,24 @@ class ClasseProfil extends Component
 
         $classe = $school_year_model->findClasse($classe_id);
 
-        if($classe){
+        $user = auth()->user();
 
-            $this->emit('insertMultiplePupils', $classe->id);
+        if($user && $user->isAdminAs('master')){
+
+            if($classe){
+
+                $this->emit('insertMultiplePupils', $classe->id);
+            }
+            else{
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
+            }
+
+
         }
         else{
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
+
+            $this->dispatchBrowserEvent('Toast', ['title' => "ACCES REFUSE", 'message' => "Vous n'êtes pas authorisé à effectué une telle requête!", 'type' => 'warning']);
+
         }
 
     }
@@ -695,6 +734,7 @@ class ClasseProfil extends Component
 
     public function importPupilsIntoClasse($classe_id)
     {
+
         $this->emit('ImportPupilsIntoClasse', $classe_id);
     }
 
@@ -702,6 +742,91 @@ class ClasseProfil extends Component
     public function movePupilFromThisClasse($classe_id)
     {
         // $this->emit('ImportPupilsIntoClasse', $classe_id);
+    }
+
+
+    public function activateNullMarks($classe_id)
+    {
+        $action = 'a';
+
+        $this->nullsMarksProcessorForClasse($action, $classe_id);
+    }
+
+
+    public function desactivateNullMarks($classe_id)
+    {
+        $action = 'd';
+
+        $this->nullsMarksProcessorForClasse($action, $classe_id);
+
+    }
+
+    public function deleteNullMarks($classe_id)
+    {
+        $action = 'dl';
+
+        $this->nullsMarksProcessorForClasse($action, $classe_id);
+
+    }
+
+    public function normalizeNullMarks($classe_id)
+    {
+        $action = 's';
+
+        $this->nullsMarksProcessorForClasse($action, $classe_id);
+    }
+
+    public function nullsMarksProcessorForClasse($action, $classe_id)
+    {
+        $semestre = session('semestre_selected');
+
+        $subject_id = session('classe_subject_selected');
+
+        if($semestre){
+
+            $user = auth()->user();
+
+            if($user){
+
+                if($user->isAdminAs('master') || $user->teacher){
+
+                    $teacher_can = $user->teacher->teacherCanUpdateMarksInThisClasse($classe_id);
+
+                    if($teacher_can || $user->isAdminAs('master')){
+
+                        $not_secure = $user->teacher->ensureThatTeacherCanAccessToClass($classe_id);
+
+                        if($not_secure || $user->isAdminAs('master')){
+
+                            $this->emit('MarksNullActionsConfirmationEvent', $action, $classe_id, $semestre, $subject_id, null);
+
+                        }
+                        else{
+                            $this->dispatchBrowserEvent('Toast', ['title' => "ACCES VERROUILLE", 'message' => "Vous n'êtes pas authorisé à acceder à cette classe pour le moment!", 'type' => 'warning']);
+                        }
+
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('Toast', ['title' => "ACCES REFUSE", 'message' => "Vous n'êtes pas authorisé à effectué cette requête!", 'type' => 'warning']);
+                    }
+
+                }
+                else{
+                    $this->dispatchBrowserEvent('Toast', ['title' => "ACCES REFUSE", 'message' => "Vous n'êtes pas authorisé à effectué cette requête!", 'type' => 'warning']);
+                }
+
+            }
+
+        }
+        else{
+
+            $semestre_type = strtoupper($this->semestre_type);
+
+            $this->dispatchBrowserEvent('Toast', ['title' => "semestre_type INCONNU", 'message' => "Veuillez sélectionner d'abord le $semestre_type dont vous voudriez charger les données!", 'type' => 'warning']);
+
+
+        }
+
     }
 
 

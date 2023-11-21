@@ -223,8 +223,7 @@ class InsertPupilMarks extends Component
                                                             ->where('subject_id', $subject_id)
                                                             ->where('semestre', $semestre)->where('type', "epe")
                                                             ->where('mark_index', $epe_key_index)
-
-                                                                                                     ->first();
+                                                            ->first();
 
                             if($mark_index_was_existed){
 

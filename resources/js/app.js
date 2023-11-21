@@ -58,7 +58,7 @@ e.private('user.' + window.ClientUser.id)
 
         Swal.fire({
             icon: 'error',
-            title: "Le traitement des notes a échoué",
+            title: "ERREURE DE TRAITEMENT!",
             text: "Une erreure est survenue lors du traitement!",
             toast: true,
             showConfirmButton: true,

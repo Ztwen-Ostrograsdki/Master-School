@@ -163,8 +163,8 @@ class CreateNewClasse extends Component
                     if($this->classe){
 
                         $$classe = $this->classe->update([
-                            'name' => $this->name,
-                            'slug' => str_replace(' ', '-', $this->name),
+                            'name' => trim(ucfirst($this->name)),
+                            'slug' => str_replace(' ', '-', trim(ucfirst($this->name))),
                             'level_id' => $level_id,
                             'classe_group_id' => $classe_group_id
                         ]);
@@ -174,8 +174,8 @@ class CreateNewClasse extends Component
 
                         $classe = Classe::create(
                             [
-                                'name' => $this->name,
-                                'slug' => str_replace(' ', '-', $this->name),
+                                'name' => trim(ucfirst($this->name)),
+                                'slug' => str_replace(' ', '-', trim(ucfirst($this->name))),
                                 'level_id' => $level_id,
                                 'classe_group_id' => $classe_group_id
                             ]

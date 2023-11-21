@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\ModelTraits\MarkTraits;
 use App\Models\Classe;
 use App\Models\Level;
 use App\Models\SchoolYear;
@@ -12,7 +13,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Mark extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, MarkTraits;
+
+    const DELAYED = 375;
+
+    public function getDelay()
+    {
+        return self::DELAYED;
+    }
 
     protected $fillable = [
         'value', 

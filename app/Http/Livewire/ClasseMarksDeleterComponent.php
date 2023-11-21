@@ -72,7 +72,7 @@ class ClasseMarksDeleterComponent extends Component
             'epe' => 'Interrogations',
             'participation' => 'Participations',
             'bonus' => 'Bonus',
-            'sanction' => 'Sanctions',
+            'minus' => 'Sanctions',
 
         ];
 
@@ -298,6 +298,8 @@ class ClasseMarksDeleterComponent extends Component
             $pupil_id = $this->pupil_id;
 
             $this->dispatchBrowserEvent('hide-form');
+
+            // dd($classe->id, $school_year_model->id, $semestre, $subject, $type, $start, $end, $pupil_id, $classe->related_marks);
 
             $this->emit('ConfirmClasseMarksDeletionLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject, $type, $start, $end, $pupil_id);
 

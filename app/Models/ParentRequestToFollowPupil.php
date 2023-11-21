@@ -2,23 +2,21 @@
 
 namespace App\Models;
 
-use App\Models\Pupil;
 use App\Models\Parentable;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Pupil;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-
-/**
- * To join a parentable to a pupil who should be is her child
- */
-class ParentPupil extends Model
+class ParentRequestToFollowPupil extends Model
 {
     use HasFactory;
-    
+
+
     protected $fillable = [
         'parentable_id',
         'pupil_id',
-        'relation'
+        'relation',
+        'authorized',
     ];
 
 
@@ -31,11 +29,4 @@ class ParentPupil extends Model
     {
         return $this->belongsTo(Pupil::class);
     }
-
-
-
-
-// 3201000252315
-
-// 97 98 11 14 comptable
 }

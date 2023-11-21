@@ -66,38 +66,56 @@ class MarkManager extends Component
         // broadcast(new NewMarkInsertEvent());
 
         if($mark_id){
+
             $school_year_model = $this->getSchoolYear();
+
             $user = auth()->user();
 
             $mark = Mark::find($mark_id);
+
             if($mark){
+
+                $update_not_delayed = true;
+
                 $classe_id = $mark->classe_id;
 
                 if(!$user->teacher->teacherCanUpdateMarksInThisClasse($classe_id)){
+
                     $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'EDITION DE NOTE VERROUILLEE', 'message' => "La mise à jour des notes est temporairement indisponible pour cette classe!", 'type' => 'warning']);
+                    
                     return false;
                 }
 
                 $not_secure = $user->ensureThatTeacherCanAccessToClass($classe_id);
+
                 $pupil = $mark->pupil;
             }
 
             if($pupil && $mark){ 
 
-                if($not_secure){
-                    $this->pupil = $pupil;
+                $update_not_delayed = $mark->ensureThatMarkUpdateNotDelayed();
+
+                if($update_not_delayed){
+
+                    if($not_secure){
                     
-                    $this->markModel = $mark;
-                    $this->mark = $mark->value;
+                        $this->pupil = $pupil;
+                        
+                        $this->markModel = $mark;
+                        $this->mark = $mark->value;
 
-                    $this->type = $mark->type;
-                    $this->mark_index = $mark->mark_index;
+                        $this->type = $mark->type;
+                        $this->mark_index = $mark->mark_index;
 
-                    $this->semestre_id = $mark->semestre;
-                    $this->dispatchBrowserEvent('modal-markManager');
+                        $this->semestre_id = $mark->semestre;
+                        $this->dispatchBrowserEvent('modal-markManager');
+                    }
+                    else{
+                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE', 'message' => "La mise à jour ou l'insertion des notes est temporairement indisponible pour cette classe!", 'type' => 'warning']);
+                    }
                 }
                 else{
-                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE', 'message' => "La mise à jour ou l'insertion des notes est temporairement indisponible pour cette classe!", 'type' => 'warning']);
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'EDITION NOTE EXPIREE', 'message' => "Cette note ne peut plus être éditée!", 'type' => 'warning']);
                 }
 
             }
