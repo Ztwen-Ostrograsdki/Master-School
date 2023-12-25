@@ -88,6 +88,10 @@ e.private('user.' + window.ClientUser.id)
         
         Livewire.emit('PresenceLateWasUpdated');
     }) 
+    .listen('ClasseDataWasUpdateSuccessfullyEvent', function(e) {
+        
+        Livewire.emit('ClasseDataWasUpdated');
+    }) 
 
 e.private('master')
     .listen('NewAddParentRequestEvent', function(e) {

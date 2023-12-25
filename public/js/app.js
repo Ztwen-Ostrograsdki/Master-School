@@ -8715,7 +8715,7 @@ e["private"]('user.' + window.ClientUser.id).listen('ParentRequestAcceptedEvent'
 }).listen('ClasseMarksWasFailedEvent', function (e) {
   Swal.fire({
     icon: 'error',
-    title: "Le traitement des notes a échoué",
+    title: "ERREURE DE TRAITEMENT!",
     text: "Une erreure est survenue lors du traitement!",
     toast: true,
     showConfirmButton: true
@@ -8732,6 +8732,8 @@ e["private"]('user.' + window.ClientUser.id).listen('ParentRequestAcceptedEvent'
   Livewire.emit('ClassePupilsListUpdatedLiveEvent');
 }).listen('ClassePresenceLateWasCompletedEvent', function (e) {
   Livewire.emit('PresenceLateWasUpdated');
+}).listen('ClasseDataWasUpdateSuccessfullyEvent', function (e) {
+  Livewire.emit('ClasseDataWasUpdated');
 });
 e["private"]('master').listen('NewAddParentRequestEvent', function (e) {
   Livewire.emit('NewParentRequest');

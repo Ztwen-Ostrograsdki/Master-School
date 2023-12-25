@@ -9,6 +9,7 @@ use App\Models\Mark;
 use App\Models\Pupil;
 use App\Models\School;
 use App\Models\Subject;
+use Barryvdh\DomPDF\PDF;
 use Livewire\Component;
 
 class ClasseMarksLister extends Component
@@ -55,6 +56,200 @@ class ClasseMarksLister extends Component
 
     public function mount()
     {
+
+    }
+
+
+    public function printerToPDF()
+    {
+
+
+        $pupils = [];
+
+        $marks = [];
+
+        $noMarks = false;
+
+        $modality = null;
+
+        $modalitiesActivated = null;
+
+        $hasModalities = false;
+
+        $averageEPETab = [];
+
+        $averageTab = [];
+
+        $ranksTab = [];
+
+        $classe_subject_coef = 1;
+
+
+        $marks_lenght = 1;
+
+        $epeMaxLenght = 1;
+
+        $devMaxLenght = 1;
+
+        $participMaxLenght = 1;
+
+        $classe_subjects = [];
+
+
+        $school_year_model = $this->getSchoolYear();
+
+        $classe = $school_year_model->findClasse($this->classe_id);
+
+        if($classe){
+
+            $classe_subjects = $classe->subjects;
+
+        }
+        else{
+
+            $classeSelf = Classe::find($this->classe_id);
+
+            $classe_subjects = $classeSelf->subjects;
+
+        }
+
+        if(session()->has('semestre_selected') && session('semestre_selected')){
+
+            $semestre = intval(session('semestre_selected'));
+
+            session()->put('semestre_selected', $semestre);
+
+            $this->semestre_selected = $semestre;
+        }
+
+        if(session()->has('semestre_type') && session('semestre_type')){
+
+            $semestre_type = session('semestre_type');
+
+            session()->put('semestre_type', $semestre_type);
+
+            $this->semestre_type = $semestre_type;
+        }
+        else{
+            session()->put('semestre_type', $this->semestre_type);
+        }
+
+        if(session()->has('classe_subject_selected') && session('classe_subject_selected')){
+
+            $subject_id = intval(session('classe_subject_selected'));
+
+            if($classe && ($classe_subjects && $classe_subjects !== [])){
+
+                $subjects_ids = $classe_subjects->pluck('id')->toArray();
+
+                if(in_array($subject_id, $subjects_ids)){
+
+                    session()->put('classe_subject_selected', $subject_id);
+
+                    $this->classe_subject_selected = $subject_id;
+
+                    $this->subject_selected = Subject::find($this->classe_subject_selected);
+                }
+
+            }
+            else{
+
+                $this->reset('classe_subject_selected', 'subject_selected');
+            }
+        }
+
+        if($classe){
+
+            $pupils = $classe->getPupils($school_year_model->id, $this->search);
+
+            $marks = $classe->getMarks($this->classe_subject_selected, $this->semestre_selected, 2, $school_year_model->school_year);
+
+            $averageEPETab = $classe->getMarksAverage($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year, 'epe');
+
+            $averageTab = $classe->getAverage($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
+
+            if($this->computedRank){
+
+                $ranksTab = $classe->getClasseRank($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
+            }
+            else{
+
+                $ranksTab = [];
+
+            }
+
+            $classe_subject_coef = $classe->get_coefs($this->classe_subject_selected, $school_year_model->id, true);
+
+
+            $epeMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'epe') + 1;
+
+            $devMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'devoir') + 1;
+
+            $participMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'participation') + 1;
+
+            if(($epeMaxLenght < 1 && $participMaxLenght < 1 && $devMaxLenght < 1)){
+
+                $noMarks = true;
+            }
+
+            if($epeMaxLenght < 2){
+
+                $epeMaxLenght = 2;
+            }
+            if($participMaxLenght < 2){
+
+                $participMaxLenght = 2;
+            }
+            if($devMaxLenght < 2){
+
+                $devMaxLenght = 2;
+            }
+            if(!($epeMaxLenght && $devMaxLenght && $participMaxLenght)){
+
+                $noMarks = true;
+            }
+
+            if($this->semestre_selected && $this->subject_selected){
+
+                $semestre = $this->semestre_selected;
+
+                $modality = $this->subject_selected->getAverageModalityOf($classe->id, $school_year_model->school_year, $semestre);
+
+                $modalitiesActivated = $classe->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->where('activated', true)->count() > 0;
+
+                $hasModalities = $classe->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre)->count() > 0;
+
+                if($modality){
+
+                    $modality = $modality->modality;
+                }
+                else{
+
+                    $modality = null;
+                }
+            }
+
+        }
+
+
+       
+
+
+        $calendar_profiler = $school_year_model->calendarProfiler();
+
+        $current_period = $calendar_profiler['current_period'];
+
+
+        $pdf = PDF::loadView('livewire.classe-marks-lister', 
+                    compact(
+                        'classe',
+                        'current_period',
+                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model'
+                    )
+                );
+
+
+
 
     }
 

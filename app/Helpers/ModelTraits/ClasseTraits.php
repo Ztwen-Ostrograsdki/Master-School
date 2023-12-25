@@ -9,6 +9,7 @@ use App\Models\ClassePupilSchoolYear;
 use App\Models\ClassesSecurity;
 use App\Models\Pupil;
 use App\Models\PupilCursus;
+use App\Models\Responsible;
 use App\Models\School;
 use App\Models\SchoolYear;
 use App\Models\Subject;
@@ -1670,6 +1671,21 @@ trait ClasseTraits{
 
         });
         
+    }
+
+
+
+    public function classeResponsiblesInitiator($school_year = null)
+    {
+        $model = $this->currentRespo();
+
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        if(!$model && !$this->hasRespo($school_year)){
+
+            Responsible::create(['school_year_id' => $school_year_model->id, 'classe_id' => $this->id]);
+        }
+
     }
 
 

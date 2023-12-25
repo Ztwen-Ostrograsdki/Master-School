@@ -27,6 +27,7 @@ class ClasseProfil extends Component
         'schoolYearChangedLiveEvent' => 'reloadClasseData',
         'classePupilListUpdated' => 'reloadClasseData',
         'classeUpdated' => 'reloadClasseData',
+        'ClasseDataWasUpdated' => 'reloadClasseData',
         'newLevelCreated' => 'reloadClasseData',
         'timePlanTablesWasUpdatedLiveEvent' => 'reloadClasseData',
         'NewClasseMarksInsert' => 'reloadClasseData',

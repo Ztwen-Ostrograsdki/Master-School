@@ -349,7 +349,13 @@
                             @endif
                         </tr>
                     @endforeach
-                </table>                                                     
+                </table> 
+                <div class="d-flex justify-content-end w-100 my-1 p-2">
+                    <span wire:click="printerToPDF" class="btn btn-success p-2 px-4 z-scale" title="Imprimer les notes de classe de la classe {{$classe->name}}">
+                        <span class=" fa fa-print"></span>
+                        <span>Print</span>
+                    </span>
+                </div>                                                    
             </div>
         @else
             <div>

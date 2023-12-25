@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Classe;
+use App\Models\SchoolYear;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -12,7 +13,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ClasseMarksDeletionCompletedEvent implements ShouldBroadcast
+class ClasseRefereesManagerEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,18 +21,27 @@ class ClasseMarksDeletionCompletedEvent implements ShouldBroadcast
 
     public $user;
 
+    public $data;
+
+    public $school_year_model;
+
+
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Classe $classe, User $user)
+    public function __construct(Classe $classe, $data, SchoolYear $school_year_model, User $user)
     {
         $this->classe = $classe;
 
         $this->user = $user;
-    }
 
+        $this->school_year_model = $school_year_model;
+
+        $this->data = $data;
+
+    }
     /**
      * Get the channels the event should broadcast on.
      *

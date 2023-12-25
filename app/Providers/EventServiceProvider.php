@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Events\AbsencesAndLatesDeleterEvent;
 use App\Events\ClasseMarksDeletionCreatedEvent;
 use App\Events\ClasseMarksInsertionCreatedEvent;
+use App\Events\ClasseRefereesManagerEvent;
 use App\Events\DetachPupilsFromSchoolYearEvent;
 use App\Events\FlushAveragesIntoDataBaseEvent;
 use App\Events\FreshAveragesIntoDBEvent;
@@ -23,6 +24,7 @@ use App\Events\UpdateClasseSanctionsEvent;
 use App\Listeners\AbsencesAndLatesDeleterBatcherListener;
 use App\Listeners\ClasseMarksDeletionBatcherListener;
 use App\Listeners\ClasseMarksInsertionBatchListener;
+use App\Listeners\ClasseRefereesManagerBatcherListener;
 use App\Listeners\CreatedTransferBatchListener;
 use App\Listeners\DataMigrationToTheNewSchoolYearBatcherListener;
 use App\Listeners\DetachPupilsFromSchoolYearBatcherListener;
@@ -138,6 +140,10 @@ class EventServiceProvider extends ServiceProvider
 
         MarksNullActionsEvent::class => [
             MarksNullActionsBatcherListener::class,
+        ],
+
+        ClasseRefereesManagerEvent::class => [
+            ClasseRefereesManagerBatcherListener::class,
         ],
 
     

@@ -17,6 +17,7 @@ class AllClasseLister extends Component
         'schoolYearChangedLiveEvent' => 'reloadData',
         'UpdatedGlobalSearch' => 'updatedSearch',
         'UpdatedSchoolYearData' => 'reloadData',
+        'ClasseDataWasUpdated' => 'reloadData',
     ];
 
     public $counter = 0;

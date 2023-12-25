@@ -244,7 +244,7 @@ class Classe extends Model
 
             if($onlyIds){
 
-                if($pupils && count($pupils) > 0){
+                if($pupils && count($pupils->get()) > 0){
 
                     return $pupils->pluck('id')->toArray();
 
@@ -399,13 +399,13 @@ class Classe extends Model
     {
         $school_year_model = $this->getSchoolYear($school_year);
 
-        $r = Responsible::where('school_year_id', $school_year_model->id)->where('classe_id', $this->id)
-            ->whereNotNull('respo_1' . $rank)
-            ->orWhere('respo_2', '<>', null)
-            ->orWhere('respo_3', '<>', null)
-            ->count();
+        $r1 = $this->responsibles()->where('school_year_id', $school_year_model->id)->whereNotNull('respo_1')->count();
 
-        return $r > 0 ? true : false;
+        $r2 = $this->responsibles()->where('school_year_id', $school_year_model->id)->whereNotNull('respo_2')->count();
+
+        $r3 = $this->responsibles()->where('school_year_id', $school_year_model->id)->whereNotNull('respo_3')->count();
+
+        return ($r1 > 0 || $r2 > 0  || $r3 > 0) ? true : false;
     }
 
     public function getRespo($rank, $school_year = null)

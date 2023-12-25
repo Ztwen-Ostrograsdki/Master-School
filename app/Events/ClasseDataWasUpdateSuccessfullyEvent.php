@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Models\Classe;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -12,11 +11,9 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ClasseMarksDeletionCompletedEvent implements ShouldBroadcast
+class ClasseDataWasUpdateSuccessfullyEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
-    public $classe;
 
     public $user;
 
@@ -25,10 +22,8 @@ class ClasseMarksDeletionCompletedEvent implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(Classe $classe, User $user)
+    public function __construct(User $user)
     {
-        $this->classe = $classe;
-
         $this->user = $user;
     }
 
