@@ -26,7 +26,7 @@ class DynamicStatistic extends Component
     public $mark_index = 1;
     public $counter = 0;
     public $subject_id;
-    public $intervalles = 'N<7;7<=N<9;9<=N<10;10<=N<11;11<=N<14;14<=N';
+    public $intervalles = 'N<7;7<=N<9;9<=N<10;10<=N<12;N>=12';
     public $size = 0;
     public $stats = [];
 
@@ -127,11 +127,15 @@ class DynamicStatistic extends Component
 
     public function updatedSemestre($semestre_id)
     {
+        $this->reset('stats');
+
         $this->semestre_selected = $semestre_id;
     }
 
     public function updatedSubject($subject_id)
     {
+        $this->reset('stats');
+
         $this->subject_selected = $subject_id;
 
     }
@@ -139,11 +143,15 @@ class DynamicStatistic extends Component
 
     public function updatedType($type)
     {
+        $this->reset('stats');
+
         $this->type = $type;
     }
 
     public function updatedClasseId($classe_id)
     {
+        $this->reset('stats');
+
         $this->classe_id = intval($classe_id);
     }
 

@@ -9,8 +9,8 @@ use App\Models\Mark;
 use App\Models\Pupil;
 use App\Models\School;
 use App\Models\Subject;
-use Barryvdh\DomPDF\PDF;
 use Livewire\Component;
+use PDF;
 
 class ClasseMarksLister extends Component
 {
@@ -69,6 +69,8 @@ class ClasseMarksLister extends Component
         $marks = [];
 
         $noMarks = false;
+
+        $teacher_profil = false;
 
         $modality = null;
 
@@ -239,16 +241,24 @@ class ClasseMarksLister extends Component
 
         $current_period = $calendar_profiler['current_period'];
 
+        $subject_selected = $this->subject_selected;
 
-        $pdf = PDF::loadView('livewire.classe-marks-lister', 
-                    compact(
-                        'classe',
-                        'current_period',
-                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model'
-                    )
-                );
+        $classe_subject_selected = $this->classe_subject_selected;
+
+        $computedRank = $this->computedRank;
+
+        $is_loading = $this->is_loading;
+
+        $relaodNow = $this->relaodNow;
 
 
+        // $pdf = PDF::loadView('livewire.classe-marks-lister', 
+        //             compact(
+        //                 'classe',
+        //                 'current_period',
+        //                 'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model','teacher_profil', 'subject_selected', 'computedRank', 'is_loading', 'is_loading', 'relaodNow', 'classe_subject_selected'
+        //             )
+        //         );
 
 
     }

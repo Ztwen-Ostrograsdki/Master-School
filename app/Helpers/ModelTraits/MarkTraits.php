@@ -30,7 +30,9 @@ trait MarkTraits{
 
 
     /**
+     * This method is used to compute the duration of a mark since creation to now 
      * @param $timestamp|$now in seconds
+     * @return time in hours
     */
 
     public function calc($timestamp, $now)

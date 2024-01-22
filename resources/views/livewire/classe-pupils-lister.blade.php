@@ -20,10 +20,10 @@
                 </span>
             @endif
             @if($pupils && count($pupils))
-            <a href="{{route('classe_pdf', $classe->id)}}"  class="z-scale btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de cette classe...">
+            <span wire:click="downloadPDF" class="z-scale btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de cette classe...">
                 <span class="fa fa-print"></span>
                 <span>Impr.</span>
-            </a>
+            </span>
             @endif
         </div>
         @if($is_loading)

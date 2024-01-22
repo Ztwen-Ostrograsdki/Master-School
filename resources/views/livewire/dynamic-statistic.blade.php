@@ -130,11 +130,11 @@
                     <div class="card-deck w-100 p-0 m-0">
                         <div class="card active p-0" href="#tab_2" data-toggle="tab">
                             <div class="info-box m-0 p-2 z-bg-secondary">
-                                <div class="info-box-content">
-                                    <div class="m-0">
+                                <div class="info-box-content w-100">
+                                    <div class="m-0 w-100">
                                         <div class="w-100 m-0 p-0 mt-3">
                                             <div class="w-100 p-0 m-0">
-                                                <blockquote class="border-warning bg-info text-black-50">
+                                                <blockquote class="border-warning bg-secondary text-black-50 w-100 mx-auto">
                                                     <h5 class="m-0 h6 p-0 py-2 w-100 text-black-50 d-flex justify-content-between">
                                                         <span class="d-flex justify-content-between col-4">
                                                             @if(isset($stats['global_stats']) && isset($stats['global_stats']['effectif']) && isset($stats['global_stats']['presents']) && isset($stats['global_stats']['absents']))
@@ -181,8 +181,9 @@
                                                             </span>
                                                         </span>
                                                     </h5>
-
+                                                    <hr class="m-0 p-0 w-100 bg-warning">
                                                 </blockquote>
+
                                             </div>
                                             <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white text-center">
                                                 <col>
@@ -342,7 +343,7 @@
                                     <div class="m-0">
                                         <div class="w-100 m-0 p-0 mt-3">
                                             <div class="w-100 p-0 m-0">
-                                                <blockquote class="border-warning bg-success text-black-50">
+                                                <blockquote class="border-warning bg-success w-100 mx-auto text-black-50">
                                                     <h5 class="m-0 h6 p-0 w-100 text-black-50 d-flex justify-content-between">
                                                         <span class="d-flex mt-2 justify-content-between col-4">
                                                             @if(isset($stats['global_stats']) && isset($stats['global_stats']['effectif']) && isset($stats['global_stats']['presents']) && isset($stats['global_stats']['absents']))
@@ -378,7 +379,7 @@
                                                             <span wire:click="getStats" class="btn btn-primary border border-white px-2 m-0" type="submit">Recharger les données</span>
                                                         </span>
                                                     </h5>
-
+                                                    <hr class="m-0 p-0 w-100 bg-warning">
                                                 </blockquote>
                                             </div>
                                             <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white text-center">
@@ -387,10 +388,10 @@
                                                 <col>
                                                 <col>
                                                 <tr class="text-center">
-                                                    <th class="bg-info text-black-50" scope="col">No</th>
-                                                    <th class="bg-info text-black-50" scope="col">Intervalles</th>
-                                                    <th class="bg-info text-black-50" scope="col">Nombres</th>
-                                                    <th class="bg-info text-black-50" scope="col">Listes</th>
+                                                    <th class="bg-secondary text-black-50" scope="col">No</th>
+                                                    <th class="bg-secondary text-black-50" scope="col">Intervalles</th>
+                                                    <th class="bg-secondary text-black-50" scope="col">Nombres</th>
+                                                    <th class="bg-secondary text-black-50" scope="col">Listes</th>
                                                 </tr>
                                                 @if(isset($stats['stats']))
                                                     @foreach($stats['stats'] as $intv => $data)

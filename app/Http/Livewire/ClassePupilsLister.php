@@ -6,9 +6,9 @@ use App\Events\DetachPupilsFromSchoolYearEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Pupil;
 use App\Models\SchoolYear;
-use Barryvdh\DomPDF\PDF;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use PDF;
 
 class ClassePupilsLister extends Component
 {
@@ -93,6 +93,52 @@ class ClassePupilsLister extends Component
 
     public function downloadPDF()
     {
+
+        $school_year_model = $this->getSchoolYear();
+
+        $classe = $school_year_model->findClasse($this->classe_id);
+        
+        $school_years = SchoolYear::all();
+        
+        $pupils = [];
+
+        if(session()->has('classe_subject_selected') && session('classe_subject_selected')){
+
+            $subject_id = intval(session('classe_subject_selected'));
+
+            if($classe && in_array($subject_id, $classe->subjects->pluck('id')->toArray())){
+
+                session()->put('classe_subject_selected', $subject_id);
+
+                $classe_subject_selected = $subject_id;
+            }
+            else{
+                $classe_subject_selected = null;
+            }
+        }
+        else{
+            $classe_subject_selected = null;
+        }
+
+        if($classe){
+            
+            $pupils = $classe->getPupils($school_year_model->id, $this->search);
+        }
+
+        $is_loading = false;
+        $editingPupilName = false;
+        $pupil_id = $this->pupil_id;
+
+        view()->share('classe', $classe);
+        view()->share('pupils', $pupils);
+        view()->share('pupil_id', $pupil_id);
+        view()->share('is_loading', false);
+        view()->share('editingPupilName', $editingPupilName);
+        view()->share('classe_subject_selected', $classe_subject_selected);
+
+        $pdf = PDF::loadView('livewire.classe-pupils-lister', [$classe, $pupils, $classe_subject_selected, $is_loading, $editingPupilName, $pupil_id]);
+
+        return $pdf->save('pdf.pdf');
         
     }
 

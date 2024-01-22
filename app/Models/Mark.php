@@ -15,7 +15,7 @@ class Mark extends Model
 {
     use HasFactory, SoftDeletes, MarkTraits;
 
-    const DELAYED = 375;
+    const DELAYED = 48; // For three hours among
 
     public function getDelay()
     {

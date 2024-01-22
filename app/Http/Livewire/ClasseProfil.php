@@ -795,7 +795,7 @@ class ClasseProfil extends Component
 
                     if($teacher_can || $user->isAdminAs('master')){
 
-                        $not_secure = $user->teacher->ensureThatTeacherCanAccessToClass($classe_id);
+                        $not_secure = $user->ensureThatTeacherCanAccessToClass($classe_id);
 
                         if($not_secure || $user->isAdminAs('master')){
 
