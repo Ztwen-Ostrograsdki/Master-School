@@ -198,11 +198,13 @@ class ClasseMarksLister extends Component
 
                 $epeMaxLenght = 2;
             }
-            if($participMaxLenght < 2){
+            if($participMaxLenght <= 2){
 
-                $participMaxLenght = 2;
+               
             }
-            if($devMaxLenght < 2){
+
+             $participMaxLenght = 1;
+            if($devMaxLenght <= 2){
 
                 $devMaxLenght = 2;
             }
@@ -251,14 +253,22 @@ class ClasseMarksLister extends Component
 
         $relaodNow = $this->relaodNow;
 
+        $printing = true;
 
-        // $pdf = PDF::loadView('livewire.classe-marks-lister', 
-        //             compact(
-        //                 'classe',
-        //                 'current_period',
-        //                 'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model','teacher_profil', 'subject_selected', 'computedRank', 'is_loading', 'is_loading', 'relaodNow', 'classe_subject_selected'
-        //             )
-        //         );
+
+        $pdf = PDF::loadView('livewire.classe-marks-lister', 
+                    compact(
+                        'classe',
+                        'current_period',
+                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model','teacher_profil', 'subject_selected', 'computedRank', 'is_loading', 'is_loading', 'relaodNow', 'classe_subject_selected', 'printing'
+                    )
+                );
+
+        $pdf->set_paper("A4", 'paysage');
+
+        $name = $classe->name . '-notes-' . $semestre_type . '-' . $this->semestre_selected . '-' . $school_year_model->school_year . '.pdf';
+
+         return $pdf->save($name);
 
 
     }
@@ -286,6 +296,8 @@ class ClasseMarksLister extends Component
     public function render()
     {
         $pupils = [];
+
+        $printing = false;
 
         $marks = [];
 
@@ -464,7 +476,7 @@ class ClasseMarksLister extends Component
                     compact(
                         'classe',
                         'current_period',
-                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model'
+                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model', 'printing'
                     )
                 );
     }

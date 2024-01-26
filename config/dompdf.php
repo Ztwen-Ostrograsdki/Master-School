@@ -66,6 +66,11 @@ return array(
          */
         "temp_dir" => sys_get_temp_dir(),
 
+
+        "orientation" => 'landscape',
+
+        "size" => 11,
+
         /**
          * ==== IMPORTANT ====
          *

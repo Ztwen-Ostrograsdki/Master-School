@@ -16,6 +16,11 @@ trait MarkTraits{
     {
         $auth = auth()->user();
 
+        if($auth->isAdminAs('master')){
+
+            return true;
+        }
+
         $updated = $this->updated_at;
 
         $to_times = Carbon::parse($updated)->timestamp;

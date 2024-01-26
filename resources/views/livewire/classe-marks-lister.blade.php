@@ -1,4 +1,5 @@
 <div>
+
     <div class="w-100 my-1">
         @if(!$teacher_profil)
             <select wire:model="classe_subject_selected" class="form-select custom-select w-auto d-block ">
@@ -35,12 +36,11 @@
             @endif
             @if($classe && $classe->classeWasNotClosedForTeacher(auth()->user()->teacher->id) && $classe->classeWasNotLockedForTeacher(auth()->user()->teacher->id))
                 @if($classe && $subject_selected)
-                    <span class="text-warning float-right btn btn-secondary border">
+                    <span class="text-warning float-right btn btn-secondary border ml-1">
                         @if($classe->hasSubjectsSanctions(session('semestre_selected'), $subject_selected->id, $school_year_model->id , true))
                             <span wire:click="desactivated({{$classe->id}})" title="Ne pas prendre en compte les sanctions" class="d-inline-block w-100 cursor-pointer z-scale">
                                 <small>Pas tenir</small>
                                 <span class="bi-exclamation-triangle text-warning"></span>
-
                             </span>
                         @else
                             <span wire:click="activated({{$classe->id}})" title="Prendre en compte les sanctions" class="d-inline-block w-100 cursor-pointer z-scale">
@@ -67,34 +67,35 @@
                         @endif
                     </span>
                 @endif
-                <span wire:click="manageModality" class="btn btn-primary z-scale border border-white float-right mx-1" title="Editer les modalités de calcule de moyenne dans la matière sélectionnée dans cette classe">
+                <span wire:click="manageModality" class="btn btn-primary z-scale border border-white float-right mr-1" title="Editer les modalités de calcule de moyenne dans la matière sélectionnée dans cette classe">
                     <span class="fa bi-pen"></span>
                     <span class="fa bi-calculator"></span>
-                    <span>Editer</span>
+                    <small>Editer</small>
                 </span>
             @endif
         @endif
         @if(auth()->user()->isAdminAs('master'))
             @if(!$teacher_profil && $classe)
-                <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right mx-1 z-scale" title="Ajouter une matière à cette classe">
+                <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right mr-1 z-scale" title="Ajouter une matière à cette classe">
                     <span class="fa fa-bookmark"></span>
-                    <span>Ajouter</span>
+                    <small>Ajouter</small>
                 </span>
             @endif
         @endif
         @if($classe && $pupils)
             @if($marks)
-            <span wire:click="refreshClasseMarks('{{$classe->id}}')" class="btn btn-danger border z-scale border-white mx-2 float-right" title="Vider des notes de cette classe">
+            <span wire:click="refreshClasseMarks('{{$classe->id}}')" class="btn btn-danger border z-scale border-white mx-1 float-right" title="Vider des notes de cette classe">
                 <span class="fa fa-trash"></span>
-                <span>Vider notes</span>
+                <small>Vider</small>
             </span>
             @endif
-        <span wire:click="insertClasseMarks" class="btn btn-primary border z-scale border-white mx-2 float-right" title="Insérer des notes de classe">
+        <span wire:click="insertClasseMarks" class="btn btn-primary border z-scale border-white mr-3 float-right" title="Insérer des notes de classe">
             <span class="fa fa-upload"></span>
-            <span>Insérer notes</span>
+            <small>Insérer</small>
         </span>
         @endif
-        <hr class="w-100 bg-warning text-warning p-0 m-0 mt-3">
+        <hr class="w-100 bg-warning text-warning p-0 m-0 mt-4">
+        <hr class="w-100 bg-warning text-warning p-0 m-0 mt-1">
     </div>
     @if($is_loading)
     <div class="w-100 d-flex justify-content-center flex-column">
@@ -224,7 +225,7 @@
                                 @if($marks[$p->id]['epe'])
                                     @foreach ($marks[$p->id]['epe'] as $m => $epe)
                                         <td title="interrogation No {{$epe->mark_index}}" wire:click="setTargetedMark({{$epe->id}})" class="text-center cursor-pointer @if($epe->value == 0) text-warning @endif ">
-                                            <span class="w-100 cursor-pointer @if($epe->forget) text-dark @endif  @if($epe->forced_mark) text-white-50 @endif" @if($epe->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($epe->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
+                                            <span class="w-100 cursor-pointer @if($epe->forget) text-cyan @endif  @if($epe->forced_mark) text-orange @endif" @if($epe->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($epe->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}} </span>
                                         </td>
                                     @endforeach
                                     @if ($marks[$p->id]['epe'] && count($marks[$p->id]['epe']) < $epeMaxLenght)
