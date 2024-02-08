@@ -132,11 +132,15 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
 
                             $dev_marks = $data['devoir'];
 
-                            if($epe_marks || $dev_marks){
+                            $participation_marks = $data['participation'];
+
+                            if($epe_marks || $dev_marks || $participation_marks){
 
                                 $epes = [];
 
                                 $devs = [];
+
+                                $parts = [];
 
                                 if($epe_marks){
                                     $epes = explode('-', $epe_marks);
@@ -145,6 +149,10 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
                                 if($dev_marks){
                                     $devs = explode('-', $dev_marks);
                                 }
+
+                                if($participation_marks){
+                                    $parts = explode('-', $participation_marks);
+                                }
                                 
                                 $tabs = [];
 
@@ -152,9 +160,13 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
 
                                 $dev_tabs = [];
 
+                                $parts_tabs = [];
+
                                 $epe_key_index = 1;
 
                                 $dev_key_index = 1;
+
+                                $part_key_index = 1;
 
                                 
                                 if($epes !== []){
@@ -240,6 +252,48 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
                                     }
                                 }
 
+                                if($parts !== []){
+                                    $has_part_marks_index = $school_year_model->marks()
+                                                                             ->where('pupil_id', $pupil->id)
+                                                                             ->where('classe_id', $classe_id)
+                                                                             ->where('subject_id', $subject_id)
+                                                                             ->where('semestre', $semestre)
+                                                                             ->where('type', 'participation')
+                                                                             ->pluck('mark_index')
+                                                                             ->toArray();
+
+                                    if(count($has_part_marks_index) > 0){
+
+                                        $part_mark_index = max($has_part_marks_index) + 1;
+                                    }
+                                    else{
+
+                                       $part_mark_index = 1;
+                                    }
+
+                                    $part_key_index = $part_mark_index;
+
+                                    foreach($parts as $partcp){
+
+                                        $mark_index_was_existed = $pupil->marks()
+                                                                        ->where('classe_id', $classe_id)
+                                                                        ->where('subject_id', $subject_id)
+                                                                        ->where('marks.school_year_id', $school_year_model->id)
+                                                                        ->where('semestre', $semestre)->where('type', "participation")
+                                                                        ->where('mark_index', $part_key_index)
+                                                                        ->first();
+
+                                        if(!$mark_index_was_existed){
+
+                                            $parts_tabs[$part_key_index] = floatval($partcp);
+
+                                            $part_key_index++;
+
+                                        }
+                                    }
+
+                                }
+
                                 if($epe_tabs !== []){
                                         
                                     foreach($epe_tabs as $epe_k_index => $validEpe){
@@ -261,6 +315,32 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
                                         if ($epe_mark) {
                                             
                                             $school_year_model->marks()->attach($epe_mark->id);
+                                        }
+
+                                    }
+                                }
+
+                                if($parts_tabs !== []){
+                                        
+                                    foreach($parts_tabs as $part_k_index => $validPart){
+
+                                        $part_mark = Mark::create([
+                                            'value' => $validPart, 
+                                            'pupil_id' => $pupil->id, 
+                                            'user_id' => $user->id, 
+                                            'creator' => $user->id, 
+                                            'subject_id' => $subject_id, 
+                                            'school_year_id' => $school_year_model->id, 
+                                            'classe_id' => $classe_id, 
+                                            'semestre' => $semestre, 
+                                            'type' => 'participation', 
+                                            'mark_index' => $part_k_index, 
+                                            'level_id' => $pupil->level_id, 
+                                        ]);
+
+                                        if ($part_mark) {
+                                            
+                                            $school_year_model->marks()->attach($part_mark->id);
                                         }
 
                                     }
@@ -398,8 +478,5 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
             }
 
         }
-
-        
-
     }
 }

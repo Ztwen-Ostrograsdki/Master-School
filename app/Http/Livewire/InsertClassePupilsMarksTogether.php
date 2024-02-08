@@ -33,15 +33,17 @@ class InsertClassePupilsMarksTogether extends Component
 
     public $epe_marks;
 
+    public $participation_marks;
+
     public $dev_marks;
 
-    public $type = 'epe';
+    public $type = 'epe-devoir';
 
     public $semestre_id = 1;
 
     public $subject;
 
-    public $title = "Insertion de nouvelle notes de classe";
+    public $title = "Insertion de nouvelles notes de classe";
 
     public $classe;
 
@@ -53,7 +55,7 @@ class InsertClassePupilsMarksTogether extends Component
     use ModelQueryTrait;
 
 
-    protected $rules = ['subject_id' => 'required|int'];
+    protected $rules = ['subject_id' => 'required|int', 'type' => 'required|string'];
 
     public function render()
     {
@@ -85,6 +87,75 @@ class InsertClassePupilsMarksTogether extends Component
 
         $this->subject = $subject;
 
+    }
+
+
+    public function updatedType($type)
+    {
+        $this->type = $type;
+
+        $marks = $this->marks;
+
+        if(in_array($type, ['epe', 'epe-devoir', 'devoir', 'participation'])){
+
+            if($marks !== []){
+
+                foreach($marks as $p_id => $p_ms){
+
+                    $epes = $p_ms['epe'];
+
+                    $devs = $p_ms['devoir'];
+
+                    $parts = $p_ms['participation'];
+
+
+                    if($this->type == 'epe'){
+
+                        unset($devs);
+
+                        unset($parts);
+                    }
+                    elseif($this->type == 'epe-devoir'){
+
+                        unset($parts);
+
+                    }
+                    elseif($this->type == 'devoir'){
+
+                        unset($epes);
+
+                        unset($parts);
+
+                    }
+                    elseif($this->type == 'participation'){
+
+                        unset($devs);
+
+                        unset($epes);
+
+                    }
+                    else{
+
+
+                    }
+
+
+                }
+
+            }
+        }
+        else{
+
+            $this->addError('type', "Type invalide");
+
+            // $this->reset('epe_marks', 'dev_marks', 'participation_marks');
+
+        }
+
+
+        
+
+        
     }
 
 
@@ -205,13 +276,23 @@ class InsertClassePupilsMarksTogether extends Component
 
                     $data = ['user' => $user, 'classe' => $classe, 'subject' => $subject, 'marks' => $marks, 'semestre' => $semestre, 'school_year_model' => $school_year_model];
 
-                    ClasseMarksInsertionCreatedEvent::dispatch($data);
 
-                    $this->dispatchBrowserEvent('hide-form');
+                    if($marks !== []){
+
+                        ClasseMarksInsertionCreatedEvent::dispatch($data);
+
+                        $this->dispatchBrowserEvent('hide-form');
+
+                        $this->reset('classe_id', 'semestre_id', 'subject_id', 'subject', 'marks', 'school_year', 'classe', 'targeted_pupil');
+
+
+
+                    }
+
 
                     // $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'NOTES SOUMISES', 'message' => "Les notes ont été soumises avec succès!", 'type' => 'success']);
 
-                    $this->reset('classe_id', 'semestre_id', 'subject_id', 'subject', 'marks', 'school_year', 'classe', 'targeted_pupil');
+                   
                    
                 }
                 else{
@@ -240,11 +321,13 @@ class InsertClassePupilsMarksTogether extends Component
 
         $error = false;
 
-        if($this->epe_marks || $this->dev_marks ){
+        if($this->epe_marks || $this->dev_marks || $this->participation_marks){
 
             $epe_marks = explode('-', $this->epe_marks);
 
             $dev_marks = explode('-', $this->dev_marks);
+
+            $participation_marks = explode('-', $this->participation_marks);
 
             if($epe_marks !== []){
 
@@ -271,7 +354,24 @@ class InsertClassePupilsMarksTogether extends Component
 
                         $error = true;
                     }
-                    elseif($dev && (floatval($dev) > 20 || floatval($epe) < 0)){
+                    elseif($dev && (floatval($dev) > 20 || floatval($dev) < 0)){
+
+                        $error = true;
+                    }
+
+                }
+
+            }
+
+            if($participation_marks !== []){
+
+                foreach($participation_marks as $part){
+
+                    if($part && !is_numeric($part)){
+
+                        $error = true;
+                    }
+                    elseif($part && (floatval($part) > 20 || floatval($part) < 0)){
 
                         $error = true;
                     }
@@ -286,18 +386,26 @@ class InsertClassePupilsMarksTogether extends Component
 
                     unset($marks[$pupil_id]);
 
-                    $marks[$pupil_id] = ['epe' => $this->epe_marks, 'devoir' => $this->dev_marks];
+                    $marks[$pupil_id] = [
+                        'epe' => $this->epe_marks, 
+                        'devoir' => $this->dev_marks, 
+                        'participation' => $this->participation_marks
+                    ];
 
                 }
                 else{
 
-                    $marks[$pupil_id] = ['epe' => $this->epe_marks, 'devoir' => $this->dev_marks];
+                    $marks[$pupil_id] = [
+                        'epe' => $this->epe_marks, 
+                        'devoir' => $this->dev_marks, 
+                        'participation' => $this->participation_marks
+                    ];
 
                 }
 
                 $this->marks = $marks;
 
-                $this->reset('epe_marks', 'dev_marks');
+                $this->reset('epe_marks', 'dev_marks', 'participation_marks');
 
             }
             else{
@@ -308,7 +416,7 @@ class InsertClassePupilsMarksTogether extends Component
 
         }
         else{
-            $this->dispatchBrowserEvent('Toast', ['title' => 'NOTES VIDES', 'message' => "Veuillez insérer des notes d'abord!", 'type' => 'warning']);
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'NOTES VIDES', 'message' => "Veuillez insérer des notes d'abord!", 'type' => 'warning']);
         }
 
 
@@ -325,17 +433,47 @@ class InsertClassePupilsMarksTogether extends Component
 
             $this->dev_marks = $this->marks[$pupil_id]['devoir'];
 
+            $this->participation_marks = $this->marks[$pupil_id]['participation'];
+
         }
     }
 
-    public function retrieveFromMarks($pupil_id)
+    public function retrievedPupilMarksFromMarksData($pupil_id)
     {
         $marks = $this->marks;
 
-        unset($data[$pupil_id]);
+        $this->targeted_pupil 
+                            ? (
+                                $pupil_id == $this->targeted_pupil 
+                                ? $this->reset('targeted_pupil') 
+                                : $this->targeted_pupil = $this->targeted_pupil
+                               ) 
+                            : $this->reset('targeted_pupil');
+
+        unset($marks[$pupil_id]);
+
+        $this->reset('epe_marks', 'dev_marks', 'participation_marks');
 
         $this->marks = $marks;
 
+    }
+
+    /**
+     * To clean the last inserting marks data
+     */
+    public function toback()
+    {
+        $this->resetErrorBag();
+
+        $this->reset('epe_marks', 'dev_marks', 'participation_marks', 'targeted_pupil');
+    }
+
+    /**
+     * To clean all marks insert data
+     */
+    public function flushMarksTabs()
+    {
+        $this->reset('epe_marks', 'dev_marks', 'participation_marks', 'marks', 'targeted_pupil');
     }
 }
 

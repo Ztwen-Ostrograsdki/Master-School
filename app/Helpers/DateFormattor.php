@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Helpers\Formattors\Formattors;
 use Illuminate\Support\Carbon;
 
 
@@ -50,7 +51,7 @@ trait DateFormattor{
     ];
 
 
-    public function __getDateAsString($date = null, $substr = 3)
+    public function __getDateAsString($date = null, $substr = 3, $withTime = false)
     {
         if($date){
             $parts = array_reverse(explode('-', $date));
@@ -63,10 +64,26 @@ trait DateFormattor{
             $month = Carbon::parse($date)->locale('fr')->monthName;
             $year = Carbon::parse($date)->locale('fr')->year;
 
+            $fetch = "";
+
             if($substr){
-                return mb_substr($day, 0, 3) . ' ' . ($dayNumber > 9 ? $dayNumber : '0'. $dayNumber) . ' ' . mb_substr($month, 0, 3) . ' ' . $year;
+
+                $fetch = mb_substr($day, 0, 3) . ' ' . ($dayNumber > 9 ? $dayNumber : '0'. $dayNumber) . ' ' . mb_substr($month, 0, 3) . ' ' . $year;
             }
-            return $day . ' ' . ($dayNumber > 9 ? $dayNumber : '0'. $dayNumber) . ' ' . $month . ' ' . $year;
+            else{
+
+                $fetch = $day . ' ' . ($dayNumber > 9 ? $dayNumber : '0'. $dayNumber) . ' ' . $month . ' ' . $year;
+            }
+
+            if($withTime){
+
+                $fetch = $fetch .= " à " . $this->__getDateASHour();
+
+            }
+            
+
+            return $fetch;
+
         }
 
 
@@ -107,9 +124,29 @@ trait DateFormattor{
     }
 
 
+    public function __getDateASHour()
+    {
+
+        $tabs_up = explode(' ', $this->updated_at);
+
+        $dates_up = explode('-', $tabs_up[0]);
+        
+        $times_up = explode(':', $tabs_up[1]);
+
+        $this->hour_up = Formattors::numberZeroFormattor((int)$times_up[0]);
+
+        $this->min_up = Formattors::numberZeroFormattor((int)$times_up[1]);
+
+        $this->sec_up = Formattors::numberZeroFormattor((int)$times_up[2]);
+
+        return $this->hour_up . 'H ' . $this->min_up . "min " . $this->sec_up . "s";
+    }
+
+
     public function __getDate()
     {
         $this->__setDate();
+
         return $this->date;
     }
 
@@ -117,10 +154,13 @@ trait DateFormattor{
     public function __setDateAgo()
     {
         $this->__setDate();
+
         $past = mktime($this->hour, $this->min, $this->sec, $this->month, $this->day, $this->year);
+
         $past_up = mktime($this->hour_up, $this->min_up, $this->sec_up, $this->month_up, $this->day_up, $this->year_up);
         
         $diff = time() - $past;
+
         $diff_up = time() - $past_up;
 
         $this->__setDateAgoToString($this->__getTheDateAsAgo($diff, $diff_up));
@@ -147,10 +187,13 @@ trait DateFormattor{
     public function __setDateAgoToString(array $matrice)
     {
         if(!array_key_exists('updated_at', $matrice)){
+
             $this->dateAgoToString = $this->__AgoToString($matrice['created_at']);
         }
         else{
+
             $this->dateAgoToString = ($this->__strings($matrice['created_at'], $matrice['updated_at']))['created_at'];
+
             $this->dateAgoToStringForUpdated = ($this->__strings($matrice['created_at'], $matrice['updated_at']))['updated_at'];
         }
     }
@@ -165,9 +208,11 @@ trait DateFormattor{
     public function __getTimestampInSecondsBetweenDates(int $start, $end = null)
     {
         if(!$end){
+
             $end = Carbon::now();
         }
         else{
+
             $end = Carbon::parse($end);
         }
 

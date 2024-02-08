@@ -19,9 +19,11 @@ use App\Events\MigrateDataToTheNewSchoolYearEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\PaymentSystemEvent;
 use App\Events\StartNewsPupilsInsertionEvent;
+use App\Events\ThrowClasseMarksConvertionEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Events\UpdateClasseSanctionsEvent;
 use App\Listeners\AbsencesAndLatesDeleterBatcherListener;
+use App\Listeners\ClasseMarksConverterBatcherListener;
 use App\Listeners\ClasseMarksDeletionBatcherListener;
 use App\Listeners\ClasseMarksInsertionBatchListener;
 use App\Listeners\ClasseRefereesManagerBatcherListener;
@@ -144,6 +146,11 @@ class EventServiceProvider extends ServiceProvider
 
         ClasseRefereesManagerEvent::class => [
             ClasseRefereesManagerBatcherListener::class,
+        ],
+
+
+        ThrowClasseMarksConvertionEvent::class => [
+            ClasseMarksConverterBatcherListener::class,
         ],
 
     

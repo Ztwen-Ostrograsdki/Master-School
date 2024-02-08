@@ -1109,5 +1109,85 @@ trait PupilTraits{
         return count($marks) > 0;
 
     }
+
+
+    public function getChoosenMarks($classe_id, $subject_id, $semestre, $school_year_id = null)
+    {
+        $school_year_model = $this->getSchoolYear($school_year_id);
+
+        $classe = Classe::find($classe_id);
+
+        if($classe){
+
+            $epeMarks = $this->marks()
+                             ->where('marks.school_year_id', $school_year_model->id)
+                             ->where('marks.semestre', $semestre)
+                             ->where('marks.subject_id', $subject_id)
+                             ->where('marks.classe_id', $classe_id)
+                             ->where('marks.type', 'epe')
+                             ->get();
+
+            $totalMarks = count($epeMarks);
+
+            $max = $totalMarks;
+
+            $modality = $classe->averageModalities()
+                               ->where('school_year', $school_year_model->school_year)
+                               ->where('semestre', $semestre)
+                               ->where('subject_id', $subject_id)
+                               ->first();
+
+
+            if($modality && $modality->activated && $modality->modality < $totalMarks){
+
+                $max = $modality->modality;
+
+                $choosenEpesMarks = [];
+
+                $epeMarksValues = [];
+
+                foreach ($epeMarks as $epe_b) {
+
+                    $epeMarksValues[$epe_b->id] = $epe_b->value;
+                }
+
+                while (count($choosenEpesMarks) < $max) {
+                    
+                    $m = max($epeMarksValues);
+                    
+                    $key = array_search($m, $epeMarksValues);
+                    
+                    $choosenEpesMarks[$key] = $key;
+                    
+                    unset($epeMarksValues[$key]);
+                }
+
+                return $choosenEpesMarks;
+
+            }
+            elseif($modality && $modality->activated && $modality->modality >= $totalMarks){
+
+                foreach ($epeMarks as $epe) {
+
+                    $choosenEpesMarks[$epe->id] = $epe->id;
+                }
+            }
+            if(!$modality || ($modality && !$modality->activated)){
+
+                //DO ANYTHINK
+
+                $choosenEpesMarks = [];
+
+            }
+
+        }
+        else{
+
+        }
+
+
+        return $choosenEpesMarks;
+
+    }
     
 }

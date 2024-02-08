@@ -125,6 +125,10 @@ window.addEventListener('modal-classeMarksRestorer', function(e) {
     $('#marksRestorerModal').modal('show');
 });
 
+window.addEventListener('modal-classeMarksConvertion', function(e) {
+    $('#confirmClasseMarksConvertionModal').modal('show');
+});
+
 window.addEventListener('modal-insertClassePupilsMarksTogether', function(e) {
     $('#insertClassePupilsMarksTogether').modal('show', function(ex) {
         

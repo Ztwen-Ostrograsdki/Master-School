@@ -106,6 +106,10 @@ Route::get('/deconnection', function () {
     return redirect()->route('connexion');
 })->name('deconexion');
 
+Route::get('/login', function () {
+    return redirect()->route('connexion');
+});
+
 Route::get('/about', function () {
     return view('layouts/app');
    

@@ -412,6 +412,10 @@ label{
     background-color: rgba(10, 10, 40, 0.87) !important;
 }
 
+.bg-choosen-marks {
+    background-color: rgba(10, 53, 30, 0.87) !important;
+}
+
 
 .bg-secondary-light-0 {
     background-color: rgba(30, 15, 45, 0.87) !important;

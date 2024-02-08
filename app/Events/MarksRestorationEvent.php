@@ -2,6 +2,8 @@
 
 namespace App\Events;
 
+use App\Models\Classe;
+use App\Models\SchoolYear;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -39,7 +41,7 @@ class MarksRestorationEvent
      *
      * @return void
      */
-    public function __construct($classe, $school_year_model, $semestre = 'all', $subject = 'all', $type = 'all', $start = null, $end = null, $pupil_id = null)
+    public function __construct(Classe $classe, SchoolYear $school_year_model, $semestre = 'all', $subject = 'all', $type = 'all', $start = null, $end = null, $pupil_id = null)
     {
         $this->classe = $classe;
 

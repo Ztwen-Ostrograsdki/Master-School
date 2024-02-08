@@ -53,7 +53,7 @@ class MarkObserver
      */
     public function restored(Mark $mark)
     {
-        $mark->value > 0 ? $this->doJob($mark) : $this->doNotJob();
+        // $mark->value > 0 ? $this->doJob($mark) : $this->doNotJob();
     }
 
     /**
@@ -64,7 +64,7 @@ class MarkObserver
      */
     public function forceDeleted(Mark $mark)
     {
-        $mark->value > 0 ? $this->doJob($mark) : $this->doNotJob();
+        // $mark->value > 0 ? $this->doJob($mark) : $this->doNotJob();
     }
 
 

@@ -299,7 +299,7 @@ class MarksRestorerComponent extends Component
 
             $this->dispatchBrowserEvent('hide-form');
 
-            MarksRestorationEvent::dispatch($classe->id, $school_year_model->id, $semestre, $subject, $type, $start, $end, $pupil_id);
+            MarksRestorationEvent::dispatch($classe, $school_year_model, $semestre, $subject, $type, $start, $end, $pupil_id);
 
         }
     }

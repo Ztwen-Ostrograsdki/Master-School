@@ -14,6 +14,7 @@
         @livewire('reset-absences-and-lates-confirmation')
         @livewire('insert-pupil-marks')
         @livewire('insert-classe-pupils-marks-together')
+        @livewire('classe-marks-convertion-confirmation')
 
     @endif
     

@@ -3,7 +3,7 @@
         <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark">
             @if(session()->has('classe_profil_section_selected') && session('classe_profil_section_selected') && session('classe_profil_section_selected') !== 'classe_general_stats' && session('classe_profil_section_selected') !== 'time_plan')
             <div class="card-header bg-dark my-2"> 
-                <h5 class="card-title cursor-pointer" data-card-widget="collapse">Informations Générales {{ $classe ? 'de la ' . $classe->name : "" }}</h5>
+                {{-- <h5 class="card-title cursor-pointer mr-auto " data-card-widget="collapse">Informations Générales {{ $classe ? 'de la ' . $classe->name : "" }}</h5> --}}
                   <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
                       <i class="fa fa-minus"></i>
@@ -12,9 +12,9 @@
                       <i class="fa fa-times"></i>
                     </button>
                   </div>
-                  <div class="card-tools">
+                  <div class="card-title">
                     @if($classe)
-                    <ul class="nav nav-pills ml-auto position-relative" style="right: 100px;">
+                    <ul class="nav nav-pills ml-auto">
                         <li class="nav-item dropdown">
                           <a class="nav-link text-white dropdown-toggle border border-warning" data-toggle="dropdown" href="#">
                             Reglages <span class="caret"></span>
@@ -29,6 +29,8 @@
                             <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
                             <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Rafraichir les retards</a>
                             <a class="dropdown-item" wire:click="insertClasseMarks"  tabindex="-1" href="#">Insérer des notes de classe</a>
+                            <a class="dropdown-item" wire:click="convertClasseLastMarksToParticipateMarks"  tabindex="-1" href="#">Convertir des notes vers un autre type</a>
+                            <a class="dropdown-item" wire:click="insertClasseParticipateMarks"  tabindex="-1" href="#">Insérer des notes de Participation de classe</a>
                             <a class="dropdown-item" wire:click="createNewClasse" tabindex="-1" href="#">Créer une classe</a>
                             <a class="dropdown-item" wire:click="editClasseGroup({{$classe->id}})" tabindex="-1" href="#">Modifier la promotion</a>
                             <a wire:click="editClasseSubjects({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Définir les matières</a>
@@ -44,12 +46,16 @@
                             <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
                           </div>
                         </li>
+
                     </ul>
                     @endif
                 </div>
             </div>
             <div class="card-body">
                 <div class="container-fluid m-0 p-0 w-100">
+                    <hr class="bg-secondary w-100 m-0 p-0">
+                    <h5 class="cursor-pointer w-100 text-orange m-0 p-0 py-2 ">Informations Générales {{ $classe ? 'de la ' . $classe->name : "" }}</h5>
+                    <hr class="bg-secondary w-100 m-0 p-0 mb-2">
                     <div class="card-deck w-100 p-0 m-0">
                         <div class="card" href="#tab_1" data-toggle="tab">
                             <div class="info-box m-0 p-0 bg-info">

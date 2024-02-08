@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\DateFormattor;
 use App\Helpers\ModelTraits\MarkTraits;
 use App\Models\Classe;
 use App\Models\Level;
@@ -15,7 +16,9 @@ class Mark extends Model
 {
     use HasFactory, SoftDeletes, MarkTraits;
 
-    const DELAYED = 48; // For three hours among
+    use DateFormattor;
+
+    const DELAYED = 4; // For three hours among
 
     public function getDelay()
     {
@@ -92,6 +95,15 @@ class Mark extends Model
     public function getEditor()
     {
         return $this->editor ? User::find($this->editor) : null;
+    }
+
+    public function getDateAgoFormated($created_at = false)
+    {
+        $this->__setDateAgo();
+        if($created_at){
+            return $this->dateAgoToString;
+        }
+        return $this->dateAgoToStringForUpdated;
     }
 
 }

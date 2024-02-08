@@ -187,7 +187,7 @@ class ClasseMarksLister extends Component
 
             $devMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'devoir') + 1;
 
-            $participMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'participation') + 1;
+            $participMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'participation');
 
             if(($epeMaxLenght < 1 && $participMaxLenght < 1 && $devMaxLenght < 1)){
 
@@ -198,12 +198,14 @@ class ClasseMarksLister extends Component
 
                 $epeMaxLenght = 2;
             }
-            if($participMaxLenght <= 2){
+            if($participMaxLenght < 1){
 
+                $participMaxLenght = 1;
                
             }
 
-             $participMaxLenght = 1;
+           
+
             if($devMaxLenght <= 2){
 
                 $devMaxLenght = 2;
@@ -416,9 +418,9 @@ class ClasseMarksLister extends Component
 
             $epeMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'epe') + 1;
 
-            $devMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'devoir') + 1;
+            $devMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'devoir');
 
-            $participMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'participation') + 1;
+            $participMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'participation');
 
             if(($epeMaxLenght < 1 && $participMaxLenght < 1 && $devMaxLenght < 1)){
 
@@ -429,11 +431,11 @@ class ClasseMarksLister extends Component
 
                 $epeMaxLenght = 2;
             }
-            if($participMaxLenght < 2){
+            if($participMaxLenght < 1){
 
-                $participMaxLenght = 2;
+                $participMaxLenght = 1;
             }
-            if($devMaxLenght < 2){
+            if($devMaxLenght <= 2){
 
                 $devMaxLenght = 2;
             }

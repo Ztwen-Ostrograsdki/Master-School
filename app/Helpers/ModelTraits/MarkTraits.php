@@ -16,10 +16,10 @@ trait MarkTraits{
     {
         $auth = auth()->user();
 
-        if($auth->isAdminAs('master')){
+        // if($auth->isAdminAs('master')){
 
-            return true;
-        }
+        //     return true;
+        // }
 
         $updated = $this->updated_at;
 

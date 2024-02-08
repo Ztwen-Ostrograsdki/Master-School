@@ -6,6 +6,7 @@ use App\Events\ClasseMarksWasFailedEvent;
 use App\Events\InitiateClasseDataUpdatingEvent;
 use App\Events\MarksRestorationEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
+use App\Jobs\JobMarksRestorer;
 use Illuminate\Bus\Batch;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -25,6 +26,8 @@ class MarksRestorationBatcherListener
         InitiateClasseDataUpdatingEvent::dispatch($event->user, $event->classe);
 
         $batch = Bus::batch([
+
+            new JobMarksRestorer($event->classe, $event->school_year_model, $event->data),
 
 
             ])->then(function(Batch $batch) use ($event){

@@ -66,6 +66,8 @@ class Pupil extends Model
     public function updatePupilEducmaster($value)
     {
         return $this->forceFill(['educmaster' => $value,])->save();
+
+        
     }
 
     public function updatePupilMatricule($value)

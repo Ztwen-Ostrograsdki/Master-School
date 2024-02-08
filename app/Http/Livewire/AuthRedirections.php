@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Events\NewUserConnectedEvent;
 use App\Events\NewUserRegistredEvent;
 use App\Helpers\AdminTraits\AdminTrait;
+use App\Helpers\Redirectors\RedirectorsDriver;
 use App\Models\LockedUsersRequest;
 use App\Models\Role;
 use App\Models\User;
@@ -93,15 +94,20 @@ class AuthRedirections extends Component
 
     public function login()
     {
-        
+
         $this->reset('userNoConfirm');
+
         $this->validateOnly('email_auth');
+
         $this->validate([
             'email_auth' => 'required|email',
             'password_auth' => 'required|string|min:4'
         ]);
+
         $credentials = ['email' => $this->email_auth, 'password' => $this->password_auth];
+
         $u = User::where('email', $this->email_auth)->first();
+
         if($u && !$u->hasVerifiedEmail()){
             $this->user = $u;
             $this->email = $u->email;
@@ -119,24 +125,24 @@ class AuthRedirections extends Component
         }
         else{
             if(Auth::attempt($credentials)){
+
                 $this->user = User::find(auth()->user()->id);
+
                 if($this->user->isAdmin()){
+
                     // $this->user->__generateAdminKey();
                 }
+
                 $this->dispatchBrowserEvent('Toast', ['title' => 'Connexion réussie!!!', 'message' => "Vous serez redirigé vers votre profil!", 'type' => 'success']);
                 // $event = new NewUserConnectedEvent($this->user);
                 // broadcast($event);
-                if($this->user->isAdminAs('master')){
-                    $this->user->___backToAdminRoute();
-                }
-                else{
-                    $this->user->__backToUserProfilRoute();
-                }
+
+                RedirectorsDriver::userRedirectorDriver($this->user);
             }
             else{
-                session()->flash('message', 'Aucune correspondance trouvée');
-                session()->flash('type', 'danger');
+
                 $this->addError('email_auth', "Vos renseignements ne sont pas correctes!");
+
                 $this->addError('password_auth', "Vos renseignements ne sont pas correctes!");
             }
         }
@@ -148,19 +154,27 @@ class AuthRedirections extends Component
     public function register()
     {
         $this->auth = Auth::user();
+
         if($this->auth){
+
             $this->password = '00000';
+
             $this->password_confirmation = '00000';
         }
+
         $v = $this->validate([
             'pseudo' => 'required|string|unique:users|between:5, 50',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|confirmed|min:4',
             'password_confirmation' => 'required|string|min:4'
         ]);
+
         if ($v) {
+
             $v = $this->validate(['password' => new StrongPassword(false, false, false, 4)]);
+
             if($v){
+
                 $this->user = User::create([
                     'pseudo' => $this->pseudo,
                     'email' => $this->email,
@@ -169,26 +183,37 @@ class AuthRedirections extends Component
                     'role_id' => Role::first()->id,
                     'email_verified_token' => Hash::make(Str::random(16)),
                 ]);
+
                 if($this->user->id == 1){
+
                     $this->user->markEmailAsVerified();
                 }
                 else{
+
                     $masterAdmin = User::find(1);
+
                     if($masterAdmin){
+
                         $masterAdmin->__followThisUser($this->user->id, true);
                     }
                 }
                 if(!$this->auth && $this->user->id == 1){
+
                     $this->dispatchBrowserEvent('RegistredSelf');
+
                     Auth::login($this->user);
                 }
                 else{
+
                     $this->resetErrorBag();
+
                     $this->dispatchBrowserEvent('hide-form');
+
                     // $this->user->sendEmailVerificationNotification();
                     // $event = new NewUserRegistredEvent($this->user);
                     // broadcast($event);
                     session()->put('user_email_to_verify', $this->user->id);
+
                     return redirect()->route('email-verification-notify', ['id' => $this->user->id]);
                 }
                 $this->resetErrorBag();

@@ -644,6 +644,17 @@ class ClasseProfil extends Component
         $this->emit('InsertClassePupilsMarksTogetherLiveEvent', $this->classe_id);
     }
 
+    public function insertClasseParticipateMarks()
+    {
+        // $this->emit('InsertClassePupilsMarksTogetherLiveEvent', $this->classe_id, 'participation');
+    }
+
+
+    public function convertClasseLastMarksToParticipateMarks()
+    {
+        $this->emit('ThrowClasseMarksConverter', $this->classe_id, 'epe-to-participation');
+    }
+
 
     public function reloadClasseData($school_year = null)
     {

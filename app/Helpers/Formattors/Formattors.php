@@ -73,6 +73,12 @@ class Formattors{
 
 	}
 
+
+    public static function numberZeroFormattor($number)
+    {
+        return $number >= 10 ? $number : '0' . $number;
+    }
+
 	/**
 	 * Return the month of the given index
 	 * @param  int    $index numeric index the the month

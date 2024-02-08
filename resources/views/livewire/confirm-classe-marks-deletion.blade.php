@@ -8,7 +8,7 @@
                             <div class="bg-transparent p-0 py-2 col-12">
                                 @if($classe)
                                     <h6 class="text-warning text-center mx-auto p-1 m-0 py-1"> 
-                                        Vous êtes sur le point de supprimer des notes de la classe de la de classe de  {{$classe->name}} 
+                                        Vous êtes sur le point de supprimer des notes de la classe de  {{$classe->name}} 
                                         @if($pupil) de l'apprenant <span class="text-orange">{{$pupil->getName()}}</span> @endif
                                     </h6>
                                     <h6 class="letter-spacing-12 my-2 font-italic text-orange text-center mx-auto">Cette suppression est irreversible et les notes ne pourront être restaurées après suppression!</h6>
