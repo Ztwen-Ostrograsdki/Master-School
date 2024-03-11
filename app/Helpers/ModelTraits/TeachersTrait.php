@@ -252,12 +252,6 @@ trait TeachersTrait{
     }
 
 
-    public function getFormatedName()
-    {
-        return strtoupper($this->name) . ' ' . ucwords($this->surname);
-    }
-
-
     public function isTeacherOfThisYear($school_year = null)
     {
 

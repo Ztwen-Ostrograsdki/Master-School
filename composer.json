@@ -18,6 +18,7 @@
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
         "livewire/livewire": "^2.5",
+        "maatwebsite/excel": "^3.1",
         "michaelachrisco/readonly": "^0.60.0",
         "predis/predis": "^2.0",
         "realrashid/sweet-alert": "^5.0"

@@ -374,9 +374,10 @@ class EventPeriodsManager extends Component
                         $this->dispatchBrowserEvent('hide-form');
 
                         $this->emit('NewCalendarAddedLiveEvent');
+                        
                         $this->emit('relaodCalendars');
 
-                        $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Mise à jour réussie!', 'message' => "Votre évènement $this->target : $this->object avec succès", 'type' => 'success']);
+                        $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour réussie!', 'message' => "Votre évènement $this->target : $this->object avec succès", 'type' => 'success']);
                     });
                 }
 

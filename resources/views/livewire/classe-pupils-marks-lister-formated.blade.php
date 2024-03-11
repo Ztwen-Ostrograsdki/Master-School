@@ -10,52 +10,32 @@
     @else
     <div class="my-2">
         @if($pupils && $classe_subject_selected && count($pupils) > 0)
-        
             <div class="w-100 m-0 p-0 mt-3">
                 <table class="w-100 m-0 p-0 table-striped table-bordered z-table hoverable text-white text-center">
                     <col>
                     <col>
-                    @if(!$simpleFormat)
-                    <colgroup span="{{$epeMaxLenght}}"></colgroup>
-                    <colgroup span="{{$participMaxLenght}}"></colgroup>
-                    @endif
-                    <colgroup span="{{$devMaxLenght}}"></colgroup>
-                    <colgroup span="3"></colgroup>
-                    <colgroup span="1"></colgroup>
-                    <colgroup span="1"></colgroup>
+                    <col>
+                    <col span="{{$devMaxLenght}}">
+                    <col >
+                    <col span="1">
+                    <col span="1">
                     <tr class="text-center">
-                        <td rowspan="2">No</td>
-                        <td rowspan="2">Les apprenants</td>
+                        <td >No</td>
+                        <td class="py-2" >Les apprenants</td>
+                        <td >Moy. Int</td>
+                        @for ($d = 1; $d <= $devMaxLenght; $d++)
+                            <td  class="dev{{$d}}">DEV {{ $d }}</td>
+                        @endfor
+                        <td >Moy</td>
+                        <td >Moy. Coef</td>
                         @if(!$simpleFormat)
-                        <th colspan="{{$epeMaxLenght}}" scope="colgroup">Les interrogations</th>
-                        <th colspan="{{$participMaxLenght}}" scope="colgroup">Les Participations</th>
+                        <td >Rang</td>
                         @endif
-                        <th colspan="{{$devMaxLenght}}" scope="colgroup">Les devoirs</th>
-                        <th colspan="3" scope="colgroup">Les Moyennes</th>
-                        @if(!$simpleFormat)
-                        <td rowspan="2">Rang</td>
-                        @endif
-                        <td rowspan="2">
+                        <td >
                             <span class="bi-tools"></span>
                         </td>
                     </tr>
-                    <tr class="text-center">
-                        @if(!$simpleFormat)
-                            @for ($e = 1; $e <= $epeMaxLenght; $e++)
-                                <th scope="col" class="epe{{$e}}">EPE {{ $e }}</th>
-                            @endfor
-                            @for ($p = 1; $p <= $participMaxLenght; $p++)
-                                <th scope="col" class="particip{{$p}}">Part. {{ $p }}</th>
-                            @endfor
-                        @endif
-                        @for ($d = 1; $d <= $devMaxLenght; $d++)
-                            <th scope="col" class="dev{{$d}}">DEV {{ $d }}</th>
-                        @endfor
-                        <th scope="col">Moy. Int</th>
-                        <th scope="col">Moy</th>
-                        <th scope="col">Moy. Coef</th>
-                        
-                    </tr>
+                    
                     @foreach($pupils as $k => $p)
                         <tr class="text-left">
                             <th scope="row" class="text-center">{{ $loop->iteration }}</th>
@@ -89,54 +69,13 @@
                                 </span>
                             </th>
                             @if(isset($marks[$p->id]) && $marks[$p->id])
-                                @if(!$simpleFormat)
-                                    {{-- LES EPE --}}
-                                    @if($marks[$p->id]['epe'])
-                                        @foreach ($marks[$p->id]['epe'] as $m => $epe)
-                                            <td title="interrogation No {{$epe->mark_index}} éditée le {{ ucwords($epe->__getDateAsString($epe->updated_at, null, true)) }} " wire:click="setTargetedMark({{$epe->id}})" class="@if(in_array($epe->id, $p->getChoosenMarks($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')))) bg-choosen-marks @endif text-center cursor-pointer @if($epe->value == 0) text-warning @endif ">
-                                                <span class="w-100 cursor-pointer @if($epe->forget) text-cyan @endif  @if($epe->forced_mark) text-orange @endif" @if($epe->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($epe->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $epe->value >= 10 ? $epe->value : '0'.$epe->value}}
-                                                </span>
-                                            </td>
-                                        @endforeach
-                                        @if ($marks[$p->id]['epe'] && count($marks[$p->id]['epe']) < $epeMaxLenght)
-                                            @for ($e = (count($marks[$p->id]['epe']) + 1); $e <= $epeMaxLenght; $e++)
-                                                <td wire:click="insertMarks({{$p->id}})" class="text-center cursor-pointer">
-                                                    <span class="w-100 cursor-pointer"> - </span>
-                                                </td>
-                                            @endfor
-                                        @endif
+                            <td class=" text-center moy-epe-note {{$averageEPETab[$p->id] !== null ? ($averageEPETab[$p->id] >= 10 ? 'text-success' : 'text-danger') : 'text-warning' }} "> 
+                                    @if($averageEPETab)
+                                        {{ $averageEPETab[$p->id] !== null ? ($averageEPETab[$p->id] >= 10 ? $averageEPETab[$p->id] : '0'.$averageEPETab[$p->id]) : ' - ' }} 
                                     @else
-                                        @for ($epev=1; $epev <= $epeMaxLenght; $epev++)
-                                            <td wire:click="insertMarks({{$p->id}})" class="text-center cursor-pointer">
-                                                <span class="w-100 cursor-pointer"> - </span>
-                                            </td>
-                                        @endfor
+                                        {{ ' - ' }}
                                     @endif
-
-                                    {{-- LES PARTICIPATIONS --}}
-                                    @if($marks[$p->id]['participation'])
-                                        @foreach ($marks[$p->id]['participation'] as $l => $part)
-                                            <td wire:click="setTargetedMark({{$part->id}})" title="Note de Participation No {{$part->mark_index}} éditée le {{ ucwords($part->__getDateAsString($part->updated_at, null, true)) }} " wire:click="setTargetedMark({{$part->id}})" class="text-center cursor-pointer @if($part->value == 0) text-warning @endif ">
-                                                <span class="w-100 cursor-pointer @if($part->forget) text-cyan @endif  @if($part->forced_mark) text-orange @endif" @if($part->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($part->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $part->value >= 10 ? $part->value : '0'.$part->value}} </span>
-                                            </td>
-                                        @endforeach
-                                        @if ($marks[$p->id]['participation'] && count($marks[$p->id]['participation']) < $participMaxLenght)
-                                            @for ($part=(count($marks[$p->id]['participation']) + 1); $part <= $participMaxLenght; $part++)
-                                                <td wire:click="insertMarks({{$p->id}}, 'participation')" class="text-center cursor-pointer">
-                                                    <span class="w-100 cursor-pointer"> - </span>
-                                                </td>
-                                            @endfor
-                                        @endif
-                                    @else
-                                        @for ($part_v=1; $part_v <= $participMaxLenght; $part_v++)
-                                            <td wire:click="insertMarks({{$p->id}}, 'participation')" class="text-center cursor-pointer">
-                                                <span class="w-100 cursor-pointer"> - </span>
-                                            </td>
-                                        @endfor
-                                    @endif
-                                @endif
-
-                                {{-- LES DEVOIRS --}}
+                                </td>
                                 @if ($marks[$p->id]['dev'])
                                     @foreach ($marks[$p->id]['dev'] as $q => $dev)
                                         <td title="Devoir No {{$dev->mark_index}} éditée le {{ ucwords($dev->__getDateAsString($dev->updated_at, null, true)) }} " wire:click="setTargetedMark({{$dev->id}}, 'devoir')" class="text-center cursor-pointer">
@@ -158,13 +97,6 @@
                                         </td>
                                     @endfor
                                 @endif
-                                <td class=" text-center moy-epe-note {{$averageEPETab[$p->id] !== null ? ($averageEPETab[$p->id] >= 10 ? 'text-success' : 'text-danger') : 'text-warning' }} "> 
-                                    @if($averageEPETab)
-                                        {{ $averageEPETab[$p->id] !== null ? ($averageEPETab[$p->id] >= 10 ? $averageEPETab[$p->id] : '0'.$averageEPETab[$p->id]) : ' - ' }} 
-                                    @else
-                                        {{ ' - ' }}
-                                    @endif
-                                </td>
                                 <td class=" text-center moy-note text-white-50 z-hover {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? 'bg-success' : 'bg-danger') : 'bg-secondary' }} "> 
                                     @if($averageTab)
                                         {{ $averageTab[$p->id] !== null ? ($averageTab[$p->id] >= 10 ? $averageTab[$p->id] : '0'.$averageTab[$p->id]) : ' - ' }} 
@@ -200,24 +132,12 @@
                                     </span>
                                 </td>
                             @else
-                                @if(!$simpleFormat)
-                                    @for ($ev=1; $ev <= $epeMaxLenght; $ev++)
-                                        <td class="text-center cursor-pointer">
-                                            <span  class="w-100 cursor-pointer"> - </span>
-                                        </td>
-                                    @endfor
-                                    @for ($part_v=1; $part_v <= $participMaxLenght; $part_v++)
-                                        <td class="text-center cursor-pointer">
-                                            <span class="w-100 cursor-pointer"> - </span>
-                                        </td>
-                                    @endfor
-                                @endif
+                                <td class=" text-center moy-epe-note"> </td>
                                 @for ($dv=1; $dv <= $devMaxLenght; $dv++)
                                     <td class="text-center cursor-pointer">
                                         <span class="w-100 cursor-pointer"> - </span>
                                     </td>
                                 @endfor
-                                <td class=" text-center moy-epe-note"> </td>
                                 <td class=" text-center moy-note"> - </td>
                                 <td class=" text-center moy-coef-note"> - </td>
                                 @if(!$simpleFormat)

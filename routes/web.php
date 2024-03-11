@@ -24,6 +24,7 @@ use App\Http\Livewire\RegisteringNewUser;
 use App\Http\Livewire\ResetPassword;
 use App\Http\Livewire\SchoolCalendar;
 use App\Http\Livewire\SchoolYearableComponent;
+use App\Http\Livewire\Statistics;
 use App\Http\Livewire\SubjectTableList;
 use App\Http\Livewire\TeacherListing;
 use App\Http\Livewire\TeacherListingByClasse;
@@ -78,6 +79,8 @@ Route::group(['prefix' => '/administration', 'middleware' => ['auth', 'admin']],
     Route::get('/promotion/{slug}', ClasseGroupProfil::class)->name('classe_group_profil');
     Route::get('/élève/{id}', PupilProfil::class)->name('pupil_profil');
     Route::get('/inscription-élèves/inscription-multiple', MultiplePupilInsertion::class)->name('multiple_pupil_insertion');
+    Route::get('/statistiques', Statistics::class)->name('statistics');
+
 });
 
 Route::get('/Enseignant/envoi-des-epreuves-de-composition', ManageEpreuvesTransfers::class)->name('upload_epreuves')->middleware(['auth']);

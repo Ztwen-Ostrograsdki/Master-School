@@ -2,20 +2,21 @@
 
 namespace Database\Seeders;
 
-use Faker\Factory;
-use App\Models\Mark;
-use App\Models\Role;
-use App\Models\User;
-use App\Models\Pupil;
+use App\Helpers\Seeders\Seeders;
+use App\Helpers\Tools\Tools;
 use App\Models\Classe;
+use App\Models\Filial;
+use App\Models\Mark;
+use App\Models\Pupil;
+use App\Models\Role;
 use App\Models\School;
 use App\Models\SchoolYear;
-use Illuminate\Support\Str;
-use App\Helpers\Tools\Tools;
-use Illuminate\Database\Seeder;
-use App\Helpers\Seeders\Seeders;
-use Illuminate\Support\Facades\Schema;
+use App\Models\User;
+use Faker\Factory;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,7 +27,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        
+
 
         // for ($i=0; $i < 10; $i++) { 
         //     $faker = Factory::create();

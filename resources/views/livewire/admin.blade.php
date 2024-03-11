@@ -78,6 +78,10 @@
                         <span class="fa fa-filter"></span>
                         <span>Créer une promotion de classes</span>
                     </span>
+                    <span wire:click="reloadClassesPromotionAndPosition" class="btn btn-primary text-left p-2 my-1 col-12 border border-white">
+                        <span class="fa fa-recycle"></span>
+                        <span>Recharger les promotions et position de chacune des classes déjà créées</span>
+                    </span>
                 </div>
                 @else
 

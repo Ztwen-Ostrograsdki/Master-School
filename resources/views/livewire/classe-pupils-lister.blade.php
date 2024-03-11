@@ -20,7 +20,11 @@
                 </span>
             @endif
             @if($pupils && count($pupils))
-            <span wire:click="downloadPDF" class="z-scale btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de cette classe...">
+            <span wire:click="toExcel" class="z-scale btn mx-2 btn-info border border-white float-right" title="Exporter la liste de la classe vers un fichier de calcul excel...">
+                <span class="fa bi-file"></span>
+                <span>To Excel File.</span>
+            </span>
+            <span wire:click="downloadPDF" class="z-scale btn mx-2 btn-secondary border border-white float-right" title="Imprimer la liste de cette classe...">
                 <span class="fa fa-print"></span>
                 <span>Impr.</span>
             </span>

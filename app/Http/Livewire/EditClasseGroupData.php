@@ -31,20 +31,26 @@ class EditClasseGroupData extends Component
     public function submit()
     {
         $this->validate();
+
         $hasAlreadyNameTaken = ClasseGroup::where('name', $this->name)->whereId('<>', $this->classe_group->id)->count();
 
         if(!$hasAlreadyNameTaken){
+
             $updated = $this->classe_group->update(['name' => $this->name, 'category' => $this->category]);
+
             if($updated){
+
                 $this->dispatchBrowserEvent('hide-form');
-                $this->emit('classeGroupUpdated');
-                $this->emit('classeUpdated');
+
+                return redirect()->route('classe_group_profil', ['slug' => str_replace(' ', '-', $this->name)]);
             }
             else{
+
                 $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "Une erreure inconnue s'est produite lors de la mise à jour,Veuillez donc réessayer!", 'type' => 'error']);
             }
         }
         else{
+
             $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure FORMULAIRE', 'message' => "Le nom que vous avez choisir existe déjà!", 'type' => 'error']);
         }
     }
@@ -53,15 +59,21 @@ class EditClasseGroupData extends Component
     public function openModal($classe_group_id)
     {
         if($classe_group_id){
+
             $classe_group = ClasseGroup::find($classe_group_id);
+
             if($classe_group){
+
                 $this->classe_group = $classe_group;
+
                 $this->name = $classe_group->name;
+
                 $this->category = $classe_group->category;
 
                 $this->dispatchBrowserEvent('modal-editClasseGroupData');
             }
             else{
+
                 $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "La promotion sélectionnée est introuvable. Veuillez sélectionner une promotion valide!", 'type' => 'error']);
 
             }

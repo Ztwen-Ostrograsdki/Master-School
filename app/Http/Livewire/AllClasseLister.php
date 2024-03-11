@@ -152,6 +152,26 @@ class AllClasseLister extends Component
     }
 
 
+    public function editClasseRespo1($classe_id, $target = 'respo1')
+    {
+        $this->emit('ManageClasseRefereesLiveEvent', $classe_id, $target, $this->getSchoolYear()->id);
+    }
+
+
+    public function editClasseRespo2($classe_id, $target = 'respo2')
+    {
+        $this->emit('ManageClasseRefereesLiveEvent', $classe_id, $target, $this->getSchoolYear()->id);
+    }
+
+    public function editClasseReferee($classe_id, $target = 'pp')
+    {
+        $this->emit('ManageClasseRefereesLiveEvent', $classe_id, $target, $this->getSchoolYear()->id);
+    }
+
+
+
+
+
     public function updateName($classe_id)
     {
         // $this->emit('UpdateClasseLiveEvent', $classe_id);

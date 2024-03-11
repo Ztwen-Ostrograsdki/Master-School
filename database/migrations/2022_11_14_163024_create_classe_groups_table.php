@@ -20,12 +20,21 @@ class CreateClasseGroupsTable extends Migration
             $table->string('filial')->nullable()->default(null);
             $table->string('option')->nullable()->default(null);
             $table->string('category')->nullable()->default(null);
+
             $table->unsignedBigInteger('level_id')->nullable();
             $table->foreign('level_id')
                   ->references('id')
                   ->on('levels')
                   ->onUpdate('restrict')
                   ->onDelete('restrict');
+
+            $table->unsignedBigInteger('filial_id')->nullable()->default(null);
+            $table->foreign('filial_id')
+                  ->references('id')
+                  ->on('filial')
+                  ->onUpdate('restrict')
+                  ->onDelete('restrict');
+                  
             $table->softDeletes();
             $table->timestamps();
         });

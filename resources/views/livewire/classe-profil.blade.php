@@ -43,7 +43,7 @@
                             @endif
                             <a wire:click="throwPresence({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Faire la présence de la classe</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" tabindex="-1" href="#">Autres</a>
+                            <a title="Recharger les données personnelles de la classe" wire:click="relaoadClassePersoDataPositionAndFilial" class="dropdown-item" tabindex="-1" href="#">Recharger la classe</a>
                           </div>
                         </li>
 
@@ -158,7 +158,7 @@
                         <div>
                             <div class="card container-fluid m-0 p-0 w-100 bg-transparent border border-dark my-2">
                                 <div class="card-header bg-dark"> 
-                                    <h5 class="card-title cursor-pointer text-white-50" data-card-widget="collapse">Listes des enseignants de la classe </h5>
+                                    <h5 class="card-title cursor-pointer text-white-50" data-card-widget="collapse">Listes des enseignants | PP | Responsables de la classe </h5>
                                   <div class="card-tools">
                                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                       <i class="fa fa-minus"></i>
@@ -173,7 +173,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="container-fluid m-0 p-0 w-100">
-                                        <div class="card-deck w-100 p-0 m-0">
+                                        <div class="w-100 p-0 m-0">
                                             <div class="card active" href="#tab_1" data-toggle="tab">
                                                 @php
                                                     $teachers = $classe->getClasseCurrentTeachers();
@@ -224,10 +224,109 @@
                                         </div>
                                         
                                     </div>
+
+                                    <div class="m-0 w-100 p-0 mt-3">
+
+                                        <hr class="bg-secondary w-100 m-0 p-0">
+                                        <h6 class="m-0 text-white-50 py-1">Le Prof Principal et les Responsables de la classe</h6>
+                                        <hr class="bg-secondary w-100 m-0 p-0">
+
+                                        @if($classe)
+                                            <div class="col-12 mx-auto p-0 m-0">
+
+                                                @php
+
+                                                    $pp = $classe->currentPrincipal();
+
+                                                @endphp
+
+                                                @if($pp)
+                                                    <h6 class="text-white-50 p-1 w-100"> 
+                                                        <span>Le prof principal actuel de cette classe est : </span>
+                                                        <span class="text-warning">{{ $pp->getName() }}</span>
+                                                        <span wire:click="editClasseReferee({{$classe->id}})" title="Editer le PP de la classe"class="text-primary ml-3 z-scale cursor-pointer">
+                                                                <span class="text-primary cursor-pointer fa fa-edit fx-20 py-2 px-2"></span>
+                                                        </span>
+                                                    </h6>
+                                                @else
+                                                    <h6 class="text-warning p-1"> 
+                                                        <span>Cette classe n'a pas encore de prof principal</span>
+
+                                                        <span wire:click="editClasseReferee({{$classe->id}})" title="Définir le PP de la classe"class="text-primary ml-3 z-scale cursor-pointer">
+                                                                <span class="text-primary cursor-pointer fa fa-edit fx-20 py-2 px-2"></span>
+                                                        </span>
+                                                    </h6>
+                                                @endif
+
+                                                <div class="d-flex w-100 justify-content-between">
+                                                    <div>
+                                                        @php
+
+                                                            $rp1 = $classe->pupil_respo1();
+
+                                                        @endphp
+
+                                                        @if($rp1)
+                                                            <h6 class="text-white-50 p-1 w-100"> 
+                                                                <span>Le premier responsable actuel de cette classe est : </span>
+                                                                <a title="Cliquer pour charger le profil de {{$rp1->getName()}}" class="" href="{{route('pupil_profil', ['id' => $rp1->id])}}">
+                                                                    <span class="text-warning">{{ $rp1->getName() }}</span>
+                                                                </a>
+                                                                <span wire:click="editClasseRespo1({{$classe->id}})" title="Editer"class="text-danger ml-3 z-scale cursor-pointer">
+                                                                    <span class="text-primary cursor-pointer fa fa-edit fx-20 py-2 px-2"></span>
+                                                                </span>
+                                                                
+                                                            </h6>
+                                                        @else
+                                                            <h6 class="text-warning p-1 rounded"> 
+                                                                <span>Cette classe n'a pas encore de premier responsable</span>
+                                                                <span wire:click="editClasseRespo1({{$classe->id}})" title="Définir le premier responsable de la classe"class="text-danger ml-3 z-scale cursor-pointer">
+                                                                    <span class="text-primary cursor-pointer fa fa-edit fx-20 py-2 px-2"></span>
+                                                                </span>
+                                                            </h6>
+                                                        @endif
+                                                    </div>
+
+                                                    <div>
+                                                        @php
+
+                                                            $rp2 = $classe->pupil_respo2();
+
+                                                        @endphp
+
+                                                        @if($rp2)
+                                                            <h6 class="text-white-50 p-1 w-100"> 
+                                                                <span>Le second responsable actuel de cette classe est : </span>
+                                                                <a title="Cliquer pour charger le profil de {{$rp2->getName()}}" class="" href="{{route('pupil_profil', ['id' => $rp2->id])}}">
+                                                                    <span class="text-warning">{{ $rp2->getName() }}</span>
+                                                                </a>
+                                                                <span wire:click="editClasseRespo2({{$classe->id}})" title="Editer"class="text-danger ml-3 z-scale cursor-pointer">
+                                                                    <span class="text-primary cursor-pointer fa fa-edit fx-20 py-2 px-2"></span>
+                                                                </span>
+                                                            </h6>
+                                                        @else
+                                                            <h6 class="text-warning p-1 rounded"> 
+                                                                <span>Cette classe n'a pas encore de second responsable</span>
+                                                                <span wire:click="editClasseRespo2({{$classe->id}})" title="Definir le second responsable de la classe"class="text-danger ml-3 z-scale cursor-pointer">
+                                                                    <span class="text-primary cursor-pointer fa fa-edit fx-20 py-2 px-2"></span>
+                                                                </span>
+                                                            </h6>
+                                                        @endif
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        @endif
+
+                                    </div>
                                 </div>
                             </div>
-                    </div>
+                        </div>
                     @endif
+
+
                 </div>
             </div>
         </div>
@@ -329,7 +428,6 @@
                 </div>
                 @endif
                 @if($classe)
-                {{-- {{ dd($classe->classePupils) }} --}}
                     <div class="">
 
                         @if($section_selected == 'liste')
@@ -343,6 +441,10 @@
                         @elseif($section_selected == 'averages')
 
                             @livewire('classe-averages-component', ['classe_id' => $classe->id])
+
+                        @elseif($section_selected == 'simple_classe_marks_view')
+
+                            @livewire('classe-pupils-marks-lister-formated', ['classe_id' => $classe->id])
                         
                         @elseif($section_selected == 'related_marks')
 

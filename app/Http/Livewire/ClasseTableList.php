@@ -15,7 +15,8 @@ class ClasseTableList extends Component
         'classeGroupUpdated' => 'reloadData',
         'classeGroupSubjectsUpdated' => 'reloadData',
         'newClasseCreated' => 'reloadData',
-        'newLevelCreated' => 'reloadData'
+        'newLevelCreated' => 'reloadData',
+        'ClassesUpdatedLiveEvent' => 'reloadData',
      ];
 
     public $counter = 0;
@@ -132,9 +133,26 @@ class ClasseTableList extends Component
         $this->emit('createNewClasseLiveEvent');
     }
 
-    public function editClasseReferees($classe_id)
+    public function editClasseRespo1($classe_id, $target = 'r1')
     {
-        $this->emit('ManageClasseRefereesLiveEvent', $classe_id, $this->getSchoolYear()->id);
+        $this->emit('ManageClasseRefereesLiveEvent', $classe_id, $target, $this->getSchoolYear()->id);
+    }
+
+
+    public function editClasseRespo2($classe_id, $target = 'r2')
+    {
+        $this->emit('ManageClasseRefereesLiveEvent', $classe_id, $target, $this->getSchoolYear()->id);
+    }
+
+    public function editClasseReferee($classe_id, $target = 'pp')
+    {
+        $this->emit('ManageClasseRefereesLiveEvent', $classe_id, $target, $this->getSchoolYear()->id);
+    }
+
+    public function resetReferee($classe_id, $target)
+    {
+
+
     }
 
 

@@ -3,11 +3,14 @@
 namespace App\Http\Livewire;
 
 use App\Events\DetachPupilsFromSchoolYearEvent;
+use App\Exports\ExportPupils;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\Classe;
 use App\Models\Pupil;
 use App\Models\SchoolYear;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 
 class ClassePupilsLister extends Component
@@ -169,6 +172,8 @@ class ClassePupilsLister extends Component
     {
         $this->search = $value;
     }
+
+
 
     public function updatedSearch($value)
     {
@@ -418,6 +423,18 @@ class ClassePupilsLister extends Component
 
         }
 
+
+    }
+
+
+    public function toExcel($classeName = null)
+    {
+
+        $classe = Classe::find($this->classe_id);
+
+        $school_year_model = $this->getSchoolYear();
+
+        // return Excel::download(new ExportPupils($classe), 'Liste-classe-de-' . $classe->name . '-' . str_replace(' - ', '-', $school_year_model->school_year) . '.xlsx');
 
     }
 

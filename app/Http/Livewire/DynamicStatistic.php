@@ -48,50 +48,73 @@ class DynamicStatistic extends Component
     public function render()
     {
         $subjects = [];
+
         $classes = [];
+
         $this->school_year_model = $this->getSchoolYear();
+
         $maxLenght = 1;
 
 
         if(session()->has('semestre_selected') && session('semestre_selected')){
+
             $semestre = intval(session('semestre_selected'));
+
             session()->put('semestre_selected', $semestre);
+
             $this->semestre_selected = $semestre;
         }
 
 
         $classe = $this->school_year_model->classes()->where('classes.id', $this->classe_id)->first();
+        
         if($classe){
+
             if($this->teacher_id){
+
                 $teacher = $this->school_year_model->teachers()->where('teachers.id', $this->teacher_id)->first();
+
                 $classes = $teacher->getTeachersCurrentClasses();
+
                 $subjects[] = $teacher->speciality();
+
                 $subject_id = $teacher->speciality()->id;
                 
                 if(in_array($subject_id, $classe->subjects()->pluck('subjects.id')->toArray())){
+
                     session()->put('classe_subject_selected', $subject_id);
+
                     $this->subject_selected = $subject_id;
                 }
             }
             else{
                 $classes = $this->school_year_model->classes;
+
                 if(session()->has('classe_subject_selected') && session('classe_subject_selected')){
+
                     $subject_id = intval(session('classe_subject_selected'));
+
                     if(in_array($subject_id, $classe->subjects()->pluck('subjects.id')->toArray())){
+
                         session()->put('classe_subject_selected', $subject_id);
+
                         $this->subject_selected = $subject_id;
                     }
                 }
+
                 $subjects = $classe->subjects;
             }
             
 
 
             if($this->subject_selected && $this->semestre_selected){
+
                 if($this->type == 'devoir'){
+
                     $maxLenght = $classe->getMarksTypeLenght($this->subject_selected, $this->semestre_selected, $this->school_year_model->school_yea, 'devoir');
                 }
                 else{
+
                     $maxLenght = $classe->getMarksTypeLenght($this->subject_selected, $this->semestre_selected, $this->school_year_model->school_yea, 'epe');
                 }
             }
@@ -104,16 +127,12 @@ class DynamicStatistic extends Component
 
         ];
 
-        $semestres = [1, 2];
-        $school = School::first();
-        if($school){
-            if($school->trimestre){
-                $this->semestre_type = 'Trimestre';
-                $semestres = [1, 2, 3];
-            }
-            else{
-                $semestres = [1, 2];
-            }
+        $semestres = $this->getSemestres();
+
+        if(count($semestres) == 3){
+
+            $this->semestre_type = 'Trimestre';
+
         }
 
         return view('livewire.dynamic-statistic', compact('classes', 'classe', 'subjects', 'semestres', 'types_of_marks', 'maxLenght'));
@@ -161,13 +180,21 @@ class DynamicStatistic extends Component
         $this->validate();
 
         $marks_values = [];
+
         $all_matches = [];
 
-        $marks = $this->school_year_model->marks()->where('classe_id', $this->classe_id)->where('type', $this->type)->where('mark_index', $this->mark_index)->where('semestre', $this->semestre_selected)->where('subject_id', $this->subject_selected)->get();
+        $marks = $this->school_year_model->marks()
+                                        ->where('classe_id', $this->classe_id)
+                                        ->where('type', $this->type)
+                                        ->where('mark_index', $this->mark_index)
+                                        ->where('semestre', $this->semestre_selected)
+                                        ->where('subject_id', $this->subject_selected)
+                                        ->get();
 
         $this->subject = Subject::find($this->subject_selected)->name;
 
         foreach($marks as $mark){
+            
             $marks_values[] = $mark->value;
         }
 

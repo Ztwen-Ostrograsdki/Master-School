@@ -292,6 +292,15 @@ class Teacher extends Model
     }
 
 
+    public function getFormatedName()
+    {
+        return strtoupper($this->name) . ' ' . ucwords($this->surname);
+    }
+
+    public function getName()
+    {
+        return strtoupper($this->name) . ' ' . ucwords($this->surname);
+    }
 
 
 

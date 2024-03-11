@@ -39,19 +39,28 @@ class ManageClasseModalities extends Component
     public function render()
     {
         $classes = [];
+
         $subjects = [];
+
         $school_years = SchoolYear::all();
+
         $semestres = [1, 2];
+
         $school = School::first();
 
         if($this->classe && $this->school_year_model){
+
             $subjects = Subject::where('level_id', $this->classe->level_id)->get();
+
             $classes = $this->school_year_model->classes;
         }
 
         if($school){
+
             if($school->trimestre){
+
                 $this->semestre_type = 'Trimestre';
+
                 $semestres = [1, 2, 3];
             }
             else{
@@ -65,23 +74,42 @@ class ManageClasseModalities extends Component
     public function openModal($classe_id, $subject_id, $school_year_id, $semestre_id, $modality_id = null)
     {
         // dd($classe_id, $subject_id, $school_year_id, $semestre_id, $modality_id);
+
         if($classe_id && $school_year_id && $subject_id && $semestre_id){
+
             $school_year_model = SchoolYear::find($school_year_id);
+
             if($school_year_model){
+
                 $this->school_year_model = $school_year_model;
+
                 $this->school_year = $this->school_year_model->id;
+
                 $classe = $this->school_year_model->classes()->where('classes.id', $classe_id)->first();
                 if($classe){
+
                     $this->classe = $classe;
+
                     $this->classe_id = $classe->id;
+
                     $subject = Subject::find($subject_id);
+
                     if($subject){
+
                         $this->subject = $subject;
+
                         $this->subject_id = $subject_id;
+
+                        $this->semestre_id = $semestre_id;
+
                         if($modality_id){
+
                             $modality = AverageModality::find($modality_id);
+
                             if($modality){
+                                
                                 $this->modality = $modality;
+                                
                                 $this->value = $modality->modality;
                             }
                             else{

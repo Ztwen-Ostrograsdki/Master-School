@@ -27,12 +27,14 @@ class ClasseProfil extends Component
         'schoolYearChangedLiveEvent' => 'reloadClasseData',
         'classePupilListUpdated' => 'reloadClasseData',
         'classeUpdated' => 'reloadClasseData',
+        'ClassesUpdatedLiveEvent' => 'reloadClasseData',
         'ClasseDataWasUpdated' => 'reloadClasseData',
         'newLevelCreated' => 'reloadClasseData',
         'timePlanTablesWasUpdatedLiveEvent' => 'reloadClasseData',
         'NewClasseMarksInsert' => 'reloadClasseData',
         'PresenceLateWasUpdated' => 'reloadClasseData',
         'selectedClasseSubjectChangeLiveEvent' => 'reloadClasseSubjectSelected',
+        'ClasseProfilSectionSelectedChangedLiveEvent' => 'reloadClasseSectionSelected',
     ];
 
     public $slug;
@@ -64,7 +66,8 @@ class ClasseProfil extends Component
         'related_marks' => 'Les Participations', 
         'lates_absences' => 'Les absences / retards', 
         'classe_general_stats' => 'Tableau des stats', 
-        'averages' => 'Les moyennes'
+        'averages' => 'Les moyennes',
+        'simple_classe_marks_view' => 'Vue Simplifiée des notes',
     ];
 
     protected $rules = ['classeName' => 'required|string'];
@@ -80,14 +83,33 @@ class ClasseProfil extends Component
         }
     }
 
+    public function editClasseRespo1($classe_id, $target = 'r1')
+    {
+        $this->emit('ManageClasseRefereesLiveEvent', $classe_id, $target, $this->getSchoolYear()->id);
+    }
+
+
+    public function editClasseRespo2($classe_id, $target = 'r2')
+    {
+        $this->emit('ManageClasseRefereesLiveEvent', $classe_id, $target, $this->getSchoolYear()->id);
+    }
+
+    public function editClasseReferee($classe_id, $target = 'pp')
+    {
+        $this->emit('ManageClasseRefereesLiveEvent', $classe_id, $target, $this->getSchoolYear()->id);
+    }
+
 
     public function updatedSearch($value)
     {
         $this->search = $value;
+
         if(strlen($value) > 2){
+
             $this->emit('UpdatedClasseListOnSearch', $value);
         }
         else{
+
             $this->emit('UpdatedClasseListOnSearch', null);
         }
     }
@@ -100,6 +122,14 @@ class ClasseProfil extends Component
         session()->put('semestre_selected', $semestre);
 
         $this->emit('semestreWasChanged', $semestre);
+
+    }
+
+    public function reloadClasseSectionSelected($section)
+    {
+        $this->section_selected = $section;
+
+        session()->put('classe_profil_section_selected', $section);
 
     }
 
@@ -181,7 +211,7 @@ class ClasseProfil extends Component
 
             $this->semestre_selected = 1;
 
-            session()->put('semestre_selected', $this->semestre_selected);
+            // session()->put('semestre_selected', $this->semestre_selected);
         }
 
 
@@ -279,11 +309,11 @@ class ClasseProfil extends Component
 
         $classe = Classe::where('id', $this->classe_id)->first();
 
-        if(!$classeNameHasBeenTaken && $classe){
+        $name = trim(ucfirst($this->classeName));
+
+        if((!$classeNameHasBeenTaken && $classe) || ($classe && !($classe->name === $name))){
 
             $this->validate();
-
-            $name = trim(ucfirst($this->classeName));
 
             $c = $classe->update(
                 [
@@ -655,6 +685,16 @@ class ClasseProfil extends Component
         $this->emit('ThrowClasseMarksConverter', $this->classe_id, 'epe-to-participation');
     }
 
+
+    public function relaoadClassePersoDataPositionAndFilial()
+    {
+
+        $classe = Classe::find($this->classe_id);
+
+        $classe->loadClasseDataOfPositionAndPromotionFilial();
+
+        $this->reloadClasseData();
+    }
 
     public function reloadClasseData($school_year = null)
     {

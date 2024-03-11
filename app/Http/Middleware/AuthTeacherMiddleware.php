@@ -24,13 +24,15 @@ class AuthTeacherMiddleware
                 return $next($request);
             }
             else{
+
                 $date = $request->user()->teacher->getLastTeachingDate();
-                return abort(403, "Vous n'êtes plus authorisé à accéder à une telle page, Vous n'êtes plus enseignant de la plateforme depuis le $date !");
+
+                return abort(403, "Vous n'êtes plus authorisé à accéder à une telle page, Vous n'êtes plus considéré comme enseignant de la plateforme depuis le $date !");
             }
         }
         else{
 
-            return abort(403, "Vous n'êtes pas authorisé à accéder à une telle page, Vous n'êtes pas enseignant!");
+            return abort(403, "Vous n'êtes pas authorisé à accéder à une telle page, Cette paeg est dédiée aux enseigants elligibles de la plateforme!");
             
         }
     }

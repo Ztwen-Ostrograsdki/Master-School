@@ -108,7 +108,7 @@
                                         @if($classe->hasPrincipal() && $classe->currentPrincipal())
                                             <span class="text-warning">
                                                 <span>{{ $classe->currentPrincipal()->getFormatedName() }}</span>
-                                                <span wire:click="editClasseReferees({{$classe->id}})" title="Retirer l'AE"class="text-danger ml-3 cursor-pointer">
+                                                <span wire:click="editClasseReferee({{$classe->id}})" title="Retirer"class="text-danger ml-3 cursor-pointer">
                                                     <span class="text-danger cursor-pointer fa fa-trash fx-20 py-2 px-2"></span>
                                                 </span>
                                             </span>
@@ -116,7 +116,7 @@
                                             <span class="text-white-50 font-italic">Non défini</span>
                                         @endif
 
-                                        <span wire:click="editClasseReferees({{$classe->id}})" title="Définir/Changer le PP" class="text-info float-right text-right m-0 p-0 cursor-pointer">
+                                        <span wire:click="editClasseReferee({{$classe->id}})" title="Définir/Changer le PP" class="text-info float-right text-right m-0 p-0 cursor-pointer">
                                                 <span class="text-info cursor-pointer fa fa-edit py-2 px-2"></span>
                                             </span>
 
@@ -125,7 +125,7 @@
                                         @if($classe->pupil_respo1())
                                             <span class="text-white-50">
                                                 <span>{{ $classe->pupil_respo1()->getName() }}</span>
-                                                <span wire:click="editClasseReferees({{$classe->id}})" title="Retirer l'AE"class="text-danger ml-3 cursor-pointer">
+                                                <span wire:click="editClasseRespo1({{$classe->id}})" title="Retirer"class="text-danger ml-3 cursor-pointer">
                                                     <span class="text-danger cursor-pointer fa fa-trash fx-20 py-2 px-2"></span>
                                                 </span>
                                             </span>
@@ -133,7 +133,7 @@
                                             <span class="text-secondary font-italic">Non défini</span>
                                         @endif
 
-                                        <span wire:click="editClasseReferees({{$classe->id}})" title="Définir/Changer le premier responsable" class="text-info float-right text-right m-0 p-0 cursor-pointer">
+                                        <span wire:click="editClasseRespo1({{$classe->id}})" title="Définir/Changer le premier responsable" class="text-info float-right text-right m-0 p-0 cursor-pointer">
                                             <span class="text-info cursor-pointer fa fa-edit py-2 px-2"></span>
                                         </span>
 
@@ -142,7 +142,7 @@
                                         @if($classe->pupil_respo2())
                                             <span class="text-white-50">
                                                 <span>{{ $classe->pupil_respo2()->getName() }}</span>
-                                                <span wire:click="editClasseReferees({{$classe->id}})" title="Retirer l'AE"class="text-danger ml-3 cursor-pointer">
+                                                <span wire:click="editClasseRespo2({{$classe->id}})" title="Retirer "class="text-danger ml-3 cursor-pointer">
                                                     <span class="text-danger cursor-pointer fa fa-trash fx-20 py-2 px-2"></span>
                                                 </span>
                                             </span>
@@ -150,7 +150,7 @@
                                             <span class="text-secondary font-italic">Non défini</span>
                                         @endif
 
-                                        <span wire:click="editClasseReferees({{$classe->id}})" title="Définir/Changer le second responsable" class="text-info float-right text-right m-0 p-0 cursor-pointer">
+                                        <span wire:click="editClasseRespo2({{$classe->id}})" title="Définir/Changer le second responsable" class="text-info float-right text-right m-0 p-0 cursor-pointer">
                                             <span class="text-info cursor-pointer fa fa-edit py-2 px-2"></span>
                                         </span>
 

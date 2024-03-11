@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Coeficient;
+use App\Models\Filial;
 use App\Models\Level;
 use App\Models\School;
 use App\Models\SchoolYear;
@@ -27,6 +28,7 @@ class ClasseGroup extends Model
         'option',
         'filial',
         'level_id',
+        'filial_id',
     ];
 
 
@@ -39,6 +41,11 @@ class ClasseGroup extends Model
     public function classes()
     {
         return $this->hasMany(Classe::class);
+    }
+
+    public function filiale()
+    {
+        return $this->belongsTo(Filial::class);
     }
 
 

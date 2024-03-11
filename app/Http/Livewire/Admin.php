@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Events\MigrateDataToTheNewSchoolYearEvent;
+use App\Events\ReloadClassesPromotionAndPositionEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Helpers\ZtwenAssert;
 use App\Models\Classe;
@@ -41,41 +42,36 @@ class Admin extends Component
     ];
 
     public $start_new_school = false;
+
     public $has_data = false;
+
     public $school_name = "Mon école";
+
     public $semestre_type = 'Semestre';
+
     public $school_year_start;
+
     public $counter = 0;
+
     public $semestre_selected = 1;
+
     public $active_section = 'standard_section';
 
 
     public function mount()
     {
         date_default_timezone_set('UTC');
-        $school = School::first();
+
+        $semestres = $this->getSemestres();
+
         $semestres = [1, 2];
-        if($school){
-            if($school->trimestre){
-                $this->semestre_type = 'trimestre';
-                $semestres = [1, 2, 3];
-            }
-            else{
-                $semestres = [1, 2];
-            }
+
+        if(count($semestres) == 3){
+
+            $this->semestre_type = 'trimestre';
+
         }
 
-
-        if(session()->has('semestre_selected') && session('semestre_selected')){
-            $semestre = intval(session('semestre_selected'));
-            session()->put('semestre_selected', $semestre);
-            $this->semestre_selected = $semestre;
-        }
-        else{
-            $this->semestre_selected = 1;
-            session()->put('semestre_selected', $this->semestre_selected);
-        }
-       
     }
 
 
@@ -90,28 +86,44 @@ class Admin extends Component
     public function render()
     {
         $school_years = SchoolYear::all();
+
         $schools = School::all();
+
         $has_school = false;
+
         $school_years_tabs = [];
+
         if(count($school_years) < 1 && count($schools) < 1){
+
             $progress = 1;
+
             $date = intval(date('Y'));
+
             $this->school_year_start = $date .' - ' . ($date  + 1);
+
             for ($i=1995; $i <= $date; $i++) { 
+
                 $y = $i . ' - ' . ($i+1);
+
                 $school_years_tabs[] = $y;
             }
         }
         else{
             $has_school = true;
+
             $progr = $this->getProgressValue() + 15;
+
             if($progr > 100){
+
                 $progress = $progr - 15;
+
             }
             else{
                 $progress = $progr;
+                
             }
             if($progress > 100){
+                
                 $this->has_data = true;
             }
         }
@@ -386,7 +398,31 @@ class Admin extends Component
 
     public function definedSemestrePeriod()
     {
-        $this->emit('definedSemestresPeriodsLiveEvent');
+
+        $semestres_was_already_defined = $this->semestrePeriodsWasAlreadyDefined();
+
+        if($semestres_was_already_defined){
+
+            $this->emit('editSemestrePeriodsLiveEvent');
+
+        }
+        else{
+
+            $this->emit('definedSemestresPeriodsLiveEvent');
+
+        }
+        
+    }
+
+
+    public function reloadClassesPromotionAndPosition()
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        $user = auth()->user();
+
+        ReloadClassesPromotionAndPositionEvent::dispatch($school_year_model, $user);
+        
     }
 
     

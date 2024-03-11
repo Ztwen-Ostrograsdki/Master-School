@@ -6,6 +6,7 @@ use App\Events\AbsencesAndLatesDeleterEvent;
 use App\Events\ClasseMarksDeletionCreatedEvent;
 use App\Events\ClasseMarksInsertionCreatedEvent;
 use App\Events\ClasseRefereesManagerEvent;
+use App\Events\CompletedClasseCreationEvent;
 use App\Events\DetachPupilsFromSchoolYearEvent;
 use App\Events\FlushAveragesIntoDataBaseEvent;
 use App\Events\FreshAveragesIntoDBEvent;
@@ -18,6 +19,7 @@ use App\Events\MarksRestorationEvent;
 use App\Events\MigrateDataToTheNewSchoolYearEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\PaymentSystemEvent;
+use App\Events\ReloadClassesPromotionAndPositionEvent;
 use App\Events\StartNewsPupilsInsertionEvent;
 use App\Events\ThrowClasseMarksConvertionEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
@@ -27,6 +29,7 @@ use App\Listeners\ClasseMarksConverterBatcherListener;
 use App\Listeners\ClasseMarksDeletionBatcherListener;
 use App\Listeners\ClasseMarksInsertionBatchListener;
 use App\Listeners\ClasseRefereesManagerBatcherListener;
+use App\Listeners\CompletedClasseCreationBatcherListener;
 use App\Listeners\CreatedTransferBatchListener;
 use App\Listeners\DataMigrationToTheNewSchoolYearBatcherListener;
 use App\Listeners\DetachPupilsFromSchoolYearBatcherListener;
@@ -40,6 +43,7 @@ use App\Listeners\MarksRestorationBatcherListener;
 use App\Listeners\NewProductCreatedListener;
 use App\Listeners\PaymentSystemListener;
 use App\Listeners\ProcessingNewsPupilsInsertionBatcherListener;
+use App\Listeners\ReloadClassesPromotionAndPositionBatcherListener;
 use App\Listeners\UpdateClasseAveragesIntoDatabaseBatcherListener;
 use App\Listeners\UpdateClasseSanctionsListener;
 use App\Models\Classe;
@@ -151,6 +155,14 @@ class EventServiceProvider extends ServiceProvider
 
         ThrowClasseMarksConvertionEvent::class => [
             ClasseMarksConverterBatcherListener::class,
+        ], 
+
+        CompletedClasseCreationEvent::class => [
+            CompletedClasseCreationBatcherListener::class,
+        ],
+
+        ReloadClassesPromotionAndPositionEvent::class => [
+            ReloadClassesPromotionAndPositionBatcherListener::class,
         ],
 
     

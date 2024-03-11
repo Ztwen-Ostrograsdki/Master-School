@@ -693,10 +693,13 @@ trait ClasseTraits{
     public function getClasseStats($semestre = 1, $school_year = null, $subject_id_selected = null, $takeBonus = true, $takeSanctions = true)
     {
         $data = [];
+
         $subjects = [];
 
         if($subject_id_selected){
+
             $subject = Subject::find($subject_id_selected);
+
             $subjects[] = $subject;
         }
         else{
@@ -708,6 +711,8 @@ trait ClasseTraits{
             foreach ($subjects as $subject) {
 
                 $averagesTab = $this->getClasseRank($subject->id, $semestre, $school_year, $takeBonus, $takeSanctions);
+
+                
                 $bestGirl = null;
                 $weakGirl = null;
                 $girlFaileds_percentage = 0;
@@ -1683,7 +1688,9 @@ trait ClasseTraits{
 
         if(!$model && !$this->hasRespo($school_year)){
 
-            Responsible::create(['school_year_id' => $school_year_model->id, 'classe_id' => $this->id]);
+            $model = Responsible::create(['school_year_id' => $school_year_model->id, 'classe_id' => $this->id]);
+            
+            return $model;
         }
 
     }

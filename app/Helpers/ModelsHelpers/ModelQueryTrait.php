@@ -86,6 +86,8 @@ trait ModelQueryTrait{
 
     public function __setSemestreIndex($school_year = null)
     {
+        // session()->forget('semestre_selected');
+
         $semestre_type = 'Semestre';
 
         $school_year_model = SchoolYear::where('school_year', $school_year)->first();
@@ -119,8 +121,11 @@ trait ModelQueryTrait{
 
                 $semestre = session('semestre_selected');
 
+                // dd($semestre_calendars);
+
             }
             else{
+
 
                 if($semestre_calendars){
 
@@ -134,11 +139,17 @@ trait ModelQueryTrait{
 
                         if($is_current){
 
+                            session()->forget('semestre_selected');
+
                             $semestre = str_replace($semestre_type . ' ', '', $calendar->object);
 
                             $calend = $calendar;
 
                             $no_current_calendar = false;
+
+                            $semestre = $calendar->semestre;
+
+                            session()->put('semestre_selected', $semestre);
                         }
                     }
 
@@ -305,6 +316,16 @@ trait ModelQueryTrait{
         }
 
 
+    }
+
+
+    public function semestrePeriodsWasAlreadyDefined($school_year = null)
+    {
+        $school_year_model = self::getSchoolYear($school_year);
+        
+        $semestre_calendars = $school_year_model->periods()->where('target', 'semestre-trimestre')->orderBy('object')->get();
+
+        return count($semestre_calendars) > 0 ;
     }
 
 }

@@ -2,6 +2,9 @@
 	
 namespace App\Helpers\Tools;
 
+use App\Models\Classe;
+use App\Models\Filial;
+
 
 class Tools{
 
@@ -194,6 +197,107 @@ class Tools{
 
 		}
 		return false;
+
+
+	}
+
+
+	public static function getFilials()
+	{
+
+		$filials = [
+            'FC' => ['name' => 'FC', 'description' => 'Froid et Climatisation', 'option' => 'Industrielle'], 
+            'MA' => ['name' => 'MA', 'description' => 'Mécanique et Auto', 'option' => 'Industrielle'],
+            'OBB' => ['name' => 'OBB', 'description' => 'OBB', 'option' => 'Industrielle'],
+            'OG' => ['name' => 'OG', 'description' => 'Opérateur Géomètre', 'option' => 'Industrielle'],
+            'FM' => ['name' => 'FM', 'description' => 'Fabrication Mécanique', 'option' => 'Industrielle'],
+            'BTP' => ['name' => 'BTP', 'description' => 'Batiment et Travaux Publics', 'option' => 'Industrielle'],
+            'F1' => ['name' => 'F1', 'description' => 'Mécanique Générale', 'option' => 'Technique'],
+            'F2' => ['name' => 'F2', 'description' => 'Electronique', 'option' => 'Technique'],
+            'F3' => ['name' => 'F3', 'description' => 'Mécanique Générale', 'option' => 'Technique'],
+            'F4' => ['name' => 'F4', 'description' => 'Génie Civil', 'option' => 'Technique'],
+            'IMI' => ['name' => 'IMI', 'description' => 'Installation et Maintenance Industrielle', 'option' => 'Informatique'],
+            'HR' => ['name' => 'HR', 'description' => 'Hotellerie et Restauration', 'option' => null],
+        ];
+
+        return $filials;
+
+	}
+
+
+	public static function getClassesPositionAsPromotions($level = 'secondary')
+	{
+
+        if ($level === "secondary") {
+
+        	$positions = [
+
+        		'1AI (1ère Année)' => 1,
+        		'2AI (2ème Année)' => 2,
+        		'3AI (3ème Année)' => 3,
+        		'Sixième' => 4,
+        		'Cinquième' => 5,
+        		'Quatrième' => 6,
+        		'Troisième' => 7,
+        		'Seconde' => 8,
+        		'Première' => 9,
+        		'Terminale' => 10,
+
+        	];
+        }
+        elseif($this->level == 'primary'){
+
+            $positions = [
+
+        		'Maternelle 1' => 1,
+        		'Maternelle 2' => 2,
+        		'CI' => 3,
+        		'CP' => 4,
+        		'CE1' => 5,
+        		'CE2' => 6,
+        		'CM1' => 7,
+        		'CM2' => 8,
+        	];
+        }
+
+        return $positions;
+
+
+	}
+
+
+	public static function updateClassesLogs()
+	{
+
+		$filials = Filial::all();
+
+        $classes = Classe::all();
+
+
+        foreach($filials as $filial){
+
+            $name = $filial->name;
+
+            foreach($classes as $cl){
+
+                if (preg_match_all('/'.$name.'/', $cl->name)) {
+
+                    $cl->update(['filial_id' => $filial->id]);
+
+                    $promotion = $cl->classe_group;
+
+                    if($promotion && $promotion->filial_id == null){
+
+                        $promotion->update(['filial' => $name, 'filial_id' => $filial->id]);
+                    }
+
+                }
+
+            }
+
+            
+
+        }
 
 
 	}

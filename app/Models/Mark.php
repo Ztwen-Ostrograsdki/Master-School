@@ -18,7 +18,7 @@ class Mark extends Model
 
     use DateFormattor;
 
-    const DELAYED = 4; // For three hours among
+    const DELAYED = 48; // For three hours among
 
     public function getDelay()
     {
@@ -100,9 +100,12 @@ class Mark extends Model
     public function getDateAgoFormated($created_at = false)
     {
         $this->__setDateAgo();
+
         if($created_at){
+
             return $this->dateAgoToString;
         }
+        
         return $this->dateAgoToStringForUpdated;
     }
 

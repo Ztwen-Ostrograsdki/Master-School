@@ -36,6 +36,13 @@ class CreateClassesTable extends Migration
                   ->onUpdate('restrict')
                   ->onDelete('restrict');
 
+            $table->unsignedBigInteger('filial_id')->nullable()->default(null);
+            $table->foreign('filial_id')
+                  ->references('id')
+                  ->on('filial')
+                  ->onUpdate('restrict')
+                  ->onDelete('restrict');
+
             $table->timestamps();
             $table->softDeletes();
         });

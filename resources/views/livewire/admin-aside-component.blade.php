@@ -522,6 +522,15 @@
               </li>
               <li class="nav-header text-uppercase text-warning">Outils</li>
               <li class="nav-item">
+                <a href="{{route('statistics')}}" class="nav-link @isRoute('statistics') active @endisRoute">
+                  <i class="nav-icon fas fa-tachometer-alt"></i>
+                  <p>
+                    Statistiques
+                    <span class="badge badge-info right"></span>
+                  </p>
+                </a>
+              </li>
+              <li class="nav-item">
                 <a href="{{route('data_manager_primary')}}" class="nav-link @isRoute('data_manager_primary') active @endisRoute">
                   <i class="nav-icon fas fa-school"></i>
                   <p>

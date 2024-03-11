@@ -11,6 +11,7 @@ use App\Models\ClassePupilSchoolYear;
 use App\Models\ClasseSanctionables;
 use App\Models\ClassesSecurity;
 use App\Models\Coeficient;
+use App\Models\Filial;
 use App\Models\Image;
 use App\Models\Level;
 use App\Models\PrincipalTeacher;
@@ -47,8 +48,50 @@ class Classe extends Model
         'classe_group_id',
         'closed',
         'locked',
-        'teacher_id'
+        'teacher_id',
+        'filial_id',
     ];
+
+
+    public function loadClasseDataOfPositionAndPromotionFilial()
+    {
+
+        $position = $this->getClassePosition();
+
+        if(!$this->position || ($this->position && $this->position !== $position)){
+
+            $this->update(['position' => $position]);
+
+        }
+
+        $filials = Filial::all();
+
+        foreach($filials as $filial){
+
+            $name = $filial->name;
+
+            if (preg_match_all('/'.$name.'/', $this->name)) {
+
+                $this->update(['filial_id' => $filial->id]);
+
+                $promotion = $this->classe_group;
+
+                if($promotion && $promotion->filial_id == null){
+
+                    $promotion->update(['filial' => $name, 'filial_id' => $filial->id]);
+                }
+
+
+                break;
+
+            }
+
+            
+
+        }
+
+
+    }
 
     public function sanctions()
     {
@@ -339,6 +382,12 @@ class Classe extends Model
     public function promotion()
     {
         return $this->belongsTo(ClasseGroup::class);
+    } 
+
+
+    public function filial()
+    {
+        return $this->belongsTo(Filial::class);
     }
 
 
@@ -375,6 +424,12 @@ class Classe extends Model
         $principal = $school_year_model->principals()->where('principal_teachers.classe_id', $this->id)->first();
 
         return $principal ? $principal : null;
+    }
+
+
+    public function getCurrentPrincipalAsModel($school_year = null)
+    {
+       return $this->hasPrincipal($school_year);
     }
 
     public function cursus()
@@ -627,33 +682,46 @@ class Classe extends Model
 
         if ($this->level->name === "secondary") {
 
-            if (preg_match_all('/Sixi/', $name)) { 
+
+            if (preg_match_all('/1AI/', $name)) { 
 
                 $level = 1;
             }
-            elseif (preg_match_all('/Cinqui/', $name)) {
+            elseif (preg_match_all('/2AI/', $name)) {
 
                 $level = 2;
             }
-            elseif (preg_match_all('/Quatriem/', $name)) {
+            elseif (preg_match_all('/3AI/', $name)) {
 
                 $level = 3;
             }
-            elseif (preg_match_all('/Troisie/', $name)) {
+            elseif (preg_match_all('/Sixi/', $name)) {
 
                 $level = 4;
             }
-            elseif (preg_match_all('/Seconde/', $name)) {
+            elseif (preg_match_all('/Cinqui/', $name)) {
 
                 $level = 5;
             }
-            elseif (preg_match_all('/Premi/', $name)) {
+            elseif (preg_match_all('/Quatriem/', $name)) {
 
                 $level = 6;
             }
-            elseif (preg_match_all('/Terminale/', $name)) {
+            elseif (preg_match_all('/Troisie/', $name)) {
 
                 $level = 7;
+            }
+            elseif (preg_match_all('/Seconde/', $name)) {
+
+                $level = 8;
+            }
+            elseif (preg_match_all('/Premi/', $name)) {
+
+                $level = 9;
+            }
+            elseif (preg_match_all('/Terminale/', $name)) {
+
+                $level = 10;
             }
         }
         elseif($this->level == 'primary'){
@@ -666,25 +734,29 @@ class Classe extends Model
 
                 $level = 2;
             }
-            elseif (preg_match_all('/CP/', $name)) {
+            elseif (preg_match_all('/CI/', $name)) {
 
                 $level = 3;
             }
-            elseif (preg_match_all('/CE1/', $name)) {
+             elseif (preg_match_all('/CP/', $name)) {
 
                 $level = 4;
             }
-            elseif (preg_match_all('/CE2/', $name)) {
+            elseif (preg_match_all('/CE1/', $name)) {
 
                 $level = 5;
             }
-            elseif (preg_match_all('/CM1/', $name)) {
+            elseif (preg_match_all('/CE2/', $name)) {
 
                 $level = 6;
             }
-            elseif (preg_match_all('/CM2/', $name)) {
+            elseif (preg_match_all('/CM1/', $name)) {
 
                 $level = 7;
+            }
+            elseif (preg_match_all('/CM2/', $name)) {
+
+                $level = 8;
                 
             }
         }
@@ -692,6 +764,7 @@ class Classe extends Model
         return $level;
 
     }
+
 
     public function getClasseCurrentTeachers($withDuration = false, $subject_id = null)
     {

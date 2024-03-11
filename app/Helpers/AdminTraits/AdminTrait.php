@@ -84,10 +84,13 @@ trait AdminTrait{
             'target' => "Admin-Key",
             'target_id' => null
         ]);
+
         if($make){
+
             return true;
         }
         else{
+
             return false;
         }
     }
@@ -268,7 +271,9 @@ trait AdminTrait{
     public function __refreshNotifications()
     {
         $notifications = MyNotifications::where('user_id', $this->id)->where('target', 'Admin-Key')->orWhere('target', 'Admin-Advanced-Key');
+
         if($notifications->get()->count() > 0){
+            
             return $notifications->delete();
         }
         

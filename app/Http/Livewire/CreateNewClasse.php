@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\CompletedClasseCreationEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\ClasseGroup;
@@ -162,12 +163,20 @@ class CreateNewClasse extends Component
                     }
                     if($this->classe){
 
-                        $$classe = $this->classe->update([
+                        $classe = $this->classe->update([
                             'name' => trim(ucfirst($this->name)),
                             'slug' => str_replace(' ', '-', trim(ucfirst($this->name))),
                             'level_id' => $level_id,
                             'classe_group_id' => $classe_group_id
                         ]);
+
+                        $position = $this->classe->getClassePosition();
+
+                        if(!$this->classe->position || ($this->classe->position && $this->classe->position !== $position)){
+
+                            $this->classe->update(['position' => $position]);
+
+                        }
 
                     }
                     else{
@@ -182,9 +191,11 @@ class CreateNewClasse extends Component
                         );
                         if($classe){
 
+                            $user = auth()->user();
+
                             $school_year_model->classes()->attach($classe->id);
 
-                            Responsible::create(['school_year_id' => $school_year_model->id, 'classe_id' => $classe->id]);
+                            CompletedClasseCreationEvent::dispatch($classe, $school_year_model, $user);
 
                             $this->dispatchBrowserEvent('hide-form');
                         }
@@ -201,7 +212,7 @@ class CreateNewClasse extends Component
 
             DB::afterCommit(function(){
 
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Création de classe terminée', 'message' => "la classe a été créé pour le cycle avec succès!", 'type' => 'success']);
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Création de classe terminée', 'message' => "la classe a été créé pour le cycle avec succès, le processus va s'achever en arrière plan!", 'type' => 'success']);
 
                 $this->emit('newClasseCreated');
 

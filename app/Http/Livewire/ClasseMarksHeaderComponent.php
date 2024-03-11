@@ -12,7 +12,7 @@ use App\Models\Subject;
 use Livewire\Component;
 use PDF;
 
-class ClasseMarksLister extends Component
+class ClasseMarksHeaderComponent extends Component
 {
     use ModelQueryTrait;
 
@@ -29,9 +29,6 @@ class ClasseMarksLister extends Component
         'NewClasseMarksInsert' => 'reloadData',
         'InitiateClasseDataUpdatingLiveEvent' => 'loadingDataStart',
         'ClasseDataLoadedSuccessfully' => 'dataWasLoaded',
-        'ClasseDisplayingRankUpdatedLiveEvent' => 'reloadRankToFetch',
-        'selectedClasseSubjectChangeLiveEvent' => 'reloadDataFormSelectedSubjectChanged',
-
     ];
 
     public $classe_id;
@@ -58,6 +55,12 @@ class ClasseMarksLister extends Component
     public $simpleFormat = false;
 
 
+    public function mount()
+    {
+
+    }
+
+
     public function showFormattedView($classe_id = null)
     {
 
@@ -67,7 +70,20 @@ class ClasseMarksLister extends Component
 
         }
 
-        $this->simpleFormat = !$this->simpleFormat;
+        if($this->simpleFormat == true){
+
+            $this->simpleFormat = false;
+
+            $this->emit('ClasseProfilSectionSelectedChangedLiveEvent', 'marks');
+
+        }
+        else{
+
+            $this->simpleFormat = true;
+
+            $this->emit('ClasseProfilSectionSelectedChangedLiveEvent', 'simple_classe_marks_view');
+
+        }
 
     }
 
@@ -92,20 +108,13 @@ class ClasseMarksLister extends Component
         $this->is_loading = true;
     }
 
-    public function reloadRankToFetch($display_rank)
-    {
-        $this->computedRank = $display_rank;
-    }
-
     public function render()
     {
         $pupils = [];
 
-        $printing = false;
-
         $marks = [];
 
-        $noMarks = false;
+        $printing = false;
 
         $modality = null;
 
@@ -113,25 +122,7 @@ class ClasseMarksLister extends Component
 
         $hasModalities = false;
 
-        $averageEPETab = [];
-
-        $averageTab = [];
-
-        $ranksTab = [];
-
         $classe_subject_coef = 1;
-
-
-        $marks_lenght = 1;
-
-        $epeMaxLenght = 1;
-
-        $devMaxLenght = 1;
-
-        $participMaxLenght = 1;
-
-        $classe_subjects = [];
-
 
         $school_year_model = $this->getSchoolYear();
 
@@ -199,56 +190,14 @@ class ClasseMarksLister extends Component
 
             $pupils = $classe->getPupils($school_year_model->id, $this->search);
 
-            $marks = $classe->getMarks($this->classe_subject_selected, $this->semestre_selected, 2, $school_year_model->school_year);
-
-            $averageEPETab = $classe->getMarksAverage($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year, 'epe');
-
-            $averageTab = $classe->getAverage($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
-
-            if($this->computedRank){
-
-                $ranksTab = $classe->getClasseRank($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year);
-            }
-            else{
-
-                $ranksTab = [];
-
-            }
-
             $classe_subject_coef = $classe->get_coefs($this->classe_subject_selected, $school_year_model->id, true);
 
-
-            $epeMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'epe') + 1;
-
-            $devMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'devoir');
-
-            $participMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'participation');
-
-            if(($epeMaxLenght < 1 && $participMaxLenght < 1 && $devMaxLenght < 1)){
-
-                $noMarks = true;
-            }
-
-            if($epeMaxLenght < 2){
-
-                $epeMaxLenght = 2;
-            }
-            if($participMaxLenght < 1){
-
-                $participMaxLenght = 1;
-            }
-            if($devMaxLenght <= 2){
-
-                $devMaxLenght = 2;
-            }
-            if(!($epeMaxLenght && $devMaxLenght && $participMaxLenght)){
-
-                $noMarks = true;
-            }
 
             if($this->semestre_selected && $this->subject_selected){
 
                 $semestre = $this->semestre_selected;
+
+                $marks = $classe->getMarks($this->classe_subject_selected, $this->semestre_selected, 2, $school_year_model->school_year);
 
                 $modality = $this->subject_selected->getAverageModalityOf($classe->id, $school_year_model->school_year, $semestre);
 
@@ -268,21 +217,38 @@ class ClasseMarksLister extends Component
 
         }
 
-
-       
-
-
         $calendar_profiler = $school_year_model->calendarProfiler();
 
         $current_period = $calendar_profiler['current_period'];
 
-        return view('livewire.classe-marks-lister', 
+        return view('livewire.classe-marks-header-component', 
                     compact(
                         'classe',
                         'current_period',
-                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model', 'printing'
+                        'marks', 'pupils',
+                        'modality', 'modalitiesActivated', 'hasModalities', 'classe_subject_coef', 'classe_subjects', 'school_year_model', 'printing'
                     )
                 );
+    }
+
+
+
+    public function displayRank()
+    {
+        $this->computedRank = true;
+
+        $this->emit('ClasseDisplayingRankUpdatedLiveEvent', $this->computedRank);
+
+        session()->put('display_classe_pupils_ranks', $this->computedRank);
+    }
+
+    public function hideRank()
+    {
+        $this->computedRank = false;
+
+        $this->emit('ClasseDisplayingRankUpdatedLiveEvent', $this->computedRank);
+
+        session()->put('display_classe_pupils_ranks', $this->computedRank);
     }
 
 
@@ -306,12 +272,72 @@ class ClasseMarksLister extends Component
 
     } 
 
+    public function manageModality($classe_id = null, $subject_id = null, $semestre = null, $modality_id = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        if($classe_id == null){
+            $classe_id = $this->classe_id;
+        }
+        if($subject_id == null){
+            $subject_id = session('classe_subject_selected');
+        }
+        if($semestre == null){
+            $semestre = session('semestre_selected');
+        }
+
+        $mod = $this->subject_selected->getAverageModalityOf($classe_id, $school_year_model->school_year, $semestre);
+        $modality = $mod ? $mod->id : null;
+
+        $this->emit('manageClasseModalitiesLiveEvent', $classe_id, $this->subject_selected->id, $school_year_model->id, $semestre, $modality);
+
+    }
+
+    public function activateModalities()
+    {
+        $this->activateModalityOrNot(true);
+    }
+
+
+    public function diseableModalities()
+    {
+        $this->activateModalityOrNot(false);
+    }
+
     public function editClasseGroup($classe_id = null)
     {
         $this->emit('editClasseGroupLiveEvent', $classe_id);
     }
 
-    
+    public function activateModalityOrNot($activated)
+    {
+
+        $school_year_model = $this->getSchoolYear();
+
+        $classe = $school_year_model->findClasse($this->classe_id);
+
+        $subject_id = session('classe_subject_selected');
+
+        $semestre = session('semestre_selected');
+
+        $modalities = $classe->averageModalities()->where('school_year', $school_year_model->school_year)->where('semestre', $semestre);
+
+        if($modalities->get()->count() > 0){
+
+            $updated = $modalities->each(function($modality) use ($activated){
+
+                $modality->update(['activated' => $activated]);
+            });
+
+            if($updated){
+
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour', 'message' => "C'est fait!", 'type' => 'success']);
+
+                $this->emit('classeUpdated');
+            }
+        }
+
+    }
 
     public function insertMarks($pupil_id, $type = 'epe')
     {
@@ -331,7 +357,10 @@ class ClasseMarksLister extends Component
     }
 
 
-
+    public function insertClasseMarks()
+    {
+        $this->emit('InsertClassePupilsMarksTogetherLiveEvent', $this->classe_id);
+    }
 
     public function insertRelatedMark($pupil_id, $semestre = null, $school_year = null)
     {
@@ -352,24 +381,29 @@ class ClasseMarksLister extends Component
     }
 
 
-    public function reloadDataFormSelectedSubjectChanged($subject_id = null)
+    public function updatedClasseSubjectSelected($subject_id)
     {
         $this->classe_subject_selected = $subject_id;
 
-        if($subject_id){
+        if($subject_id !== null){
 
             $this->subject_selected = Subject::find($subject_id);
 
             session()->put('classe_subject_selected', $subject_id);
 
+            $this->emit('selectedClasseSubjectChangeLiveEvent', $subject_id);
         }
-        else{
+        elseif(is_null($subject_id) || $subject_id == ""){
+
+            $this->classe_subject_selected = null;
+
             session()->forget('classe_subject_selected');
 
+            $this->emit('selectedClasseSubjectChangeLiveEvent', null);
+
         }
 
-        $this->reloadData();
-
+        
     }
 
     public function semestreWasChanged($semestre_selected = null)
@@ -383,7 +417,6 @@ class ClasseMarksLister extends Component
     public function reloadData($data = null)
     {
         $this->count = 1;
-
     }
 
 
@@ -393,4 +426,65 @@ class ClasseMarksLister extends Component
     }
 
 
+    public function refreshClasseMarks($classe_id)
+    {
+        if ($classe_id) {
+
+            $classe = Classe::find($classe_id);
+        }
+        else{
+            $classe = Classe::whereSlug($this->slug)->first();
+        }
+        if ($classe) {
+
+            $school_year_model = $this->getSchoolYear();
+
+            $semestre = $this->semestre_selected;
+
+            if (session()->has('semestre_selected') && session('semestre_selected')) {
+
+                $semestre = session('semestre_selected');
+            }
+
+            $subject_id = session('classe_subject_selected');
+
+            $this->emit('ThrowClasseMarksDeleterLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject_id);
+
+        }
+        
+    }
+
+
+    public function activated($classe_id)
+    {
+
+        $user = auth()->user();
+
+        $school_year_model = $this->getSchoolYear();
+
+        $subject = $this->subject_selected;
+
+        $semestre = session('semestre_selected');
+
+        $classe = $school_year_model->findClasse($classe_id);
+
+        UpdateClasseSanctionsEvent::dispatch($classe, $user, $school_year_model, $semestre, $subject, true);
+    }
+
+
+    public function desactivated($classe_id)
+    {
+        $user = auth()->user();
+
+        $school_year_model = $this->getSchoolYear();
+
+        $subject = $this->subject_selected;
+
+        $semestre = session('semestre_selected');
+
+        $classe = $school_year_model->findClasse($classe_id);
+
+        UpdateClasseSanctionsEvent::dispatch($classe, $user, $school_year_model, $semestre, $subject, false);
+    }
 }
+
