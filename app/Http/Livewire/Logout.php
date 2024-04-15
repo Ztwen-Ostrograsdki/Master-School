@@ -25,18 +25,22 @@ class Logout extends Component
     {
 
         Auth::guard('web')->logout();
-        $this->emit("newUserConnected");
+
+        // $this->emit("newUserConnected");
+
         $this->dispatchBrowserEvent('hide-form');
+
         $this->dispatchBrowserEvent('Toast', ['title' => 'Deconnexion réussie!!!', 'message' => "Vous serez redirigé !", 'type' => 'success']);
+
         Session::flush();
+
         return redirect()->route('connexion');
     }
 
     public function cancel()
     {
-        session()->flash('message', 'Deconnexion annulée');
-        session()->flash('type', 'success');
         $this->dispatchBrowserEvent('hide-form');
+
         Session::flush();
     }
 

@@ -18,6 +18,16 @@ class CreateSchoolsTable extends Migration
             $table->string('name');
             $table->boolean('trimestre')->default(0);
             $table->boolean('semestre')->default(1);
+            $table->unsignedBigInteger('users_counter')->nullable()->default(null);
+            $table->unsignedBigInteger('parents_counter')->nullable()->default(null);
+            $table->unsignedBigInteger('pupils_counter')->nullable()->default(null);
+            $table->unsignedBigInteger('classes_counter')->nullable()->default(null);
+            $table->unsignedBigInteger('teachers_counter')->nullable()->default(null);
+            $table->unsignedBigInteger('subjects_counter')->nullable()->default(null);
+            $table->unsignedBigInteger('classe_groups_counter')->nullable()->default(null);
+            $table->unsignedBigInteger('promotions_counter')->nullable()->default(null);
+            $table->unsignedBigInteger('marks_counter')->nullable()->default(null);
+            $table->unsignedBigInteger('epreuves_counter')->nullable()->default(null);
             $table->timestamps();
         });
     }

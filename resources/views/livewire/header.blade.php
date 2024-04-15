@@ -5,6 +5,7 @@
             <a class="navbar-brand" href="{{route('home')}}"><h2>My Ztwen <em>School</em> <small class="text-lowercase text-white-50"><sup>school</sup></small> </h2></a>
             <button style="background-color: none !important" class="navbar-toggler border border-white bg-transparent" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
+              <span class="d-none">{{ $target }}</span>
             </button>
             <div class="collapse navbar-collapse " id="navbarResponsive">
                 <ul class="navbar-nav ml-auto">
@@ -15,7 +16,7 @@
                         {{ __('Visiter') }}
                     </x-z-linker>
                     @auth
-                        <x-z-linker :params="['id' => auth()->user()->id]" :routeName="'parent_profil'" :isActive="request()->routeIs('parent_profil')">
+                        <x-z-linker :params="['id' => $user->id]" :routeName="'parent_profil'" :isActive="request()->routeIs('parent_profil')">
                             {{ __('Espace Parents') }}
                         </x-z-linker>
                         @isTeacher()
@@ -23,36 +24,36 @@
                                 {{ __('Envoi Epreuves') }}
                             </x-z-linker>
                         @endif
-                        @isAdmin(Auth::user())
+                        @isAdmin($user)
                         <x-z-linker :routeName="'admin'" :isActive="request()->routeIs('admin')">
                             {{ __('Administration') }}
                         </x-z-linker>
                         @endisAdmin
                         <li class="nav-item cursor-pointer">
-                                <x-z-linker :params="['id' => auth()->user()->id]" :routeName="'user_profil'" :isActive="request()->routeIs('user_profil')">
-                                    <span class="fa fa-user text-success"></span> {{  mb_substr(Auth::user()->pseudo, 0, 7) }}
+                                <x-z-linker :params="['id' => $user->id]" :routeName="'user_profil'" :isActive="request()->routeIs('user_profil')">
+                                    <span class="fa fa-user text-success"></span> {{  mb_substr($user->pseudo, 0, 7) }}
                                 </x-z-linker>
                             {{-- <div class=" sm:flex sm:items-center sm:ml-6">
                                 @include('livewire.components.user.user-dropdown-component')
                             </div> --}}
                         </li>
-                @endauth
-                @guest
-                    @routeHas('registration')
-                        <li class="nav-item cursor-pointer">
-                            <a href="{{route('registration')}}" class="nav-link registerModalOpen @isRoute('registration') active disabled @endisRoute " >S'inscrire
-                            <span class="sr-only">(current)</span>
-                            </a>
-                        </li> 
-                    @endrouteHas
-                    @routeHas('connexion')
-                        <li class="nav-item cursor-pointer">
-                            <a href="{{route('connexion')}}" class="nav-link loginOpen @isRoute('connexion') active disabled @endisRoute " >Connexion
+                    @endauth
+                    @guest
+                        @routeHas('registration')
+                            <li class="nav-item cursor-pointer">
+                                <a href="{{route('registration')}}" class="nav-link registerModalOpen @isRoute('registration') active disabled @endisRoute " >S'inscrire
                                 <span class="sr-only">(current)</span>
-                            </a>
-                        </li> 
-                    @endrouteHas
-                @endguest
+                                </a>
+                            </li> 
+                        @endrouteHas
+                        @routeHas('connexion')
+                            <li class="nav-item cursor-pointer">
+                                <a href="{{route('connexion')}}" class="nav-link loginOpen @isRoute('connexion') active disabled @endisRoute " >Connexion
+                                    <span class="sr-only">(current)</span>
+                                </a>
+                            </li> 
+                        @endrouteHas
+                    @endguest
                 </ul>
             </div>
           </div>
@@ -96,7 +97,7 @@
                         </x-z-linker>
                         @endisAdmin
                         @auth
-                        <x-z-linker :params="['id' => auth()->user()->id]" :routeName="'user-profil'" :isActive="request()->routeIs('user-profil')">
+                        <x-z-linker :params="['id' => $user->id]" :routeName="'user-profil'" :isActive="request()->routeIs('user-profil')">
                             <span class="bi-person mr-2"></span>
                             <span>{{ __('Profil') }}</span>
                         </x-z-linker>

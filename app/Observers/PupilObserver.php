@@ -2,8 +2,11 @@
 
 namespace App\Observers;
 
+use App\Events\UpdateSchoolModelEvent;
 use App\Helpers\AdminTraits\AdminTrait;
-use App\Models\pupil;
+use App\Jobs\JobUpdateSchoolModel;
+use App\Models\Pupil;
+use App\Models\School;
 
 class PupilObserver
 {
@@ -15,9 +18,11 @@ class PupilObserver
      * @param  \App\Models\pupil  $pupil
      * @return void
      */
-    public function created(pupil $pupil)
+    public function created(Pupil $pupil)
     {
-        
+        $user = auth()->user(); 
+
+        UpdateSchoolModelEvent::dispatch($user);
     }
 
     /**
@@ -26,7 +31,7 @@ class PupilObserver
      * @param  \App\Models\pupil  $pupil
      * @return void
      */
-    public function updated(pupil $pupil)
+    public function updated(Pupil $pupil)
     {
         // dd($pupil);
     }
@@ -37,9 +42,11 @@ class PupilObserver
      * @param  \App\Models\pupil  $pupil
      * @return void
      */
-    public function deleted(pupil $pupil)
+    public function deleted(Pupil $pupil)
     {
-        //
+        $user = auth()->user(); 
+        
+        UpdateSchoolModelEvent::dispatch($user);
     }
 
     /**
@@ -48,7 +55,7 @@ class PupilObserver
      * @param  \App\Models\pupil  $pupil
      * @return void
      */
-    public function restored(pupil $pupil)
+    public function restored(Pupil $pupil)
     {
         //
     }
@@ -59,7 +66,7 @@ class PupilObserver
      * @param  \App\Models\pupil  $pupil
      * @return void
      */
-    public function forceDeleted(pupil $pupil)
+    public function forceDeleted(Pupil $pupil)
     {
         //
     }

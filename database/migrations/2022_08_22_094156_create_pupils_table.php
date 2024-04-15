@@ -19,6 +19,7 @@ class CreatePupilsTable extends Migration
             $table->string('firstName');
             $table->string('lastName');
             $table->string('matricule')->unique();
+            $table->string('ltpk_matricule')->nullable()->default(rand(12225, 898788));
             $table->string('last_school_from')->nullable()->default(null);
             $table->string('contacts')->nullable()->default(null);
             $table->date('birth_day')->nullable()->default(null);

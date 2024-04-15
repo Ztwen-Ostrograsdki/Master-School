@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\Redirectors\RedirectorsDriver;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,9 +18,14 @@ class AuthorizedToAdminRoutes
      */
     public function handle(Request $request, Closure $next)
     {
+        RedirectorsDriver::setUlrFromToSessionBeforeRedirection($request);
+        
         $user = $request->user();
+        
         if(Auth::user()){
+
             if($user->__hasAdminAuthorization()){
+
                 return $next($request);
             }
             else{

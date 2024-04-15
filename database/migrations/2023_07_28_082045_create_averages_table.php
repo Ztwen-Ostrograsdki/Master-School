@@ -17,6 +17,7 @@ class CreateAveragesTable extends Migration
         Schema::create('averages', function (Blueprint $table) {
             $table->id();
             $table->float('moy')->nullable()->default(null);
+            $table->float('epe_average')->nullable()->default(null);
             $table->float('max')->nullable()->default(null);
             $table->float('min')->nullable()->default(null);
             $table->string('mention')->nullable()->default(null);

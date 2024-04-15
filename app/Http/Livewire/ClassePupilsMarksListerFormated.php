@@ -3,13 +3,17 @@
 namespace App\Http\Livewire;
 
 use App\Events\UpdateClasseSanctionsEvent;
+use App\Exports\ExportPupils;
+use App\Exports\PupilsAveragesExports;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Mark;
 use App\Models\Pupil;
 use App\Models\School;
 use App\Models\Subject;
+use Illuminate\Support\Facades\View;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 
 class ClassePupilsMarksListerFormated extends Component
@@ -20,6 +24,7 @@ class ClassePupilsMarksListerFormated extends Component
     protected $listeners = [
         'classeSubjectUpdated' => 'reloadData',
         'classePupilListUpdated' => 'reloadData',
+        'ReloadClasseListDataAbandonLiveEvent' => 'reloadData',
         'schoolYearChangedLiveEvent' => 'reloadData',
         'classeUpdated' => 'reloadData',
         'semestreWasChanged',
@@ -31,6 +36,8 @@ class ClassePupilsMarksListerFormated extends Component
         'ClasseDataLoadedSuccessfully' => 'dataWasLoaded',
         'ClasseDisplayingRankUpdatedLiveEvent' => 'reloadRankToFetch',
         'selectedClasseSubjectChangeLiveEvent' => 'reloadDataFormSelectedSubjectChanged',
+        'PrintSingleMarksAsExcelFileLiveEvent' => 'printSingleMarksAsExcelFile',
+        'ClasseDataWasUpdated' => 'reloadData',
     ];
 
     public $classe_id;
@@ -199,7 +206,7 @@ class ClassePupilsMarksListerFormated extends Component
 
         if($classe){
 
-            $pupils = $classe->getPupils($school_year_model->id, $this->search);
+            $pupils = $classe->getNotAbandonnedPupils($school_year_model->id, $this->search);
 
             $marks = $classe->getMarks($this->classe_subject_selected, $this->semestre_selected, 2, $school_year_model->school_year);
 
@@ -428,5 +435,36 @@ class ClassePupilsMarksListerFormated extends Component
 
         UpdateClasseSanctionsEvent::dispatch($classe, $user, $school_year_model, $semestre, $subject, false);
     }
+
+
+    public function printSingleMarksAsExcelFile()
+    {
+        $classe = Classe::find($this->classe_id);
+
+        $school_year_model = $this->getSchoolYear();
+
+        $semestre_type = $this->semestre_type;
+
+        $semestre = $this->semestre_selected;
+
+        $subject = $this->subject_selected;
+
+        if($subject && $semestre && $semestre_type){
+
+            $file_name = 'Les-notes-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
+
+            return Excel::download(new PupilsAveragesExports($classe, $school_year_model, $semestre, $subject), $file_name);
+
+
+        }
+        else{
+
+            $this->dispatchBrowserEvent('Toast', ['title' => 'REQUETE INCOMPLETE', 'message' => "Vous bien définir les données du formulaire de téléchargement, certaines données n'ont pas été renseignées!", 'type' => 'warning']);
+
+        }
+    }
+
+
+   
 }
 

@@ -99,6 +99,7 @@
                                 <col>
                                 <col>
                                 @foreach($pupils as $pupil)
+                                    @if(2 == 2)
                                     <tr class="@isset($marks[$pupil->id]) bg-secondary-light-2 @endisset @if($targeted_pupil && $targeted_pupil !== $pupil->id) opacity-50  @else opacity-100 @endif">
                                         <th class="px-2">{{$loop->iteration}}</th>
                                         <th class="text-left pl-2">{{$pupil->getName()}}</th>
@@ -221,6 +222,7 @@
                                         </th>
 
                                     </tr>
+                                    @endif
                                 @endforeach
                             </table>
                         </div>

@@ -20,6 +20,7 @@ use Livewire\Component;
 class Admin extends Component
 {
     use ZtwenAssert;
+    
     use ModelQueryTrait;
 
     protected $listeners = [

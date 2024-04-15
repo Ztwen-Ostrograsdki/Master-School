@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\PreparePupilDataToFetchEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Level;
@@ -20,35 +21,59 @@ class PupilsListerComponent extends Component
         'classeUpdated' => 'reloadClasseData',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
         'GlobalDataUpdated' => 'reloadClasseData',
+        'DataAreReadyToFetchLiveEvent' => 'fetchData',
     ];
     
     
     public $counter = 0;
+
     public $selected;
+
     public $selectedAction;
+
     public $checkeds = [];
+
     public $selecteds = [];
+
     public $activeData = [];
+
     public $download_pdf_z = false;
+
     public $search = null;
 
     public $pupilFirstName;
+
     public $pupilLastName;
+
     public $pupil_id;
+
     public $classe_group_id_selected;
+
     public $classe_id_selected;
+
     public $sexe_selected;
+
     public $theLevel;
+
     public $slug;
+
     public $level;
+
     public $taking = 30;
+
     public $editingPupilName = false;
 
     public $levels = [];
 
+    public $pupil_type_selected = 'continued';
+
+    public $data = [];
 
 
-
+    public function fetchData($data)
+    {
+        $this->data = json_encode($data['data']);
+    }
 
     public function mount($slug)
     {
@@ -108,13 +133,24 @@ class PupilsListerComponent extends Component
         $this->classe_group_id_selected = $classe_group_id;
     }
 
+    public function updatedPupilTypeSelected($pupil_type_selected)
+    {
+        $this->reset('search', 'pupil_type_selected');
+
+        $this->pupil_type_selected = $pupil_type_selected;
+    }
+
     public function render()
     {
         $school_year_model = $this->getSchoolYear();
 
         $pupils = [];
 
+        $total = 0;
+
         $classes = [];
+
+        $pupil_type_selected = $this->pupil_type_selected;
 
         $classe_groups = $school_year_model->classe_groups()->orderBy('classe_groups.name', 'asc')->get();
         
@@ -126,7 +162,19 @@ class PupilsListerComponent extends Component
 
             if($this->search && mb_strlen($this->search) >= 2){
 
-                $pupils = Pupil::where('level_id', $level->id)->where('firstName', 'like', '%' . $this->search . '%')->orWhere('lastName', 'like', '%' . $this->search . '%')->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                if($pupil_type_selected == 'all'){
+
+                    $pupils = Pupil::where('level_id', $level->id)->where('firstName', 'like', '%' . $this->search . '%')->orWhere('lastName', 'like', '%' . $this->search . '%')->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                }
+                elseif ($pupil_type_selected == 'abandonned') {
+                    
+                    $pupils = Pupil::where('level_id', $level->id)->where('abandonned', true)->where('firstName', 'like', '%' . $this->search . '%')->orWhere('lastName', 'like', '%' . $this->search . '%')->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                }
+                elseif ($pupil_type_selected == 'continued') {
+                    
+                    $pupils = Pupil::where('level_id', $level->id)->where('abandonned', false)->where('firstName', 'like', '%' . $this->search . '%')->orWhere('lastName', 'like', '%' . $this->search . '%')->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                }
             }
             else{
 
@@ -138,9 +186,23 @@ class PupilsListerComponent extends Component
 
                     if($this->sexe_selected && $classe){
 
-                        $pupils = $classe->getPupils($school_year_model->id, null, $this->sexe_selected);
+                        if($pupil_type_selected == 'all'){
+
+                            $pupils = $classe->getPupils($school_year_model->id, null, $this->sexe_selected);
+
+                        }
+                        elseif ($pupil_type_selected == 'abandonned') {
+                            
+                            $pupils = $classe->getAbandonneds($school_year_model->id, null, $this->sexe_selected);
+                        }
+                        elseif ($pupil_type_selected == 'continued') {
+
+                            $pupils = $classe->getNotAbandonnedPupils($school_year_model->id, null, $this->sexe_selected);
+                        }
+
                     }
                     elseif($classe){
+
                         $pupils = $classe->getPupils($school_year_model->id);
                     }
 
@@ -164,32 +226,102 @@ class PupilsListerComponent extends Component
                         } 
                     }
 
-                    if($sexe && $classe_group){
+                    if($sexe){
 
-                        $pupils = Pupil::where('level_id', $level->id)->whereIn('pupils.id', $pupils_ids)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                        if($pupil_type_selected == 'all'){
+
+                            $pupils = Pupil::where('level_id', $level->id)->whereIn('pupils.id', $pupils_ids)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                        }
+                        elseif($pupil_type_selected == 'abandonned'){
+
+                            $pupils = Pupil::where('level_id', $level->id)->whereIn('pupils.id', $pupils_ids)->where('pupils.abandonned', true)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                        }
+                        elseif($pupil_type_selected == 'continued'){
+
+                            $pupils = Pupil::where('level_id', $level->id)->whereIn('pupils.id', $pupils_ids)->where('pupils.abandonned', false)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                        }
+
+                        
                     }
                     else{
 
-                        $pupils = Pupil::where('level_id', $level->id)->whereIn('pupils.id', $pupils_ids)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                        if($pupil_type_selected == 'all'){
+
+                            $pupils = Pupil::where('level_id', $level->id)->whereIn('pupils.id', $pupils_ids)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                        }
+                        elseif($pupil_type_selected == 'abandonned'){
+
+                            $pupils = Pupil::where('level_id', $level->id)->whereIn('pupils.id', $pupils_ids)->where('pupils.abandonned', true)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                        }
+                        elseif($pupil_type_selected == 'continued'){
+
+                            $pupils = Pupil::where('level_id', $level->id)->whereIn('pupils.id', $pupils_ids)->where('pupils.abandonned', false)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                        }
                     }
 
                 }
                 elseif($sexe){
 
+                    if($pupil_type_selected == 'all'){
+
+                            $pupils = Pupil::where('level_id', $level->id)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                        }
+                        elseif($pupil_type_selected == 'abandonned'){
+
+                            $pupils = Pupil::where('level_id', $level->id)->where('pupils.abandonned', true)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                        }
+                        elseif($pupil_type_selected == 'continued'){
+
+                            $pupils = Pupil::where('level_id', $level->id)->where('pupils.abandonned', false)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                        }
+
                     $pupils = Pupil::where('level_id', $level->id)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
                 }
                 else{
 
-                    $pupils = Pupil::where('level_id', $level->id)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                    if($pupil_type_selected == 'all'){
+
+                        $pupils = Pupil::where('level_id', $level->id)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                    }
+                    elseif($pupil_type_selected == 'abandonned'){
+
+                        $pupils = Pupil::where('level_id', $level->id)->where('pupils.abandonned', true)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                    }
+                    elseif($pupil_type_selected == 'continued'){
+
+                        $pupils = Pupil::where('level_id', $level->id)->where('pupils.abandonned', false)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                    }
+
+                    if($this->data){
+
+                        // $pupils = $this->data;
+
+                    }
+                    else{
+
+                        // $user = auth()->user();
+
+                        // PreparePupilDataToFetchEvent::dispatch($user, $level);
+
+                        // $pupils = Pupil::where('level_id', $level->id)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                    }
+
+                    
                 }
-
-
-                
 
             }
             
         }
-        return view('livewire.pupils-lister-component', compact('pupils', 'school_year_model', 'classes', 'classe_groups'));
+        return view('livewire.pupils-lister-component', compact('pupils', 'total', 'school_year_model', 'classes', 'classe_groups'));
     }
 
 

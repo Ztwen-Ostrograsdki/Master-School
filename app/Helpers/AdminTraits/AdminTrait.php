@@ -42,9 +42,12 @@ trait AdminTrait{
     public function __hasAdminAuthorization()
     {
         if(session()->has('admin-' . $this->id) && session('admin-' . $this->id) == $this->id){
+            
             $this->__regenerateAdminSession();
+            
             return true;
         }
+
         return false;
     }
 
@@ -125,19 +128,28 @@ trait AdminTrait{
     public function __generateAdminKey()
     {
         $key = Str::random(4);
+
         if($this->hasAdminKey()){
+
             $this->__destroyWeakKeys();
+
             $this->__refreshNotifications();
         }
+
         $make = UserAdminKey::create([
             'user_id' => $this->id,
             'key' =>  Hash::make($key)
         ]);
+
         if($make){
+
             $this->__destroyStrongKeys();
+
             $this->__refreshNotifications();
+
             return $this->__sendKey($key);
         }
+
         return false;
     }
 
@@ -149,18 +161,27 @@ trait AdminTrait{
     public function __generateAdvancedRequestKey()
     {
         $key = Str::random(4);
+        
         if($this->hasAdminAdvancedKey()){
+            
             $this->__destroyStrongKeys();
+            
             $this->__refreshNotifications();
         }
+        
         $make = UserAdminKey::create([
             'user_id' => $this->id,
             'key' =>  Hash::make($key)
         ]);
+        
         $make->forceFill(['advanced' => true])->save();
+        
         if($make){
+            
             $this->__destroyWeakKeys();
+            
             $this->__refreshNotifications();
+            
             return $this->__sendAdvancedKey($key);
         }
         return false;
@@ -196,11 +217,16 @@ trait AdminTrait{
     public function __destroyAdminKey()
     {
         if($this->hasAdminKey()){
+
             $this->userAdminKey->delete();
+
+            $this->__hydrateAdminSession();
+
+            $this->__refreshNotifications();
         }
-        $this->__hydrateAdminSession();
-        $this->__refreshNotifications();
-        $this->__backToUserProfilRoute();
+        
+
+        // $this->__backToUserProfilRoute();
     }
 
 
@@ -227,7 +253,9 @@ trait AdminTrait{
     public function __destroyStrongKeys()
     {
         $strong_keys = UserAdminKey::where('user_id', $this->id)->where('advanced', true);
+
         if($strong_keys->get()->count() > 0){
+
             $strong_keys->delete();
         }
     }
@@ -238,6 +266,21 @@ trait AdminTrait{
      * @return boolean
      */
     public function hasAdminKey()
+    {
+        $key = $this->userAdminKey;
+
+        if($key){
+            return true;
+        }
+        return false;
+    }  
+
+      /**
+     * Determine if an admin has a weak admin key
+     *
+     * @return boolean
+     */
+    public function __hasAdminKey()
     {
         $key = $this->userAdminKey;
 
@@ -262,6 +305,21 @@ trait AdminTrait{
         return false;
     }
 
+    /**
+     * Determine if an admin has a strong admin key or an advanced admin key
+     *
+     * @return boolean
+     */
+    public function __hasAdminAdvancedKey()
+    {
+        $key = $this->userAdminKey;
+
+        if($key && $key->advanced){
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * Use to refresh all notification about the admin key: strong and weak
@@ -273,7 +331,7 @@ trait AdminTrait{
         $notifications = MyNotifications::where('user_id', $this->id)->where('target', 'Admin-Key')->orWhere('target', 'Admin-Advanced-Key');
 
         if($notifications->get()->count() > 0){
-            
+
             return $notifications->delete();
         }
         

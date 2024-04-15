@@ -158,6 +158,22 @@ return [
         null => "Juste une épreuve",
     ],
 
+    'users_displaying_sections' => [
+        null => "Tous les utilisateurs",
+        'admins' => "Tous les utilisateurs administrateurs",
+        'admins_keys' => "Tous les utilisateurs administrateurs ayant une clé active",
+        'connecteds' => "Tous les utilisateurs connectés",
+        'blockeds' => "Tous les utilisateurs Bloqués",
+        'not_blockeds' => "Tous les utilisateurs Non Bloqués",
+        'confirmeds' => "Tous les utilisateurs Confirmés",
+        'unconfirmeds' => "Tous les utilisateurs Non Confirmés",
+        'blockeds_unconfirmeds' => "Tous les utilisateurs Bloqués Non Confirmés",
+        'blockeds_confirmeds' => "Tous les utilisateurs Bloqués Confirmé",
+        'parents' => "Tous les parents",
+        'teachers' => "Tous les Enseignants",
+
+    ],
+
 
     'epreuvesFolder' => "epreuvesFolder/",
 

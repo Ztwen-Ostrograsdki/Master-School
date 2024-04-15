@@ -2,12 +2,18 @@
 
 namespace App\Http\Livewire;
 
+use App\Models\Parentable;
+use App\Models\Teacher;
 use App\Models\User;
 use Livewire\Component;
 
 class UserListingTable extends Component
 {
-    protected $listeners = ['refreshDataFromUsers' => 'refreshData', 'UpdatedGlobalSearch' => 'updatedSearch', 'UpdateTheActiveSection' => 'updatedActiveSection'];
+    protected $listeners = [
+        'refreshDataFromUsers' => 'refreshData', 
+        'UpdatedGlobalSearch' => 'updatedSearch', 
+        'UpdateTheActiveSection' => 'reloadSectionData',
+    ];
 
     public $active_section = null;
 
@@ -15,19 +21,13 @@ class UserListingTable extends Component
 
     public $counter = 0;
 
-    public $sections = [
-        null => "Tous les utilisateurs",
-        'blockeds' => "Tous les utilisateurs Bloqués",
-        'confirmeds' => "Tous les utilisateurs Confirmés",
-        'unconfirmeds' => "Tous les utilisateurs Non Confirmés",
-        'blockeds_unconfirmeds' => "Tous les utilisateurs Bloqués Non Confirmés",
-        'blockeds_confirmeds' => "Tous les utilisateurs Bloqués Confirmé",
-
-    ];
+    public $sections = [];
 
     public function render()
     {
         $users = [];
+
+        $this->sections = config('app.users_displaying_sections');
 
         if(session()->has('users_section_selected') && session('users_section_selected')){
             
@@ -39,15 +39,113 @@ class UserListingTable extends Component
 
             $users = User::all();
         }
-        elseif($this->active_section == 'confirmed'){
+        elseif($this->active_section == 'confirmeds'){
 
             $users = User::whereNotNull('email_verified_at')->get();
+        }
+        elseif($this->active_section == 'unconfirmeds'){
+
+            $users = User::whereNull('email_verified_at')->get();
+        }
+        elseif($this->active_section == 'blockeds'){
+
+            $users = User::where('blocked', true)->orWhere('locked', true)->get();
+        }
+        elseif($this->active_section == 'not_blockeds'){
+
+            $users = User::where('blocked', false)->orWhere('locked', false)->get();
+        }
+        elseif($this->active_section == 'admins'){
+
+            $users = [];
+
+            $all = User::whereNotNull('email_verified_at')->get();
+
+            foreach($all as $u){
+
+                if($u->administrator){
+
+                    $users[] = $u;
+
+                }
+
+            }
+
+        }
+        elseif($this->active_section == 'connecteds'){
+
+            $users = [];
+
+            $all = User::whereNotNull('email_verified_at')->get();
+
+            foreach($all as $u){
+
+                if($u->administrator){
+
+                    $users[] = $u;
+
+                }
+
+            }
+
+        }
+        elseif($this->active_section == 'admins_keys'){
+
+            $users = [];
+
+            $all = User::whereNotNull('email_verified_at')->get();
+
+            foreach($all as $u){
+
+                if($u->administrator && $u->hasAdminKey()){
+
+                    $users[] = $u;
+
+                }
+
+            }
+
+        }
+        elseif($this->active_section == 'parents'){
+
+            $users = [];
+
+            $parentors = Parentable::all();
+
+            foreach($parentors as $p){
+
+                if($p->user){
+
+                    $users[] = $p->user;
+
+                }
+
+            }
+
+        }
+        elseif($this->active_section == 'teachers'){
+
+            $users = [];
+
+            $teachers = Teacher::all();
+
+            foreach($teachers as $t){
+
+                if($t->user){
+
+                    $users[] = $t->user;
+
+                }
+
+            }
+
         }
         else{
 
             $users = [];
 
         }
+
         return view('livewire.user-listing-table', compact('users'));
     }
 
@@ -60,8 +158,13 @@ class UserListingTable extends Component
     public function updatedActiveSection($section)
     {
         $this->active_section = $section;
+    }
 
-        session()->put('users_section_selected', $section);
+    public function reloadSectionData($section)
+    {
+        $this->active_section = $section;
+
+        // session()->put('users_section_selected', $section);
     }
 
 
@@ -91,7 +194,7 @@ class UserListingTable extends Component
     {
         $user = User::find($user_id);
 
-        if($user){
+        if($user && !$user->isAdminAs('master')){
 
             if(!$user->blocked && !$user->locked){
 

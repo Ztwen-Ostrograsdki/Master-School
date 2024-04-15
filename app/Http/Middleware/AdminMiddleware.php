@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\Redirectors\RedirectorsDriver;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,8 +18,12 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
+        RedirectorsDriver::setUlrFromToSessionBeforeRedirection($request);
+
         if(Auth::user()){
+            
             if(Auth::user()->isAdmin() || Auth::user()->id == 1){
+                
                 return $next($request);
             }
             return abort(403, "Vous n'êtes pas authorisé");

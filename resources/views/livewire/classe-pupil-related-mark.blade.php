@@ -37,32 +37,34 @@
             </thead>
             <tbody>
                 @foreach($pupils as $p)
-                    <tr class="">
-                        <td class="text-center border-right">{{ $loop->iteration }}</td>
-                        <td class="text-capitalize pl-2 @if($p->sexe == 'female') text-orange  @endif " >
-                            {{ $p->getName() }}
-                        </td>
-                        
-                        <td class="text-center text-success"> {{ $p->getRelatedMarksCounter($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), 'bonus', true) }}</td>
-                        <td class="text-center text-danger"> {{ $p->getRelatedMarksCounter($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), 'minus', true) }}</td>
-                        <td class="text-center"> {{ $p->getLastRelatedMarkValue($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), true) ? $p->getLastRelatedMarkValue($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), true) : '-'}}</td>
-                        <td class="text-center text-capitalize"> {{ $p->getLastRelatedMarkDate($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) ? $p->getLastRelatedMarkDate($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) : '-' }}</td>
-                        <td class="text-center text-capitalize"> {{ $p->getLastRelatedMarkHoraire($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) ? $p->getLastRelatedMarkHoraire($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) : '-' }}</td>
-                        <td class="text-center"> 
-                            <span class="row w-100 m-0 p-0">
-                                <span title="Supprimer la Dernière note" class="col-4 m-0 p-0 cursor-pointer">
-                                    <span class="text-warning cursor-pointer fa fa-trash py-2 px-2"></span>
+                    @if(!$p->abandonned)
+                        <tr class="">
+                            <td class="text-center border-right">{{ $loop->iteration }}</td>
+                            <td class="text-capitalize pl-2 @if($p->sexe == 'female') text-orange  @endif " >
+                                {{ $p->getName() }}
+                            </td>
+                            
+                            <td class="text-center text-success"> {{ $p->getRelatedMarksCounter($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), 'bonus', true) }}</td>
+                            <td class="text-center text-danger"> {{ $p->getRelatedMarksCounter($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), 'minus', true) }}</td>
+                            <td class="text-center"> {{ $p->getLastRelatedMarkValue($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), true) ? $p->getLastRelatedMarkValue($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), true) : '-'}}</td>
+                            <td class="text-center text-capitalize"> {{ $p->getLastRelatedMarkDate($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) ? $p->getLastRelatedMarkDate($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) : '-' }}</td>
+                            <td class="text-center text-capitalize"> {{ $p->getLastRelatedMarkHoraire($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) ? $p->getLastRelatedMarkHoraire($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) : '-' }}</td>
+                            <td class="text-center"> 
+                                <span class="row w-100 m-0 p-0">
+                                    <span title="Supprimer la Dernière note" class="col-4 m-0 p-0 cursor-pointer">
+                                        <span class="text-warning cursor-pointer fa fa-trash py-2 px-2"></span>
+                                    </span>
+                                    <span wire:click="refreshPupilRelatedsMarks({{$p->id}})" title="Supprimer toutes les notes bonus - sanctions de l'apprenant {{$p->getName()}}" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                        <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
+                                    </span>
+                                    <span wire:click="insertRelatedMark({{$p->id}})" title="Faire un bonus ou une sanction à {{$p->getName()}}" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                        <span class="text-primary cursor-pointer fa fa-edit py-2 px-2"></span>
+                                    </span>
                                 </span>
-                                <span wire:click="refreshPupilRelatedsMarks({{$p->id}})" title="Supprimer toutes les notes bonus - sanctions de l'apprenant {{$p->getName()}}" class="text-danger col-4 m-0 p-0 cursor-pointer">
-                                    <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
-                                </span>
-                                <span wire:click="insertRelatedMark({{$p->id}})" title="Faire un bonus ou une sanction à {{$p->getName()}}" class="text-danger col-4 m-0 p-0 cursor-pointer">
-                                    <span class="text-primary cursor-pointer fa fa-edit py-2 px-2"></span>
-                                </span>
-                            </span>
-                        </td>
+                            </td>
 
-                    </tr>
+                        </tr>
+                    @endif
                 @endforeach
             </tbody>
         </table>            

@@ -52,6 +52,15 @@
                                 @endforeach
                             </select>
                         </span>
+
+                        <span class="nav-item mx-2">
+                            <select wire:model="pupil_type_selected" class="form-select z-bg-secondary custom-select">
+                                <option value=""> Tous </option>
+                                <option value="not_abandoned"> Les réguliers </option>
+                                <option value="abandonned"> Les Abandons </option>
+                                
+                            </select>
+                        </span>
                     </div>
 
                     @if($pupils && count($pupils))

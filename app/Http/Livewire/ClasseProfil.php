@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 use App\Events\AbsencesAndLatesDeleterEvent;
 use App\Events\FreshAveragesIntoDBEvent;
+use App\Events\PupilAbandonnedClassesEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Jobs\JobUpdateClasseAllSemestresAverageIntoDatabase;
@@ -25,7 +26,9 @@ class ClasseProfil extends Component
 
     protected $listeners = [
         'schoolYearChangedLiveEvent' => 'reloadClasseData',
+        'ReloadClasseListDataAbandonLiveEvent' => 'reloadClasseData',
         'classePupilListUpdated' => 'reloadClasseData',
+        'setPupilToAbandonned' => 'toAbandonned',
         'classeUpdated' => 'reloadClasseData',
         'ClassesUpdatedLiveEvent' => 'reloadClasseData',
         'ClasseDataWasUpdated' => 'reloadClasseData',
@@ -82,6 +85,30 @@ class ClasseProfil extends Component
             return abort(404);
         }
     }
+
+    public function printSingleMarksAsExcelFile()
+    {
+        $this->emit('PrintSingleMarksAsExcelFileLiveEvent');
+
+        $this->dispatchBrowserEvent('Toast', ['title' => "Impression lancée", 'message' => "L'impression des notes simplifiée de la classe a été lancée!", 'type' => 'success']);
+
+    }
+
+    public function printMarksAsExcelFile()
+    {
+        $this->emit('PrintMarksAsExcelFileLiveEvent');
+
+        $this->dispatchBrowserEvent('Toast', ['title' => "Impression lancée", 'message' => "L'impression des notes de la classe a été lancée!", 'type' => 'success']);
+
+    }
+
+    public function updatePupilsLTPKMatricule()
+    {
+        $classe_id = $this->classe_id;
+        
+        $this->emit('UpdateClassePupilsLTPKMatriculeLiveEvent', $classe_id);
+    }
+
 
     public function editClasseRespo1($classe_id, $target = 'r1')
     {
@@ -253,7 +280,7 @@ class ClasseProfil extends Component
 
             if($classe){
 
-                $pupils = $classe->getClassePupils();
+                $pupils = $classe->getPupils();
             }
             else{
 
@@ -391,7 +418,7 @@ class ClasseProfil extends Component
 
         if($classe){
 
-            $pupils = $classe->getClassePupils();
+            $pupils = $classe->getPupils();
 
             if(count($pupils) > 0){
 
@@ -781,6 +808,28 @@ class ClasseProfil extends Component
 
         }
 
+    }
+
+    public function toAbandonned($pupil_id)
+    {
+        $pupil = Pupil::find($pupil_id);
+
+        if($pupil){
+
+            $user = auth()->user();
+
+            $school_year_model = $this->getSchoolYear();
+
+            PupilAbandonnedClassesEvent::dispatch($pupil, $user, $school_year_model);
+
+            $this->dispatchBrowserEvent('Toast', ['title' => "PROCESSUS LANCE", 'message' => "LE processus a été lancé!", 'type' => 'success']);
+
+        }
+        else{
+
+            $this->dispatchBrowserEvent('Toast', ['title' => "APPRENANT INTROUVABLE", 'message' => "Veuillez vérifier les donneés et réessayer!", 'type' => 'error']);
+
+        }
     }
 
 

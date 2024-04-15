@@ -23,7 +23,9 @@
                         </div>
                         <hr class="m-0 p-0 bg-white w-100">
                         <div class="m-0 py-2 px-2">
+
                             <div class="d-flex flex-column w-100 cursor-pointer m-0 p-0 justify-content-around">
+                                @if($user && $user->isAdmin())
                                 <span title="Détruire la clé de session d'administration" wire:click="destroyAdminSessionKey" class="cursor-pointer py-1 border rounded px-2">
                                     <span class="bi-trash"></span>
                                     <span class="d-none d-xxl-inline d-xl-inline d-md-inline d-lg-inline ml-1">Détruire la clé</span>
@@ -36,6 +38,7 @@
                                     <span class="bi-eye"></span>
                                     <span class="d-none d-xxl-inline d-xl-inline d-md-inline d-lg-inline ml-1">Afficher la clé</span>
                                 </span>
+                                @endif
                                 <span title="Se déconnecter" class="cursor-pointer py-1 border rounded px-2 my-1">
                                     <span class="bi-lock text-danger"></span>
                                     <span class="d-none d-xxl-inline d-xl-inline d-md-inline d-lg-inline ml-1">
@@ -214,22 +217,41 @@
                                             </h6>
 
                                             <h6 class="">
-                                                <span class="text-warning">Classes assignées:</span>
-                                                <small class="d-flex justify-content-around">
+                                                @php
+
+                                                    $teacher_classes_paginated = $user->teacher->getTeachersCurrentClassesWithPagination();
+                                                @endphp
+                                                <span class="text-warning">Classes assignées: 
+                                                    <i class="text-white-50">
+                                                        ( {{ $teacher_classes_paginated['total'] }} classe(s) )
+                                                    </i>
+                                                </span>
+                                                <div class="w-100">
                                                     @if($user->teacher->hasClasses())
-                                                        @foreach($user->teacher->getTeachersCurrentClasses() as $c)
-                                                            @php
-                                                                $cl = $c->getNumericName();
-                                                            @endphp
-                                                            <a class="text-white border rounded border-white btn-secondary py-1 px-2 mr-1 my-1" href="{{route('teacher_profil_as_user', ['id' => auth()->user()->teacher->id, 'classe_id' => $c->id, 'slug' => $c->slug])}}">
-                                                                {{ $cl['root'] }}<sup>{{ $cl['sup'] }} </sup> {{ $cl['idc'] }}
-                                                            </a>
+                                                        @foreach($teacher_classes_paginated['classes'] as $teacher_classes)
+
+                                                            <div class="w-100 row p-1 m-1 mb-1">
+
+                                                                @foreach($teacher_classes as $c)
+
+                                                                    @php
+                                                                        $cl = $c->getNumericName();
+
+                                                                    @endphp
+                                                                    <a class="text-white small col-3 border rounded border-white btn-secondary py-2 text-center px-2 mr-2 z-scale" href="{{route('teacher_profil_as_user', ['id' => auth()->user()->teacher->id, 'classe_id' => $c->id, 'slug' => $c->slug])}}">
+                                                                        {{ $cl['root'] }}<sup>{{ $cl['sup'] }} </sup> {{ $cl['idc'] }}
+                                                                    </a>
+
+                                                                @endforeach
+
+                                                            </div>
+                                                            
 
                                                         @endforeach
                                                     @else
                                                         Aucune classe assignée!
                                                     @endif
-                                                </small>
+                                                </div>
                                             </h6>
 
                                         </div>

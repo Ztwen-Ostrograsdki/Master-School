@@ -8695,7 +8695,10 @@ if (window.User) {
   window.ClientUser = window.User;
 }
 
-e["private"]('user.' + window.ClientUser.id).listen('ParentRequestAcceptedEvent', function (e) {
+e["private"]('user.' + window.ClientUser.id).listen('PupilDataAreReadyToFetchEvent', function (e) {
+  console.log(e.data);
+  Livewire.emit('DataAreReadyToFetchLiveEvent', e);
+}).listen('ParentRequestAcceptedEvent', function (e) {
   Swal.fire({
     icon: 'success',
     title: "Demande Acceptée",
@@ -8704,6 +8707,38 @@ e["private"]('user.' + window.ClientUser.id).listen('ParentRequestAcceptedEvent'
     showConfirmButton: false
   });
   Livewire.emit('NotifyMeWhenMyRequestAccepted', e.user);
+}).listen('PupilSetToOrFromAbandonnedEvent', function (e) {
+  Livewire.emit('ReloadClasseListDataAbandonLiveEvent');
+}).listen('ForcingUserDisconnectionEvent', function (e) {
+  Swal.fire({
+    icon: 'warning',
+    title: "PROCEDURE INEVITABLE: RUPTURE DE CONNEXION",
+    text: " Vous allez être déconnecté dans quelques secondes!",
+    toast: true,
+    showConfirmButton: false
+  });
+  Livewire.emit('RedirectoLoginPage');
+}).listen('UserAdminSessionKeyExpiredEvent', function (e) {
+  window.location.reload();
+}).listen('UserRetrievedFromAdminEvent', function (e) {
+  Swal.fire({
+    icon: 'warning',
+    title: "Status Admin retiré",
+    text: " Vous n'avez plus le status administrateur",
+    toast: true,
+    showConfirmButton: false
+  });
+  Livewire.emit('ReloadComponentEvent');
+  window.location.reload();
+}).listen('UserExtendsToAdminEvent', function (e) {
+  Swal.fire({
+    icon: 'info',
+    title: "Status Admin attribué",
+    text: " Vous avez reçu le status administrateur",
+    toast: true,
+    showConfirmButton: false
+  });
+  Livewire.emit('ReloadComponentEvent'); // window.location.reload(); 
 }).listen('InitiateClasseDataUpdatingEvent', function (e) {
   Livewire.emit('InitiateClasseDataUpdatingLiveEvent');
 }).listen('ParentAccountBlockedEvent', function (e) {
@@ -8729,6 +8764,9 @@ e["private"]('user.' + window.ClientUser.id).listen('ParentRequestAcceptedEvent'
 }).listen('ClassePupilsListUpdatingEvent', function (e) {
   Livewire.emit('ClassePupilsListUpdatingLiveEvent');
 }).listen('ClassePupilsListUpdatedEvent', function (e) {
+  Livewire.emit('ClassePupilsListUpdatedLiveEvent');
+}).listen('ClassePupilsMatriculeUpdatedEvent', function (e) {
+  Livewire.emit('ClasseDataWasUpdated');
   Livewire.emit('ClassePupilsListUpdatedLiveEvent');
 }).listen('ClassePresenceLateWasCompletedEvent', function (e) {
   Livewire.emit('PresenceLateWasUpdated');

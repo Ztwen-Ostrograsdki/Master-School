@@ -30,6 +30,8 @@ class AllPupilLister extends Component
 
     public $classe_id_selected;
 
+    public $pupil_type_selected;
+
     public $classe_group_id_selected;
 
     public $level = 'secondary';
@@ -42,7 +44,9 @@ class AllPupilLister extends Component
 
     public function render()
     {
-        $pupils = Pupil::all();
+        // $pupils = Pupil::all();
+
+        $pupils = [];
 
         $school_year_model = $this->getSchoolYear();
 
@@ -59,77 +63,83 @@ class AllPupilLister extends Component
         
         if($this->search && mb_strlen($this->search) >= 2){
 
-                $pupils = Pupil::where('level_id', $this->level_id)->where('firstName', 'like', '%' . $this->search . '%')->orWhere('lastName', 'like', '%' . $this->search . '%')->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
-            }
-            else{
+            $pupils = Pupil::where('level_id', $this->level_id)->where('firstName', 'like', '%' . $this->search . '%')->orWhere('lastName', 'like', '%' . $this->search . '%')->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+        }
+        else{
 
-                $sexe = $this->sexe_selected;
+            $sexe = $this->sexe_selected;
 
-                if($this->classe_id_selected){
+            if($this->classe_id_selected){
 
-                    $classe = $school_year_model->classes()->where('classes.id', $this->classe_id_selected)->first();
+                $classe = $school_year_model->classes()->where('classes.id', $this->classe_id_selected)->first();
 
-                    $data = [];
+                $data = [];
 
-                    if($this->sexe_selected && $classe){
+                if($this->sexe_selected && $classe){
 
-                        $data = $classe->getPupils($school_year_model->id, null, $this->sexe_selected);
-                    }
-                    elseif($classe){
+                    $data = $classe->getPupils($school_year_model->id, null, $this->sexe_selected);
+                }
+                elseif($classe){
 
-                        $data = $classe->getClasseCurrentPupils($school_year_model->id);
-                    }
+                    $data = $classe->getClasseCurrentPupils($school_year_model->id);
+                }
 
-                    if(count($data) > 0){
+                if(count($data) > 0){
 
-                        foreach($data as $p){
-                            
-                            if($p->level_id == $this->level_id){
+                    foreach($data as $p){
+                        
+                        if($p->level_id == $this->level_id){
 
-                                $pupils[] = $p;
-
-                            }
+                            $pupils[] = $p;
 
                         }
 
                     }
 
-
-
                 }
-                elseif($this->classe_group_id_selected){
 
-                    $classe_group = $school_year_model->classe_groups()->where('classe_groups.id', $this->classe_group_id_selected)->first();
-                    $pupils_ids = [];    
 
-                    if($classe_group){
-                        $classes_cg = $classe_group->classes;
-                        if(count($classes_cg) > 0){
-                            foreach($classes_cg as $classe){
-                                $pupils_ids = $classe->getPupils($school_year_model->id, null, null, true);
-                            }
-                        } 
-                    }
 
-                    if($sexe && $classe_group){
+            }
+            elseif($this->classe_group_id_selected){
 
-                        $pupils = Pupil::where('level_id', $this->level_id)->whereIn('pupils.id', $pupils_ids)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
-                    }
-                    else{
+                $classe_group = $school_year_model->classe_groups()->where('classe_groups.id', $this->classe_group_id_selected)->first();
 
-                        $pupils = Pupil::where('level_id', $this->level_id)->whereIn('pupils.id', $pupils_ids)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
-                    }
+                $pupils_ids = [];    
 
+                if($classe_group){
+
+                    $classes_cg = $classe_group->classes;
+
+                    if(count($classes_cg) > 0){
+                        
+                        foreach($classes_cg as $classe){
+                            
+                            $pupils_ids = $classe->getPupils($school_year_model->id, null, null, true);
+                        }
+                    } 
                 }
-                elseif($sexe){
 
-                    $pupils = Pupil::where('level_id', $this->level_id)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+                if($sexe && $classe_group){
+
+                    $pupils = Pupil::where('level_id', $this->level_id)->whereIn('pupils.id', $pupils_ids)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
                 }
                 else{
-                    $pupils = Pupil::where('level_id', $this->level_id)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+
+                    $pupils = Pupil::where('level_id', $this->level_id)->whereIn('pupils.id', $pupils_ids)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
                 }
 
             }
+            elseif($sexe){
+
+                $pupils = Pupil::where('level_id', $this->level_id)->where('pupils.sexe', $sexe)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+            }
+            else{
+
+                $pupils = Pupil::where('level_id', $this->level_id)->orderBy('firstName', 'asc')->orderBy('lastName', 'asc')->get();
+            }
+
+        }
 
 
         return view('livewire.all-pupil-lister', compact('pupils', 'school_year_model', 'lastYear', 'classes', 'classe_groups'));
@@ -309,6 +319,7 @@ class AllPupilLister extends Component
     public function updatedClasseIdSelected($classe_id)
     {
         $this->reset('search', 'classe_group_id_selected');
+
         $this->classe_id_selected = $classe_id;
     }
 
@@ -316,7 +327,15 @@ class AllPupilLister extends Component
     public function updatedClasseGroupIdSelected($classe_group_id)
     {
         $this->reset('search', 'classe_id_selected');
+
         $this->classe_group_id_selected = $classe_group_id;
+    }
+
+    public function updatedPupilTypeSelected($pupil_type_selected)
+    {
+        $this->reset('search', 'pupil_type_selected');
+
+        $this->pupil_type_selected = $pupil_type_selected;
     }
 
 

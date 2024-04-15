@@ -135,6 +135,7 @@ class Classe extends Model
     }
 
 
+
     public function qotHours()
     {
         return $this->hasMany(QotHour::class);
@@ -209,7 +210,7 @@ class Classe extends Model
     }
 
 
-    public function getClasseCurrentPupils($school_year = null)
+    public function getClasseCurrentPupils($school_year = null, $with_abandon = true)
     {
         $pupils = [];
 
@@ -219,13 +220,34 @@ class Classe extends Model
 
         if($cursuses){
 
-            $pupils = $this->pupils()->whereIn('id', $cursuses)->orderBy('pupils.firstName', 'asc')->orderBy('pupils.lastName', 'asc')->get();
+            if($with_abandon){
+
+                $pupils = $this->pupils()
+                           ->whereIn('pupils.id', $cursuses)
+                           ->orderBy('pupils.firstName', 'asc')
+                           ->orderBy('pupils.lastName', 'asc')
+                           ->get();
+
+            }
+            else{
+
+                $pupils = $this->pupils()
+                           ->where('pupils.abandonned', false)
+                           ->whereIn('pupils.id', $cursuses)
+                           ->orderBy('pupils.firstName', 'asc')
+                           ->orderBy('pupils.lastName', 'asc')
+                           ->get();
+
+            }
 
         }
 
         return $pupils;
 
     }
+
+
+
 
 
     public function getPupils($school_year = null, $search = null, $sexe = null, $onlyIds = false, $orderByData = [], $orderBy = 'desc')
@@ -320,6 +342,198 @@ class Classe extends Model
 
     }
 
+
+    public function getNotAbandonnedPupils($school_year = null, $search = null, $sexe = null, $onlyIds = false, $orderByData = [], $orderBy = 'desc')
+    {
+        $pupils = [];
+
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $cursuses = $this->classePupilSchoolYear()->where('classe_pupil_school_years.school_year_id', $school_year_model->id);
+        
+
+        if($cursuses->get() && count($cursuses->get()) > 0){
+
+            $pupils_ids = $cursuses->pluck('pupil_id')->toArray();
+
+
+            if($search && strlen($search) > 2){
+
+                if($sexe){
+
+                    $pupils = $this->pupils()
+                             ->where('abandonned', false)
+                             ->where('sexe', $sexe)
+                             ->where('firstName', 'like', '%' . $search . '%')
+                             ->orWhere('lastName', 'like', '%' . $search . '%')
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
+                }
+                else{
+
+                    $pupils = $this->pupils()
+                             ->where('abandonned', false)
+                             ->where('firstName', 'like', '%' . $search . '%')
+                             ->orWhere('lastName', 'like', '%' . $search . '%')
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
+                }
+            }
+            else{
+
+                if($sexe){
+
+                    $pupils = $this->pupils()
+                             ->where('sexe', $sexe)
+                             ->where('abandonned', false)
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
+
+                }
+                else{
+
+                    $pupils = $this->pupils()
+                             ->where('abandonned', false)
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
+                }
+            }
+
+
+            if($onlyIds){
+
+                if($pupils && count($pupils->get()) > 0){
+
+                    return $pupils->pluck('id')->toArray();
+
+                }
+
+                else{
+
+                    return [];
+
+                }
+
+            }
+
+
+            if($pupils && $pupils->count() > 0){
+
+                return $pupils->get();
+            }
+            else{
+
+                return [];
+
+            }
+        }
+        else{
+
+            return [];
+
+        }
+
+    }
+
+    public function getAbandonneds($school_year = null, $search = null, $sexe = null, $onlyIds = false, $orderByData = [], $orderBy = 'desc')
+    {
+        $pupils = [];
+
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $cursuses = $this->classePupilSchoolYear()->where('classe_pupil_school_years.school_year_id', $school_year_model->id);
+        
+
+        if($cursuses->get() && count($cursuses->get()) > 0){
+
+            $pupils_ids = $cursuses->pluck('pupil_id')->toArray();
+
+
+            if($search && strlen($search) > 2){
+
+                if($sexe){
+
+                    $pupils = $this->pupils()
+                             ->where('abandonned', true)
+                             ->where('sexe', $sexe)
+                             ->where('firstName', 'like', '%' . $search . '%')
+                             ->orWhere('lastName', 'like', '%' . $search . '%')
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
+                }
+                else{
+
+                    $pupils = $this->pupils()
+                             ->where('abandonned', true)
+                             ->where('firstName', 'like', '%' . $search . '%')
+                             ->orWhere('lastName', 'like', '%' . $search . '%')
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
+                }
+            }
+            else{
+
+                if($sexe){
+
+                    $pupils = $this->pupils()
+                             ->where('sexe', $sexe)
+                             ->where('abandonned', true)
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
+
+                }
+                else{
+
+                    $pupils = $this->pupils()
+                             ->where('abandonned', true)
+                             ->orderBy('firstName', 'asc')
+                             ->orderBy('lastName', 'asc')
+                             ->whereIn('pupils.id', $pupils_ids);
+                }
+            }
+
+
+            if($onlyIds){
+
+                if($pupils && count($pupils->get()) > 0){
+
+                    return $pupils->pluck('id')->toArray();
+
+                }
+
+                else{
+
+                    return [];
+
+                }
+
+            }
+
+
+            if($pupils && $pupils->count() > 0){
+
+                return $pupils->get();
+            }
+            else{
+
+                return [];
+
+            }
+        }
+        else{
+
+            return [];
+
+        }
+
+    }
 
     public function getClassePupilsOnGender($gender, $school_year = null)
     {

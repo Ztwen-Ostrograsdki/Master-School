@@ -12,6 +12,7 @@ use App\Helpers\ZtwenManagers\GaleryManager;
 use App\Models\Admin;
 use App\Models\Administrator;
 use App\Models\Image;
+use App\Models\LockedRoutes;
 use App\Models\LockedUsersRequest;
 use App\Models\MyNotifications;
 use App\Models\Parentable;
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
@@ -69,6 +71,8 @@ class User extends Authenticatable
         'unlock_token',
     ];
 
+    public $imagesFolder = 'usersPhotos';
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -105,10 +109,62 @@ class User extends Authenticatable
         return $this->hasMany(Transfer::class);
     }
 
+    public function lockedRoutes()
+    {
+        return $this->hasMany(LockedRoutes::class);
+    }
 
-    public $imagesFolder = 'usersPhotos';
 
-    
+    public function __thisRouteIsLockedForThatUser($routeName = null, $url = null, $path = null)
+    {
+        $request = null;
+
+        if($routeName && !$url && !$path){
+
+            $request = LockedRoutes::where('routeName', $routeName);
+
+        }
+        elseif ($url && !$path && !$routeName) {
+
+            $request = LockedRoutes::where('url', $url);
+        }
+        elseif($path && !$routeName && !$url){
+
+            $request = LockedRoutes::where('path', $path);
+
+        }
+
+        if($request){
+
+            $user_id = '%' . '-' . $this->id . '-' . '%';
+
+            $matched = $request->where('targeted_users', 'like', $user_id)->first();
+
+            if($matched){
+
+                $expired_date = $matched->expired_date;
+
+                $now = Carbon::now();
+
+                $expired_date_to_timestamp = Carbon::parse($expired_date)->timestamp;
+
+                $diff = $expired_date_to_timestamp - $now;
+
+                if($diff > 0){
+
+                   return true;
+
+                }
+
+            }
+            return false;
+
+        }
+
+        return false;
+    }
+
+
     public function role()
     {
         return $this->hasOne(Role::class);

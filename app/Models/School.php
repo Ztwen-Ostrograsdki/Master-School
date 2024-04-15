@@ -14,5 +14,15 @@ class School extends Model
         'name',
         'trimestre',
         'semestre',
+        'users_counter',
+        'parents_counter',
+        'pupils_counter',
+        'classes_counter',
+        'teachers_counter',
+        'subjects_counter',
+        'classe_groups_counter',
+        'promotions_counter',
+        'marks_counter',
+        'epreuves_counter',
     ];
 }

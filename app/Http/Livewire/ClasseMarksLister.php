@@ -19,6 +19,7 @@ class ClasseMarksLister extends Component
 
     protected $listeners = [
         'classeSubjectUpdated' => 'reloadData',
+        'ReloadClasseListDataAbandonLiveEvent' => 'reloadData',
         'classePupilListUpdated' => 'reloadData',
         'schoolYearChangedLiveEvent' => 'reloadData',
         'classeUpdated' => 'reloadData',
@@ -31,6 +32,7 @@ class ClasseMarksLister extends Component
         'ClasseDataLoadedSuccessfully' => 'dataWasLoaded',
         'ClasseDisplayingRankUpdatedLiveEvent' => 'reloadRankToFetch',
         'selectedClasseSubjectChangeLiveEvent' => 'reloadDataFormSelectedSubjectChanged',
+        'PrintMarksAsExcelFileLiveEvent' => 'printMarksAsExcelFile',
 
     ];
 
@@ -197,7 +199,7 @@ class ClasseMarksLister extends Component
 
         if($classe){
 
-            $pupils = $classe->getPupils($school_year_model->id, $this->search);
+            $pupils = $classe->getNotAbandonnedPupils($school_year_model->id, $this->search);
 
             $marks = $classe->getMarks($this->classe_subject_selected, $this->semestre_selected, 2, $school_year_model->school_year);
 
@@ -390,6 +392,34 @@ class ClasseMarksLister extends Component
     public function updatedRelaodNow($value = true)
     {
         $this->reloadData();
+    }
+
+
+    public function printMarksAsExcelFile()
+    {
+        $classe = Classe::find($this->classe_id);
+
+        $school_year_model = $this->getSchoolYear();
+
+        $semestre_type = $this->semestre_type;
+
+        $semestre = $this->semestre_selected;
+
+        $subject = $this->subject_selected;
+
+        if($subject && $semestre && $semestre_type){
+
+            $file_name = 'Les-notes-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
+
+            return Excel::download(new PupilsAveragesExports($classe, $school_year_model, $semestre, $subject), $file_name, true);
+
+
+        }
+        else{
+
+            $this->dispatchBrowserEvent('Toast', ['title' => 'REQUETE INCOMPLETE', 'message' => "Vous bien définir les données du formulaire de téléchargement, certaines données n'ont pas été renseignées!", 'type' => 'warning']);
+
+        }
     }
 
 

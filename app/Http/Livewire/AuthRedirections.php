@@ -128,12 +128,16 @@ class AuthRedirections extends Component
 
                 $this->user = User::find(auth()->user()->id);
 
+                /**
+                 * Generate (if user is an admin) admin session key to access to admin composantes: ONLY ADMIN 
+                 */
                 if($this->user->isAdmin()){
 
-                    // $this->user->__generateAdminKey();
+                    $this->user->__generateAdminKey();
                 }
 
-                $this->dispatchBrowserEvent('Toast', ['title' => 'Connexion réussie!!!', 'message' => "Vous serez redirigé vers votre profil!", 'type' => 'success']);
+                $this->dispatchBrowserEvent('Toast', ['title' => 'Connexion réussie!!!', 'message' => "Vous serez redirigé dans quelques secondes!", 'type' => 'success']);
+                
                 // $event = new NewUserConnectedEvent($this->user);
                 // broadcast($event);
 

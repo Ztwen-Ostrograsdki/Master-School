@@ -11,6 +11,7 @@ use App\Models\ShoppingBag;
 use App\Notifications\SendTokenToBlockedUserForVerification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
 trait UserTrait{
@@ -23,6 +24,44 @@ trait UserTrait{
     public function __reporteThisUser()
     {
         
+    }
+
+    public function __canAccessToThisRoute($routeName = null, $url = null, $path = null)
+    {
+        $can = true;
+
+        if($routeName){
+
+            $can = !$this->__thisRouteIsLockedForThatUser($routeName);
+
+            return $can;
+
+        }
+
+        if($url){
+
+            $can = !$this->__thisRouteIsLockedForThatUser(null, $url);
+
+            return $can;
+
+        }
+
+
+        if($path){
+
+            $can = !$this->__thisRouteIsLockedForThatUser(null, null, $path);
+
+            return $can;
+
+        }
+        else{
+
+            return true;
+
+        }
+
+        return $can;
+
     }
 
 

@@ -60,7 +60,14 @@ class Pupil extends Model
     protected $secure = [
         'educmaster',
         'matricule',
+        'ltpk_matricule'
     ];
+
+    public function updatePupilLTPKMatricule($value)
+    {
+        return $this->forceFill(['ltpk_matricule' => $value,])->save();
+        
+    }
 
 
     public function updatePupilEducmaster($value)

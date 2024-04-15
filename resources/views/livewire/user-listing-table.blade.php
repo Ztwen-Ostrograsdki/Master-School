@@ -63,6 +63,7 @@
                                 {{ $u->getDateAgoFormated($u->created_at) }}
                             </td>
                             <td class="text-center"> 
+                                @if(!$u->isAdminAs('master'))
                                 <span class="row w-100 m-0 p-0">
                                     <span title="Supprimer cet utilisateur" wire:click="delete({{$u->id}})" class="text-danger col-3 m-0 p-0 cursor-pointer">
                                         <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
@@ -89,6 +90,12 @@
                                         </span>
                                     @endif
                                 </span>
+                                @else
+                                    <span class="w-100 m-0 p-0">
+                                        <span class="w-100 text-white-50">Master Admin</span>
+                                    </span>
+
+                                @endif
                             </td>
 
                         </tr>

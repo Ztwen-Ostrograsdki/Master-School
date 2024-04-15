@@ -25,6 +25,8 @@ class ClassePupilsLister extends Component
         'UpdatedGlobalSearch' => 'reloadClasseDataOnSearch',
         'ClassePupilsListUpdatingLiveEvent' => 'the_loading',
         'ClassePupilsListUpdatedLiveEvent' => 'the_loaded',
+        'ReloadClasseListDataAbandonLiveEvent' => 'reloadClasseData',
+        'ClasseDataWasUpdated' => 'reloadClasseData',
     ];
     
     
@@ -424,6 +426,11 @@ class ClassePupilsLister extends Component
         }
 
 
+    }
+
+    public function toAbandonned($pupil_id)
+    {
+        $this->emit('setPupilToAbandonned', $pupil_id);
     }
 
 

@@ -151,14 +151,8 @@ class InsertClassePupilsMarksTogether extends Component
             // $this->reset('epe_marks', 'dev_marks', 'participation_marks');
 
         }
-
-
-        
-
         
     }
-
-
 
 
     public function openModal(int $classe_id)
@@ -179,7 +173,7 @@ class InsertClassePupilsMarksTogether extends Component
                 $not_secure = $user->ensureThatTeacherCanAccessToClass($classe_id);
 
 
-                $this->pupils = $this->classe->getPupils();
+                $this->pupils = $this->classe->getNotAbandonnedPupils();
 
                 $this->subjects = $this->classe->subjects;
 

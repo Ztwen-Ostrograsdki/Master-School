@@ -28,6 +28,7 @@
                             <a class="dropdown-item" tabindex="-1" wire:click="refreshClasseMarks('{{$classe->id}}')" href="#">Vider les notes de cette classe</a>
                             <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
                             <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Rafraichir les retards</a>
+                            <a class="dropdown-item" wire:click="updatePupilsLTPKMatricule"  tabindex="-1" href="#">Mettre à jour les matricules</a>
                             <a class="dropdown-item" wire:click="insertClasseMarks"  tabindex="-1" href="#">Insérer des notes de classe</a>
                             <a class="dropdown-item" wire:click="convertClasseLastMarksToParticipateMarks"  tabindex="-1" href="#">Convertir des notes vers un autre type</a>
                             <a class="dropdown-item" wire:click="insertClasseParticipateMarks"  tabindex="-1" href="#">Insérer des notes de Participation de classe</a>
@@ -41,6 +42,8 @@
                                 <a wire:click="desactivateNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Désactiver les zéros</a>
                                 <a wire:click="normalizeNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Normaliser les notes zéros</a><a wire:click="activateNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Activer les zéros</a>
                             @endif
+                            <a class="dropdown-item" title="Imprimer les notes formatées en format Excel" wire:click="printSingleMarksAsExcelFile" tabindex="-1" href="#">Imprimer notes formatter en format excel</a>
+                            <a class="dropdown-item" title="Imprimer les toutes les notes en format Excel" wire:click="printMarksAsExcelFile" tabindex="-1" href="#">Imprimer toutes les notes en format excel</a>
                             <a wire:click="throwPresence({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Faire la présence de la classe</a>
                             <div class="dropdown-divider"></div>
                             <a title="Recharger les données personnelles de la classe" wire:click="relaoadClassePersoDataPositionAndFilial" class="dropdown-item" tabindex="-1" href="#">Recharger la classe</a>
@@ -63,8 +66,8 @@
                                 <div class="info-box-content">
                                     <span class="info-box-text">Effectif 
                                         (<b class="text-warning">
-                                            {{ $classe ? count($classe->getClasseCurrentPupils()) : 'vide'}}
-                                        </b>)
+                                            {{ $classe ? count($classe->getClasseCurrentPupils(null, true)) : 'vide'}}
+                                        </b> <small>dont</small> <span class="text-warning">{{ count($classe->getAbandonneds()) }} </span> abds)
                                     </span>
                                     <span class="info-box-number d-flex flex-column m-0 p-0">
                                         <span class="small">

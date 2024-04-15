@@ -129,6 +129,10 @@ window.addEventListener('modal-classeMarksConvertion', function(e) {
     $('#confirmClasseMarksConvertionModal').modal('show');
 });
 
+window.addEventListener('modal-updateClassePupilsLTPKMatricule', function(e) {
+    $('#updateClassePupilsLTPKMatricule').modal('show');
+});
+
 window.addEventListener('modal-insertClassePupilsMarksTogether', function(e) {
     $('#insertClassePupilsMarksTogether').modal('show', function(ex) {
         

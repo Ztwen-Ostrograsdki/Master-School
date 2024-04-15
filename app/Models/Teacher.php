@@ -181,6 +181,80 @@ class Teacher extends Model
     }
 
 
+    public function getTeachersCurrentClassesWithPagination($classesBy = 3, $school_year = null)
+    {
+        $data = [];
+
+        $total = 0;
+
+        if($this->hasClasses($school_year)){
+
+            $__classes = $this->getTeachersCurrentClasses();
+
+            $classes = [];
+
+            $total = count($__classes);
+
+            if($total > 0){
+
+                foreach($__classes as $classe){
+
+                    $classes[] = $classe;
+
+                }
+
+
+                if (count($classes) > 0) { 
+
+                    $i = 0;
+
+                    $k = 1;
+
+                    $data[$k] = [];
+
+                    $box = [];
+
+                    while(count($classes) > 0){
+
+                        $box[] = $classes[$i];
+
+                        unset($classes[$i]);
+
+                        if(count($box) == $classesBy){
+
+                            $data[$k] = $box;
+
+                            $k++;
+
+                            $box = [];
+                        }
+                        elseif(count($box) < $classesBy && $classes == []){
+
+                            $data[$k] = $box;
+
+                            $box = [];
+
+                        }
+
+                        if(isset($classes[$i + 1])){
+
+                            $i++;
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        return ['classes' => $data, 0 => $data, 'null' => $data, 'total' => $total];
+
+    }
+
+
     public function hasClasses($school_year = null)
     {
         $school_year_model = $this->getSchoolYear($school_year);

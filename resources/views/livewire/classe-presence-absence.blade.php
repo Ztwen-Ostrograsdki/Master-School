@@ -22,6 +22,7 @@
                 </thead>
                 <tbody>
                     @foreach($pupils as $k => $p)
+                        @if(!$p->abandonned)
                         <tr class="">
                             <td class="text-center border-right py-1">{{ $loop->iteration }}</td>
                             <td class="text-capitalize pl-2" title="charger le profil de {{$p->getName()}}">
@@ -40,6 +41,7 @@
 
                             </td>
                         </tr>
+                        @endif
                     @endforeach
                 </tbody>
             </table>                                                     

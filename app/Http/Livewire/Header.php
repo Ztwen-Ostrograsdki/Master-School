@@ -2,56 +2,65 @@
 
 namespace App\Http\Livewire;
 
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Livewire\Component;
 
 class Header extends Component
 {
-    protected $listeners = [];
-    public $user;
-    public $username;
+    protected $listeners = [
 
+        'ReloadComponentEvent' => 'reloadData',
+        'RedirectoLoginPage' => 'toLoginPage',
 
-    public function mount()
-    {
-        $this->getData();
-        $this->getUserData();
-    }
+    ];
+
+    public $counter = 0;
+
     public function render()
     {
-        return view('livewire.header');
+        $target = $this->counter + rand(15, 22578);
+
+        $user = null;
+
+        $username = null;
+
+        $auth = auth()->user();
+
+        if($auth){
+
+            $user = $auth;
+
+            $username = $auth->name;
+
+        }
+
+        return view('livewire.header', compact('target', 'user', 'username'));
     } 
 
-
-
-    public function booted()
+    public function reloadData()
     {
-        $this->getUserData();
+        $this->counter = rand(1, 1275);
+    }
+
+
+
+    public function toLoginPage()
+    {
+        Session::flush();
+
+        return redirect()->route('connexion');
     }
 
     public function newUserConnected()
     {
-        return $this->user = Auth::user();
+        
     }
 
-
-    public function getUserData()
-    {
-        $user = Auth::user();
-        if($user){
-            $this->user = Auth::user();
-        }
-    }
-
-    public function getData()
-    {
-    }
 
     public function userDataEdited($user_id)
     {
-        if(Auth::user() && $user_id == Auth::user()->id){
-            return $this->user = Auth::user();
-        }
+
     }
 
 

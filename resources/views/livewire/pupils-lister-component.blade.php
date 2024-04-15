@@ -7,7 +7,10 @@
                 <h6 class="m-0 p-0 h6 text-white-50 p-3">
                     Liste complète des apprenant du <span class="text-warning">{{$level ? $level->nameInFrench() : ''}}</span> enregistrés sur la plateforme <span class="text-warning"></span>
 
-                    <span class="float-right text-muted"> </span>
+                    <span class="float-right text-muted"> 
+                        Données chargées: 
+                        <span class="text-warning mx-2"> {{ count($pupils) }} sur {{ $total }} </span>
+                    </span>
                 </h6>
                 <hr class="m-0 p-0 w-100 bg-primary">
             </blockquote>
@@ -39,6 +42,15 @@
                                 @foreach($classes as $cl)
                                     <option value="{{$cl->id}}"> La {{ $cl->name }} </option>
                                 @endforeach
+                            </select>
+                        </span>
+
+                        <span class="nav-item mx-2">
+                            <select wire:model="pupil_type_selected" class="form-select z-bg-secondary custom-select">
+                                <option value="all"> Tous les apprenants </option>
+                                <option value="abandonned"> Les abandons </option>
+                                <option value="continued"> Les apprenants en situation régulière </option>
+                                
                             </select>
                         </span>
                     </div>

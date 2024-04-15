@@ -45,7 +45,8 @@ class UserProfil extends Component
         'updatedImages' => 'reloadData',
         'timePlanTablesWasUpdatedLiveEvent' => 'reloadData',
         'IsendNewFriendRequest_L_Event' => 'notifyMeWhenNewFollower',
-        'schoolYearChangedLiveEvent' => 'reloadData'
+        'schoolYearChangedLiveEvent' => 'reloadData',
+        'ReloadComponentEvent' => 'reloadData',
     ];
     protected $rules = [
         'name' => 'required|string|between:5,50',
@@ -158,7 +159,9 @@ class UserProfil extends Component
     public function regenerateAdminKey()
     {
         $user = User::find($this->user_id);
+
         $make = $user->__regenerateAdminKey();
+
         if($make){
             $this->dispatchBrowserEvent('Toast', ['type' => 'success', 'title' => 'CLE MODIFIEE AVEC SUCCES',  'message' => "La clé a été générée avec succès"]);
         }
@@ -176,6 +179,7 @@ class UserProfil extends Component
     public function destroyAdminSessionKey()
     {
         $user = User::find($this->user_id);
+
         return $user->__destroyAdminKey();
     }
 

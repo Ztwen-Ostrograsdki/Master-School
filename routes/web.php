@@ -56,7 +56,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', Home::class)->name('home');
 
-Route::group(['prefix' => '/administration', 'middleware' => ['auth', 'admin']], function(){
+Route::group(['prefix' => '/administration', 'middleware' => ['auth', 'admin', 'admin.authenticate', 'user.authorized2route']], function(){
     Route::get('/', Admin::class)->middleware('auth')->name('admin');
     Route::get('/utilisateurs', UserListing::class)->name('user_listing');
     Route::get('/utilisateurs/{target}', UsersListingByTarget::class)->name('user_listing_by_target');
@@ -83,10 +83,10 @@ Route::group(['prefix' => '/administration', 'middleware' => ['auth', 'admin']],
 
 });
 
-Route::get('/Enseignant/envoi-des-epreuves-de-composition', ManageEpreuvesTransfers::class)->name('upload_epreuves')->middleware(['auth']);
+Route::get('/Enseignant/envoi-des-epreuves-de-composition', ManageEpreuvesTransfers::class)->name('upload_epreuves', 'user.authorized2route')->middleware(['auth']);
 Route::get('/compte/mon-compte/{id}', UserProfil::class)->name('user_profil')->middleware(['user.self', 'notBlockedUser']);
-Route::get('/espace-parent/mon-compte-parent/{id}', ParentProfil::class)->name('parent_profil')->middleware(['auth']);
-Route::get('/mon-compte/enseignant/{id}/{classe_id}/{slug}', TeacherProfilAsUser::class)->name('teacher_profil_as_user')->middleware(['user.teacher', 'classeNotClosedForTeacher']);
+Route::get('/espace-parent/mon-compte-parent/{id}', ParentProfil::class)->name('parent_profil')->middleware(['auth', 'user.authorized2route']);
+Route::get('/mon-compte/enseignant/{id}/{classe_id}/{slug}', TeacherProfilAsUser::class)->name('teacher_profil_as_user')->middleware(['user.teacher', 'classeNotClosedForTeacher', 'user.authorized2route']);
 
 
 Route::get('/email-verification-notify', ForceEmailVerifyNotification::class)->name('email-verification-notify');
@@ -97,7 +97,7 @@ Route::get('/classe/{classe_id}/pdf', [ClasseListDownload::class, 'createPDF'])-
 
 Route::get('/connexion', AuthRedirections::class)->name('connexion')->middleware('guest');
 Route::get('/inscription', AuthRedirections::class)->name('registration')->middleware('guest');
-Route::get('/authentification', AdminAuthorization::class)->name('get-admin-authorization')->middleware(['auth', 'admin', 'verifiedUser']);
+Route::get('/authentification', AdminAuthorization::class)->name('get-admin-authorization')->middleware(['auth', 'admin', 'verifiedUser', 'admin.not.authenticate', 'user.authorized2route']);
 Route::get('/mot-de-passe-oublie', AuthRedirections::class)->name('password-forgot')->middleware('guest');
 Route::get('/changer-mot-de-passe/get-protection/id={id}/token={token}/key={key}/hash={hash}/s={s}/from-email={email}/reset-password=1/password=new', ResetPassword::class)->name('reset.password')->middleware(['guest', 'signed']);
 Route::get('/verrouillage-de-mon-compte/protection=1/id={id}/token={token}/hash={hash}/security=1/blocked=true', [BlockTemporaryMyAccount::class, '__locked'])->name('block-temporary-account')->middleware(['signed']);

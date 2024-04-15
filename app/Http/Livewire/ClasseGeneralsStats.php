@@ -61,15 +61,22 @@ class ClasseGeneralsStats extends Component
         }
 
         if($classe){
+
             $this->classe = $classe;
+
             if($this->subject_selected){
+
                 $subject = Subject::find($this->subject_selected);
+
                 $subjects[] = $subject;
             }
             else{
+
                 $subjects = $classe->subjects;
             }
-            $pupils = $classe->getPupils($school_year_model->id);
+
+            $pupils = $classe->getNotAbandonnedPupils($school_year_model->id);
+
             $stats = $classe->getClasseStats($this->semestre_selected, $school_year_model->school_year, $this->subject_selected);
         }
         return view('livewire.classe-generals-stats',compact('stats', 'subjects'));

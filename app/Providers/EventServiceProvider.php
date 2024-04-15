@@ -11,6 +11,7 @@ use App\Events\DetachPupilsFromSchoolYearEvent;
 use App\Events\FlushAveragesIntoDataBaseEvent;
 use App\Events\FreshAveragesIntoDBEvent;
 use App\Events\ImportRegistredTeachersToTheCurrentYearEvent;
+use App\Events\InitiateClassePupilsMatriculeUpdateEvent;
 use App\Events\InitiateSettingsOnMarksEvent;
 use App\Events\LocalTransfertCreatedEvent;
 use App\Events\MakeClassePresenceLateEvent;
@@ -19,12 +20,17 @@ use App\Events\MarksRestorationEvent;
 use App\Events\MigrateDataToTheNewSchoolYearEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\PaymentSystemEvent;
+use App\Events\PreparePupilDataToFetchEvent;
+use App\Events\PupilAbandonnedClassesEvent;
 use App\Events\ReloadClassesPromotionAndPositionEvent;
 use App\Events\StartNewsPupilsInsertionEvent;
 use App\Events\ThrowClasseMarksConvertionEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Events\UpdateClasseSanctionsEvent;
+use App\Events\UpdateSchoolModelEvent;
+use App\Events\UserAccountBlockedEvent;
 use App\Listeners\AbsencesAndLatesDeleterBatcherListener;
+use App\Listeners\BlockedOrUnblockedUserAccountListener;
 use App\Listeners\ClasseMarksConverterBatcherListener;
 use App\Listeners\ClasseMarksDeletionBatcherListener;
 use App\Listeners\ClasseMarksInsertionBatchListener;
@@ -42,20 +48,30 @@ use App\Listeners\MarksNullActionsBatcherListener;
 use App\Listeners\MarksRestorationBatcherListener;
 use App\Listeners\NewProductCreatedListener;
 use App\Listeners\PaymentSystemListener;
+use App\Listeners\PreparePupilDataToFetchListener;
 use App\Listeners\ProcessingNewsPupilsInsertionBatcherListener;
+use App\Listeners\PupilAbandonnedClassesListener;
 use App\Listeners\ReloadClassesPromotionAndPositionBatcherListener;
 use App\Listeners\UpdateClasseAveragesIntoDatabaseBatcherListener;
 use App\Listeners\UpdateClasseSanctionsListener;
+use App\Listeners\UpdateSchoolModelListener;
+use App\Listeners\UpdatingClassePupilsMatriculeListener;
+use App\Models\Administrator;
 use App\Models\Classe;
 use App\Models\ClassesSecurity;
 use App\Models\Mark;
 use App\Models\Pupil;
 use App\Models\RelatedMark;
+use App\Models\User;
+use App\Models\UserAdminKey;
+use App\Observers\AdministratorObserver;
 use App\Observers\ClasseObserver;
 use App\Observers\ClassesSecurityObserver;
 use App\Observers\MarkObserver;
 use App\Observers\PupilObserver;
 use App\Observers\RelatedMarkObserver;
+use App\Observers\UserAdminKeyObserver;
+use App\Observers\UserObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -165,6 +181,26 @@ class EventServiceProvider extends ServiceProvider
             ReloadClassesPromotionAndPositionBatcherListener::class,
         ],
 
+        UserAccountBlockedEvent::class => [
+            BlockedOrUnblockedUserAccountListener::class,
+        ],
+
+        PupilAbandonnedClassesEvent::class => [
+            PupilAbandonnedClassesListener::class,
+        ], 
+
+        PreparePupilDataToFetchEvent::class => [
+            PreparePupilDataToFetchListener::class,
+        ],
+
+        UpdateSchoolModelEvent::class => [
+            UpdateSchoolModelListener::class,
+        ],
+
+        InitiateClassePupilsMatriculeUpdateEvent::class => [
+            UpdatingClassePupilsMatriculeListener::class,
+        ],
+
     
     ];
 
@@ -184,6 +220,12 @@ class EventServiceProvider extends ServiceProvider
         Classe::observe(ClasseObserver::class);
 
         RelatedMark::observe(RelatedMarkObserver::class);
+
+        UserAdminKey::observe(UserAdminKeyObserver::class);
+
+        Administrator::observe(AdministratorObserver::class);
+
+        User::observe(UserObserver::class);
 
     }
 

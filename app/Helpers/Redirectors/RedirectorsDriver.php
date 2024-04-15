@@ -3,6 +3,8 @@
 namespace App\Helpers\Redirectors;
 
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /**
  * Trait to manage the redirections after currently login
@@ -17,6 +19,22 @@ trait RedirectorsDriver{
 	{
 
 
+	}
+
+
+	public static function setUlrFromToSessionBeforeRedirection(Request $request)
+	{
+		session()->forget('afterRedirectionUlr');
+
+        $theRouteName = Route::currentRouteName();
+
+        $theUrl = $request->url();
+
+        if($theRouteName !== 'connexion' && $theRouteName !== 'registration'){
+
+            session()->put('afterRedirectionUlr', $theUrl);
+
+        }
 	}
 
 
