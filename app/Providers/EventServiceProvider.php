@@ -12,6 +12,7 @@ use App\Events\FlushAveragesIntoDataBaseEvent;
 use App\Events\FreshAveragesIntoDBEvent;
 use App\Events\ImportRegistredTeachersToTheCurrentYearEvent;
 use App\Events\InitiateClassePupilsMatriculeUpdateEvent;
+use App\Events\InitiateClassePupilsNamesUpdateEvent;
 use App\Events\InitiateSettingsOnMarksEvent;
 use App\Events\LocalTransfertCreatedEvent;
 use App\Events\MakeClassePresenceLateEvent;
@@ -34,6 +35,7 @@ use App\Listeners\BlockedOrUnblockedUserAccountListener;
 use App\Listeners\ClasseMarksConverterBatcherListener;
 use App\Listeners\ClasseMarksDeletionBatcherListener;
 use App\Listeners\ClasseMarksInsertionBatchListener;
+use App\Listeners\ClassePupilsNamesUpdatingListener;
 use App\Listeners\ClasseRefereesManagerBatcherListener;
 use App\Listeners\CompletedClasseCreationBatcherListener;
 use App\Listeners\CreatedTransferBatchListener;
@@ -199,6 +201,10 @@ class EventServiceProvider extends ServiceProvider
 
         InitiateClassePupilsMatriculeUpdateEvent::class => [
             UpdatingClassePupilsMatriculeListener::class,
+        ],
+
+        InitiateClassePupilsNamesUpdateEvent::class => [
+            ClassePupilsNamesUpdatingListener::class,
         ],
 
     

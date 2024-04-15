@@ -2,34 +2,36 @@
 
 namespace App\Http\Livewire;
 
-use App\Events\InitiateClassePupilsMatriculeUpdateEvent;
+use App\Events\InitiateClassePupilsNamesUpdateEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
-use App\Models\Pupil;
 use Livewire\Component;
 
-class UpdateClassePupilsLTPKMatricule extends Component
+class UpdateClassePupilsNames extends Component
 {
-    protected $listeners = ['UpdateClassePupilsLTPKMatriculeLiveEvent' => 'openModal'];
+
+    protected $listeners = ['UpdateClassePupilsNamesLiveEvent' => 'openModal'];
 
 
     public $classe_id;
 
     public $targeted_pupil;
 
-    public $ltpk_matricule;
+    public $upd_firstname;
 
-    public $matricule_data = [];
+    public $upd_lastName;
+
+    public $names_data = [];
 
     public $olders = [];
 
-    public $title = "Mise à jour des matricules des élèves de classe";
+    public $title = "Mise à jour des noms et prénoms des élèves";
 
     public $classe;
 
     use ModelQueryTrait;
 
 
-    protected $rules = ['ltpk_matricule' => 'required|string'];
+    protected $rules = ['upd_lastName' => 'required|string'];
 
     public function render()
     {
@@ -37,11 +39,11 @@ class UpdateClassePupilsLTPKMatricule extends Component
 
         if($this->classe){
 
-            $pupils = $this->classe->getNotAbandonnedPupils();
+            $pupils = $this->classe->getPupils();
 
         }
 
-        return view('livewire.update-classe-pupils-l-t-p-k-matricule', compact('pupils'));
+        return view('livewire.update-classe-pupils-names', compact('pupils'));
     }
 
 
@@ -66,17 +68,15 @@ class UpdateClassePupilsLTPKMatricule extends Component
 
                     $this->classe_id = $classe_id;
 
-                    $pupils = $classe->getNotAbandonnedPupils();
+                    $pupils = $classe->getPupils();
 
                     foreach($pupils as $p){
 
-                        // $this->matricule_data[$p->id] = $p->ltpk_matricule;
-
-                        $this->olders[$p->id] = $p->ltpk_matricule;
+                        $this->olders[$p->id] = $p->upd_lastName;
 
                     }
 
-                    $this->dispatchBrowserEvent('modal-updateClassePupilsLTPKMatricule');
+                    $this->dispatchBrowserEvent('modal-updateClassePupilsNames');
 
                 }
                 else{
@@ -100,9 +100,9 @@ class UpdateClassePupilsLTPKMatricule extends Component
 
     public function submit()
     {
-        $matricule_data = $this->matricule_data;
+        $names_data = $this->names_data;
 
-        if($matricule_data && $this->ltpk_matricule == null){
+        if($names_data && $this->upd_lastName == null){
 
             $user = auth()->user();
 
@@ -112,13 +112,13 @@ class UpdateClassePupilsLTPKMatricule extends Component
                 
                 if($not_secure){
 
-                    if($matricule_data !== []){
+                    if($names_data !== []){
 
-                        InitiateClassePupilsMatriculeUpdateEvent::dispatch($matricule_data, $user);
+                        InitiateClassePupilsNamesUpdateEvent::dispatch($names_data, $user);
 
                         $this->dispatchBrowserEvent('hide-form');
 
-                        $this->reset('matricule_data', 'classe', 'targeted_pupil', 'ltpk_matricule');
+                        $this->reset('names_data', 'classe', 'targeted_pupil', 'upd_lastName');
 
                     }
                    
@@ -135,70 +135,72 @@ class UpdateClassePupilsLTPKMatricule extends Component
     }
 
 
-    public function pushIntoMatriculeData($pupil_id)
+    public function pushIntoNamesData($pupil_id)
     {
         $this->reset('targeted_pupil');
 
-        $matricule_data = $this->matricule_data;
+        $names_data = $this->names_data;
+
+        ucwords(trim($this->upd_lastName));
 
         $error = false;
 
-        if($this->ltpk_matricule){
+        if($this->upd_lastName){
 
             if(!$error){
 
-                if(isset($matricule_data[$pupil_id]) && array_key_exists($pupil_id, $matricule_data)){
+                if(isset($names_data[$pupil_id]) && array_key_exists($pupil_id, $names_data)){
 
-                    unset($matricule_data[$pupil_id]);
+                    unset($names_data[$pupil_id]);
 
-                    $matricule_data[$pupil_id] = $this->ltpk_matricule;
+                    $names_data[$pupil_id] = $this->upd_lastName;
 
                 }
                 else{
 
-                    $matricule_data[$pupil_id] = $this->ltpk_matricule;
+                    $names_data[$pupil_id] = ucwords(trim($this->upd_lastName));
                         
                 }
 
-                $this->matricule_data = $matricule_data;
+                $this->names_data = $names_data;
 
-                $this->reset('ltpk_matricule');
+                $this->reset('upd_lastName');
 
             }
             else{
 
-                return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Matricule invalide', 'message' => "Le matricule doit être une valeur numérique réglémentaires!", 'type' => 'error']);
+                return $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Note invalide', 'message' => "Les noms doivent être des caractères alphabétiques!", 'type' => 'error']);
 
             }
 
         }
         else{
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'MATRICULE NON RESEIGNE', 'message' => "Veuillez insérer le matricule d'abord!", 'type' => 'warning']);
+            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'NOMS VIDES', 'message' => "Veuillez insérer des noms d'abord!", 'type' => 'warning']);
         }
 
 
     }
 
 
-    public function editMatriculeData($pupil_id)
+    public function editNamesData($pupil_id)
     {
         $this->targeted_pupil = $pupil_id;
 
-        if(isset($this->matricule_data[$pupil_id])){
+        if(isset($this->names_data[$pupil_id])){
 
-            $this->ltpk_matricule = $this->matricule_data[$pupil_id];
+            $this->upd_lastName = $this->names_data[$pupil_id];
 
         }
         else{
 
-            $this->ltpk_matricule = $this->olders[$pupil_id];
+            $this->upd_lastName = $this->olders[$pupil_id];
 
         }
     }
 
-    public function retrievedPupilFromMatriculeData($pupil_id)
+    public function retrievedPupilFromNamesData($pupil_id)
     {
-        $matricule_data = $this->matricule_data;
+        $names_data = $this->names_data;
 
         $this->targeted_pupil 
                             ? (
@@ -208,30 +210,30 @@ class UpdateClassePupilsLTPKMatricule extends Component
                                ) 
                             : $this->reset('targeted_pupil');
 
-        unset($matricule_data[$pupil_id]);
+        unset($names_data[$pupil_id]);
 
-        $this->reset('ltpk_matricule');
+        $this->reset('upd_lastName');
 
-        $this->matricule_data = $matricule_data;
+        $this->names_data = $names_data;
 
     }
 
     /**
-     * To clean the last inserting marks matricule_data
+     * To clean the last inserting marks names_data
      */
     public function toback()
     {
         $this->resetErrorBag();
 
-        $this->reset('ltpk_matricule', 'targeted_pupil');
+        $this->reset('upd_lastName', 'targeted_pupil');
     }
 
     /**
-     * To clean all marks insert matricule_data
+     * To clean all marks insert names_data
      */
-    public function flushMatriculeDataTabs()
+    public function flushNamesDataTabs()
     {
-        $this->reset('ltpk_matricule', 'targeted_pupil');
+        $this->reset('upd_lastName', 'targeted_pupil');
     }
 }
 

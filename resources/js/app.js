@@ -148,6 +148,12 @@ e.private('user.' + window.ClientUser.id)
         
         Livewire.emit('ClassePupilsListUpdatedLiveEvent');
     }) 
+    .listen('ClassePupilsNamesUpdatedEvent', function(e) {
+
+        Livewire.emit('ClasseDataWasUpdated');
+        
+        Livewire.emit('ClassePupilsListUpdatedLiveEvent');
+    }) 
     .listen('ClassePresenceLateWasCompletedEvent', function(e) {
         
         Livewire.emit('PresenceLateWasUpdated');

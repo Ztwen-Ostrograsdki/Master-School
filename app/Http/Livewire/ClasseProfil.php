@@ -109,6 +109,13 @@ class ClasseProfil extends Component
         $this->emit('UpdateClassePupilsLTPKMatriculeLiveEvent', $classe_id);
     }
 
+    public function updateClassePupilsNames()
+    {
+        $classe_id = $this->classe_id;
+        
+        $this->emit('UpdateClassePupilsNamesLiveEvent', $classe_id);
+    }
+
 
     public function editClasseRespo1($classe_id, $target = 'r1')
     {

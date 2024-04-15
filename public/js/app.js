@@ -8768,6 +8768,9 @@ e["private"]('user.' + window.ClientUser.id).listen('PupilDataAreReadyToFetchEve
 }).listen('ClassePupilsMatriculeUpdatedEvent', function (e) {
   Livewire.emit('ClasseDataWasUpdated');
   Livewire.emit('ClassePupilsListUpdatedLiveEvent');
+}).listen('ClassePupilsNamesUpdatedEvent', function (e) {
+  Livewire.emit('ClasseDataWasUpdated');
+  Livewire.emit('ClassePupilsListUpdatedLiveEvent');
 }).listen('ClassePresenceLateWasCompletedEvent', function (e) {
   Livewire.emit('PresenceLateWasUpdated');
 }).listen('ClasseDataWasUpdateSuccessfullyEvent', function (e) {

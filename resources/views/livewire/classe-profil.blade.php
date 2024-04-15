@@ -28,6 +28,7 @@
                             <a class="dropdown-item" tabindex="-1" wire:click="refreshClasseMarks('{{$classe->id}}')" href="#">Vider les notes de cette classe</a>
                             <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
                             <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Rafraichir les retards</a>
+                            <a class="dropdown-item" wire:click="updateClassePupilsNames"  tabindex="-1" href="#">Mettre à jour les noms et prenoms</a>
                             <a class="dropdown-item" wire:click="updatePupilsLTPKMatricule"  tabindex="-1" href="#">Mettre à jour les matricules</a>
                             <a class="dropdown-item" wire:click="insertClasseMarks"  tabindex="-1" href="#">Insérer des notes de classe</a>
                             <a class="dropdown-item" wire:click="convertClasseLastMarksToParticipateMarks"  tabindex="-1" href="#">Convertir des notes vers un autre type</a>

@@ -27,4 +27,5 @@
     @livewire('confirmation-component')
     @livewire('quota-manager')
     @livewire('update-classe-pupils-l-t-p-k-matricule')
+    @livewire('update-classe-pupils-names')
 </div>
