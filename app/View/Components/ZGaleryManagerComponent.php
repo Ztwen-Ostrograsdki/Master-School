@@ -12,13 +12,14 @@ class ZGaleryManagerComponent extends Component
     public $modelName;
     public $labelTitle = '';
     public $submitMethodName;
+    public $isImage = true;
     public $error = null;
     /**
      * Create a new component instance.
      *
      * @return void
      */
-    public function __construct($modalName, $submitMethodName = 'submit', $modalHeaderTitle = '',$labelTitle = "L'image à télécharger ...", $theModel = 'profil_image', $modelName = 'profil_image', $error = false)
+    public function __construct($modalName, $submitMethodName = 'submit', $modalHeaderTitle = '',$labelTitle = "L'image à télécharger ...", $theModel = 'profil_image', $modelName = 'profil_image', $error = false, $isImage = true)
     {
         $this->modalName = $modalName;
         $this->modalHeaderTitle = $modalHeaderTitle;
@@ -27,6 +28,7 @@ class ZGaleryManagerComponent extends Component
         $this->labelTitle = $labelTitle;
         $this->modelName = $modelName;
         $this->submitMethodName = $submitMethodName;
+        $this->isImage = $isImage;
     }
     /**
      * Get the view / contents that represent the component.

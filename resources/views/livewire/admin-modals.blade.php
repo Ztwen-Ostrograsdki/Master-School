@@ -28,4 +28,5 @@
     @livewire('quota-manager')
     @livewire('update-classe-pupils-l-t-p-k-matricule')
     @livewire('update-classe-pupils-names')
+    @livewire('update-classe-pupils-data-from-file')
 </div>

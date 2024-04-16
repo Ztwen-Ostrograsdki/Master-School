@@ -21,7 +21,7 @@
                     <col span="1">
                     <tr class="text-center">
                         <td >No</td>
-                        <td class="text-left">Matricule</td>
+                        <td class="">Matricule</td>
                         <td class="py-2" >Les apprenants</td>
                         <td >Moy. Int</td>
                         @for ($d = 1; $d <= $devMaxLenght; $d++)
@@ -41,7 +41,7 @@
                             @if(!$p->abandonned)
                                 <tr class="text-left">
                                     <th scope="row" class="text-center">{{ $loop->iteration }}</th>
-                                    <th scope="row" class="text-left">{{ $p->ltpk_matricule }}</th>
+                                    <th scope="row" class="text-left letter-spacing-12 pl-2">{{ $p->ltpk_matricule }}</th>
                                     <th class="text-capitalize p-0 m-0 d-flex justify-content-between">
                                         @isMaster(auth()->user())
                                         <a class="text-white m-0 p-0 py-1" href="{{route('pupil_profil', ['id' => $p->id])}}">

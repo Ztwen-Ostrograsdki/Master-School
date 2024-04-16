@@ -11,6 +11,7 @@ use App\Events\DetachPupilsFromSchoolYearEvent;
 use App\Events\FlushAveragesIntoDataBaseEvent;
 use App\Events\FreshAveragesIntoDBEvent;
 use App\Events\ImportRegistredTeachersToTheCurrentYearEvent;
+use App\Events\InitiateClassePupilsDataUpdatingFromFileEvent;
 use App\Events\InitiateClassePupilsMatriculeUpdateEvent;
 use App\Events\InitiateClassePupilsNamesUpdateEvent;
 use App\Events\InitiateSettingsOnMarksEvent;
@@ -55,6 +56,7 @@ use App\Listeners\ProcessingNewsPupilsInsertionBatcherListener;
 use App\Listeners\PupilAbandonnedClassesListener;
 use App\Listeners\ReloadClassesPromotionAndPositionBatcherListener;
 use App\Listeners\UpdateClasseAveragesIntoDatabaseBatcherListener;
+use App\Listeners\UpdateClassePupilsDataFromFileListener;
 use App\Listeners\UpdateClasseSanctionsListener;
 use App\Listeners\UpdateSchoolModelListener;
 use App\Listeners\UpdatingClassePupilsMatriculeListener;
@@ -205,6 +207,10 @@ class EventServiceProvider extends ServiceProvider
 
         InitiateClassePupilsNamesUpdateEvent::class => [
             ClassePupilsNamesUpdatingListener::class,
+        ],
+
+        InitiateClassePupilsDataUpdatingFromFileEvent::class => [
+            UpdateClassePupilsDataFromFileListener::class,
         ],
 
     

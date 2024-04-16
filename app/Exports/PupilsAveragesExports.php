@@ -142,7 +142,8 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
             if($this->all == false){
 
                 $data[$p->id] = [
-                    'N°' => $k,
+                    "N° d'ordre" => $k,
+                    "Matricule" => $p->ltpk_matricule,
                     'Nom et Prenoms' => $p->getName(),
                     'Moy Int' => $averageEPETab[$p->id],
                     'DEV 1' => $dev1,
@@ -172,12 +173,12 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
     {
         if($this->all == false){
 
-            return ['N°', 'NOM ET PRENOMS', 'MOY. INT', 'DEV 1', 'DEV 2', 'MOY', 'MOY. COEF', 'OBS'];
+            return ["N° d'ordre", 'MATRICULE', 'NOM ET PRENOMS', 'MOY. INT', 'DEV 1', 'DEV 2', 'MOY', 'MOY. COEF', 'OBS'];
 
         }
         else{
 
-            return ['N°', 'NOM ET PRENOMS', 'MOY. INT', 'DEV 1', 'DEV 2', 'MOY', 'MOY. COEF', 'OBS'];
+            return ["N° d'ordre", 'MATRICULE', 'NOM ET PRENOMS', 'MOY. INT', 'DEV 1', 'DEV 2', 'MOY', 'MOY. COEF', 'OBS'];
 
         }
     }

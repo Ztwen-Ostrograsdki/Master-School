@@ -135,6 +135,9 @@ window.addEventListener('modal-updateClassePupilsLTPKMatricule', function(e) {
 window.addEventListener('modal-updateClassePupilsNames', function(e) {
     $('#updateClassePupilsNames').modal('show');
 });
+window.addEventListener('modal-updateClassePupilsDataFromFile', function(e) {
+    $('#updateClassePupilsDataFromFileModal').modal('show');
+});
 
 window.addEventListener('modal-insertClassePupilsMarksTogether', function(e) {
     $('#insertClassePupilsMarksTogether').modal('show', function(ex) {

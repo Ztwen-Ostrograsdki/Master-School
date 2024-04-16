@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\Classe;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -12,7 +13,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class InitiateClassePupilsMatriculeUpdateEvent implements ShouldBroadcastNow
+class InitiateClassePupilsDataUpdatingFromFileEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -24,11 +25,15 @@ class InitiateClassePupilsMatriculeUpdateEvent implements ShouldBroadcastNow
 
     public $user;
 
-    public $matricule_data;
+    public $classe;
 
-    public function __construct(array $matricule_data, User $user)
+    public $data;
+
+    public function __construct(Classe $classe, array $data, User $user)
     {
-        $this->matricule_data = $matricule_data;
+        $this->classe = $classe;
+
+        $this->data = $data;
 
         $this->user = $user;
     }

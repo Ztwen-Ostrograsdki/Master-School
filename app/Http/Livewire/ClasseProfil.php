@@ -116,6 +116,13 @@ class ClasseProfil extends Component
         $this->emit('UpdateClassePupilsNamesLiveEvent', $classe_id);
     }
 
+    public function updateClassePupilsPersoDataFromFile()
+    {
+        $classe_id = $this->classe_id;
+        
+        $this->emit('UpdateClassePupilsPersoDataFromFile', $classe_id);
+    }
+
 
     public function editClasseRespo1($classe_id, $target = 'r1')
     {

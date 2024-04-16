@@ -154,6 +154,12 @@ e.private('user.' + window.ClientUser.id)
         
         Livewire.emit('ClassePupilsListUpdatedLiveEvent');
     }) 
+    .listen('ClassePupilsDataWasUpdatedFromFileEvent', function(e) {
+
+        Livewire.emit('ClasseDataWasUpdated');
+        
+        Livewire.emit('ClassePupilsListUpdatedLiveEvent');
+    }) 
     .listen('ClassePresenceLateWasCompletedEvent', function(e) {
         
         Livewire.emit('PresenceLateWasUpdated');

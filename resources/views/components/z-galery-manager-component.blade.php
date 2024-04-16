@@ -14,7 +14,7 @@ $ztwenInput = Str::random(15);
                                 {{$modalHeaderTitle}} 
                             </h6>
                             @endif
-                            <strong class="ml-3 text-warning text-italic text-center" wire:loading wire:target="{{$modelName}}" >Chargement de l'image en cours, veuillez patienter...</strong>
+                            <strong class="ml-3 text-warning text-italic text-center" wire:loading wire:target="{{$modelName}}" >Chargement du fichier en cours, veuillez patienter...</strong>
                         </span>
                         <div class="d-flex justify-content-end w-20">
                            <div class="w-25"></div>
@@ -26,7 +26,7 @@ $ztwenInput = Str::random(15);
                 <div class="">
                     <div class="">
                         <div class="bg-transparent w-100 p-0 m-0">
-                            @if($theModel)
+                            @if($theModel && $isImage)
                                 <div class="m-0 p-0 d-flex justify-center bg-transparent">
                                     <img width="250" class="border mt-2 p-0" src="{{$theModel->temporaryUrl()}}" alt="image en chargement">
                                 </div>
@@ -34,7 +34,7 @@ $ztwenInput = Str::random(15);
                                 <label class="m-0 p-0 text-center cursor-pointer z-bg-secondary w-100 d-flex flex-column justify-content-between" for="{{$ztwenInput}}">
                                     <div class="w-100">
                                        <h5 class="px-2 text-secondary w-100 text-bold py-2 mt-2 align-content-center" >
-                                           Veuillez choisir l'image à télécharger
+                                           Veuillez choisir le fichier
                                            <span class="fa fa-download"></span>
                                        </h5>
                                        <span></span>
