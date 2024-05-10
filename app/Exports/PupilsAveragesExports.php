@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Helpers\Tools\Tools;
 use App\Models\Classe;
+use App\Models\SchoolYear;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -26,11 +27,13 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
 
     public $withRank;
 
+    public $epeMaxLenght = 1;
+
     public $all = false;
 
 
 
-   public function __construct(Classe $classe, $school_year_model, $semestre, $subject, $all = false, $withRank = false)
+   public function __construct(Classe $classe, SchoolYear $school_year_model, $semestre, $subject, $all = false, $withRank = false)
     {
         $this->classe = $classe;
 
@@ -47,6 +50,12 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
         $this->withRank = $withRank;
 
         $this->all = $all;
+
+        if($this->all){
+
+            $this->epeMaxLenght = $classe->getMarksTypeLenght($subject->id, $semestre, $school_year_model->school_year, 'epe');
+
+        }
     }
     /**
     * @return \Illuminate\Support\Collection
@@ -57,6 +66,8 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
 
         $ranksTab = [];
 
+        $epeMaxLenght = 0;
+
         $classe = $this->classe;
 
         $school_year_model = $this->school_year_model;
@@ -65,6 +76,9 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
 
         $subject = $this->subject;
 
+        $rank = "Non Classé";
+
+        $epes = [];
 
         $pupils = $classe->getNotAbandonnedPupils($school_year_model->id);
 
@@ -136,6 +150,12 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
 
                 }
 
+                if($this->withRank && isset($ranksTab[$p->id])){
+
+                    $rank = $ranksTab[$p->id]['rank'] . ' ' . $ranksTab[$p->id]['exp'] . ' ' . $ranksTab[$p->id]['base']; 
+
+                }
+
 
             }
 
@@ -148,8 +168,8 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
                     'Moy Int' => $averageEPETab[$p->id],
                     'DEV 1' => $dev1,
                     'DEV 2' => $dev2,
-                    'MOY.' => $moy,
-                    'Moy. Coef.' => $moy_coef,
+                    'MOY. Semestre' => $moy,
+                    // 'Moy. Coef.' => $moy_coef,
                     'OBS' => $mention,
 
                 ];
@@ -157,6 +177,53 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
             }
             else{
 
+                $to_fetch = [
+                    "N° d'ordre" => $k,
+                    "Matricule" => $p->ltpk_matricule,
+                    'Nom et Prenoms' => $p->getName(),
+
+                ];
+
+                $all_marks = $p->getMarks($subject->id, $semestre);
+
+
+
+                if(count($all_marks) > 0){
+
+                    $all_marks = $all_marks[$subject->id];
+
+                    $epes = $all_marks['epe'];
+
+                    for($ii = 0; $ii < $this->epeMaxLenght; $ii++){
+
+                        $id = $ii + 1;
+
+                        if(isset($epes[$ii])){
+
+                            $epe = $epes[$ii]->value;
+
+                            $to_fetch["INT" . $id] = $epe == 0.0 ? '00' : $epe; 
+
+                        }
+                        else{
+
+                            $to_fetch["INT" . $id] = " - "; 
+
+                        }
+
+                    }
+
+                }
+
+                $to_fetch["Moy Int"] = $averageEPETab[$p->id];
+                $to_fetch["DEV 1"] = $dev1;
+                $to_fetch["DEV 2"] = $dev2;
+                $to_fetch["Moy"] = $moy;
+                $to_fetch["Moy Coef"] = $moy_coef;
+                $to_fetch["RANG"] = $rank;
+                $to_fetch["OBS"] = $mention;
+
+                $data[$p->id] = $to_fetch;
 
             }
 
@@ -164,6 +231,8 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
 
 
         }
+
+        // dd($data);
 
         return collect($data);
     }
@@ -173,12 +242,30 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
     {
         if($this->all == false){
 
-            return ["N° d'ordre", 'MATRICULE', 'NOM ET PRENOMS', 'MOY. INT', 'DEV 1', 'DEV 2', 'MOY', 'MOY. COEF', 'OBS'];
+            return ["N° d'ordre", 'MATRICULE', 'NOM ET PRENOMS', 'MOY. INT', 'DEV 1', 'DEV 2', 'MOY. Semestre', 'OBS'];
 
         }
         else{
 
-            return ["N° d'ordre", 'MATRICULE', 'NOM ET PRENOMS', 'MOY. INT', 'DEV 1', 'DEV 2', 'MOY', 'MOY. COEF', 'OBS'];
+            $epe_size = $this->epeMaxLenght;
+
+            $headers = ["N° d'ordre", "MATRICULE", "NOM ET PRENOMS"];
+
+            $default_headers = ['MOY. INT', 'DEV 1', 'DEV 2', 'MOY', 'MOY. COEF', 'RANG', 'OBS'];
+
+
+            for ($i=1; $i <= $epe_size ; $i++) { 
+                
+                $headers[] = "INT " . $i;
+            }
+
+            foreach($default_headers as $h){
+
+                $headers[] = $h;
+
+            }
+
+            return $headers;
 
         }
     }

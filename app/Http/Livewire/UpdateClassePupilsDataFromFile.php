@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Events\InitiateClassePupilsDataUpdatingFromFileEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Imports\ImportPupilPersoDataFromFile;
+use App\Models\Pupil;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Maatwebsite\Excel\Facades\Excel;
@@ -24,6 +25,24 @@ class UpdateClassePupilsDataFromFile extends Component
 
     public $classe = null;
 
+    public $pupil = null;
+
+    public $target = 'classe';
+
+    public $show = true;
+
+    public $show_form = true;
+
+    public $target_row;
+
+    public $row;
+
+    public $pupil_id;
+
+    public $pupils_data = [];
+
+    public $targets = ['classe' => "Toute la classe", 'pupil' => "Un élève précis"];
+
     public $title = "Mise à jour des données des apprenants via un fichier";
 
     protected $rules = [
@@ -32,20 +51,99 @@ class UpdateClassePupilsDataFromFile extends Component
 
     public function render()
     {
-        return view('livewire.update-classe-pupils-data-from-file');
+        $pupils = [];
+
+        if($this->target && $this->classe && $this->target == 'pupil'){
+
+            $pupils = $this->classe->getPupils();
+
+        }
+        return view('livewire.update-classe-pupils-data-from-file', compact('pupils'));
+    }
+
+    public function updatedShow($value)
+    {
+        // $this->show = !$this->show;
+    }
+
+    public function toShowOrHide()
+    {
+         $this->show = !$this->show;
+    }
+
+    public function toShowOrHideForm()
+    {
+        $this->show_form = !$this->show_form;
     }
 
 
-    
-    public function importedData()
+    public function updatedTarget($target)
     {
+        $this->target = $target;
+    }
+
+    public function getTargetRowData($row)
+    {
+        if((!$this->row || !$this->target_row) || (($this->row || $this->row == 0) && $this->target_row && $row !== $this->row)){
+
+            $this->reset('target_row', 'row');
+
+            if(($row || $row == 0) && is_int($row)){
+
+                $row = (int)$row;
+
+                if(isset($this->pupils_data[$row])){
+
+                    $this->row = $row;
+
+                    $this->target_row = $this->pupils_data[$row];
+
+                }
+                else{
+
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'ERREURE', 'message' => "La donnée sélectionnée semble ne pas avoir de correspondance dans le fichier ciblé!", 'type' => 'warning']);
+
+                }
+
+            }
+            else{
+
+                $this->dispatchBrowserEvent('Toast', ['title' => 'ERREURE', 'message' => "Les données sélectionnées sont ambigües!", 'type' => 'error']);
+
+            }
+
+
+        }
+    }
+
+
+    public function updatedPupilId($pupil_id)
+    {
+        $this->reset('pupil');
+
+        $this->resetErrorBag('pupil_id');
+
+        $p = Pupil::find($pupil_id);
+
+        if($p){
+
+            $this->pupil = $p;
+
+        }
+        else{
+            $this->dispatchBrowserEvent('Toast', ['title' => 'ERREURE', 'message' => "La sélection n'existe pas dans la base de données!", 'type' => 'error']);
+
+        }
+    }
+
+
+    public function updatedDataFile($file)
+    {
+        $this->reset('pupils_data');
+
         $this->validate();
 
-        // Excel::import(new ImportPupilPersoDataFromFile, $this->data_file);
-
         $path = $this->data_file->getRealPath();
-
-        // $data = Excel::import(new ImportPupilPersoDataFromFile, $this->data_file);
 
         $sheet = (new Xls)->load($path)->getActiveSheet();
 
@@ -83,29 +181,82 @@ class UpdateClassePupilsDataFromFile extends Component
 
 
             $data[] = $pupil;
-
-            
         }
 
+        $this->pupils_data = $data;
+    }
 
-        if($data){
+    public function importedData()
+    {
+        $this->validate();
 
-            $classe = $this->classe;
+        if($this->target == 'pupil'){
 
-            $user = auth()->user();
+            $this->validate(['pupil_id' => 'required|numeric']);
 
-            InitiateClassePupilsDataUpdatingFromFileEvent::dispatch($classe, $data, $user);
+            if($this->target_row){
+
+                $classe = $this->classe;
+
+                $data = $this->target_row;
+
+                $user = auth()->user();
+
+                if($this->pupil){
+
+                    $pupil = $this->pupil;
+
+                    InitiateClassePupilsDataUpdatingFromFileEvent::dispatch($classe, $data, $user, $this->pupil_id);
+
+                }
+                else{
+
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'ERREURE', 'message' => "Veuillez sélectionnez l'apprenant cible!", 'type' => 'error']);
+
+                    $this->addError('pupil_id', "Veuillez sélectionner l'apprenant cible");
+
+                }
+            }
+            else{
+
+                $this->dispatchBrowserEvent('Toast', ['title' => 'ERREURE', 'message' => "Veuillez sélectionnez la donnée dans le fichier!", 'type' => 'error']);
+
+            }
+
+        }
+        elseif($this->target == 'classe'){
+
+            if($this->pupils_data){
+
+                $classe = $this->classe;
+
+                $data = $this->pupils_data;
+
+                $user = auth()->user();
+
+                InitiateClassePupilsDataUpdatingFromFileEvent::dispatch($classe, $data, $user);
+
+            }
+
 
         }
 
-        $this->dispatchBrowserEvent('hide-form');
+        // $this->dispatchBrowserEvent('hide-form');
 
         $this->dispatchBrowserEvent('Toast', ['title' => 'PROCESSUS LANCE', 'message' => "Le fichier de mise à jour des données a été soumis avec succès!", 'type' => 'success']);
 
         $this->resetErrorBag();
 
-        $this->reset('classe_id', 'classe', 'data_file');
+        $this->reset('pupils_data', 'target_row', 'row', 'pupil_id', 'pupil', 'show');
+
+        $this->data_file = $this->data_file;
         
+    }
+
+
+    public function clearForm()
+    {
+        $this->reset('pupils_data', 'target_row', 'row', 'pupil_id', 'pupil', 'show');
     }
 
 
@@ -128,14 +279,6 @@ class UpdateClassePupilsDataFromFile extends Component
                 if($not_secure || ($user->isAdminAs('master'))){
 
                     $this->classe_id = $classe_id;
-
-                    // $pupils = $classe->getNotAbandonnedPupils();
-
-                    // foreach($pupils as $p){
-
-                        // $this->matricule_data[$p->id] = $p->ltpk_matricule;
-
-                    // }
 
                     $this->dispatchBrowserEvent('modal-updateClassePupilsDataFromFile');
 

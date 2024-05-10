@@ -14,6 +14,7 @@ use App\Http\Livewire\ForceEmailVerifyNotification;
 use App\Http\Livewire\Home;
 use App\Http\Livewire\ManageEpreuvesTransfers;
 use App\Http\Livewire\MultiplePupilInsertion;
+use App\Http\Livewire\PDFPrinter;
 use App\Http\Livewire\ParentProfil;
 use App\Http\Livewire\ParentsListerComponent;
 use App\Http\Livewire\PolyvalenteClasseManager;
@@ -94,6 +95,8 @@ Route::post('/inscription', RegisteringNewUser::class)->middleware('guest')->nam
 
 Route::get('/classe/{classe_id}', [ClasseListDownload::class, 'index'])->name('classe_pdf');
 Route::get('/classe/{classe_id}/pdf', [ClasseListDownload::class, 'createPDF'])->name('classe_pdf_print');
+
+Route::get('/pdf', [PDFPrinter::class, 'render'])->name('pdf_print');
 
 Route::get('/connexion', AuthRedirections::class)->name('connexion')->middleware('guest');
 Route::get('/inscription', AuthRedirections::class)->name('registration')->middleware('guest');

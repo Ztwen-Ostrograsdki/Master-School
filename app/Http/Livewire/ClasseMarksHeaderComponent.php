@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\InitiateClasseParticipationMarksEvent;
 use App\Events\UpdateClasseSanctionsEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
@@ -85,6 +86,12 @@ class ClasseMarksHeaderComponent extends Component
 
         }
 
+    }
+
+
+    public function updateClassePupilsPersoDataFromFile($classe_id)
+    {
+        $this->emit('UpdateClassePupilsPersoDataFromFile', $classe_id);
     }
 
 
@@ -404,6 +411,62 @@ class ClasseMarksHeaderComponent extends Component
         }
 
         
+    }
+
+    public function updateParticipatesClasseMarks()
+    {
+
+        $school_year_model = $this->getSchoolYear();
+
+        $classe = $school_year_model->findClasse($this->classe_id);
+
+        $subject_id = session('classe_subject_selected');
+
+        $semestre = session('semestre_selected');
+
+
+        if($classe && $subject_id && $semestre){
+
+            $subject = Subject::find($subject_id);
+
+            $user = auth()->user();
+
+            // $pupils = $classe->getNotAbandonnedPupils();
+
+            // $tabs = [];
+
+
+            // if(count($pupils) > 0){
+
+            //     foreach($pupils as $pupil){
+
+            //         $part = $pupil->definedParticipationMark($semestre, $subject_id, $school_year_model->school_year);
+
+            //         $tabs[$pupil->getName()] = $part;
+
+
+            //     }
+
+            //     dd($tabs);
+
+
+            // }
+
+
+            InitiateClasseParticipationMarksEvent::dispatch($classe, $school_year_model, $semestre, $subject, $user);
+
+            $this->dispatchBrowserEvent('Toast', ['title' => 'PROCESSUS LANCE', 'message' => "Les notes de Participations sont en cours de traitement...!", 'type' => 'success']);
+
+
+
+        }
+        else{
+
+            $this->dispatchBrowserEvent('Toast', ['title' => 'ERREURE', 'message' => "Votre formulaire semble incomplet!", 'type' => 'error']);
+
+        }
+
+
     }
 
     public function semestreWasChanged($semestre_selected = null)

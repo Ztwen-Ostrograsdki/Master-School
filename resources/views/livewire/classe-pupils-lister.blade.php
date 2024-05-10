@@ -109,10 +109,13 @@
                                     {{ $p->getSexe() }}
                                 </td>
                                 <td class="text-center">
-                                    {{ $p->matricule }}
+                                    {{ $p->ltpk_matricule }}
                                 </td>
                                 <td class="text-center">
                                     {{ str_ireplace("Il y a ", '', $p->getDateAgoFormated(true)) }}
+                                    <small class="text-warning d-block m-0 p-0">
+                                        Mise à jour Il y a {{ str_ireplace("Il y a ", '', $p->getDateAgoFormated(false)) }}
+                                    </small>
                                 </td>
                                 <td class="text-center w-auto p-0">
                                     <span class="row w-100 m-0 p-0">

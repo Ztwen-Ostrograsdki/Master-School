@@ -201,6 +201,19 @@ class Tools{
 
 	}
 
+	public static function numberIsBetweenLFGT($mark, $start = 0, $end)
+	{
+
+		if($end > $start){
+
+			return ($mark >= $start && $mark < $end);
+
+		}
+		return false;
+
+
+	}
+
 
 	public static function getFilials()
 	{

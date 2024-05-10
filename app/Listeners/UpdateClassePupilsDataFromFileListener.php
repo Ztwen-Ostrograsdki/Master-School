@@ -22,7 +22,7 @@ class UpdateClassePupilsDataFromFileListener
     {
         $batch = Bus::batch([
 
-            new JobUpdateClassePupilsDataFromFile($event->classe, $event->data, $event->user),
+            new JobUpdateClassePupilsDataFromFile($event->classe, $event->data, $event->user, $event->pupil_id),
 
             ])->then(function(Batch $batch) use ($event){
 

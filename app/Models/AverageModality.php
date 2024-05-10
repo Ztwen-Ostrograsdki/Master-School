@@ -9,9 +9,15 @@ class AverageModality extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['modality', 'classe_id', 'subject_id', 'school_year', 'semestre', 'activated'];
+    protected $fillable = ['modality', 'classe_id', 'subject_id', 'school_year', 'semestre', 'activated', 'locked'];
 
     protected $casts = ['trimestre'];
+
+
+    public function canUpdate()
+    {
+        return $this->locked == false;
+    }
 
 
     

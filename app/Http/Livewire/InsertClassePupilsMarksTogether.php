@@ -359,16 +359,27 @@ class InsertClassePupilsMarksTogether extends Component
 
             if($participation_marks !== []){
 
-                foreach($participation_marks as $part){
+                if(count($participation_marks) <= 1){
 
-                    if($part && !is_numeric($part)){
+                    foreach($participation_marks as $part){
 
-                        $error = true;
+                        if($part && !is_numeric($part)){
+
+                            $error = true;
+                        }
+                        elseif($part && (floatval($part) > 20 || floatval($part) < 0)){
+
+                            $error = true;
+                        }
+
                     }
-                    elseif($part && (floatval($part) > 20 || floatval($part) < 0)){
 
-                        $error = true;
-                    }
+                }
+                else{
+
+                    $error = true;
+
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'NOTES INVALIDES', 'message' => "Chaque apprenant doit avoir au plus UNE SEULE NOTE de participation. PAS PLUS!", 'type' => 'warning']);
 
                 }
 

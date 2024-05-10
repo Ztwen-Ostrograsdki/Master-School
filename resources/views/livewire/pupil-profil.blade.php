@@ -28,7 +28,9 @@
                             @if($current_classe && session()->has('classe_subject_selected') && session('classe_subject_selected') && $pupil->hasNullsMarks($current_classe->id, session('semestre_selected'), null, session('classe_subject_selected')))
                                 <a wire:click="deleteNullMarks"  class="dropdown-item" tabindex="-1" href="#">Supprimer les notes zéros</a>
                                 <a wire:click="desactivateNullMarks"  class="dropdown-item" tabindex="-1" href="#">Désactiver les zéros</a>
-                                <a wire:click="normalizeNullMarks"  class="dropdown-item" tabindex="-1" href="#">Normaliser les notes zéros</a><a wire:click="activateNullMarks"  class="dropdown-item" tabindex="-1" href="#">Activer les zéros</a>
+                                <a wire:click="normalizeNullMarks"  class="dropdown-item" tabindex="-1" href="#">Normaliser les notes zéros</a>
+                                <a wire:click="activateNullMarks"  class="dropdown-item" tabindex="-1" href="#">Activer les zéros</a>
+                                <a wire:click="optimizeClasseAveragesIntoDatabase"  class="dropdown-item" tabindex="-1" href="#">Optimiser les moyennes depuis le serveur</a>
                             @endif
                             <a class="dropdown-item" tabindex="-1" href="#">Mettre à jour</a>
                             <div class="dropdown-divider"></div>
@@ -100,7 +102,7 @@
                                     <x-ztitle-liner :smallTitle=" '(à ' . $pupil->birth_city . ')'" classe="text-capitalize" :icon="'bi-calendar'" :useIcon="true" :value="$pupil->__getDateAsString($pupil->birth_day, null)"></x-ztitle-liner>
                                     <x-ztitle-liner :icon="'bi-phone'" :useIcon="true" :value="$pupil->contacts"></x-ztitle-liner>
                                     <x-ztitle-liner :icon="'bi-house'" :useIcon="true" :value="$pupil->residence"></x-ztitle-liner>
-                                    <x-ztitle-liner class="text-orange" :smallTitle="'(Numéro EducMaster)'" :icon="'bi-person-badge text-orange'" :useIcon="true" :value="$pupil->educmaster ? $pupil->educmaster : 'Non renseigné'"></x-ztitle-liner>
+                                    <x-ztitle-liner class="text-orange" :smallTitle="'(Numéro EducMaster)'" :classes="'text-warning'" :icon="'bi-person-badge text-orange'" :useIcon="true" :value="$pupil->educmaster ? $pupil->educmaster : $pupil->ltpk_matricule ? $pupil->ltpk_matricule : 'Non renseigné'"></x-ztitle-liner>
                                 </div>
                             </div>
                         </div>

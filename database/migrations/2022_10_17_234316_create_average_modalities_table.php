@@ -17,6 +17,7 @@ class CreateAverageModalitiesTable extends Migration
         Schema::create('average_modalities', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('modality')->nullable()->default(null);
+            $table->boolean('locked')->default(0);
             $table->unsignedBigInteger('classe_id');
             $table->unsignedBigInteger('subject_id');
             $table->string('trimestre')->nullable()->default(null);

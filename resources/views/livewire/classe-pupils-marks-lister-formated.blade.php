@@ -49,6 +49,7 @@
                                                 <span class="mx-2 d-none d-lg-inline d-xl-inline text-small @if($p->sexe == 'female') text-orange  @endif ">
                                                     {{$p->getName()}}
                                                 </span>
+                                                
                                             </span>
                                         </a>
                                         @else

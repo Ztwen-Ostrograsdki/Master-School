@@ -28,16 +28,16 @@
             @endif
             @if($classe && $classe->classeWasNotClosedForTeacher(auth()->user()->teacher->id) && $classe->classeWasNotLockedForTeacher(auth()->user()->teacher->id))
                 @if($classe && $subject_selected)
-                    <span class="text-warning float-right btn btn-secondary border ml-1">
+                    <span class="float-right btn btn-warning border ml-1">
                         @if($classe->hasSubjectsSanctions(session('semestre_selected'), $subject_selected->id, $school_year_model->id , true))
                             <span wire:click="desactivated({{$classe->id}})" title="Ne pas prendre en compte les sanctions" class="d-inline-block w-100 cursor-pointer z-scale">
                                 <small>Pas tenir</small>
-                                <span class="bi-exclamation-triangle text-warning"></span>
+                                <span class="bi-pin-angle"></span>
                             </span>
                         @else
                             <span wire:click="activated({{$classe->id}})" title="Prendre en compte les sanctions" class="d-inline-block w-100 cursor-pointer z-scale">
                                 <small>Tenir compte</small>
-                                <span class="bi-exclamation-triangle text-success"></span>
+                                <span class="bi-pin-angle"></span>
                             </span>
                         @endif
                     </span>
@@ -59,18 +59,24 @@
                         @endif
                     </span>
                 @endif
-                <span wire:click="manageModality" class="btn btn-primary z-scale border border-white float-right mr-1" title="Editer les modalités de calcule de moyenne dans la matière sélectionnée dans cette classe">
-                    <span class="fa bi-pen"></span>
-                    <span class="fa bi-calculator"></span>
-                    <small>Editer</small>
-                </span>
+
+                @if($classe && $subject_selected)
+                    <span wire:click="manageModality" class="btn btn-primary z-scale border border-white float-right mr-1" title="Editer les modalités de calcule de moyenne dans la matière sélectionnée dans cette classe">
+                        <span class="fa bi-pen"></span>
+                        <span class="fa bi-calculator"></span>
+                    </span>
+
+                    <span wire:click="updateParticipatesClasseMarks" class="btn btn-warning z-scale border border-white float-right mr-1" title="Mettre à jour les notes de participations de la matière sélectionnée dans cette classe">
+                        <span class="fa bi-wrench-adjustable"></span>
+                        <span class="fa bi-wrench-adjustable-circle"></span>
+                    </span>
+                @endif
             @endif
         @endif
         @if(auth()->user()->isAdminAs('master'))
             @if(!$teacher_profil && $classe)
                 <span wire:click="editClasseSubjects({{$classe->id}})" class="btn btn-success border border-white float-right mr-1 z-scale" title="Ajouter une matière à cette classe">
-                    <span class="fa fa-bookmark"></span>
-                    <small>Ajouter</small>
+                    <span class="fa bi-file-earmark-diff"></span>
                 </span>
             @endif
         @endif
@@ -78,7 +84,6 @@
             @if($marks)
                 <span wire:click="refreshClasseMarks('{{$classe->id}}')" class="btn btn-danger border z-scale border-white mx-1 float-right" title="Vider des notes de cette classe">
                     <span class="fa fa-trash"></span>
-                    <small>Vider</small>
                 </span>
             @endif
             <span wire:click="insertClasseMarks" class="btn btn-primary border z-scale border-white mr-1 float-right" title="Insérer des notes de classe">
@@ -91,14 +96,18 @@
             </span>
             <span wire:click="restorMarks({{$classe->id}})" class="btn btn-secondary border z-scale border-white mr-1 float-right" title="Restaurer des notes de classe">
                 <span class="fa fa-reply"></span>
-                <small>Restaurer</small>
             </span>
 
             <span wire:click="showFormattedView({{$classe->id}})" class="btn btn-primary mx-2 border z-scale border-white mr-1 float-right" title="@if($simpleFormat) Masquer @else Afficher @endif le format simplifié des notes de classe">
-                <span class="fa fa-book"></span>
+                <span class="fa bi-binoculars"></span>
                 <small> Vue @if($simpleFormat) globale @else simple @endif</small>
             </span>
+
+            <span wire:click="updateClassePupilsPersoDataFromFile({{$classe->id}})" class="btn btn-warning border z-scale border-white mr-1 float-right" title="Mettre à jour les données des apprenants à partir d'un fichier">
+                <span class="fa fa-download"></span>
+            </span>
         @endif
+
 
     </div>
 
@@ -177,9 +186,9 @@
         @if($subject_selected && isset($subject_selected->name))
             <small class="text-warning m-2">
                 @if($modality && $modalitiesActivated)
-                    <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de <b class="text-white">{{$subject_selected->name}}</b>, <b class="text-white">0{{$modality}}</b> notes seront prises en comptes!
+                    <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de <b class="text-white">{{$subject_selected->name}}</b>, <b class="text-white">0{{$modality}}</b> notes plus la note de participation seront prises en comptes!
                 @else
-                    <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de  <b class="text-white">{{$subject_selected->name}}</b>, toutes les notes seront prises en comptes!
+                    <small class="bi-calculator mr-1"></small>Pour le calcule des moyennes d'interros de  <b class="text-white">{{$subject_selected->name}}</b>, toutes les notes plus la note de participation seront prises en comptes!
                 @endif
             </small>
             @if($modality && $modalitiesActivated)

@@ -2,6 +2,7 @@
 namespace App\Helpers\ModelTraits;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Helpers\Tools\Tools;
 use App\Jobs\JobPupilDeleterFromDatabase;
 use App\Models\Classe;
 use App\Models\ClassePupilSchoolYear;
@@ -1098,6 +1099,53 @@ trait PupilTraits{
 
     }
 
+    public function getPupilMarksUnder2($classe_id, $semestre, $school_year = null, $subject_id = null, $value = 2)
+    {
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $marks = [];
+
+        if(!$classe_id){
+
+            $classe = $this->getCurrentClasse();
+
+            if($classe){
+
+                $classe_id = $classe->id;
+
+            }
+
+        }
+
+        if($classe_id){
+
+            if($subject_id){
+
+                $marks = $this->marks()->where('marks.school_year_id', $school_year_model->id)
+                                   ->where('marks.subject_id', $subject_id)
+                                   ->where('marks.classe_id', $classe_id)
+                                   ->where('marks.semestre', $semestre)
+                                   ->where('marks.type', 'epe')
+                                   ->where('marks.value', '<=', $value)
+                                   ->get();
+
+            }
+            else{
+                $marks = $this->marks()->where('marks.school_year_id', $school_year_model->id)
+                                   ->where('marks.classe_id', $classe_id)
+                                   ->where('marks.semestre', $semestre)
+                                   ->where('marks.type', 'epe')
+                                   ->where('marks.value', '<=', $value)
+                                   ->get();
+
+            }
+
+       }
+
+        return $marks;
+
+    }
+
     /**
      * Assert if a classe or pupil of a classe has nulls marks for a specific subject with subject_id
      */
@@ -1187,6 +1235,291 @@ trait PupilTraits{
 
 
         return $choosenEpesMarks;
+
+    }
+
+
+     /**
+     * Get if pupil of a classe has nulls marks for a specific subject with subject_id
+     */
+    public function getNullsMarksCounter($classe_id, $semestre, $school_year = null, $subject_id = null)
+    {
+
+        $marks = $this->getPupilNullMarks($classe_id, $semestre, $school_year, $subject_id);
+
+        return count($marks);
+
+    }
+
+    public function getMarksUnder2Counter($classe_id, $semestre, $school_year = null, $subject_id = null, $value = 2)
+    {
+
+        $marks = $this->getPupilMarksUnder2($classe_id, $semestre, $school_year, $subject_id, $value);
+
+        return count($marks);
+
+    }
+
+
+    public function definedParticipationMark($semestre, $subject_id, $school_year = null)
+    {
+
+        $marks = $this->getMarks($subject_id, $semestre, $school_year);
+
+        $classe_id = $this->getCurrentClasse()->id;
+
+        $participation = null;
+
+        $MMVFPC = config('app.MMVFPC');
+
+        if($marks){
+
+            $initiate = 1;
+
+            $marks = $marks[$subject_id];
+
+            $epes = $marks['epe'];
+
+            $devs = $marks['devoir'];
+
+            $parts = $marks['participation'];
+
+
+            if(count($epes) && count($devs)){
+
+                $total = count($epes) + count($devs);
+
+                $sum = 0;
+
+
+                foreach($epes as $epe){
+
+                    $sum = $sum + $epe->value;
+
+                }
+
+
+                foreach($devs as $dev){
+
+                    $sum = $sum + $dev->value;
+
+                }
+
+                $initiate = $initiate + ceil($sum / $total);
+
+
+
+                if(Tools::numberIsBetweenLFGT($initiate, 0, 8)){
+
+                    $diff = 8 - $initiate;
+
+                    if($diff == 0){
+
+                        $participation = 8;
+
+                    }
+                    else{
+
+                        $participation = $initiate + (ceil($initiate / $diff));
+
+                        if($participation > 10){
+
+                            $participation = 10;
+
+                        }
+
+                    }
+
+
+
+                }
+                elseif(Tools::numberIsBetweenLFGT($initiate, 8, 11)){
+
+                    $diff = 11 - $initiate;
+
+                    if($diff == 0){
+
+                        $$participation = 11;
+
+                    }
+                    else{
+
+                        $participation = $initiate + (ceil($initiate / $diff));
+
+                        if($participation > 11){
+
+                            $participation = 11;
+
+                        }
+
+                    }
+
+                }
+                elseif(Tools::numberIsBetweenLFGT($initiate, 11, 13)){
+
+                    $diff = 13 - $initiate;
+
+                    if($diff == 0){
+
+                        $participation = 13;
+
+                    }
+                    else{
+
+                        $participation = $initiate + (ceil($initiate / $diff));
+
+                        if($participation > 13){
+
+                            $participation = 13;
+
+                        }
+
+                    }
+
+                }
+                elseif(Tools::numberIsBetweenLFGT($initiate, 13, 15)){
+
+                    $diff = 15 - $initiate;
+
+                    if($diff == 0){
+
+                        $$participation = 15;
+
+                    }
+                    else{
+
+                        $participation = $initiate + (ceil($initiate / $diff));
+
+                        if($participation > 15){
+
+                            $participation = 15;
+
+                        }
+
+                    }
+
+                }
+                elseif(Tools::numberIsBetweenLFGT($initiate, 15, 17)){
+
+                    $diff = 17 - $initiate;
+
+                    if($diff == 0){
+
+                        $$participation = 17;
+
+                    }
+                    else{
+
+                        $participation = $initiate + (ceil($initiate / $diff));
+
+                        if($participation > 17){
+
+                            $participation = 17;
+
+                        }
+
+                    }
+
+                }
+                elseif(Tools::numberIsBetweenLFGT($initiate, 17, 19)){
+
+                    $diff = 19 - $initiate;
+
+                    if($diff == 0){
+
+                        $$participation = 19;
+
+                    }
+                    else{
+
+                        $participation = $initiate + (ceil($initiate / $diff));
+
+                        if($participation > 19){
+
+                            $participation = 19;
+
+                        }
+
+                    }
+
+                }
+                elseif($initiate >= 19){
+
+                    $participation = 19;
+
+                }
+                else{
+
+                    $participation = $initiate;
+
+                }
+
+
+                $nullMarks = $this->getNullsMarksCounter($classe_id, $semestre, $school_year, $subject_id);
+
+                $U2Marks = $this->getMarksUnder2Counter($classe_id, $semestre, $school_year, $subject_id, $MMVFPC);
+
+                $sanction = $this->getPupilBonusesMinusesSummary($classe_id, $subject_id, $semestre, $school_year);
+
+                if($participation > ($nullMarks + $U2Marks)){
+
+                    $participation = $participation - $nullMarks - $U2Marks;
+
+                }
+
+                if($sanction){
+
+                    $to_take = ceil(abs($sanction) / 10);
+
+                    if($sanction < 0){
+
+                        if($participation > $to_take){
+
+                            $participation = $participation - $to_take;
+
+                        }
+                        else{
+
+                            $participation = 1;
+
+                        }
+
+                    }
+                    else{
+                        if(($participation + $to_take) < 19){
+
+                            $participation = $participation + $to_take;
+
+                        }
+                        else{
+
+                            $participation = 19;
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        return $participation;
+
+    }
+
+
+    public function getPupilBonusesMinusesSummary($classe_id, $subject_id, $semestre, $school_year, $type = 'bonus', $signed = true)
+    {
+        $bonuses = $this->getRelatedMarksCounter($classe_id, $subject_id, $semestre, $school_year,'bonus', false);
+
+        $minuses = $this->getRelatedMarksCounter($classe_id, $subject_id, $semestre, $school_year,'minus', false);
+
+
+        $sum = $bonuses - $minuses;
+
+        return $signed ? $sum : abs($sum);
 
     }
     

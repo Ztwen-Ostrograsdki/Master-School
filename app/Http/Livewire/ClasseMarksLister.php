@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Events\UpdateClasseSanctionsEvent;
+use App\Exports\PupilsAveragesExports;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Mark;
@@ -10,6 +11,7 @@ use App\Models\Pupil;
 use App\Models\School;
 use App\Models\Subject;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
 use PDF;
 
 class ClasseMarksLister extends Component
@@ -25,6 +27,7 @@ class ClasseMarksLister extends Component
         'classeUpdated' => 'reloadData',
         'semestreWasChanged',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
+        'ClasseDataWasUpdated' => 'reloadData',
         'UpdatedGlobalSearch' => 'reloadClasseDataOnSearch',
         'UpdatedRelaodNowLiveEvent' => 'updatedRelaodNow',
         'NewClasseMarksInsert' => 'reloadData',
@@ -220,11 +223,11 @@ class ClasseMarksLister extends Component
             $classe_subject_coef = $classe->get_coefs($this->classe_subject_selected, $school_year_model->id, true);
 
 
-            $epeMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'epe') + 1;
+            $epeMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year, 'epe') + 1;
 
-            $devMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'devoir');
+            $devMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year, 'devoir');
 
-            $participMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_yea, 'participation');
+            $participMaxLenght = $classe->getMarksTypeLenght($this->classe_subject_selected, $this->semestre_selected, $school_year_model->school_year, 'participation');
 
             if(($epeMaxLenght < 1 && $participMaxLenght < 1 && $devMaxLenght < 1)){
 
@@ -409,9 +412,36 @@ class ClasseMarksLister extends Component
 
         if($subject && $semestre && $semestre_type){
 
-            $file_name = 'Les-notes-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
+            $file_name = 'Les-notes-simplifiees-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
 
-            return Excel::download(new PupilsAveragesExports($classe, $school_year_model, $semestre, $subject), $file_name, true);
+            return Excel::download(new PupilsAveragesExports($classe, $school_year_model, $semestre, $subject, true), $file_name);
+
+
+        }
+        else{
+
+            $this->dispatchBrowserEvent('Toast', ['title' => 'REQUETE INCOMPLETE', 'message' => "Vous bien définir les données du formulaire de téléchargement, certaines données n'ont pas été renseignées!", 'type' => 'warning']);
+
+        }
+    }
+
+    public function exportToExcelFormat()
+    {
+        $classe = Classe::find($this->classe_id);
+
+        $school_year_model = $this->getSchoolYear();
+
+        $semestre_type = $this->semestre_type;
+
+        $semestre = $this->semestre_selected;
+
+        $subject = $this->subject_selected;
+
+        if($subject && $semestre && $semestre_type){
+
+            $file_name = 'Les-notes-completes-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
+
+            return Excel::download(new PupilsAveragesExports($classe, $school_year_model, $semestre, $subject, true, true), $file_name);
 
 
         }

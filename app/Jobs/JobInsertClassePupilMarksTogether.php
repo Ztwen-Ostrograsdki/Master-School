@@ -321,21 +321,36 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
                                 }
 
                                 if($parts_tabs !== []){
-                                        
-                                    foreach($parts_tabs as $part_k_index => $validPart){
+
+                                    $validPart = max($parts_tabs);
+
+                                    $old = $pupil->marks()
+                                               ->where('marks.school_year_id', $school_year_model->id)
+                                               ->where('marks.subject_id', $subject_id)
+                                               ->where('marks.classe_id', $classe_id)
+                                               ->where('marks.semestre', $semestre)
+                                               ->where('marks.type', 'participation')
+                                               ->first();
+
+                                    if($old && $old->value !== $participation){
+
+                                        $old->update(['value' => $validPart]);
+
+                                    }
+                                    else{
 
                                         $part_mark = Mark::create([
-                                            'value' => $validPart, 
-                                            'pupil_id' => $pupil->id, 
-                                            'user_id' => $user->id, 
-                                            'creator' => $user->id, 
-                                            'subject_id' => $subject_id, 
-                                            'school_year_id' => $school_year_model->id, 
-                                            'classe_id' => $classe_id, 
-                                            'semestre' => $semestre, 
-                                            'type' => 'participation', 
-                                            'mark_index' => $part_k_index, 
-                                            'level_id' => $pupil->level_id, 
+                                                'value' => $validPart, 
+                                                'pupil_id' => $pupil->id, 
+                                                'user_id' => $user->id, 
+                                                'creator' => $user->id, 
+                                                'subject_id' => $subject_id, 
+                                                'school_year_id' => $school_year_model->id, 
+                                                'classe_id' => $classe_id, 
+                                                'semestre' => $semestre, 
+                                                'type' => 'participation', 
+                                                'mark_index' => 1, 
+                                                'level_id' => $pupil->level_id, 
                                         ]);
 
                                         if ($part_mark) {
@@ -344,6 +359,7 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
                                         }
 
                                     }
+                                        
                                 }
 
                                 if($dev_tabs !== []){

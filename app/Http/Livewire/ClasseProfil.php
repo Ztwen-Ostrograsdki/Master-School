@@ -16,8 +16,10 @@ use App\Models\Pupil;
 use App\Models\Responsible;
 use App\Models\School;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use PDF;
 
 class ClasseProfil extends Component
 {
@@ -84,6 +86,33 @@ class ClasseProfil extends Component
         else{
             return abort(404);
         }
+    }
+
+    public function to_print()
+    {
+
+
+
+            $pdf = PDF::loadView('livewire.p-d-f-printer', ['title' => 'Erreure']);
+
+            // // return $pdf->output();
+
+            // $pdf = App::make('dompdf.wrapper');
+
+            // $pdf->loadView('livewire.p-d-f-printer', ['title' => 'Erreure']);
+
+            $name = time() . 'file-pdf.pdf';
+
+            return response()->streamDownload(function() use ($pdf, $name){
+
+                $pdf->stream();
+
+
+            }, $name);
+
+        // return $pdf->stream();
+
+
     }
 
     public function printSingleMarksAsExcelFile()
@@ -775,6 +804,26 @@ class ClasseProfil extends Component
 
 
 
+    // public function optimizeClasseAveragesIntoDatabase($classe_id)
+    // {
+    //     $classe = Classe::find($classe_id);
+
+    //     $semestres = $this->getSemestres();
+
+    //     $user = auth()->user();
+
+
+    //     if($classe && $semestres){
+
+    //         $school_year_model = $this->getSchoolYear();
+
+    //         FreshAveragesIntoDBEvent::dispatch($user, $classe, $school_year_model, null);
+            
+    //     }
+
+    // }
+
+
     public function optimizeClasseAveragesIntoDatabase($classe_id)
     {
         $classe = Classe::find($classe_id);
@@ -783,12 +832,13 @@ class ClasseProfil extends Component
 
         $user = auth()->user();
 
-
         if($classe && $semestres){
 
             $school_year_model = $this->getSchoolYear();
 
-            FreshAveragesIntoDBEvent::dispatch($user, $classe, $school_year_model, null);
+            $semestre = session('semestre_selected');
+
+            FreshAveragesIntoDBEvent::dispatch($user, $classe, $school_year_model, $semestre, true);
             
         }
 

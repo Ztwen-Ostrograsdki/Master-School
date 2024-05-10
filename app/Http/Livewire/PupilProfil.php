@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\FreshAveragesIntoDBEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\ClassePupilSchoolYear;
@@ -21,6 +22,7 @@ class PupilProfil extends Component
         'updatedImages' => 'reloadPupilData',
         'NewClasseMarksInsert' => 'reloadPupilData',
         'PresenceLateWasUpdated' => 'reloadPupilData',
+        'ClasseDataLoadedSuccessfully' => 'reloadPupilData',
     ];
 
     public $slug;
@@ -544,6 +546,29 @@ class PupilProfil extends Component
 
             $this->dispatchBrowserEvent('Toast', ['title' => "semestre_type INCONNU", 'message' => "Veuillez sélectionner d'abord le $semestre_type dont vous voudriez charger les données!", 'type' => 'warning']);
 
+        }
+
+    }
+
+
+    public function optimizeClasseAveragesIntoDatabase()
+    {
+        $pupil = Pupil::find($this->pupil_id);
+
+        $classe = $pupil->getCurrentClasse();
+
+        $semestres = $this->getSemestres();
+
+        $user = auth()->user();
+
+        if($classe && $semestres){
+
+            $school_year_model = $this->getSchoolYear();
+
+            $semestre = session('semestre_selected');
+
+            FreshAveragesIntoDBEvent::dispatch($user, $classe, $school_year_model, $semestre, true);
+            
         }
 
     }

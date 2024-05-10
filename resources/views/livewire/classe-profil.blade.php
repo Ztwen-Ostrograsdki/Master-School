@@ -127,7 +127,7 @@
                         </div>
                         <div class="card">
                             <div class="info-box m-0 p-0 bg-success">
-                                <span class="info-box-icon"><i class="far fa-heart"></i></span>
+                                <span wire:click="to_print" class="info-box-icon"><i class="far z-scale cursor-pointer fa-heart"></i></span>
                                 <div class="info-box-content">
                                   <span class="info-box-text">Scolarités</span>
                                   <span class="info-box-number">25%</span>

@@ -66,6 +66,9 @@
                                         <span class="mx-2 d-none d-lg-inline d-xl-inline text-small @if($p->sexe == 'female') text-orange  @endif ">
                                             {{$p->getName()}}
                                         </span>
+                                        <small title="Matricule EducMaster de {{$p->getName()}}" class="text-warning letter-spacing-12 ml-1">
+                                            <b class="ml-1">EM: </b>{{ $p->ltpk_matricule }}
+                                        </small>
                                     </span>
                                 </a>
                                 @else
@@ -74,6 +77,9 @@
                                         <span class="mx-2 d-none d-lg-inline d-xl-inline text-small @if($p->sexe == 'female') text-orange  @endif ">
                                             {{$p->getName()}}
                                         </span>
+                                        <small title="Matricule EducMaster de {{$p->getName()}}" class="text-warning letter-spacing-12 ml-1">
+                                            <b class="ml-1">EM: </b>{{ $p->ltpk_matricule }}
+                                        </small>
                                     </span>
                                 </span>
                                 @endisMaster
@@ -82,7 +88,7 @@
                                         <small class="text-success">
                                             ({{ $p->getRelatedMarksCounter($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), 'bonus', true) }}) 
                                         </small>
-                                         <small class="text-danger">
+                                        <small class="text-danger">
                                              ({{ $p->getRelatedMarksCounter($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), 'minus', true) }})
                                         </small>
                                     </small>
@@ -116,8 +122,8 @@
                                     {{-- LES PARTICIPATIONS --}}
                                     @if($marks[$p->id]['participation'])
                                         @foreach ($marks[$p->id]['participation'] as $l => $part)
-                                            <td wire:click="setTargetedMark({{$part->id}})" title="Note de Participation No {{$part->mark_index}} éditée le {{ ucwords($part->__getDateAsString($part->updated_at, null, true)) }} " wire:click="setTargetedMark({{$part->id}})" class="text-center cursor-pointer @if($part->value == 0) text-warning @endif ">
-                                                <span class="w-100 cursor-pointer @if($part->forget) text-cyan @endif  @if($part->forced_mark) text-orange @endif" @if($part->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($part->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $part->value >= 10 ? $part->value : '0'.$part->value}} </span>
+                                            <td wire:click="setTargetedMark({{$part->id}})" title="Note de Participation No {{$part->mark_index}} éditée le {{ ucwords($part->__getDateAsString($part->updated_at, null, true)) }} " wire:click="setTargetedMark({{$part->id}})" class="bg-choosen-marks text-center cursive cursor-pointer @if($part->value == 0) text-warning @endif ">
+                                                <span class="w-100 cursor-pointer cursive @if($part->forget) text-cyan @endif  @if($part->forced_mark) text-orange @endif" @if($part->forced_mark) title="Cette note est obligatoire elle sera prise en compte dans le calcule de moyenne qu'elle soit meilleure note ou non" @endif @if($part->forget) title="Cette note ne sera pas prise en compte pour le calcule de moyenne qu'elle soit meilleure note ou non" @endif > {{ $part->value >= 10 ? $part->value : '0'.$part->value}} </span>
                                             </td>
                                         @endforeach
                                         @if ($marks[$p->id]['participation'] && count($marks[$p->id]['participation']) < $participMaxLenght)
@@ -229,9 +235,9 @@
                         @endforeach
                     </table> 
                 <div class="d-flex justify-content-end w-100 my-1 p-2">
-                    <span wire:click="printerToPDF" class="btn btn-success p-2 px-4 z-scale" title="Imprimer les notes de classe de la classe {{$classe->name}}">
+                    <span wire:click="exportToExcelFormat" class="btn btn-success p-2 px-4 z-scale" title="Imprimer les notes de classe de la classe {{$classe->name}}">
                         <span class=" fa fa-print"></span>
-                        <span>Print</span>
+                        <span>Imprimer les notes en format Excel</span>
                     </span>
                 </div>                                                    
             </div>

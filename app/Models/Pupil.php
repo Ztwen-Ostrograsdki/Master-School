@@ -257,11 +257,6 @@ class Pupil extends Model
     }
 
 
-
-
-
-
-
     public function parents()
     {
         return $this->hasMany(ParentPupil::class);

@@ -3,43 +3,50 @@
 namespace App\Events;
 
 use App\Models\Classe;
+use App\Models\SchoolYear;
+use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class InitiateClassePupilsDataUpdatingFromFileEvent implements ShouldBroadcastNow
+class InitiateClasseParticipationMarksEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
-    /**
-     * Create a new event instance.
-     *
-     * @return void
-     */
 
     public $user;
 
     public $classe;
 
-    public $data;
+    public $school_year_model;
 
-    public $pupil_id;
+    public $subject;
 
-    public function __construct(Classe $classe, array $data, User $user, $pupil_id = null)
+    public $semestre = null;
+
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct(Classe $classe, SchoolYear $school_year_model, $semestre, Subject $subject, User $user)
     {
-        $this->classe = $classe;
-
-        $this->data = $data;
-
         $this->user = $user;
 
-        $this->pupil_id = $pupil_id;
+        $this->classe = $classe;
+
+        $this->school_year_model = $school_year_model;
+
+        $this->subject = $subject;
+
+        $this->semestre = $semestre;
+
+
     }
 
     /**

@@ -63,7 +63,7 @@
                         <tr class="text-center bg-secondary-light-1 ">
                             <th rowspan="2">No</th>
                             <th rowspan="2">Nom et Prénoms </th>
-                            <th rowspan="2">Matricule</th>
+                            <th rowspan="2">N° EducMaster</th>
                             <th rowspan="2">Contacts</th>
                             <th colspan="{{count($semestres) + 1}}" scope="colgroup">Moyennes</th>
                             <th rowspan="2">Actions</th>
@@ -100,8 +100,8 @@
                                         
                                     </span>
                                 </th>
-                                <th class="text-capitalize text-center p-0 m-0 px-2">
-                                    {{$p->matricule}}
+                                <th title="Numéro EducMaster" class="text-capitalize text-white-50 text-center p-0 m-0 px-2">
+                                    {{$p->ltpk_matricule}}
                                 </th>
                                 <th style="letter-spacing: 1.2px;" class="text-capitalize text-center pl-2 p-0 m-0">
                                     {{$p->contacts}}

@@ -23,19 +23,23 @@ class JobUpdateClassePupilsDataFromFile implements ShouldQueue
      *
      * @return void
      */
-     public $user;
+    public $user;
 
     public $data;
 
     public $classe;
 
-    public function __construct(Classe $classe, array $data, User $user)
+    public $pupil_id;
+
+    public function __construct(Classe $classe, array $data, User $user, $pupil_id = null)
     {
         $this->data = $data;
 
         $this->user = $user;
 
         $this->classe = $classe;
+
+        $this->pupil_id = $pupil_id;
     }
 
 
@@ -50,41 +54,66 @@ class JobUpdateClassePupilsDataFromFile implements ShouldQueue
 
         $classe = $this->classe;
 
-        DB::transaction(function($e) use ($data, $classe){
+        $pupil_id = $this->pupil_id;
 
-            foreach ($data as $pupil_data){
-
-                $ltpk_matricule = $pupil_data['ltpk_matricule'];
-
-                $firstName = $pupil_data['firstName'];
-
-                $lastName = $pupil_data['lastName'];
+        DB::transaction(function($e) use ($data, $classe, $pupil_id){
 
 
-                $model = Pupil::where('pupils.classe_id', $classe->id)
-                                ->where('pupils.firstName', $firstName)
-                                ->first();
+            if($pupil_id){
 
-                if($model){
+                $p = Pupil::find($pupil_id);
 
-                    $db_lastnames = explode(' ', $model->lastName);
+                if($p){
 
-                    $file_lastnames = explode(' ', $lastName);
+                    $ltpk_matricule = $data['ltpk_matricule'];
 
-                    foreach($db_lastnames as $name){
+                    $firstName = $data['firstName'];
 
-                        if(strlen($name) > 2 && in_array($name, $file_lastnames)){
+                    $lastName = $data['lastName'];
 
-                            $model->update($pupil_data);
+                    $p->update($data);
 
-                            $model->updatePupilLTPKMatricule($ltpk_matricule);
-                            
+                    $p->updatePupilLTPKMatricule($ltpk_matricule);
+
+                }
+
+            }
+            else{
+
+                foreach ($data as $pupil_data){
+
+                    $ltpk_matricule = $pupil_data['ltpk_matricule'];
+
+                    $firstName = $pupil_data['firstName'];
+
+                    $lastName = $pupil_data['lastName'];
+
+
+                    $model = Pupil::where('pupils.classe_id', $classe->id)
+                                    ->where('pupils.firstName', $firstName)
+                                    ->first();
+
+                    if($model){
+
+                        $db_lastnames = explode(' ', $model->lastName);
+
+                        $file_lastnames = explode(' ', $lastName);
+
+                        foreach($db_lastnames as $name){
+
+                            if(strlen($name) > 2 && in_array($name, $file_lastnames)){
+
+                                $model->update($pupil_data);
+
+                                $model->updatePupilLTPKMatricule($ltpk_matricule);
+                                
+                            }
+
                         }
-
                     }
                 }
-            }
 
+            }
         });
     }
 }
