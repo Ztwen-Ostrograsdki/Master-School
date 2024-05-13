@@ -2,9 +2,11 @@
 
 namespace App\Http\Livewire;
 
-use Livewire\Component;
+use App\Events\UserLeavingChannelEvent;
+use App\Events\UsersOnlineEvent;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Livewire\Component;
 
 class Logout extends Component
 {
@@ -23,10 +25,13 @@ class Logout extends Component
 
     public function logout()
     {
+        $auth = auth()->user();
+
+        // UsersOnlineEvent::dispatch($auth);
+
+        // UserLeavingChannelEvent::dispatch($auth);
 
         Auth::guard('web')->logout();
-
-        // $this->emit("newUserConnected");
 
         $this->dispatchBrowserEvent('hide-form');
 

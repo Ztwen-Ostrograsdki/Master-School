@@ -2,6 +2,8 @@
 
 namespace App\Events;
 
+use App\Models\Parentable;
+use App\Models\Pupil;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -11,20 +13,36 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UserAccountBlockedEvent implements ShouldBroadcast
+class ParentRequestToFollowPupilEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $parentable;
+
+    public $pupil;
+
+    public $relation;
+
+    public $authorized;
+
     public $user;
 
-     /**
+    /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(User $user)
+    public function __construct(Parentable $parentable, Pupil $pupil, $relation, bool $authorized = false, User $user)
     {
-        $this->user = $user; 
+        $this->parentable = $parentable;
+
+        $this->pupil = $pupil;
+
+        $this->relation = $relation;
+
+        $this->authorized = $authorized;
+
+        $this->user = $user;
     }
 
     /**

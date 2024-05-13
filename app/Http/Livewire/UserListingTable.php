@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\UserConfirmedEmailEvent;
 use App\Models\Parentable;
 use App\Models\Teacher;
 use App\Models\User;
@@ -13,6 +14,9 @@ class UserListingTable extends Component
         'refreshDataFromUsers' => 'refreshData', 
         'UpdatedGlobalSearch' => 'updatedSearch', 
         'UpdateTheActiveSection' => 'reloadSectionData',
+        'UserConfirmedEmailLiveEvent' => 'refreshData',
+        'NewUserCreatedLiveEvent' => 'refreshData',
+        'OnlineUsersLiveEvent' => 'getOnlineUsers',
     ];
 
     public $active_section = null;
@@ -22,6 +26,8 @@ class UserListingTable extends Component
     public $counter = 0;
 
     public $sections = [];
+
+    public $onlines_users = [];
 
     public function render()
     {
@@ -76,15 +82,22 @@ class UserListingTable extends Component
 
             $users = [];
 
-            $all = User::whereNotNull('email_verified_at')->get();
+            $onlines_users = $this->onlines_users;
 
-            foreach($all as $u){
+            if($onlines_users){
 
-                if($u->administrator){
+                foreach($onlines_users as $user_id => $u){
 
-                    $users[] = $u;
+                    $user = User::find($user_id);
+
+                    if($user){
+
+                        $users[] = $user;
+
+                    }
 
                 }
+
 
             }
 
@@ -168,12 +181,32 @@ class UserListingTable extends Component
     }
 
 
+    public function getOnlineUsers($users = [])
+    {
+        $ids = [];
+
+        if($users !== []){
+
+            foreach($users as $u){
+
+                $ids[$u['id']] = $u;
+
+            }
+
+
+        }
+        $this->onlines_users = $ids;
+
+    }
+
+
 
     public function markEmailAsVerified($user_id)
     {
         $user = user::find($user_id);
 
         $user->markEmailAsVerified();
+
     }
 
     public function markEmailAsUnverified($user_id)

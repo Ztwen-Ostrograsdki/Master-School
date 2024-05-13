@@ -52,6 +52,9 @@
 
                                             @endif
                                         </span>
+                                        @if($onlines_users && isset($onlines_users[$u->id]))
+                                            <span class="fa fa-circle mt-1 text-success" title="{{$u->pseudo}} est en line présentement"></span>
+                                        @endif
                                     </span>
                                 </a>
                             </td>

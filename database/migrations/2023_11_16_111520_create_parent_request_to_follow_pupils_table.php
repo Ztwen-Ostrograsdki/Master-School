@@ -18,6 +18,8 @@ class CreateParentRequestToFollowPupilsTable extends Migration
         Schema::create('parent_request_to_follow_pupils', function (Blueprint $table) {
             $table->id();
             $table->boolean('authorized')->default(0);
+            $table->boolean('refused')->default(0);
+            $table->boolean('analysed')->default(0);
             $table->string('relation')->nullable()->default('Parenté');
             $table->unsignedBigInteger('parentable_id');
             $table->foreign('parentable_id')

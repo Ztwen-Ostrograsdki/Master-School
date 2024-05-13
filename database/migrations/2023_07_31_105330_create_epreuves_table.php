@@ -21,6 +21,7 @@ class CreateEpreuvesTable extends Migration
             $table->string('name');
             $table->string('target')->nullable()->default('devoir');
             $table->text('description')->nullable()->default(null);
+            $table->text('duration')->nullable()->default(120);
             $table->string('session')->nullable()->default(null);
             $table->string('exam_name')->nullable()->default(null);
             $table->string('semestre')->nullable()->default(null);

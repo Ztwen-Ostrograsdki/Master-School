@@ -46,12 +46,14 @@ class UsersListingByTarget extends Component
     public function markEmailAsVerified($user_id)
     {
         $user = User::find($user_id);
+
         $user->markEmailAsVerified();
     }
 
     public function markEmailAsUnverified($user_id)
     {
         $user = user::find($user_id);
+        
         $user->markEmailAsOnlyUnverified();
     }
 

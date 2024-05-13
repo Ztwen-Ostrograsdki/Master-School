@@ -3,12 +3,14 @@
 namespace App\Helpers\UserTraits;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Jobs\JobDeleteUserLockRequests;
 use App\Models\MyNotifications;
 use App\Models\Parentable;
 use App\Models\Product;
 use App\Models\SeenLikeProductSytem;
 use App\Models\ShoppingBag;
 use App\Notifications\SendTokenToBlockedUserForVerification;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -255,7 +257,7 @@ trait UserTrait{
     public function __generateUnlockedToken()
     {
         $key = Str::random(4);
-        $key = 'abc123';
+        // $key = 'abc123';
         $token =  Hash::make($key);
 
         $this->notify(new SendTokenToBlockedUserForVerification($key));
@@ -274,28 +276,40 @@ trait UserTrait{
     }
 
 
+    public function isBlocked()
+    {
+        return $this->blocked && $this->locked;
+    }
+
+
+    public function deleteLockedRequest()
+    {
+        $lockedRequests = $this->lockedRequests;
+
+        if($lockedRequests){
+
+            $lockedRequests->delete();
+
+        }
+    }
+
+
 
     public function __blockerManager()
     {
         DB::transaction(function($e){
+
             try {
+
                 if(!$this->blocked && !$this->locked){
 
                     $this->update(['locked' => true, 'blocked' => true, 'unlock_token' => null]);
 
-                    if($this->lockedRequests){
-
-                        $this->lockedRequests->delete();
-                    }
                 }
                 else{
 
                     $this->update(['locked' => false, 'blocked' => false, 'unlock_token' => null]);
 
-                    if($this->lockedRequests){
-
-                        $this->lockedRequests->delete();
-                    }
                 }
                 
             } catch (Exception $exceptError) {
@@ -729,16 +743,19 @@ trait UserTrait{
 
     public function parentable_creator($contacts, $job, $name, $residence)
     {
-        return Parentable::create([
+        $p = Parentable::create([
 
             'user_id' => $this->id,
             'name' => ucwords($name),
             'contacts' => str_replace(' ', '/', trim($contacts)),
             'job' => $job,
             'residence' => $residence,
-            'key' => $this->parentable_password_generator()
 
         ]);
+
+        $p->forceFill(['key' => $this->parentable_password_generator()])->save();
+
+        return $p;
     }
 
 

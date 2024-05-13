@@ -31,7 +31,7 @@
                     <div class="col-4">
                         <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Le lien parentale </label>
                         <select class="px-2 form-select text-white z-bg-secondary mt-1 w-100 @error('lien') text-danger border border-danger @enderror" wire:model.defer="lien">
-                            <option disabled class="" value="{{null}}">Choisissez le lien parental</option>
+                            <option class="" value="{{null}}">Choisissez le lien parental</option>
                             @foreach ($liens as $l)
                                 <option  value="{{$l}}">{{$l}}</option>
                             @endforeach
@@ -44,15 +44,15 @@
                     <div class="col-10 m-0 p-0">
                         <div class="p-0 m-0 mt-0 mb-2 row">
                             <label class="z-text-cyan m-0 p-0 w-100 cursor-pointer">Votre clé secret</label>
-                            <input autofocus="autofocus" placeholder="Votre clé secret" class="text-white form-control bg-transparent border border-white px-2 mt-1 z-focus @error('auth_key') text-danger border-danger @enderror" wire:model.defer="auth_key" type="text" name="auth_key">
-                            @error('auth_key')
+                            <input autofocus="autofocus" placeholder="Votre clé secret" class="text-white form-control bg-transparent border border-white px-2 mt-1 z-focus @error('code') text-danger border-danger @enderror" wire:model.defer="code" type="text" name="code">
+                            @error('code')
                                 <small class="py-1 z-text-orange">{{$message}}</small>
                             @enderror
                         </div>
                     </div>
                     
                 </div>
-                @else
+                @elseif($to_confirm && $target)
                     <div class="justify-content-center d-flex flex-column mx-auto p-2">
                         <div class="col-10">
                             <span class="text-white-50 h6">

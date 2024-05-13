@@ -13,6 +13,8 @@ class LockedRoutes extends Model
 
     use DateFormattor;
 
+    //delay unit: minutes
+
     protected $fillable = ['path', 'url', 'routeName', 'delay', 'expired_date', 'user_id', 'activated', 'targeted_users'];
 
     public function routes()
@@ -46,4 +48,5 @@ class LockedRoutes extends Model
 
         return $users;
     }
+
 }

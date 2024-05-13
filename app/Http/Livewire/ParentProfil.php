@@ -67,11 +67,17 @@ class ParentProfil extends Component
     public function render()
     {
 
+        $parent_requests = [];
+
         $auth = auth()->user();
 
         if($this->user->parentable){
                 
             $this->parentable = $this->user->parentable;
+
+            $my_requests = $this->parentable->parentRequests;
+
+            $parent_requests = $my_requests;
         }
 
         $teacher = $this->user->teacher;
@@ -86,7 +92,7 @@ class ParentProfil extends Component
 
         }
 
-        return view('livewire.parent-profil', compact('auth'));
+        return view('livewire.parent-profil', compact('auth', 'parent_requests'));
     }
 
 

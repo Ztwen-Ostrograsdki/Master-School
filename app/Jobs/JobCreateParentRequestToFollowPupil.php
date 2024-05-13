@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Parentable;
+use App\Models\Pupil;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -11,24 +12,32 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class JobSentParentKeyToParentableUser implements ShouldQueue
+class JobCreateParentRequestToFollowPupil implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $key;
-
     public $parentable;
 
+    public $pupil;
+
+    public $relation;
+
+    public $authorized;
+
     /**
-     * Create a new job instance.
+     * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Parentable $parentable, string $key)
+    public function __construct(Parentable $parentable, Pupil $pupil, $relation, bool $authorized = false)
     {
         $this->parentable = $parentable;
 
-        $this->key = $key;
+        $this->pupil = $pupil;
+
+        $this->relation = $relation;
+
+        $this->authorized = $authorized;
     }
 
     /**
@@ -38,8 +47,6 @@ class JobSentParentKeyToParentableUser implements ShouldQueue
      */
     public function handle()
     {
-        $user = $this->parentable->user;
-
-        $user->sendParentableKeyNotification($this->key);
+        $this->parentable->requestToFollowThisPupil($this->pupil->id, $this->relation, false);
     }
 }

@@ -17,6 +17,7 @@ use App\Http\Livewire\MultiplePupilInsertion;
 use App\Http\Livewire\PDFPrinter;
 use App\Http\Livewire\ParentProfil;
 use App\Http\Livewire\ParentsListerComponent;
+use App\Http\Livewire\ParentsRequestingListToFollowPupils;
 use App\Http\Livewire\PolyvalenteClasseManager;
 use App\Http\Livewire\PupilProfil;
 use App\Http\Livewire\PupilsListerComponent;
@@ -72,6 +73,7 @@ Route::group(['prefix' => '/administration', 'middleware' => ['auth', 'admin', '
     
     Route::get('/tous-les-apprenant/cycle/{slug}', PupilsListerComponent::class)->name('pupil_listing');
     Route::get('/tous-les-parents/', ParentsListerComponent::class)->name('parents_listing');
+    Route::get('/tous-les-parents/les-demandes-de-suivi/', ParentsRequestingListToFollowPupils::class)->name('parents_request_to_follow_they_pupils');
     Route::get('/tous-les-apprenant-de-la/{slug}', PupilsListingByClasse::class)->name('classe_pupils');
     Route::get('/toutes-les-classes', ClasseTableList::class)->name('classe_listing');
     Route::get('/classe-polyvalente/cycle/{slug}', PolyvalenteClasseManager::class)->name('polyvalente_classe');

@@ -273,17 +273,17 @@
                 </ul>
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="#" class="nav-link @isRoutes(['parents_listing', 'parents_request_to_follow_they_pupils']) active @endisRoutes ">
                   <i class="nav-icon fas fa-edit"></i>
                   <p>
-                     Les parents
+                    Les parents
                     <i class="fas fa-angle-left right"></i>
                     <span class="badge badge-secondary right">{{ count($parents) }}</span>
                   </p>
                 </a>
                 <ul class="nav nav-treeview">
                   <li class="nav-item">
-                    <a href="{{route('parents_listing')}}" class="nav-link">
+                    <a href="{{route('parents_listing')}}" class="nav-link @isRoute('parents_listing') active @endisRoute">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Liste complète</p>
                     </a>
@@ -292,6 +292,12 @@
                     <a href="#" class="nav-link">
                       <i class="far fa-circle nav-icon"></i>
                       <p>Nouveau</p>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a href="{{route('parents_request_to_follow_they_pupils')}}" class="nav-link @isRoute('parents_request_to_follow_they_pupils') active @endisRoute">
+                      <i class="far fa-circle nav-icon"></i>
+                      <p>Les demandes</p>
                     </a>
                   </li>
                   <li class="nav-item">

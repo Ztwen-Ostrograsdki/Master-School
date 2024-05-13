@@ -22,7 +22,11 @@ class BlockedOrUnblockedUserAccountListener
      */
     public function handle(UserAccountBlockedEvent $event)
     {
-        ForcingUserDisconnectionEvent::dispatch($event->user);
+        if($event->user->isBlocked()){
+
+            ForcingUserDisconnectionEvent::dispatch($event->user);
+
+        }
 
         $batch = Bus::batch([
 
@@ -30,15 +34,21 @@ class BlockedOrUnblockedUserAccountListener
 
             ])->then(function(Batch $batch) use ($event){
 
-                ForcingUserDisconnectionEvent::dispatch($event->user);
+                if($event->user->isBlocked()){
 
-            })
-            ->catch(function(Batch $batch, Throwable $er){
+                    ForcingUserDisconnectionEvent::dispatch($event->user);
+
+                }
+                else{
+
+                    $event->user->deleteLockedRequest();
+
+                }
+
+            })->catch(function(Batch $batch, Throwable $er){
 
 
-            })
-
-            ->finally(function(Batch $batch){
+            })->finally(function(Batch $batch){
 
 
             })->dispatch();

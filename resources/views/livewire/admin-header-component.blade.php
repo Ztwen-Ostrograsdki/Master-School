@@ -44,6 +44,8 @@
             @livewire('admin-messagers-center-component')
         <!-- Notifications Dropdown Menu -->
             @livewire('admin-notifications-center-component')
+
+            @livewire('online-users-lister')
           
           
           <li class="nav-item">

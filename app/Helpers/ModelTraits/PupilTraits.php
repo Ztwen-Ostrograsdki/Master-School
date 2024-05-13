@@ -1054,6 +1054,21 @@ trait PupilTraits{
     }
 
 
+    public function getPupilBonusesMinusesSummary($classe_id, $subject_id, $semestre, $school_year, $type = 'bonus', $signed = true)
+    {
+        $bonuses = $this->getRelatedMarksCounter($classe_id, $subject_id, $semestre, $school_year,'bonus', false);
+
+        $minuses = $this->getRelatedMarksCounter($classe_id, $subject_id, $semestre, $school_year,'minus', false);
+
+
+        $sum = $bonuses - $minuses;
+
+        return $signed ? $sum : abs($sum);
+
+    }
+
+
+
     public function getPupilNullMarks($classe_id, $semestre, $school_year = null, $subject_id = null)
     {
         $school_year_model = $this->getSchoolYear($school_year);
@@ -1510,17 +1525,5 @@ trait PupilTraits{
     }
 
 
-    public function getPupilBonusesMinusesSummary($classe_id, $subject_id, $semestre, $school_year, $type = 'bonus', $signed = true)
-    {
-        $bonuses = $this->getRelatedMarksCounter($classe_id, $subject_id, $semestre, $school_year,'bonus', false);
-
-        $minuses = $this->getRelatedMarksCounter($classe_id, $subject_id, $semestre, $school_year,'minus', false);
-
-
-        $sum = $bonuses - $minuses;
-
-        return $signed ? $sum : abs($sum);
-
-    }
-    
+        
 }

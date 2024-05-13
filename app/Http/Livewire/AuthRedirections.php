@@ -3,7 +3,11 @@
 namespace App\Http\Livewire;
 
 use App\Events\NewUserConnectedEvent;
+use App\Events\NewUserCreatedEvent;
 use App\Events\NewUserRegistredEvent;
+use App\Events\UserConnectedEvent;
+use App\Events\UserJoiningChannelEvent;
+use App\Events\UsersOnlineEvent;
 use App\Helpers\AdminTraits\AdminTrait;
 use App\Helpers\Redirectors\RedirectorsDriver;
 use App\Models\LockedUsersRequest;
@@ -22,24 +26,43 @@ use Livewire\Component;
 class AuthRedirections extends Component
 {
     public $unlock_token_expires = false;
+
     public $showPassword = false;
+
     public $showNewPassword = false;
+
     public $email_auth;
+
     public $counter = 0;
+
     public $email_for_reset;
+
     public $password_auth;
+
     public $email;
+
     public $unlock_token;
+
     public $pseudo;
+
     public $password;
+
     public $new_password;
+
     public $password_confirmation;
+
     public $new_password_confirmation;
+
     public $target;
+
     public $unverifiedUser = false;
+
     public $user;
+
     public $userNoConfirm = false;
+
     public $blockedUser = false;
+
     public $reset_password_final_step = false;
 
     protected $rules = [
@@ -69,13 +92,17 @@ class AuthRedirections extends Component
     public function mount()
     {
         $target = Route::currentRouteName();
+
         if($target == 'login' || $target == 'connexion'){
+
             $this->target = 'login';
         }
         elseif($target == 'registration'){
+
             $this->target = 'registration';
         }
         elseif($target == 'password-forgot'){
+
             $this->target = 'reset_password';
         }
     }
@@ -89,6 +116,7 @@ class AuthRedirections extends Component
     public function updatedEmailAuth($email)
     {
         $this->resetErrorBag();
+
         $this->reset('userNoConfirm', 'showPassword', 'showNewPassword', 'unverifiedUser', 'userNoConfirm', 'blockedUser', 'reset_password_final_step');
     }
 
@@ -109,24 +137,37 @@ class AuthRedirections extends Component
         $u = User::where('email', $this->email_auth)->first();
 
         if($u && !$u->hasVerifiedEmail()){
+
             $this->user = $u;
+
             $this->email = $u->email;
+
             $this->emit('newEmailToShouldBeConfirmed', $this->email);
+
             session()->put('email-to-confirm', $this->email);
+
             $this->addError('email_auth', "Ce compte n'a pas été confirmé!");
+
             $this->userNoConfirm = true;
         }
         elseif($u && ($u->blocked || $u->locked)){
+
             $this->user = $u;
+
             $this->email_auth = $u->email;
-            // $this->emit('newEmailToShouldBeConfirmed', $this->email);
+
             $this->addError('email_auth', "Ce compte a été bloqué temporairement!");
+
             $this->blockedUser = true;
         }
         else{
             if(Auth::attempt($credentials)){
 
                 $this->user = User::find(auth()->user()->id);
+
+                // UserJoiningChannelEvent::dispatch($this->user);
+
+                UserConnectedEvent::dispatch($this->user);
 
                 /**
                  * Generate (if user is an admin) admin session key to access to admin composantes: ONLY ADMIN 
@@ -188,46 +229,61 @@ class AuthRedirections extends Component
                     'email_verified_token' => Hash::make(Str::random(16)),
                 ]);
 
-                if($this->user->id == 1){
+                if($this->user){
 
-                    $this->user->markEmailAsVerified();
-                }
-                else{
+                    if($this->user->id == 1){
 
-                    $masterAdmin = User::find(1);
-
-                    if($masterAdmin){
-
-                        $masterAdmin->__followThisUser($this->user->id, true);
+                        $this->user->markEmailAsVerified();
                     }
-                }
-                if(!$this->auth && $this->user->id == 1){
+                    else{
 
-                    $this->dispatchBrowserEvent('RegistredSelf');
+                        $masterAdmin = User::find(1);
 
-                    Auth::login($this->user);
-                }
-                else{
+                        if($masterAdmin){
 
+                            $masterAdmin->__followThisUser($this->user->id, true);
+                        }
+                    }
+                    if(!$this->auth && $this->user->id == 1){
+
+                        $this->dispatchBrowserEvent('RegistredSelf');
+
+                        NewUserCreatedEvent::dispatch($this->user, $this->user);
+
+                        Auth::login($this->user);
+                    }
+                    else{
+
+                        $this->resetErrorBag();
+
+                        $this->dispatchBrowserEvent('hide-form');
+
+                        NewUserCreatedEvent::dispatch($this->auth, $this->user);
+
+                        // $this->user->sendEmailVerificationNotification();
+
+                        session()->put('user_email_to_verify', $this->user->id);
+
+                        return redirect()->route('email-verification-notify', ['id' => $this->user->id]);
+                    }
                     $this->resetErrorBag();
+                    
+                    $this->dispatchBrowserEvent('RegistredNewUser', ['username' => $this->name]);
 
-                    $this->dispatchBrowserEvent('hide-form');
+                    if($this->user->id == 1){
 
-                    // $this->user->sendEmailVerificationNotification();
-                    // $event = new NewUserRegistredEvent($this->user);
-                    // broadcast($event);
-                    session()->put('user_email_to_verify', $this->user->id);
+                        return redirect(RouteServiceProvider::ADMIN);
+                    }
+                    else{
+                        return redirect()->back();
+                    }
 
-                    return redirect()->route('email-verification-notify', ['id' => $this->user->id]);
-                }
-                $this->resetErrorBag();
-                $this->dispatchBrowserEvent('RegistredNewUser', ['username' => $this->name]);
-                $this->emit("refreshUsersList");
-                if($this->user->id == 1){
-                    return redirect(RouteServiceProvider::ADMIN);
+
                 }
                 else{
-                    return redirect()->back();
+
+                    $this->dispatchBrowserEvent('FireAlertDoNotClose', ['title' => 'ERREURE SERVEUR', 'message' => "Une erreure est survenue lors de la creation de votre compte, veuillez réessayer",  'type' => 'error']);
+
                 }
             }
         }
@@ -237,26 +293,40 @@ class AuthRedirections extends Component
     public function sendCode()
     {
         $this->validate(['email_for_reset' => 'required|email']);
+
         $user = User::where('email', $this->email_for_reset)->first();
+
         if($user){
+
             $this->user = $user;
+
             if($user->hasVerifiedEmail()){
+
                 $user->forceFill([
                     'reset_password_token' => Str::random(6),
                 ])->save();
+
                 $this->user->sendEmailForForgotPasswordNotification();
+
                 return redirect($user->__urlForPasswordReset());
             }
             else{
+
                 $this->dispatchBrowserEvent('FireAlertDoNotClose', ['type' => 'warning', 'message' => "Cette adresse n'a pas encore été confirmé",  'title' => 'Compte non activé']);
+
                 $this->emit('newEmailToShouldBeConfirmed', $this->email_for_reset);
+
                 session()->put('email-to-confirm', $this->email_for_reset);
+
                 $this->addError('email_for_reset', "Ce compte n'a pas été confirmé!");
+
                 $this->userNoConfirm = true;
             }
         }
         else{
+
             $this->addError('email_for_reset', "L'adresse mail est introuvable");
+
             $this->dispatchBrowserEvent('FireAlertDoNotClose', ['type' => 'error', 'message' => "L'adresse mail renseillée est introuvable",  'title' => 'Erreur']);
         }
     }
@@ -279,19 +349,36 @@ class AuthRedirections extends Component
     public function sendLockedRequest()
     {
         $u = $this->user;
+
         $email = $this->email_auth;
 
         if($u && $email){
-            $request = LockedUsersRequest::create(['user_id' => $u->id, "message" => "Demande de déblocage du compte $email"]);
-            if($request){
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'success', 'message' => "Votre demande a été soumis avec succès!",  'title' => 'DEMANDE ENVOYEE']);
+
+            $old = $u->lockedRequests;
+
+            if(!$old){
+
+                $request = LockedUsersRequest::create(['user_id' => $u->id, "message" => "Demande de déblocage du compte $email"]);
+
+                if($request){
+
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'success', 'message' => "Votre demande a été soumis avec succès!",  'title' => 'DEMANDE ENVOYEE']);
+                }
+                else{
+
+                    $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'error', 'message' => "Votre demande n'a pas pu être soumise!",  'title' => 'Erreur']);
+                }
+
             }
             else{
-                $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'error', 'message' => "Votre demande n'a pas pu être soumise!",  'title' => 'Erreur']);
+
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'info', 'message' => "Vous avez déjà envoyé une demande et elle est en cours de traitement!",  'title' => 'REQUETE DEJA SOUMISE']);
+
             }
 
         }
         else{
+
             $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'error', 'message' => "Veuillez renseigner des données valides!",  'title' => 'Erreur']);
         }
 
@@ -302,15 +389,23 @@ class AuthRedirections extends Component
     public function validateToken()
     {
         $this->validate(['unlock_token' => 'required|string|min:4']);
+
         $this->validate(['unlock_token' => new PasswordChecked($this->user->unlock_token)]);
+
         if($this->keyIsExpires()){
+
             $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'error', 'title' => 'Authentification échouée', 'message' => "Cette clé a déjà expiré. Veuillez renseigner la nouvelle clé."]);
+
             $this->addError('unlock_token', "Cette clé n'est plus valable. Taper la nouvelle clé!");
+
             $this->unlock_token_expires = true;
         }
         else{
+
             $r = $this->user->__unlockOrLockThisUser();
+
             $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'success', 'title' => "VERIFICATION REUSSIE", "message" => "Vous pouvez à présent vous connecter à votre compte et accéder à vos données!"]);
+
             $this->reset('unlock_token_expires', 'blockedUser', 'unlock_token');
         }
         
@@ -326,9 +421,13 @@ class AuthRedirections extends Component
     public function keyIsExpires()
     {
         $now = Carbon::now();
+
         $e = $this->user->updated_at;
+
         $times = $now->diffInMinutes($e);
+
         if($times > 15){
+
             return true;
         }
         return false;
@@ -339,8 +438,11 @@ class AuthRedirections extends Component
         $user = $this->user;
 
         if($user){
+
             $request = $user->__generateUnlockedToken();
+
             if($request){
+
                 $this->dispatchBrowserEvent('ToastDoNotClose', ['type' => 'success', 'message' => "Clé générée avec succès!",  'title' => 'CLE ENVOYEE']);
             }
             else{
@@ -354,6 +456,14 @@ class AuthRedirections extends Component
 
         $this->refreshData();
 
+    }
+
+
+    public function retryLogin()
+    {
+        $this->resetErrorBag();
+
+        $this->reset('userNoConfirm', 'blockedUser', 'unverifiedUser', 'unlock_token_expires');
     }
 
 

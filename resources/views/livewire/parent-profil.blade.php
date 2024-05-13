@@ -184,6 +184,79 @@
                                 </div>
                             @endif
                         </div>
+                        <div>
+                            <h6>Mes demandes</h6>
+
+                            <div class="w-100 m-0 p-0 mt-1">
+                                @if(count($parent_requests) > 0)
+                                    <div>
+                                        <div>
+
+                                            @foreach($parent_requests as $req)
+                                                <div class="col-12 my-2">
+                                                    <div class="card card-outline-secondary text-orange bg-secondary-light-0 m-0 p-0 border border-primary">
+                                                        <div class="card-header m-0">
+                                                            <span class="card-title float-left">
+                                                               Demande N° {{ $loop->iteration }}
+                                                            </span>
+
+                                                            <span class="text-warning float-right">Votre demande n'a pas encore été analysé et est en cours de traitement ...</span>
+                                                        </div>
+                                                        @php
+                                                            $user = $req->parentable->user;
+
+                                                            $parentable = $req->parentable;
+
+                                                            $pupil = $req->pupil;
+                                                        @endphp
+                                                        <div class="card-body">
+                                                            <p class="text-sm text-white-50 text-right"><i class="far fa-clock mr-1"></i> Vous avez envoyé cette demande {{ $req->getDateAgoFormated($req->created_at) }} </p>
+
+                                                            <div class="my-2 border rounded p-2">
+
+                                                                <div class="border p-2 rounded">
+                                                                    <div class="d-flex justify-content-between">
+                                                                        <div class="col-7">
+                                                                            <x-ztitle-liner :title="'Classe : '" :value="$pupil->classe->name"></x-ztitle-liner>
+                                                                            <x-ztitle-liner :title="'Apprenant(e) :'" :value="$pupil->getName()" ></x-ztitle-liner>
+                                                                            <x-ztitle-liner :title="'Date de naissance :'" :smallTitle=" '(à ' . $pupil->birth_city . ')'" classe="text-capitalize" :value="$pupil->__getDateAsString($pupil->birth_day, null)"></x-ztitle-liner>
+                                                                            <x-ztitle-liner :title="'Résidence :'" :value="$pupil->residence"></x-ztitle-liner>
+                                                                            <x-ztitle-liner :title="'EducMaster : '" class="text-orange" :smallTitle="'(Numéro EducMaster)'" :classes="'text-warning'" :value="$pupil->educmaster ? $pupil->educmaster : $pupil->ltpk_matricule ? : 'Inconnu'"></x-ztitle-liner>
+                                                                            <x-ztitle-liner :title="'Lien de parenté :'" :value="$req->relation"></x-ztitle-liner>
+                                                                            <hr class="bg-secondary m-0 p-0 my-1">
+
+                                                                            <span class="">
+                                                                                <span class="btn btn-danger p-2">Annuler cette demande</span>
+                                                                            </span>
+
+                                                                        </div>
+
+                                                                        <div class="border border-secondary p-2">
+                                                                            <h6 class="text-orange text-center p-1">Photo de profil de {{ $pupil->getName() }}</h6>
+
+                                                                            <img class="border border-warning m-0 p-0" src="{{$pupil->__profil(250)}}" alt="">
+                                                                        </div>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            @endforeach
+
+                                        </div>
+
+                                    </div>
+                                @else
+
+                                    <h6>Aucune demande en cours</h6>
+
+                                @endif
+                            </div>
+
+                        </div>
                      </div>
                 </div>
              </div>

@@ -17,6 +17,8 @@ class AdminAsideComponent extends Component
     protected $listeners = [
         'schoolYearChangedLiveEvent' => 'reloadData',
         'classePupilListUpdated' => 'reloadData',
+        'NewUserCreatedLiveEvent' => 'reloadData',
+        'UserConfirmedEmailLiveEvent' => 'reloadData',
         'newClasseCreated' => 'reloadData',
         'classeUpdated' => 'reloadData',
         'newClasseGroupCreated' => 'reloadData',

@@ -9,6 +9,7 @@ use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Jobs\JobSentParentKeyToParentableUser;
 use App\Models\Parentable;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Livewire\Component;
@@ -21,7 +22,7 @@ class ParentsListerComponent extends Component
         'pupilUpdated' => 'reloadData',
         'UpdatedSchoolYearData' => 'reloadData',
         'GlobalDataUpdated' => 'reloadData',
-        'NewParentRequest' => 'newParent',
+        'NewParentRequest' => 'newParentRequest',
     ];
 
     public $counter = 0;
@@ -90,24 +91,22 @@ class ParentsListerComponent extends Component
     {
         $parentable = Parentable::find($parentable_id);
 
-        $key = Str::random(5);
-
-        $key = 12345;
+        $key = Str::random(3);
 
         if($parentable){
 
-            $parentable->update(['authorized' => 1, 'key' => Hash::make($key)]);
+            $parentable->forceFill(['authorized' => 1, 'key' => Hash::make($key)])->save();
 
             broadcast(new ParentRequestAcceptedEvent($parentable->user));
 
-            // dispatch(new JobSentParentKeyToParentableUser($parentable, $key))->delay(Carbon::now()->addSeconds(15));
+            dispatch(new JobSentParentKeyToParentableUser($parentable, $key));
 
             $this->reloadData();
         }
     }
 
 
-    public function newParent($parent = null)
+    public function newParentRequest($parent = null)
     {
 
         $this->dispatchBrowserEvent('Toast', ['title' => 'NOUVELLE DEMANDE DE COMPTE PARENT', 'message' => "Un utilisateur vient d'envoyer une demande de compte parent pour suivre ses enfants!", 'type' => 'info']);

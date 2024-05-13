@@ -58,6 +58,7 @@
                                         <span class="text-center text-warning">Veuillez renseigner la clé qui vous a été envoyez par mail!</span>
                                     @else
                                         <span class="text-center text-warning">Les administrateurs sont à pied d'oeuvre pour régler le problème!</span>
+                                        <span wire:click="retryLogin" class="bg-orange d-block border text-white btn rounded px-3 py-2">Réessayer le login!</span>
                                     @endif
                                 </blockquote>
                                 @if($user->unlock_token)
@@ -79,15 +80,24 @@
                                 <blockquote class="text-info text-left">
                                     Mr/Mme <b class="text-orange"> {{$user->pseudo}} </b>, il se pourait que votre compte <span class="text-warning"> {{ $email }} </span> ait été temporairement bloqué ou verrouillé, veuillez cliquer sur le bouton <span class="text-warning">signaler</span> ci-dessous afin que les administrateurs puissent régler le problème!
                                 </blockquote>
-                                <span wire:click="sendLockedRequest" class="bg-primary border text-white btn rounded px-3 py-2 w-75">Signaler pour récupérer mon compte!</span>
+                                <span class="d-flex w-100 justify-content-center">
+
+                                    <span wire:click="sendLockedRequest" class="bg-primary border text-white btn rounded px-3 py-2 mr-2">Signaler pour récupérer mon compte!</span>
+                                    <span wire:click="retryLogin" class="bg-orange border text-white btn rounded px-3 py-2 ml-2">Réessayer le login!</span>
+
+                                </span>
                             @endif
                         </h6>
                     </div>
                     @else
                     <div class="w-100 mt-3 d-flex justify-center">
-                        <span wire:click="forcedEmailVerification" class="text-white cursor-pointer text-center bg-success border rounded px-3 py-2 w-75" >
+                        <span wire:click="forcedEmailVerification" class="text-white cursor-pointer text-center bg-success border rounded px-3 py-2" >
                             <span class="bi-key mx-2"></span>
                             <span>Confirmer mon compte</span>
+                        </span>
+                        <span wire:click="retryLogin" class="text-white cursor-pointer text-center z-bg-orange border rounded px-3 py-2" >
+                            <span class="bi-person-check mx-2"></span>
+                            <span>Réessayer</span>
                         </span>
                     </div>
                     @endif

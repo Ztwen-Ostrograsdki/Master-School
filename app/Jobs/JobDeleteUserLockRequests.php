@@ -10,10 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
 
-class JobUserAccountBlockingManager implements ShouldQueue
+class JobDeleteUserLockRequests implements ShouldQueue
 {
     use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -36,20 +34,6 @@ class JobUserAccountBlockingManager implements ShouldQueue
      */
     public function handle()
     {
-
-        if($this->user->isBlocked()){
-
-            $this->user->__unlockOrLockThisUser();
-
-        }
-        else{
-
-            Auth::guard('web')->logout();
-
-            Session::flush();
-
-        }
-
-
+        $this->user->deleteLockedRequest();
     }
 }

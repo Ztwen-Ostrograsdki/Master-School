@@ -8,23 +8,24 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UserAccountBlockedEvent implements ShouldBroadcast
+class UserLeavingChannelEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $user;
 
-     /**
+    /**
      * Create a new event instance.
      *
      * @return void
      */
     public function __construct(User $user)
     {
-        $this->user = $user; 
+        $this->user = $user;
     }
 
     /**

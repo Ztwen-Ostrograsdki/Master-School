@@ -25,6 +25,18 @@ if (window.User) {
 }
 
 e.private('user.' + window.ClientUser.id)
+    .listen('UserLeavingChannelEvent', function(e) {
+
+        console.log(e.data, e.user, e)
+
+        Livewire.emit('UserLeavingChannelLiveEvent', e);
+    })
+    .listen('UserJoiningChannelEvent', function(e) {
+
+        console.log(e.data, e.user, e)
+
+        Livewire.emit('UserJoiningChannelLiveEvent', e);
+    })
     .listen('PupilDataAreReadyToFetchEvent', function(e) {
 
         console.log(e.data)
@@ -47,7 +59,8 @@ e.private('user.' + window.ClientUser.id)
 
         Livewire.emit('ReloadClasseListDataAbandonLiveEvent');
 
-    }).listen('ForcingUserDisconnectionEvent', function(e) {
+    })
+    .listen('ForcingUserDisconnectionEvent', function(e) {
 
         Swal.fire({
             icon: 'warning',
@@ -167,9 +180,25 @@ e.private('user.' + window.ClientUser.id)
     .listen('ClasseDataWasUpdateSuccessfullyEvent', function(e) {
         
         Livewire.emit('ClasseDataWasUpdated');
+    })
+    .listen('NewUserCreatedEvent', function(e) {
+        
+        Livewire.emit('NewUserCreatedLiveEvent');
+    }) 
+    .listen('UserConfirmedEmailEvent', function(e) {
+        
+        Livewire.emit('UserConfirmedEmailLiveEvent');
     }) 
 
 e.private('master')
+    .listen('RefreshLockedRequestListEvent', function(e) {
+
+        Livewire.emit('RefreshLockedRequestListLiveEvent');
+    })
+    .listen('UserSentLockedRequestEvent', function(e) {
+
+        Livewire.emit('UserSentLockedRequestLiveEvent');
+    })
     .listen('NewAddParentRequestEvent', function(e) {
 
         Livewire.emit('NewParentRequest');
@@ -177,6 +206,19 @@ e.private('master')
     .listen('NewEpreuveWasUploadedEvent', function(e) {
 
         Livewire.emit('NewEpreuveWasUploadedLiveEvent');
+    })
+    .listen('ParentRequestToFollowPupilCreatedSuccessfullyEvent', function(e) {
+
+        Swal.fire({
+            icon: 'success',
+            title: "Nouvelle demande reçue",
+            text: " Un parent a envoyé une demande de suivie d'apprenant",
+            toast: true,
+            showConfirmButton: false,
+        });
+
+        Livewire.emit('NewParentRequestToFollowPupilLiveEvent');
+
     })
 
     .listen('ClasseMarksWasFailedEvent', function(e) {
@@ -191,7 +233,8 @@ e.private('master')
     })
 
 e.private('reloadMarkChannel.' + window.ClientUser.id)
-   
+
+
 e.private('reloader.' + window.ClientUser.id)
 
     .listen('ClasseMarksWasUpdatedIntoDBSuccessfullyEvent', function(e) {
@@ -216,21 +259,25 @@ e.private('reloader.' + window.ClientUser.id)
 //     })
    
 
-// e.join('online')
-//     .here(function(users) {
-//         // console.log('users on line', users);
-//     })
-//     .joining(function(user) {
-//         Swal.fire({
-//             text: user.name + " est en ligne ",
-//             toast: true,
-//             showConfirmButton: false,
-//         });
-//     })
-//     .leaving(function(user) {
-//         Swal.fire({
-//             text: user.name + " est s'est déconnecté ",
-//             toast: true,
-//             showConfirmButton: false,
-//         });
-//     });
+e.join('online')
+    .here(function(users) {
+
+        Livewire.emit('OnlineUsersLiveEvent', users);
+    })
+    .joining(function(user) {
+
+        // Swal.fire({
+        //     text: user.pseudo + " est en ligne ",
+        //     toast: true,
+        //     showConfirmButton: false,
+        // });
+    })
+    .leaving(function(user) {
+
+
+        // Swal.fire({
+        //     text: user.pseudo + " s'est déconnecté ",
+        //     toast: true,
+        //     showConfirmButton: false,
+        // });
+    });

@@ -22,6 +22,7 @@ use App\Events\MarksNullActionsEvent;
 use App\Events\MarksRestorationEvent;
 use App\Events\MigrateDataToTheNewSchoolYearEvent;
 use App\Events\NewProductCreatedEvent;
+use App\Events\ParentRequestToFollowPupilEvent;
 use App\Events\PaymentSystemEvent;
 use App\Events\PreparePupilDataToFetchEvent;
 use App\Events\PupilAbandonnedClassesEvent;
@@ -32,6 +33,7 @@ use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Events\UpdateClasseSanctionsEvent;
 use App\Events\UpdateSchoolModelEvent;
 use App\Events\UserAccountBlockedEvent;
+use App\Events\UserConnectedEvent;
 use App\Listeners\AbsencesAndLatesDeleterBatcherListener;
 use App\Listeners\BlockedOrUnblockedUserAccountListener;
 use App\Listeners\ClasseMarksConverterBatcherListener;
@@ -51,6 +53,7 @@ use App\Listeners\MakeClassePresenceLateBatcherListener;
 use App\Listeners\MarksNullActionsBatcherListener;
 use App\Listeners\MarksRestorationBatcherListener;
 use App\Listeners\NewProductCreatedListener;
+use App\Listeners\ParentRequestToFollowPupilListener;
 use App\Listeners\PaymentSystemListener;
 use App\Listeners\PreparePupilDataToFetchListener;
 use App\Listeners\ProcessingNewsPupilsInsertionBatcherListener;
@@ -62,10 +65,13 @@ use App\Listeners\UpdateClassePupilsDataFromFileListener;
 use App\Listeners\UpdateClasseSanctionsListener;
 use App\Listeners\UpdateSchoolModelListener;
 use App\Listeners\UpdatingClassePupilsMatriculeListener;
+use App\Listeners\UserConnectedListener;
 use App\Models\Administrator;
 use App\Models\Classe;
 use App\Models\ClassesSecurity;
+use App\Models\LockedUsersRequest;
 use App\Models\Mark;
+use App\Models\ParentRequestToFollowPupil;
 use App\Models\Pupil;
 use App\Models\RelatedMark;
 use App\Models\User;
@@ -73,7 +79,9 @@ use App\Models\UserAdminKey;
 use App\Observers\AdministratorObserver;
 use App\Observers\ClasseObserver;
 use App\Observers\ClassesSecurityObserver;
+use App\Observers\LockedUsersRequestObserver;
 use App\Observers\MarkObserver;
+use App\Observers\ParentRequestToFollowPupilObserver;
 use App\Observers\PupilObserver;
 use App\Observers\RelatedMarkObserver;
 use App\Observers\UserAdminKeyObserver;
@@ -96,6 +104,10 @@ class EventServiceProvider extends ServiceProvider
 
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+
+        UserConnectedEvent::class => [
+            UserConnectedListener::class,
         ],
 
         NewProductCreatedEvent::class => [
@@ -219,6 +231,10 @@ class EventServiceProvider extends ServiceProvider
             UpdateClasseParticipationMarksListener::class,
         ],
 
+        ParentRequestToFollowPupilEvent::class => [
+            ParentRequestToFollowPupilListener::class,
+        ],
+
     
     ];
 
@@ -244,6 +260,10 @@ class EventServiceProvider extends ServiceProvider
         Administrator::observe(AdministratorObserver::class);
 
         User::observe(UserObserver::class);
+
+        LockedUsersRequest::observe(LockedUsersRequestObserver::class);
+
+        ParentRequestToFollowPupil::observe(ParentRequestToFollowPupilObserver::class);
 
     }
 

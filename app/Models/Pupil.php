@@ -63,6 +63,8 @@ class Pupil extends Model
         'ltpk_matricule'
     ];
 
+    public $imagesFolder = 'pupilsPhotos';
+
     public function updatePupilLTPKMatricule($value)
     {
         return $this->forceFill(['ltpk_matricule' => $value,])->save();
@@ -81,8 +83,6 @@ class Pupil extends Model
     {
         return $this->forceFill(['matricule' => $value,])->save();
     }
-
-    public $imagesFolder = 'pupilsPhotos';
 
     public function averages()
     {
@@ -181,29 +181,45 @@ class Pupil extends Model
     public function getRelatedMarksCounter($classe_id, $subject_id, $semestre, $school_year, $type = 'bonus', $signed = false)
     {
         $this->bonus_counter = 0; 
+
         $this->minus_counter = 0; 
+
         if($classe_id && $subject_id && $semestre && $school_year){
+
             if(is_numeric($school_year)){
+
                 $school_year_model = SchoolYear::where('id', $school_year)->first();
             }
             else{
+
                 $school_year_model = SchoolYear::where('school_year', $school_year)->first();
             }
             if($school_year_model){
-                $school_year_model->related_marks()->where('pupil_id', $this->id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->where('type', $type)->each(function($mark) use ($type){
+
+                $school_year_model->related_marks()
+                                  ->where('pupil_id', $this->id)
+                                  ->where('classe_id', $classe_id)
+                                  ->where('subject_id', $subject_id)
+                                  ->where('semestre', $semestre)
+                                  ->where('type', $type)
+                                  ->each(function($mark) use ($type){
                     if($type == 'bonus'){
+
                         $this->bonus_counter = $this->bonus_counter + $mark->value;
                     }
                     elseif ($type == 'minus') {
+
                         $this->minus_counter = $this->minus_counter + $mark->value;
                     }
                 });
             }
         }
         if($type == 'bonus'){
+
             return( $signed && $this->bonus_counter > 0) ?  ' + '. $this->bonus_counter : $this->bonus_counter ;
         }
         elseif ($type == 'minus') {
+
             return ($signed && $this->minus_counter > 0) ? ' - '. $this->minus_counter : $this->minus_counter ;
         }
     }
@@ -212,14 +228,26 @@ class Pupil extends Model
     public function getLastRelatedMark(int $classe_id, $subject_id, $semestre, $school_year, $signed = false)
     {
         if($classe_id && $subject_id && $semestre && $school_year){
+
             if(is_numeric($school_year)){
+
                 $school_year_model = SchoolYear::where('id', $school_year)->first();
             }
             else{
+
                 $school_year_model = SchoolYear::where('school_year', $school_year)->first();
             }
             if($school_year_model){
-                $this->last_related_mark = $school_year_model->related_marks()->where('pupil_id', $this->id)->where('classe_id', $classe_id)->where('subject_id', $subject_id)->where('semestre', $semestre)->orderBy('related_marks.id', 'desc')->first();
+
+                $rm = $school_year_model->related_marks()
+                                        ->where('pupil_id', $this->id)
+                                        ->where('classe_id', $classe_id)
+                                        ->where('subject_id', $subject_id)
+                                        ->where('semestre', $semestre)
+                                        ->orderBy('related_marks.id', 'desc')
+                                        ->first();
+
+                $this->last_related_mark = $rm;
             }
         }
         return $this->last_related_mark;
@@ -311,17 +339,25 @@ class Pupil extends Model
     public function getArchives()
     {
         $all_classes = [];
+
         $school_years = SchoolYear::all();
 
         $pupil_school_years = $this->school_years;
+
         if(count($pupil_school_years) > 0){
+
             $classesSchoolYears = $this->classesSchoolYears;
+
             if($classesSchoolYears){
+
                 foreach ($classesSchoolYears as $school_year_classe) {
+
                     $classe = $school_year_classe->classe;
+
                     $school_year = $school_year_classe->school_year;
                     
                     if($classe && $school_year){
+
                         $all_classes[] = [
                             'classe' => $classe,
                             'school_year' => $school_year
@@ -390,45 +426,66 @@ class Pupil extends Model
         $school_year_model = $this->getSchoolYear();
 
         $subjects = $this->classe->subjects;
+
         $subjects_tab = [];
+
         $targets = [];
 
         $best_mark = null;
+
         $best_mark = null;
 
         foreach($subjects as $subject){
+
             $average = 0;
-            $marks = $school_year_model->marks()->where('pupil_id', $this->id)->where('semestre',$semestre_id)->where('type', '<>', 'participation')->where('subject_id', $subject->id)->pluck('value')->toArray();
+
+            $marks = $school_year_model->marks()
+                                       ->where('pupil_id', $this->id)
+                                       ->where('semestre',$semestre_id)
+                                       ->where('type', '<>', 'participation')
+                                       ->where('subject_id', $subject->id)
+                                       ->pluck('value')
+                                       ->toArray();
             if(count($marks) > 0){
+
                 $average = array_sum($marks) / count($marks);
             }
             else{
+
                 $average = -1;
             }
             if($average !== -1){
+
                 $subjects_tab[$subject->name] = $average;
             }
         }
 
         if($subjects_tab !== []){
+
             $best_mark = max($subjects_tab);
+
             $best_mark_suject_name = array_search($best_mark, $subjects_tab);
 
             $weak_mark = max($subjects_tab);
+
             $weak_mark_subject_name = array_search($weak_mark, $subjects_tab);
 
             $targets = [$best_mark_suject_name => $best_mark, $weak_mark_subject_name => $weak_mark];
 
             if($targets !== []){
+
                 if(count($targets) <= 1){
+
                     $targets['Aucune'] = null;
                 }
             }
             else{
+
                 $targets = ['Aucune' => null, 'Aucune' => null];
             }
         }
         else{
+
             $targets = ['Aucune' => null, 'Aucune' => null];
         }
         return $targets;
@@ -459,10 +516,6 @@ class Pupil extends Model
         return null;
 
     }
-
-
-
-
 
 
 }

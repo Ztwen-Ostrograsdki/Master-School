@@ -2,12 +2,15 @@
 
 namespace App\Helpers\UserTraits;
 
+use App\Events\ForcingUserDisconnectionEvent;
+use App\Events\UserConfirmedEmailEvent;
 use App\Models\Parentable;
 use App\Notifications\ResetEmail;
 use App\Notifications\SentEmailVerificationToUser;
 use App\Notifications\SentParentKeyToUserNotification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
@@ -39,19 +42,32 @@ trait MustVerifyEmailTrait
      */
     public function markEmailAsVerified()
     {
+        $auth = auth()->user();
+
         if($this->id == 1){
-            return $this->forceFill([
+            $make = $this->forceFill([
                 'email_verified_at' => $this->freshTimestamp(),
                 'email_verified_token' => null,
                 'role' => 'master',
                 'token' => null,
             ])->save();
         }
-        return $this->forceFill([
+
+        $make = $this->forceFill([
             'email_verified_at' => $this->freshTimestamp(),
             'email_verified_token' => null,
             'token' => null,
         ])->save();
+
+        if($make){
+
+            $this->deleteLockedRequest();
+
+            UserConfirmedEmailEvent::dispatch($auth, $this);
+
+            return $make;
+
+        }
        
     }
     /**
@@ -66,8 +82,11 @@ trait MustVerifyEmailTrait
             'email_verified_at' => null,
             'email_verified_token' => Hash::make(Str::random(16)),
         ])->save();
+
         $this->notify(new SentEmailVerificationToUser);
+
         session()->put('user_email_to_verify', $this->id);
+
         return redirect()->route('email-verification-notify', ['id' => $this->id]);
     } 
 
@@ -78,11 +97,21 @@ trait MustVerifyEmailTrait
      */
     public function markEmailAsOnlyUnverified()
     {
-        $this->forceFill([
-            'token' => Str::random(6),
-            'email_verified_at' => null,
-            'email_verified_token' => Hash::make(Str::random(16)),
-        ])->save();
+        DB::transaction(function($e){
+
+            $make = $this->forceFill([
+                'token' => Str::random(6),
+                'email_verified_at' => null,
+                'email_verified_token' => Hash::make(Str::random(16)),
+            ])->save();
+
+            if($make){
+
+                ForcingUserDisconnectionEvent::dispatch($this);
+
+            }
+
+        });
     }
 
     /**
@@ -110,11 +139,14 @@ trait MustVerifyEmailTrait
     public function __initialisedResetUserEmail($newEmail)
     {
         $token = Str::random(6);
+
         $make = $this->update([
             'new_email' => $newEmail,
             'new_email_verified_token' => $token,
         ]);
+
         if($make){
+
             return $this->__resetEmail();
         }
         else{
@@ -149,6 +181,7 @@ trait MustVerifyEmailTrait
     public function __resetEmail()
     {
         if($this->hasNewEmailToVerified()){
+
             return $this->notify(new ResetEmail());
         }
         return false;
@@ -165,8 +198,11 @@ trait MustVerifyEmailTrait
             'token' => Str::random(6),
             'email_verified_token' => Hash::make(Str::random(16)),
         ])->save();
+
         $this->notify(new SentEmailVerificationToUser);
+
         session()->put('user_email_to_verify', $this->id);
+
         return redirect()->route('email-verification-notify', ['id' => $this->id]);
     }
 

@@ -413,6 +413,44 @@ class ClasseMarksHeaderComponent extends Component
         
     }
 
+
+    public function restorMarks($classe_id)
+    {
+        if ($classe_id) {
+
+            $classe = Classe::find($classe_id);
+        }
+        else{
+            $classe = Classe::whereSlug($this->slug)->first();
+        }
+        if ($classe) {
+
+            $school_year_model = $this->getSchoolYear();
+
+            $semestre = $this->semestre_selected;
+
+            if (session()->has('semestre_selected') && session('semestre_selected')) {
+
+                $semestre = session('semestre_selected');
+            }
+
+            $subject_id = session('classe_subject_selected');
+
+            $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe->id);
+
+            if($not_secure){
+
+                $this->emit('ThrowMarksRestorationLiveEvent', $classe->id, $school_year_model->id, $semestre, $subject_id);
+
+            }
+            else{
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE TEMPORAIREMENT', 'message' => "Vous ne pouvez pas supprimer les notes!", 'type' => 'warning']);
+            }
+
+        }
+        
+    }
+
     public function updateParticipatesClasseMarks()
     {
 
@@ -431,33 +469,9 @@ class ClasseMarksHeaderComponent extends Component
 
             $user = auth()->user();
 
-            // $pupils = $classe->getNotAbandonnedPupils();
-
-            // $tabs = [];
-
-
-            // if(count($pupils) > 0){
-
-            //     foreach($pupils as $pupil){
-
-            //         $part = $pupil->definedParticipationMark($semestre, $subject_id, $school_year_model->school_year);
-
-            //         $tabs[$pupil->getName()] = $part;
-
-
-            //     }
-
-            //     dd($tabs);
-
-
-            // }
-
-
             InitiateClasseParticipationMarksEvent::dispatch($classe, $school_year_model, $semestre, $subject, $user);
 
             $this->dispatchBrowserEvent('Toast', ['title' => 'PROCESSUS LANCE', 'message' => "Les notes de Participations sont en cours de traitement...!", 'type' => 'success']);
-
-
 
         }
         else{

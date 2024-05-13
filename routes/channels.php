@@ -20,6 +20,9 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 Broadcast::channel('user.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+Broadcast::channel('parent.{id}', function ($user, $id) {
+    return (int) $user->parentable->id === (int) $id;
+});
 
 Broadcast::channel('master', function ($user) {
     return (int) $user->isAdminAs('master');
@@ -51,8 +54,20 @@ Broadcast::channel('reloadMarkChannel.{id}', function ($auth, $id) {
 
 
 
-// Broadcast::channel('online', function ($user) {
-//     if((int) $user->id === (int) auth()->user()->id){
-//         return ['id' => $user->id, 'name' => $user->name, 'email' => $user->email];
-//     }
-// });
+Broadcast::channel('online', function ($user) {
+
+    if((int) $user->id === (int) auth()->user()->id){
+
+        $roleName = 'Inconnu';
+
+        $role = $user->getRole();
+
+        if($role){
+
+            $roleName = $role->name;
+
+        }
+        
+        return ['id' => $user->id, 'pseudo' => $user->pseudo, 'email' => $user->email, 'role' => $roleName];
+    }
+});

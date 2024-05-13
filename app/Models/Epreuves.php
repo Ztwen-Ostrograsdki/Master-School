@@ -10,6 +10,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Epreuves extends Model
 {
+    /**
+      * @properties Duration unit: minutes 
+    */ 
+    
     use HasFactory;
 
     protected $table_name = 'epreuves';
@@ -17,7 +21,6 @@ class Epreuves extends Model
     protected $fillable = [
         'name', 'classe_id', 'semestre', 'school_year_id', 'subject_id', 'description', 'target', 'duration', 'classe_group_id', 'teacher_id', 'author', 'session', 'exam_name', 'blocked', 'authorized', 'level_id'
     ];
-
 
 
 

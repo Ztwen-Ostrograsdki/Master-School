@@ -11,20 +11,24 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class UserAccountBlockedEvent implements ShouldBroadcast
+class UserSentLockedRequestEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $user;
 
-     /**
+    public $sender;
+
+    /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(User $user)
+    public function __construct(User $user, User $sender)
     {
-        $this->user = $user; 
+        $this->user = $user;
+
+        $this->sender = $sender;
     }
 
     /**
@@ -34,6 +38,6 @@ class UserAccountBlockedEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('user.' . $this->user->id);
+        return new PrivateChannel('master');
     }
 }

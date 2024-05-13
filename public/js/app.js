@@ -8695,7 +8695,13 @@ if (window.User) {
   window.ClientUser = window.User;
 }
 
-e["private"]('user.' + window.ClientUser.id).listen('PupilDataAreReadyToFetchEvent', function (e) {
+e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', function (e) {
+  console.log(e.data, e.user, e);
+  Livewire.emit('UserLeavingChannelLiveEvent', e);
+}).listen('UserJoiningChannelEvent', function (e) {
+  console.log(e.data, e.user, e);
+  Livewire.emit('UserJoiningChannelLiveEvent', e);
+}).listen('PupilDataAreReadyToFetchEvent', function (e) {
   console.log(e.data);
   Livewire.emit('DataAreReadyToFetchLiveEvent', e);
 }).listen('ParentRequestAcceptedEvent', function (e) {
@@ -8778,11 +8784,28 @@ e["private"]('user.' + window.ClientUser.id).listen('PupilDataAreReadyToFetchEve
   Livewire.emit('PresenceLateWasUpdated');
 }).listen('ClasseDataWasUpdateSuccessfullyEvent', function (e) {
   Livewire.emit('ClasseDataWasUpdated');
+}).listen('NewUserCreatedEvent', function (e) {
+  Livewire.emit('NewUserCreatedLiveEvent');
+}).listen('UserConfirmedEmailEvent', function (e) {
+  Livewire.emit('UserConfirmedEmailLiveEvent');
 });
-e["private"]('master').listen('NewAddParentRequestEvent', function (e) {
+e["private"]('master').listen('RefreshLockedRequestListEvent', function (e) {
+  Livewire.emit('RefreshLockedRequestListLiveEvent');
+}).listen('UserSentLockedRequestEvent', function (e) {
+  Livewire.emit('UserSentLockedRequestLiveEvent');
+}).listen('NewAddParentRequestEvent', function (e) {
   Livewire.emit('NewParentRequest');
 }).listen('NewEpreuveWasUploadedEvent', function (e) {
   Livewire.emit('NewEpreuveWasUploadedLiveEvent');
+}).listen('ParentRequestToFollowPupilCreatedSuccessfullyEvent', function (e) {
+  Swal.fire({
+    icon: 'success',
+    title: "Nouvelle demande reçue",
+    text: " Un parent a envoyé une demande de suivie d'apprenant",
+    toast: true,
+    showConfirmButton: false
+  });
+  Livewire.emit('NewParentRequestToFollowPupilLiveEvent');
 }).listen('ClasseMarksWasFailedEvent', function (e) {
   Swal.fire({
     icon: 'error',
@@ -8808,24 +8831,20 @@ e["private"]('reloader.' + window.ClientUser.id).listen('ClasseMarksWasUpdatedIn
 //         });
 //         // Livewire.emit('NewParentRequest');
 //     })
-// e.join('online')
-//     .here(function(users) {
-//         // console.log('users on line', users);
-//     })
-//     .joining(function(user) {
-//         Swal.fire({
-//             text: user.name + " est en ligne ",
-//             toast: true,
-//             showConfirmButton: false,
-//         });
-//     })
-//     .leaving(function(user) {
-//         Swal.fire({
-//             text: user.name + " est s'est déconnecté ",
-//             toast: true,
-//             showConfirmButton: false,
-//         });
-//     });
+
+e.join('online').here(function (users) {
+  Livewire.emit('OnlineUsersLiveEvent', users);
+}).joining(function (user) {// Swal.fire({
+  //     text: user.pseudo + " est en ligne ",
+  //     toast: true,
+  //     showConfirmButton: false,
+  // });
+}).leaving(function (user) {// Swal.fire({
+  //     text: user.pseudo + " s'est déconnecté ",
+  //     toast: true,
+  //     showConfirmButton: false,
+  // });
+});
 
 /***/ }),
 
