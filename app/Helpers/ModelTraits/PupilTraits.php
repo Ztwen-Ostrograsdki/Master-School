@@ -31,6 +31,48 @@ trait PupilTraits{
         return Classe::where('name', 'like', $target)->where('level_id', $level_id)->first();
     }
 
+    public function getPupilTimePlans($school_year = null)
+    {
+
+        $school_year_model = $this->getSchoolYear($school_year);
+
+        $classe = $this->getCurrentClasse();
+
+        $time_plans = [];
+
+
+        if($classe){
+
+            $subjects = $classe->subjects;
+
+            if(count($subjects)){
+
+                foreach($subjects as $subject){
+
+                    $sub_times = $classe->timePlans()->where('time_plans.classe_id', $classe->id)->where('time_plans.subject_id', $subject->id)->where('time_plans.school_year_id', $school_year_model->id)->orderBy('day_index', 'asc')->get();
+
+                    if(count($sub_times)){
+
+                        $time_plans[$subject->id] = [
+
+                            'subject' => $subject,
+                            'times' => $sub_times,
+
+                        ];
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        return $time_plans;
+
+
+    }
+
 
     public function pupilDeleter($school_year = null, $destroy = false)
     {

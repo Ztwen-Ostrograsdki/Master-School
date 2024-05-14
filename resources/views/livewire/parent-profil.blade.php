@@ -55,8 +55,9 @@
                         </div>
                         <hr class="w-100 bg-white text-white mt-2">
                         <div class="px-2" >
-                            @if($user->teacher && $user->teacher->teaching)
+                            
                                 <div class="row d-flex justify-content-between text-white w-100 ">
+                                    @if($user->teacher && $user->teacher->teaching)
                                     <div class="col-lg-3 col-xlg-3 col-md-12 col-12 shadow border-orange border rounded float-right p-2 m-2">
                                         <h6 class="text-white-50">
                                             <span class="fa fa-user"></span>
@@ -142,47 +143,148 @@
                                             @endif
                                         </div>
 
+
                                     </div>
+                                    @endif
+
+                                    {{-- AFFICHAGE DES DONNEES DES APPRENANTS SUIVIS PAR LE PARENT --}}
+                                    @if($parentable)
                                     <div class="col-lg-4 col-xlg-4 col-md-12 col-12 shadow border-orange border rounded float-right p-2 m-2">
                                         <h6 class="text-white-50">
                                             <span class="fa fa-user"></span>
                                             <span>Mes enfants</span>
-                                            @if(auth()->user()->isAdminAs('master') || auth()->user->id == $user->id)
-                                                <span wire:click="updateTeacherPersoData({{$user->teacher->id}})" class="float-right fa fa-edit text-secondary cursor-pointer fx-20" title="Editer mes infos..."></span>
+                                            @if(auth()->user()->isAdminAs('master') || auth()->user()->id == $parentable->user->id)
+                                                <span class="float-right fa fa-edit text-secondary cursor-pointer fx-20" title="Editer les données..."></span>
                                             @endif
                                         </h6>
                                         <hr class="m-0 p-0 bg-white text-white">
 
                                         <div class="row d-flex justify-content-center w-95 mx-auto">
-                                            
-                                            <div class="col-12 shadow border-orange border rounded float-right p-2 m-2">
-                                                <h6 class="">
-                                                    <span>
-                                                        <span class="text-warning">Nom et prénoms:</span>
-                                                        <span>Pierre Marc</span>
-                                                    </span>
-                                                    
-                                                </h6>
-                                                <h6 class="">
-                                                    <span>
-                                                        <span class="text-warning">Classe:</span>
-                                                        <span>2nde F1</span>
-                                                    </span>
-                                                </h6>
-                                                <h6 class="">
-                                                    <span>
-                                                        <span class="text-warning">Relation familiale:</span>
-                                                        <span>Fils</span>
-                                                    </span>
-                                                </h6>
 
-                                            </div>
+                                            @php
+
+                                                $sons = $parentable->pupils;
+
+                                            @endphp
+
+                                            @if(count($sons))
+                                                
+                                                @foreach($sons as $son)
+
+                                                    @php
+                                                        $pupil = $son->pupil;
+                                                    @endphp
+
+                                                    <div class="col-12 shadow border-orange border rounded float-right p-2 m-2">
+                                                        <h6 class=" text-right d-flex">
+                                                            <span>
+                                                                <a class="nav-link btn btn-primary p-2" href="{{route('pupil_marks_listing_for_parent', ['id' => $pupil->id])}}">Voir les notes</a>
+                                                            </span>
+                                                            <span class="mx-2 btn btn-warning p-2" wire:click="delete({{$son->id}})" title="Ne plus suivre {{ $pupil->getName() }}">
+                                                                <span>Ne plus suivre</span>
+                                                                <span class=" mr-2 cursor-pointer fa fa-trash"></span>
+                                                            </span>
+                                                        </h6>
+                                                        <hr class="bg-secondary">
+                                                        <h6 class="">
+                                                            <span>
+                                                                <span class="text-warning">Apprenant(e) :</span>
+                                                                <span>{{ $pupil->getName() }}</span>
+                                                            </span>
+                                                            
+                                                        </h6>
+                                                        <h6 class="">
+                                                            <span>
+                                                                <span class="text-warning">N° EducMaster :</span>
+                                                                <span>{{ $pupil->educmaster ? $pupil->educmaster : $pupil->ltpk_matricule ? : 'Inconnu' }}</span>
+                                                            </span>
+                                                            
+                                                        </h6>
+                                                        <h6 class="">
+                                                            <span>
+                                                                <span class="text-warning">Classe:</span>
+                                                                <span> {{ $pupil->getCurrentClasse()->name }} </span>
+                                                            </span>
+                                                        </h6>
+                                                        <h6 class="">
+                                                            <span>
+                                                                <span class="text-warning">Relation familiale:</span>
+                                                                <span>{{ $parentable->parent_relation($pupil->id) }}</span>
+                                                            </span>
+                                                        </h6>
+                                                        <hr class="bg-orange">
+
+                                                        <h6 class="">
+                                                            <div class="w-100 m-0 p-0 mx-auto">
+                                                                <span class="text-orange text-center py-2">Emploi du temps:</span>
+                                                                <div class="d-flex justify-content-between flex-column">
+
+                                                                    <div class="d-flex justify-content-between flex-column">
+                                                                        @if($pupil->getCurrentClasse())
+
+                                                                            @php
+                                                                                $time_plans = $pupil->getPupilTimePlans()
+
+                                                                            @endphp
+
+                                                                            @if(count($time_plans))
+
+                                                                                @foreach($time_plans as $time_data)
+
+                                                                                    @php
+
+                                                                                        $subject = $time_data['subject'];
+
+                                                                                        $horars = $time_data['times'];
+
+                                                                                    @endphp
+                                                                                    <div class="col-12 bg-secondary-light-0 border rounded p-1 m-1">
+                                                                                        <div class="m-0 p-0">
+                                                                                            <h6 class="d-flex justify-content-between">
+                                                                                                <span class="">
+                                                                                                    <span class="text-orange"> {{ $subject->name }} </span>
+                                                                                                </span>
+                                                                                            </h6>
+                                                                                            <hr class="m-0 p-0 bg-secondary text-secondary">
+                                                                                            <div class="m-0 p-0">
+                                                                                                @if(count($horars) > 0)
+                                                                                                    @foreach($horars as $tm)
+                                                                                                        <h6 class="">
+                                                                                                            <span class="text-warning"> {{$tm->day}} :</span>
+                                                                                                            <span>{{ $tm->start . 'H à ' . $tm->end . 'H' }}</span>
+                                                                                                        </h6>
+                                                                                                    @endforeach
+                                                                                                @else
+                                                                                                    <span class="text-white-50 font-italic">Pas encore défini!</span>
+                                                                                                @endif
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                @endforeach
+
+                                                                            @endif
+                                                                        @else
+                                                                            Aucune classe assignée!
+                                                                        @endif
+                                                                    </div>
+                                                                
+                                                                </div>
+                                                                
+                                                            </div>
+                                                        </h6>
+                                                    </div>
+                                                @endforeach
+                                            @else
+
+                                                <span>La liste est vide! </span>
+
+                                            @endif
                                         </div>
 
                                     </div>
+                                    @endif
 
                                 </div>
-                            @endif
                         </div>
                         <div>
                             <h6>Mes demandes</h6>
@@ -192,7 +294,7 @@
                                     <div>
                                         <div>
                                             @foreach($parent_requests as $req)
-                                                <div @if($req->refused) style="opacity: 0.5;" @endif class="col-12 my-2">
+                                                <div @if($req->refused) style="opacity: 0.5;" @endif class="col-12 my-2 @if($req->authorized) d-none @endif ">
                                                     <div class="card card-outline-secondary text-orange bg-secondary-light-0 m-0 p-0 border @if($req->refused) border-danger @else border-primary @endif">
                                                         <div class="card-header m-0">
                                                             <span class="card-title float-left">

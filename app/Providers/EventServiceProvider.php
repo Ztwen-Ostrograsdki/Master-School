@@ -16,6 +16,7 @@ use App\Events\InitiateClassePupilsDataUpdatingFromFileEvent;
 use App\Events\InitiateClassePupilsMatriculeUpdateEvent;
 use App\Events\InitiateClassePupilsNamesUpdateEvent;
 use App\Events\InitiateSettingsOnMarksEvent;
+use App\Events\JoinParentToPupilNowEvent;
 use App\Events\LocalTransfertCreatedEvent;
 use App\Events\MakeClassePresenceLateEvent;
 use App\Events\MarksNullActionsEvent;
@@ -49,6 +50,7 @@ use App\Listeners\FlushAveragesIntoDataBaseBatcherListener;
 use App\Listeners\FreshAveragesIntoDBBatcherListener;
 use App\Listeners\ImportRegistredTeachersToTheCurrentYearBatcherListener;
 use App\Listeners\InitiateSettingsOnMarksBatcherListener;
+use App\Listeners\JoinParentToPupilNowListener;
 use App\Listeners\MakeClassePresenceLateBatcherListener;
 use App\Listeners\MarksNullActionsBatcherListener;
 use App\Listeners\MarksRestorationBatcherListener;
@@ -233,6 +235,10 @@ class EventServiceProvider extends ServiceProvider
 
         ParentRequestToFollowPupilEvent::class => [
             ParentRequestToFollowPupilListener::class,
+        ],
+
+        JoinParentToPupilNowEvent::class => [
+            JoinParentToPupilNowListener::class,
         ],
 
     

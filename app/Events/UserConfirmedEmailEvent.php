@@ -39,6 +39,6 @@ class UserConfirmedEmailEvent implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('user.' . $this->auth->id);
+        return new PrivateChannel('master');
     }
 }

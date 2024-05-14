@@ -8784,10 +8784,6 @@ e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', f
   Livewire.emit('PresenceLateWasUpdated');
 }).listen('ClasseDataWasUpdateSuccessfullyEvent', function (e) {
   Livewire.emit('ClasseDataWasUpdated');
-}).listen('NewUserCreatedEvent', function (e) {
-  Livewire.emit('NewUserCreatedLiveEvent');
-}).listen('UserConfirmedEmailEvent', function (e) {
-  Livewire.emit('UserConfirmedEmailLiveEvent');
 }).listen('MyParentRequestToFollowPupilCreatedEvent', function (e) {
   Livewire.emit('MyParentRequestToFollowPupilCreatedLiveEvent');
 }).listen('AboutMyParentRequestsEvent', function (e) {
@@ -8805,11 +8801,16 @@ e["private"]('master').listen('RefreshLockedRequestListEvent', function (e) {
   Livewire.emit('NewParentRequestToFollowPupilLiveEvent');
 }).listen('ParentRequestToFollowPupilWasDeletedEvent', function (e) {
   Livewire.emit('UpdateParentRequestsListLiveEvent');
+}).listen('ParentHaveBeenJoinedToPupilEvent', function (e) {
+  Livewire.emit('ParentHaveBeenJoinedToPupilLiveEvent');
+}).listen('NewUserCreatedEvent', function (e) {
+  Livewire.emit('NewUserCreatedLiveEvent');
+}).listen('UserConfirmedEmailEvent', function (e) {
+  Livewire.emit('UserConfirmedEmailLiveEvent');
 }).listen('ClasseMarksWasFailedEvent', function (e) {
   Swal.fire({
     icon: 'error',
     title: "Le traitement des notes a échoué",
-    text: " Votre demande a été Accepté",
     toast: true,
     showConfirmButton: false
   });
@@ -8818,19 +8819,7 @@ e["private"]('reloadMarkChannel.' + window.ClientUser.id);
 e["private"]('reloader.' + window.ClientUser.id).listen('ClasseMarksWasUpdatedIntoDBSuccessfullyEvent', function (e) {
   Livewire.emit('ClasseDataLoadedSuccessfully');
   Livewire.emit('NewClasseMarksInsert');
-}); // e.private('classe.marks.insert.user.' + window.ClientUser.id)
-//     .listen('JobFinisched', function(u) {
-//         // console.log(u);
-//         Swal.fire({
-//             icon: 'success',
-//             title: "Demande Acceptée",
-//             text: " Votre demande a été Accepté",
-//             toast: true,
-//             showConfirmButton: false,
-//         });
-//         // Livewire.emit('NewParentRequest');
-//     })
-
+});
 e.join('online').here(function (users) {
   Livewire.emit('OnlineUsersLiveEvent', users);
 }).joining(function (user) {// Swal.fire({

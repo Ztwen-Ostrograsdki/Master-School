@@ -187,6 +187,20 @@ class Classe extends Model
         return $this->hasMany(Pupil::class);
     }
 
+    public function getCurrentTimePlans($school_year_id = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        if(!$school_year_id){
+
+            $school_year_id = $school_year_model->id;
+
+        }
+
+        return $this->timePlans()->where('time_plans.classe_id', $this->id)->where('time_plans.school_year_id', $school_year_id)->orderBy('day_index', 'asc')->get();
+
+    }
+
 
     public function classePupilSchoolYear()
     {

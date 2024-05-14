@@ -172,4 +172,10 @@ class ParentProfil extends Component
     {
         return redirect(route('parent_profil', ['id' => $this->user->id]));
     }
+
+
+    public function updateParentPersoData($parentable_id)
+    {
+
+    }
 }

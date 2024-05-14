@@ -28,6 +28,8 @@ class ParentsListerComponent extends Component
     public $counter = 0;
 
     public $search = null;
+    
+    public $by_job = null;
 
 
 

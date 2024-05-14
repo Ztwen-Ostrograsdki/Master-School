@@ -3,9 +3,11 @@
 namespace App\Observers;
 
 use App\Events\AboutMyParentRequestsEvent;
+use App\Events\JoinParentToPupilNowEvent;
 use App\Events\MyParentRequestToFollowPupilCreatedEvent;
 use App\Events\ParentRequestToFollowPupilWasDeletedEvent;
 use App\Models\ParentRequestToFollowPupil;
+use Illuminate\Support\Facades\DB;
 
 class ParentRequestToFollowPupilObserver
 {
@@ -28,6 +30,17 @@ class ParentRequestToFollowPupilObserver
      */
     public function updated(ParentRequestToFollowPupil $parentRequestToFollowPupil)
     {
+        if($parentRequestToFollowPupil->authorized){
+
+            $joined = $parentRequestToFollowPupil->parentable->pupils()->where('parent_pupils.pupil_id', $parentRequestToFollowPupil->pupil_id)->first();
+
+            if(!$joined){
+
+                JoinParentToPupilNowEvent::dispatch($parentRequestToFollowPupil);
+
+            }
+        }
+
         AboutMyParentRequestsEvent::dispatch($parentRequestToFollowPupil->parentable);
 
         ParentRequestToFollowPupilWasDeletedEvent::dispatch();
@@ -41,9 +54,33 @@ class ParentRequestToFollowPupilObserver
      */
     public function deleting(ParentRequestToFollowPupil $parentRequestToFollowPupil)
     {
-        AboutMyParentRequestsEvent::dispatch($parentRequestToFollowPupil->parentable);
+        $joineds = $parentRequestToFollowPupil->parentable->pupils()->where('parent_pupils.pupil_id', $parentRequestToFollowPupil->pupil_id)->get();
 
-        ParentRequestToFollowPupilWasDeletedEvent::dispatch();
+        if(count($joineds)){
+
+            DB::transaction(function($e) use ($joineds){
+
+                foreach($joineds as $join){
+
+                    $join->delete();
+
+                }
+
+            });
+
+            AboutMyParentRequestsEvent::dispatch($parentRequestToFollowPupil->parentable);
+
+            ParentRequestToFollowPupilWasDeletedEvent::dispatch();
+
+        }
+        else{
+
+            AboutMyParentRequestsEvent::dispatch($parentRequestToFollowPupil->parentable);
+
+            ParentRequestToFollowPupilWasDeletedEvent::dispatch();
+
+        }
+
     }
 
     /**

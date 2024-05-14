@@ -37,10 +37,10 @@
         
         {{-- chargement des modals --}}
     @if(!App\Helpers\RouteManager::hasUrl('administration'))
-        <body class="font-sans antialiased" style="background-color: lightslategray;">
+        <body class="font-sans antialiased bg-secondary-light-0" style="background-color: rgba(30, 15, 45, 0.87) !important;">
             @include('components.mycomponents.loader') {{-- chargement du loader --}}
             @livewire('header') {{-- chargement du header --}}
-            <div class=" bg-gray-100 border" style="background-color: rgb(167, 193, 219); min-height: 150vh !important;">
+            <div class=" bg-gray-100 border bg-secondary-light-0" style="background-color: rgba(30, 15, 45, 0.87) !important; min-height: 150vh !important;">
                 <!-- Page Content -->
                 <div class="">
                     @if (isset($slot))

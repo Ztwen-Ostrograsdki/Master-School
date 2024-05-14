@@ -16,6 +16,7 @@ class CreateParentPupilsTable extends Migration
         Schema::disableForeignKeyConstraints();
         Schema::create('parent_pupils', function (Blueprint $table) {
             $table->id();
+            $table->boolean('locked')->default(false);
             $table->string('relation')->nullable()->default('Parenté');
             $table->unsignedBigInteger('parentable_id');
             $table->foreign('parentable_id')

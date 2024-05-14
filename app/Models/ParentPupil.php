@@ -18,7 +18,8 @@ class ParentPupil extends Model
     protected $fillable = [
         'parentable_id',
         'pupil_id',
-        'relation'
+        'relation',
+        'locked',
     ];
 
 

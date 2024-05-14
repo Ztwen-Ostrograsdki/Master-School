@@ -16,7 +16,7 @@
                 <div class="d-flex justify-content-between m-0 p-0">
                     <span class="nav-item mx-2">
                         <select wire:model="display_by_parent" class="form-select z-bg-secondary custom-select">
-                            <option value=""> Grouper les demandes par parents </option>
+                            <option value="{{null}}"> Grouper les demandes par parents </option>
                             <option value="all"> Toutes les demandes </option>
                             @foreach($parents as $pare)
                                 <option value="{{$pare->id}}">  {{ $pare->name }} </option>
@@ -26,7 +26,7 @@
 
                     <span class="nav-item mx-2">
                         <select wire:model="display_by_target" class="form-select z-bg-secondary custom-select">
-                            <option value=""> Grouper les demandes par sections </option>
+                            <option value="{{null}}"> Grouper les demandes par sections </option>
                             @foreach($sections as $section => $sec_name)
                                 <option value="{{$section}}">  {{ $sec_name }} </option>
                             @endforeach
@@ -143,7 +143,7 @@
 
                                                                 </div>
                                                                 <div class="border border-secondary p-2">
-                                                                    <h6 class="text-orange text-center p-1">Photo de profil de {{ $pupil->getName() }}</h6>
+                                                                    <h6 class="text-orange text-center p-1">Photo de profil de {{ mb_substr($pupil->getName(), 0, 20) }}...</h6>
 
                                                                     <img class="border border-warning m-0 p-0" src="{{$pupil->__profil(250)}}" alt="">
                                                                 </div>

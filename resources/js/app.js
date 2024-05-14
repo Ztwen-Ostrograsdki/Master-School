@@ -181,14 +181,7 @@ e.private('user.' + window.ClientUser.id)
         
         Livewire.emit('ClasseDataWasUpdated');
     })
-    .listen('NewUserCreatedEvent', function(e) {
-        
-        Livewire.emit('NewUserCreatedLiveEvent');
-    }) 
-    .listen('UserConfirmedEmailEvent', function(e) {
-        
-        Livewire.emit('UserConfirmedEmailLiveEvent');
-    }) 
+    
     .listen('MyParentRequestToFollowPupilCreatedEvent', function(e) {
         
         Livewire.emit('MyParentRequestToFollowPupilCreatedLiveEvent');
@@ -225,13 +218,25 @@ e.private('master')
         Livewire.emit('UpdateParentRequestsListLiveEvent');
 
     })
+    .listen('ParentHaveBeenJoinedToPupilEvent', function(e) {
+
+        Livewire.emit('ParentHaveBeenJoinedToPupilLiveEvent');
+
+    })
+    .listen('NewUserCreatedEvent', function(e) {
+        
+        Livewire.emit('NewUserCreatedLiveEvent');
+    }) 
+    .listen('UserConfirmedEmailEvent', function(e) {
+        
+        Livewire.emit('UserConfirmedEmailLiveEvent');
+    }) 
 
     .listen('ClasseMarksWasFailedEvent', function(e) {
 
         Swal.fire({
             icon: 'error',
             title: "Le traitement des notes a échoué",
-            text: " Votre demande a été Accepté",
             toast: true,
             showConfirmButton: false,
         });
@@ -250,19 +255,6 @@ e.private('reloader.' + window.ClientUser.id)
         
     })
 
-// e.private('classe.marks.insert.user.' + window.ClientUser.id)
-//     .listen('JobFinisched', function(u) {
-//         // console.log(u);
-//         Swal.fire({
-//             icon: 'success',
-//             title: "Demande Acceptée",
-//             text: " Votre demande a été Accepté",
-//             toast: true,
-//             showConfirmButton: false,
-//         });
-//         // Livewire.emit('NewParentRequest');
-//     })
-   
 
 e.join('online')
     .here(function(users) {

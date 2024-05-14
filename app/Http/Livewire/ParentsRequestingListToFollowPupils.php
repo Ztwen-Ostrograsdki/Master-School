@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\ParentRequestToFollowPupil;
 use App\Models\Parentable;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class ParentsRequestingListToFollowPupils extends Component
@@ -17,6 +18,7 @@ class ParentsRequestingListToFollowPupils extends Component
         'NewParentRequest' => 'newParent',
         'NewParentRequestToFollowPupilLiveEvent' => 'newParentRequest',
         'UpdateParentRequestsListLiveEvent' => 'reloadRequests',
+        'ParentHaveBeenJoinedToPupilLiveEvent' => 'reloadRequests',
     ];
 
     public $counter = 0;
@@ -93,6 +95,19 @@ class ParentsRequestingListToFollowPupils extends Component
     public function getRequestsToDisplay()
     {
 
+        if(session()->has('parent_request_list_by_parent')){
+
+            $this->display_by_parent = session('parent_request_list_by_parent');
+
+        }
+        
+
+        if(session()->has('parent_request_list_by_target')){
+
+            $this->display_by_target = session('parent_request_list_by_target');
+
+        }
+
         $byp = $this->display_by_parent;
 
         $byt = $this->display_by_target;
@@ -166,13 +181,13 @@ class ParentsRequestingListToFollowPupils extends Component
 
     public function updatedDisplayByParent($parent)
     {
-
+        session()->put('parent_request_list_by_parent', $parent);
     }
 
 
-    public function updatedDisplayByTarget($parent)
+    public function updatedDisplayByTarget($target)
     {
-
+        session()->put('parent_request_list_by_target', $target);
     }
 
     public function reloadRequests()
@@ -213,9 +228,28 @@ class ParentsRequestingListToFollowPupils extends Component
 
     public function refused($req_id)
     {
+        
         $req = ParentRequestToFollowPupil::find($req_id);
 
-        return ($req && !$req->refused) ? $req->update(['refused' => true, 'analysed' => false]) : false;
+        if($req){
+
+            $joineds = $req->parentable->pupils()->where('parent_pupils.pupil_id', $req->pupil_id)->get();
+
+            DB::transaction(function($e) use ($joineds, $req){
+
+                foreach($joineds as $join){
+
+                    $join->delete();
+
+                }
+
+                return (!$req->refused) ? $req->update(['refused' => true, 'analysed' => false, 'authorized' => false]) : false;
+
+            });
+        }
+        
+
+        
     }
 
 

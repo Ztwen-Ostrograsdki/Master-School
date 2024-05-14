@@ -19,6 +19,7 @@ use App\Http\Livewire\ParentProfil;
 use App\Http\Livewire\ParentsListerComponent;
 use App\Http\Livewire\ParentsRequestingListToFollowPupils;
 use App\Http\Livewire\PolyvalenteClasseManager;
+use App\Http\Livewire\PupilMarksListingForParent;
 use App\Http\Livewire\PupilProfil;
 use App\Http\Livewire\PupilsListerComponent;
 use App\Http\Livewire\PupilsListingByClasse;
@@ -89,6 +90,7 @@ Route::group(['prefix' => '/administration', 'middleware' => ['auth', 'admin', '
 Route::get('/Enseignant/envoi-des-epreuves-de-composition', ManageEpreuvesTransfers::class)->name('upload_epreuves', 'user.authorized2route')->middleware(['auth']);
 Route::get('/compte/mon-compte/{id}', UserProfil::class)->name('user_profil')->middleware(['user.self', 'notBlockedUser']);
 Route::get('/espace-parent/mon-compte-parent/{id}', ParentProfil::class)->name('parent_profil')->middleware(['auth', 'user.authorized2route']);
+Route::get('/espace-parent/mon-compte-parent/notes-de-mon-enfant/{id}', PupilMarksListingForParent::class)->name('pupil_marks_listing_for_parent')->middleware(['auth', 'user.authorized2route', 'parentable.authorized2pupilprofil']);
 Route::get('/mon-compte/enseignant/{id}/{classe_id}/{slug}', TeacherProfilAsUser::class)->name('teacher_profil_as_user')->middleware(['user.teacher', 'classeNotClosedForTeacher', 'user.authorized2route']);
 
 

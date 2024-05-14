@@ -11,11 +11,12 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ParentRequestToFollowPupilCreatedSuccessfullyEvent implements ShouldBroadcastNow
+class ParentHaveBeenJoinedToPupilEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    
+   
+
     /**
      * Get the channels the event should broadcast on.
      *

@@ -52,6 +52,11 @@ class Parentable extends Model
         return $this->hasMany(ParentRequestToFollowPupil::class);
     }
 
+    public function notConfirmedsParentRequests()
+    {
+        return $this->parentRequests()->where('authorized', 0)->get();
+    }
+
 
     public function requestToFollowThisPupil($pupil_id, $relation, $authorized = false)
     {
@@ -64,6 +69,22 @@ class Parentable extends Model
 
             ]);
 
+    }
+
+
+    public function isMySon($pupil_id)
+    {
+        $join = $this->pupils()->where('parent_pupils.pupil_id', $pupil_id)->first();
+
+        return $join ? ($join->locked ? false : true) : false;
+    }
+
+
+    public function parent_relation($pupil_id)
+    {
+        $join = $this->pupils()->where('parent_pupils.pupil_id', $pupil_id)->first();
+
+        return $join ? $join->relation : 'Inconnue';
     }
 
 

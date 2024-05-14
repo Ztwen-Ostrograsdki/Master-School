@@ -3,7 +3,7 @@
         <div class="m-0 p-0 w-100">
             <blockquote class="text-warning p-0">
                 <hr class=" w-100 m-0 p-0 bg-primary">
-                <h6 style="letter-spacing: 1.2px" class="w-100 py-2 m-0 fx-17 font-italic">{{ count($parents) }} Parents d'élève enregistré(s) sur la plateforme </h6>
+                <h6 style="letter-spacing: 1.2px" class="w-100 py-2 m-0 fx-17 text-orange text-right px-2 mr-2 font-italic">{{ count($parents) >= 10 ? count($parents) : '0' . count($parents) }} Parents d'élève enregistré(s) sur la plateforme </h6>
                 <hr class=" w-100 m-0 p-0 bg-primary">
             </blockquote>
         </div>
@@ -11,8 +11,9 @@
             <div class="w-100 my-1 mt-2 d-flex justify-content-between mb-2">
                 <div class="d-flex justify-content-start m-0 p-0">
                     <span class="nav-item mx-2">
-                        <select wire:model="classe_group_id_selected" class="form-select z-bg-secondary custom-select">
-                            <option value=""> Lister les parents par profession </option>
+                        <select wire:model="by_job" class="form-select z-bg-secondary custom-select">
+                            <option value="{{null}}"> Lister les parents par profession </option>
+                            <option value="all"> Liste complète </option>
                             @foreach($professions as $profession)
                                 <option value="{{$profession}}">  {{ $profession }} </option>
                             @endforeach
@@ -20,12 +21,6 @@
                     </span>
                 </div>
 
-                @if($parents && count($parents))
-                <span class="btn mx-2 btn-info border border-white float-right" title="Imprimer la liste de complète...">
-                    <span class="fa fa-print"></span>
-                    <span>Impr.</span>
-                </span>
-                @endif
             </div>
 
             <div class="card-body z-bg-secondary">
@@ -50,7 +45,10 @@
                                 <td>Contacts</td>
                                 <td>Résidence</td>
                                 <td>Nationalité</td>
-                                <td>Nombres d'enfants</td>
+                                <td>
+                                    Nombres d'enfants
+                                    <small class="text-warning d-block">(En cours)</small>
+                                </td>
                                 <td>Statut</td>
                                 <td>Action</td>
                             </tr>
@@ -80,7 +78,10 @@
                                         <small style="letter-spacing: 1.2px;" class="text-white-50 font-italic ">Non renseignée</small>
                                     @endif
                                 </td>
-                                <td class=" ">{{ 25 }}</td>
+                                <td class=" ">
+                                    {{ count($p->pupils) >= 10 ? count($p->pupils) : '0' . count($p->pupils) }}
+                                    <small title="Les demandes en cours de traitement..." class="text-warning mx-2"> ({{ count($p->notConfirmedsParentRequests()) >= 10 ? count($p->notConfirmedsParentRequests()) : '0' . count($p->notConfirmedsParentRequests()) }}) </small>
+                                </td>
                                 <td class=" ">
                                     @if($p->authorized)
                                         <small class="text-success">
