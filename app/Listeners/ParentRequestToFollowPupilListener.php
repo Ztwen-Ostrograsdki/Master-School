@@ -28,7 +28,7 @@ class ParentRequestToFollowPupilListener
 
             ])->then(function(Batch $batch) use ($event){
 
-                ParentRequestToFollowPupilCreatedSuccessfullyEvent::dispatch($event->parentable->user);
+                ParentRequestToFollowPupilCreatedSuccessfullyEvent::dispatch();
 
 
             })->catch(function(Batch $batch, Throwable $er){

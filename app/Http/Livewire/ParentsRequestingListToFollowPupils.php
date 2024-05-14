@@ -11,17 +11,29 @@ class ParentsRequestingListToFollowPupils extends Component
 {
     protected $listeners = [
         'schoolYearChangedLiveEvent' => 'reloadData',
-        'UpdatedGlobalSearch' => 'updatedSearch',
         'pupilUpdated' => 'reloadData',
         'UpdatedSchoolYearData' => 'reloadData',
         'GlobalDataUpdated' => 'reloadData',
         'NewParentRequest' => 'newParent',
-        'NewParentRequestToFollowPupilLiveEvent' => 'reloadRequests',
+        'NewParentRequestToFollowPupilLiveEvent' => 'newParentRequest',
+        'UpdateParentRequestsListLiveEvent' => 'reloadRequests',
     ];
 
     public $counter = 0;
 
     public $search = null;
+
+    public $display_by_target = null;
+
+    public $display_by_parent = null;
+
+    public $sections = [
+        'all' => 'Toutes les demandes',
+        'authorized' => 'Demandes Approuvées',
+        'refused' => 'Demandes rejetées',
+        'analysed' => 'Demandes analysées',
+
+    ];
 
 
 
@@ -29,18 +41,154 @@ class ParentsRequestingListToFollowPupils extends Component
 
     public function render()
     {
-        $parents = Parentable::all();
+        $parents = [];
 
-        $parentsRequests = ParentRequestToFollowPupil::all();
+        $requestsToDisplay = [];
 
-        $professions = config('app.professions');
+        $parentsRequestsNoTreats = ParentRequestToFollowPupil::where('refused', 0)->where('authorized', 0)->orderBy('updated_at', 'desc')->get();
 
-        return view('livewire.parents-requesting-list-to-follow-pupils', compact('parents', 'professions', 'parentsRequests'));
+        $parentsRequestsTreats = ParentRequestToFollowPupil::where('refused', 1)->orWhere('authorized', 1)->orderBy('updated_at', 'desc')->get();
+
+        if(count($parentsRequestsTreats)){
+
+            foreach($parentsRequestsTreats as $rq){
+
+                if(!isset($parents[$rq->parentable_id])){
+
+                    $parents[$rq->parentable_id] = $rq->parentable;
+
+                }
+
+            }
+
+        }
+
+
+        if(count($parentsRequestsNoTreats)){
+
+            foreach($parentsRequestsNoTreats as $rqq){
+
+                if(!isset($parents[$rqq->parentable_id])){
+
+                    $parents[$rqq->parentable_id] = $rqq->parentable;
+
+                }
+
+            }
+
+        }
+
+
+        if(count($parentsRequestsTreats) > 0 || count($parentsRequestsNoTreats) > 0){
+
+            $requestsToDisplay = $this->getRequestsToDisplay();
+
+        }
+
+
+        return view('livewire.parents-requesting-list-to-follow-pupils', compact('parents', 'parentsRequestsNoTreats', 'parentsRequestsTreats', 'requestsToDisplay'));
+    }
+
+
+    public function getRequestsToDisplay()
+    {
+
+        $byp = $this->display_by_parent;
+
+        $byt = $this->display_by_target;
+
+        if($byp && $byt){
+
+
+            if($byp !== 'all' && $byt !== 'all'){
+
+                $requestsToDisplay = ParentRequestToFollowPupil::where($byt, 1)->where('parentable_id', $byp)->orderBy('updated_at', 'desc')->get();
+
+            }
+            elseif($byp !== 'all' && $byt == 'all'){
+
+                $requestsToDisplay = ParentRequestToFollowPupil::where('parentable_id', $byp)->orderBy('updated_at', 'desc')->get();
+
+            }
+            elseif($byp == 'all' && $byt !== 'all'){
+
+                $requestsToDisplay = ParentRequestToFollowPupil::where($byt, 1)->orderBy('updated_at', 'desc')->get();
+
+            }
+            elseif($byp == 'all' && $byt == 'all' ){
+
+                $requestsToDisplay = ParentRequestToFollowPupil::orderBy('updated_at', 'desc')->get();
+
+            }
+        }
+        else{
+
+            if($byp == null && $byt !== null){
+
+                if($byt == 'all'){
+
+                    $requestsToDisplay = ParentRequestToFollowPupil::orderBy('updated_at', 'desc')->get();
+
+                }
+                else{
+
+                    $requestsToDisplay = ParentRequestToFollowPupil::where($byt, 1)->orderBy('updated_at', 'desc')->get();
+
+                }
+
+            }
+            elseif($byp !== null && $byt == null){
+
+                if($byp == 'all'){
+
+                    $requestsToDisplay = ParentRequestToFollowPupil::orderBy('updated_at', 'desc')->get();
+
+                }
+                else{
+
+                    $requestsToDisplay = ParentRequestToFollowPupil::where('parentable_id', $byp)->orderBy('updated_at', 'desc')->get();
+
+                }
+
+            }
+            else{
+
+                $requestsToDisplay = ParentRequestToFollowPupil::where('refused', 0)->where('authorized', 0)->orderBy('updated_at', 'desc')->get();
+
+            }
+        }
+
+
+        return $requestsToDisplay;
+
+
+    }
+
+    public function updatedDisplayByParent($parent)
+    {
+
+    }
+
+
+    public function updatedDisplayByTarget($parent)
+    {
+
     }
 
     public function reloadRequests()
     {
+
         $this->counter = rand(1, 12);
+
+    }
+
+    public function newParentRequest()
+    {
+
+        $this->dispatchBrowserEvent('Toast', ['title' => 'NOUVELLE DEMANDE DE SUIVI', 'message' => "Un parent vient d'envoyer une demande de suivie d'un apprenant!", 'type' => 'success']);
+
+        $this->counter = rand(1, 12);
+
     }
 
     public function delete($req_id)
@@ -52,6 +200,22 @@ class ParentsRequestingListToFollowPupils extends Component
     public function confirmed($req_id)
     {
         $req = ParentRequestToFollowPupil::find($req_id);
+
+        return ($req && !$req->authorized) ? $req->update(['authorized' => true, 'analysed' => true, 'refused' => false]) : false;
+    }
+
+    public function analyzed($req_id)
+    {
+        $req = ParentRequestToFollowPupil::find($req_id);
+
+        return ($req && !$req->analysed) ? $req->update(['analysed' => true, 'refused' => false]) : false;
+    }
+
+    public function refused($req_id)
+    {
+        $req = ParentRequestToFollowPupil::find($req_id);
+
+        return ($req && !$req->refused) ? $req->update(['refused' => true, 'analysed' => false]) : false;
     }
 
 

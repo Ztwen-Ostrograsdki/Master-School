@@ -189,6 +189,14 @@ e.private('user.' + window.ClientUser.id)
         
         Livewire.emit('UserConfirmedEmailLiveEvent');
     }) 
+    .listen('MyParentRequestToFollowPupilCreatedEvent', function(e) {
+        
+        Livewire.emit('MyParentRequestToFollowPupilCreatedLiveEvent');
+    }) 
+    .listen('AboutMyParentRequestsEvent', function(e) {
+        
+        Livewire.emit('AboutMyParentRequestsLiveEvent');
+    }) 
 
 e.private('master')
     .listen('RefreshLockedRequestListEvent', function(e) {
@@ -209,15 +217,12 @@ e.private('master')
     })
     .listen('ParentRequestToFollowPupilCreatedSuccessfullyEvent', function(e) {
 
-        Swal.fire({
-            icon: 'success',
-            title: "Nouvelle demande reçue",
-            text: " Un parent a envoyé une demande de suivie d'apprenant",
-            toast: true,
-            showConfirmButton: false,
-        });
-
         Livewire.emit('NewParentRequestToFollowPupilLiveEvent');
+
+    })
+    .listen('ParentRequestToFollowPupilWasDeletedEvent', function(e) {
+
+        Livewire.emit('UpdateParentRequestsListLiveEvent');
 
     })
 

@@ -2,6 +2,9 @@
 
 namespace App\Observers;
 
+use App\Events\AboutMyParentRequestsEvent;
+use App\Events\MyParentRequestToFollowPupilCreatedEvent;
+use App\Events\ParentRequestToFollowPupilWasDeletedEvent;
 use App\Models\ParentRequestToFollowPupil;
 
 class ParentRequestToFollowPupilObserver
@@ -14,7 +17,7 @@ class ParentRequestToFollowPupilObserver
      */
     public function created(ParentRequestToFollowPupil $parentRequestToFollowPupil)
     {
-        
+        MyParentRequestToFollowPupilCreatedEvent::dispatch($parentRequestToFollowPupil->parentable->user);
     }
 
     /**
@@ -25,7 +28,9 @@ class ParentRequestToFollowPupilObserver
      */
     public function updated(ParentRequestToFollowPupil $parentRequestToFollowPupil)
     {
-        //
+        AboutMyParentRequestsEvent::dispatch($parentRequestToFollowPupil->parentable);
+
+        ParentRequestToFollowPupilWasDeletedEvent::dispatch();
     }
 
     /**
@@ -34,9 +39,11 @@ class ParentRequestToFollowPupilObserver
      * @param  \App\Models\ParentRequestToFollowPupil  $parentRequestToFollowPupil
      * @return void
      */
-    public function deleted(ParentRequestToFollowPupil $parentRequestToFollowPupil)
+    public function deleting(ParentRequestToFollowPupil $parentRequestToFollowPupil)
     {
-        
+        AboutMyParentRequestsEvent::dispatch($parentRequestToFollowPupil->parentable);
+
+        ParentRequestToFollowPupilWasDeletedEvent::dispatch();
     }
 
     /**

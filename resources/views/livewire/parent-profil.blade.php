@@ -191,16 +191,37 @@
                                 @if(count($parent_requests) > 0)
                                     <div>
                                         <div>
-
                                             @foreach($parent_requests as $req)
-                                                <div class="col-12 my-2">
-                                                    <div class="card card-outline-secondary text-orange bg-secondary-light-0 m-0 p-0 border border-primary">
+                                                <div @if($req->refused) style="opacity: 0.5;" @endif class="col-12 my-2">
+                                                    <div class="card card-outline-secondary text-orange bg-secondary-light-0 m-0 p-0 border @if($req->refused) border-danger @else border-primary @endif">
                                                         <div class="card-header m-0">
                                                             <span class="card-title float-left">
                                                                Demande N° {{ $loop->iteration }}
                                                             </span>
 
-                                                            <span class="text-warning float-right">Votre demande n'a pas encore été analysé et est en cours de traitement ...</span>
+                                                            @if($req->refused)
+                                                                <span style="font-size: 1.4rem; font-weight: bolder; text-align: center;" class="text-danger text-center bg-warning mx-3 p-2 border border-danger px-3">REJETEE</span>
+                                                            @endif
+
+                                                            @if($req->authorized)
+                                                                <span style="font-size: 1.4rem; font-weight: bolder; text-align: center;" class="text-white text-center bg-success mx-3 p-2 border border-success px-3">APPROUVEE</span>
+                                                            @endif
+
+                                                            @if($req->refused)
+                                                                <span class="text-warning float-right">Désolé !!! Votre demande a été réjeté </span>
+                                                                
+                                                            @elseif($req->analysed && !$req->authorized)
+                                                                <span class="fa fa-check text-success mx-2"></span>
+                                                                <span class="text-success float-right">Votre demande a  été analysé et est en cours de traitement ...</span>
+
+                                                            @elseif($req->authorized)
+
+                                                                <span class="fa fa-check-all text-success mx-2"></span>
+                                                                <span class="text-success float-right">Félicitations !!! Votre demande a  été analysé et approuvé</span>
+                                                            @else
+                                                                <span class="text-warning float-right">Votre demande a  n'a pas encore été analysé, elle en cours de traitement</span>
+
+                                                            @endif
                                                         </div>
                                                         @php
                                                             $user = $req->parentable->user;
@@ -226,13 +247,13 @@
                                                                             <hr class="bg-secondary m-0 p-0 my-1">
 
                                                                             <span class="">
-                                                                                <span class="btn btn-danger p-2">Annuler cette demande</span>
+                                                                                <span wire:click="delete({{$req->id}})" class="btn btn-danger p-2">Je ne souhaite plus suivre {{ mb_substr($pupil->getName(), 0, 20) }} ...</span>
                                                                             </span>
 
                                                                         </div>
 
                                                                         <div class="border border-secondary p-2">
-                                                                            <h6 class="text-orange text-center p-1">Photo de profil de {{ $pupil->getName() }}</h6>
+                                                                            <h6 class="text-orange text-center p-1">Photo de profil de {{ mb_substr($pupil->getName(), 0, 20) }} ...</h6>
 
                                                                             <img class="border border-warning m-0 p-0" src="{{$pupil->__profil(250)}}" alt="">
                                                                         </div>

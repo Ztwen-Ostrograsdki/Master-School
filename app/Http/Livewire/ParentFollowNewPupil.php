@@ -77,9 +77,40 @@ class ParentFollowNewPupil extends Component
 
         if($pupil){
 
-            $this->target = $pupil;
+            $yet = ParentRequestToFollowPupil::where('pupil_id', $pupil->id)->where('parentable_id', $this->parentable->id)->first();
 
-            $this->to_confirm = true;
+            if(!$yet){
+
+                $this->target = $pupil;
+
+                $this->to_confirm = true;
+
+            }
+            else{
+
+                if($yet->authorized){
+
+                    $this->addError('matricule', "Vous suivez déjà {$pupil->getName()}");
+
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'APPRENANT DEJA SUIVI', 'message' => "Vous suivez déjà {$pupil->getName()}!", 'type' => 'info']);
+
+                }
+                elseif($yet->refused){
+
+                    $this->addError('matricule', "Accès refusé pour {$pupil->getName()}");
+
+                    $this->dispatchBrowserEvent('Toast', ['title' => "ACCES REFUSE", 'message' => "Vous ne pouvez pas suivre {$pupil->getName()}, veuillez vous rapprocher de l'administration!", 'type' => 'info']);
+
+                }
+                else{
+
+                    $this->addError('matricule', "Vous avez déjà fait cette demande de suivi");
+
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'DEMANDE DEJA ENVOYEE', 'message' => "Vous avez déjà fait une demande de suivi pour cet apprenant!", 'type' => 'error']);
+
+                }
+
+            }
 
         }
         else{

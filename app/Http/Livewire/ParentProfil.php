@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use App\Events\NewAddParentRequestEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\ParentRequestToFollowPupil;
 use App\Models\Parentable;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +41,8 @@ class ParentProfil extends Component
         'NotifyMeWhenMyRequestAccepted' => 'reloadData',
         'UpdateParentAccountAfterDeleted' => 'parentAccoutDeleted',
         'UpdateParentAccountAfterBlocked' => 'reloadData',
+        'MyParentRequestToFollowPupilCreatedLiveEvent' => 'reloadData',
+        'AboutMyParentRequestsLiveEvent' => 'reloadData',
     ];
 
     protected $rules = [
@@ -75,7 +78,7 @@ class ParentProfil extends Component
                 
             $this->parentable = $this->user->parentable;
 
-            $my_requests = $this->parentable->parentRequests;
+            $my_requests = $this->parentable->parentRequests()->orderBy('updated_at', 'desc')->get();
 
             $parent_requests = $my_requests;
         }
@@ -158,6 +161,11 @@ class ParentProfil extends Component
         }
 
         $this->counter = rand(1, 12);
+    }
+
+    public function delete($req_id)
+    {
+        ParentRequestToFollowPupil::find($req_id)->delete();
     }
 
     public function parentAccoutDeleted()
