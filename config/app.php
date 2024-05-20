@@ -31,7 +31,7 @@ return [
     'teacher_classes_limit' => 4,
 
     // 'min_mark_value_for_participation_calculation' 
-    'MMVFPC' => 8,
+    'MMVFPC' => 5,
 
     'local_events' => [
         'semestre-trimestre' => 'Semstres / Trimestres',

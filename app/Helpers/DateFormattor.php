@@ -235,5 +235,65 @@ trait DateFormattor{
                 $this->__getTimestampInSecondsBetweenDates($start, $end) / (3600*24*7);
     }
 
+
+    public function __to($date = null, $with_hour = false, $created_at = false)
+    {
+        $date = $this->created_at;
+
+        $date_timestamp = Carbon::parse($date);
+
+        $now_timestamp = Carbon::now();
+
+        $dates = explode(' ', Carbon::parse($date)->toDateTimeString());
+
+        $d = $dates[0];
+
+        $t = $dates[1];
+
+        $date_to_str = $this->__getDateAsString($date, null);
+
+        $times = explode(':', $t);
+
+        $h = $times[0];
+
+        $m = $times[1];
+
+        if($now_timestamp->diffInHours($date_timestamp) > 24){
+
+            $to = ucwords($date_to_str);
+
+            if($with_hour){
+
+                $to.= ' à ' . $h . 'H ' . $m . "'";
+
+            }
+
+            $date_to_str = $to;
+
+        }
+        else{
+
+            $date_to_str = $this->getDateAgoFormated($created_at);
+
+        }
+
+
+        return $date_to_str;
+
+        
+    }
+
+
+    public function getDateAgoFormated($created_at = false)
+    {
+        $this->__setDateAgo();
+
+        if($created_at){
+
+            return $this->dateAgoToString;
+        }
+        return $this->dateAgoToStringForUpdated;
+    }
+
     
 }

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Events\FlushAveragesIntoDataBaseEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
+use App\Jobs\JobForceMarksDestroyingAfterMoreDays;
 use App\Jobs\JobUpdateClasseAnnualAverageIntoDatabase;
 use App\Jobs\JobUpdateClasseSemestrialAverageIntoDatabase;
 use App\Jobs\UpdateAverageTable;
@@ -31,7 +32,7 @@ class MarkObserver
      */
     public function updated(Mark $mark)
     {
-        $mark->value > 0 ? $this->doJob($mark) : $this->doNotJob();
+        $mark->value > 0 && $mark->isDirty() ? $this->doJob($mark) : $this->doNotJob();
     }
 
     /**
@@ -42,7 +43,19 @@ class MarkObserver
      */
     public function deleted(Mark $mark)
     {
-        $mark->value > 0 ? $this->doJob($mark) : $this->doNotJob();
+        if($mark->type !== 'participation'){
+
+            $mark->value > 0 && $mark->isDirty() ? $this->doJob($mark) : $this->doNotJob();
+
+        }
+
+    }
+
+
+    public function deleting(Mark $mark)
+    {
+
+        // dispatch(new JobForceMarksDestroyingAfterMoreDays($mark))->delay(Carbon::now()->addDays(30));
     }
 
     /**

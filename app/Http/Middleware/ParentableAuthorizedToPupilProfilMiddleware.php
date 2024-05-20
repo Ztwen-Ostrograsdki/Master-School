@@ -32,18 +32,18 @@ class ParentableAuthorizedToPupilProfilMiddleware
                 }
                 else{
 
-                    return abort(403, "Vous n'êtes pas authorisé à accéder à une telle page, vous n'êtes pas parent de cet apprenant! ");
+                    return abort(401, "Vous n'êtes pas authorisé à accéder à une telle page, vous n'êtes pas parent de cet apprenant! ");
                 }
             }
             else{
 
 
-                return abort(403, "Vous n'êtes plus authorisé à accéder à une telle page!");
+                return abort(401, "Vous n'êtes plus authorisé à accéder à une telle page!");
             }
         }
         else{
 
-            return abort(403, "Vous n'êtes pas authorisé à accéder à une telle page, Cette paeg est dédiée aux parents elligibles de la plateforme!");
+            return abort(401, "Vous n'êtes pas authorisé à accéder à une telle page, Cette paeg est dédiée aux parents elligibles de la plateforme!");
             
         }
     }

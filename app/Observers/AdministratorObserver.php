@@ -14,6 +14,7 @@ class AdministratorObserver
      * @param  \App\Models\Administrator  $administrator
      * @return void
      */
+    
     public function created(Administrator $administrator)
     {
         UserExtendsToAdminEvent::dispatch($administrator->user);

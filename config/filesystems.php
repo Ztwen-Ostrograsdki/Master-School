@@ -63,7 +63,12 @@ return [
         ],
         'epreuvesFolder' => [
             'driver' => 'local',
-            'root' => public_path().('epreuvesFolder'),
+            'root' => public_path().('/epreuvesFolder'),
+            'visibility' => 'public',
+        ],
+        'excels' => [
+            'driver' => 'local',
+            'root' => public_path().('/excels'),
             'visibility' => 'public',
         ],
 
@@ -98,6 +103,7 @@ return [
         public_path('storage/classesPhotos') => storage_path('app/classesPhotos'),
         public_path('storage/teachersPhotos') => storage_path('app/teachersPhotos'),
         public_path('storage/epreuvesFolder') => storage_path('app/epreuvesFolder'),
+        public_path('storage/excels') => storage_path('app/excels'),
 
     ],
 

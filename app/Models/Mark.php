@@ -8,15 +8,15 @@ use App\Models\Classe;
 use App\Models\Level;
 use App\Models\SchoolYear;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Mark extends Model
 {
-    use HasFactory, SoftDeletes, MarkTraits;
-
-    use DateFormattor;
+    use HasFactory, SoftDeletes, MarkTraits, DateFormattor, Prunable;
 
     const DELAYED = 48; // For three hours among
 
@@ -49,6 +49,13 @@ class Mark extends Model
         'forced_mark',
         'mark_index',
     ];
+
+
+    public function prunable(): Builder
+    {
+        return static::where('deleted_at', '<=', now()->subMonth());
+
+    }
 
     public function user()
     {

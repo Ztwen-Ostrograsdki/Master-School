@@ -412,7 +412,9 @@ class ClasseMarksLister extends Component
 
         if($subject && $semestre && $semestre_type){
 
-            $file_name = 'Les-notes-simplifiees-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
+            // $file_name = 'Les-notes-simplifiees-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
+
+            $file_name = strtoupper($classe->name) . '-' . $subject->name . '-SIMPLIFIEES.XLS';
 
             return Excel::download(new PupilsAveragesExports($classe, $school_year_model, $semestre, $subject, true), $file_name);
 
@@ -439,7 +441,9 @@ class ClasseMarksLister extends Component
 
         if($subject && $semestre && $semestre_type){
 
-            $file_name = 'Les-notes-completes-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
+            // $file_name = 'Les-notes-completes-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
+
+            $file_name = strtoupper($classe->name) . '-' . $subject->name . '-COMPLETES.xlsx';
 
             return Excel::download(new PupilsAveragesExports($classe, $school_year_model, $semestre, $subject, true, true), $file_name);
 

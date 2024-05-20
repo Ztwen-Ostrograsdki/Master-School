@@ -189,6 +189,14 @@ e.private('user.' + window.ClientUser.id)
     .listen('AboutMyParentRequestsEvent', function(e) {
         
         Livewire.emit('AboutMyParentRequestsLiveEvent');
+    })  
+    .listen('ClasseMarksToSimpleExcelFileCompletedEvent', function(e) {
+
+        Livewire.emit('ClasseMarksToSimpleExcelFileCompletedLiveEvent', e.file_name);
+    }) 
+    .listen('ClasseExcelsFilesWasUpdatedEvent', function(e) {
+
+        Livewire.emit('ClasseExcelsFilesWasUpdatedLiveEvent');
     }) 
 
 e.private('master')

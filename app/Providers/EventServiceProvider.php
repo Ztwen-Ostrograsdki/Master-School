@@ -25,12 +25,14 @@ use App\Events\MigrateDataToTheNewSchoolYearEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\ParentRequestToFollowPupilEvent;
 use App\Events\PaymentSystemEvent;
+use App\Events\PrepareClasseMarksExcelFileDataInsertionToDatabaseEvent;
 use App\Events\PreparePupilDataToFetchEvent;
 use App\Events\PupilAbandonnedClassesEvent;
 use App\Events\ReloadClassesPromotionAndPositionEvent;
 use App\Events\StartNewsPupilsInsertionEvent;
 use App\Events\ThrowClasseMarksConvertionEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
+use App\Events\UpdateClasseMarksToSimpleExcelFileEvent;
 use App\Events\UpdateClasseSanctionsEvent;
 use App\Events\UpdateSchoolModelEvent;
 use App\Events\UserAccountBlockedEvent;
@@ -50,6 +52,7 @@ use App\Listeners\FlushAveragesIntoDataBaseBatcherListener;
 use App\Listeners\FreshAveragesIntoDBBatcherListener;
 use App\Listeners\ImportRegistredTeachersToTheCurrentYearBatcherListener;
 use App\Listeners\InitiateSettingsOnMarksBatcherListener;
+use App\Listeners\InsertClasseMarksExcelFileDataToDatabaseListener;
 use App\Listeners\JoinParentToPupilNowListener;
 use App\Listeners\MakeClassePresenceLateBatcherListener;
 use App\Listeners\MarksNullActionsBatcherListener;
@@ -62,6 +65,7 @@ use App\Listeners\ProcessingNewsPupilsInsertionBatcherListener;
 use App\Listeners\PupilAbandonnedClassesListener;
 use App\Listeners\ReloadClassesPromotionAndPositionBatcherListener;
 use App\Listeners\UpdateClasseAveragesIntoDatabaseBatcherListener;
+use App\Listeners\UpdateClasseMarksToSimpleExcelFileListener;
 use App\Listeners\UpdateClasseParticipationMarksListener;
 use App\Listeners\UpdateClassePupilsDataFromFileListener;
 use App\Listeners\UpdateClasseSanctionsListener;
@@ -70,6 +74,7 @@ use App\Listeners\UpdatingClassePupilsMatriculeListener;
 use App\Listeners\UserConnectedListener;
 use App\Models\Administrator;
 use App\Models\Classe;
+use App\Models\ClasseMarksExcelFile;
 use App\Models\ClassesSecurity;
 use App\Models\LockedUsersRequest;
 use App\Models\Mark;
@@ -79,6 +84,7 @@ use App\Models\RelatedMark;
 use App\Models\User;
 use App\Models\UserAdminKey;
 use App\Observers\AdministratorObserver;
+use App\Observers\ClasseMarksExcelFileObserver;
 use App\Observers\ClasseObserver;
 use App\Observers\ClassesSecurityObserver;
 use App\Observers\LockedUsersRequestObserver;
@@ -241,6 +247,14 @@ class EventServiceProvider extends ServiceProvider
             JoinParentToPupilNowListener::class,
         ],
 
+        UpdateClasseMarksToSimpleExcelFileEvent::class => [
+            UpdateClasseMarksToSimpleExcelFileListener::class,
+        ],
+
+        PrepareClasseMarksExcelFileDataInsertionToDatabaseEvent::class => [
+            InsertClasseMarksExcelFileDataToDatabaseListener::class,
+        ],
+
     
     ];
 
@@ -270,6 +284,8 @@ class EventServiceProvider extends ServiceProvider
         LockedUsersRequest::observe(LockedUsersRequestObserver::class);
 
         ParentRequestToFollowPupil::observe(ParentRequestToFollowPupilObserver::class);
+
+        ClasseMarksExcelFile::observe(ClasseMarksExcelFileObserver::class);
 
     }
 

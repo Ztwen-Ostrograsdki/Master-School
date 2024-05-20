@@ -106,6 +106,10 @@
             <span wire:click="updateClassePupilsPersoDataFromFile({{$classe->id}})" class="btn btn-warning border z-scale border-white mr-1 float-right" title="Mettre à jour les données des apprenants à partir d'un fichier">
                 <span class="fa fa-download"></span>
             </span>
+
+            <span wire:click="updateClasseMarksToSimpleExcelFile({{$classe->id}})" class="btn btn-success border z-scale border-white mr-1 float-right" title="Mettre à jour le fichier de notes des apprenants">
+                <span class="fa fa-upload"></span>
+            </span>
         @endif
 
 

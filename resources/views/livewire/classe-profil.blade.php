@@ -443,6 +443,10 @@
 
                             @livewire('classe-marks-lister', ['classe_id' => $classe->id])
 
+                         @elseif($section_selected == 'excel_files')
+
+                            @livewire('classes-marks-excel-files-completed', ['classe_id' => $classe->id])
+
                         @elseif($section_selected == 'averages')
 
                             @livewire('classe-averages-component', ['classe_id' => $classe->id])

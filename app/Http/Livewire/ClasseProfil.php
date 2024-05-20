@@ -68,6 +68,7 @@ class ClasseProfil extends Component
         'liste' => 'Liste des apprenants', 
         'time_plan' => 'Emploi du temps', 
         'marks' => 'Les notes', 
+        'excel_files' => 'Les Fichiers Excel de Notes', 
         'related_marks' => 'Les Participations', 
         'lates_absences' => 'Les absences / retards', 
         'classe_general_stats' => 'Tableau des stats', 

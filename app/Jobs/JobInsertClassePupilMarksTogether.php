@@ -298,25 +298,28 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
                                         
                                     foreach($epe_tabs as $epe_k_index => $validEpe){
 
-                                        $epe_mark = Mark::create([
-                                            'value' => $validEpe, 
-                                            'pupil_id' => $pupil->id, 
-                                            'user_id' => $user->id, 
-                                            'creator' => $user->id, 
-                                            'subject_id' => $subject_id, 
-                                            'school_year_id' => $school_year_model->id, 
-                                            'classe_id' => $classe_id, 
-                                            'semestre' => $semestre, 
-                                            'type' => 'epe', 
-                                            'mark_index' => $epe_k_index, 
-                                            'level_id' => $pupil->level_id, 
-                                        ]);
+                                        Mark::withoutEvents(function() use ($validEpe, $pupil, $user, $subject_id, $school_year_model, $classe_id, $semestre, $epe_k_index){
 
-                                        if ($epe_mark) {
-                                            
-                                            $school_year_model->marks()->attach($epe_mark->id);
-                                        }
+                                            $epe_mark = Mark::create([
+                                                'value' => $validEpe, 
+                                                'pupil_id' => $pupil->id, 
+                                                'user_id' => $user->id, 
+                                                'creator' => $user->id, 
+                                                'subject_id' => $subject_id, 
+                                                'school_year_id' => $school_year_model->id, 
+                                                'classe_id' => $classe_id, 
+                                                'semestre' => $semestre, 
+                                                'type' => 'epe', 
+                                                'mark_index' => $epe_k_index, 
+                                                'level_id' => $pupil->level_id, 
+                                            ]);
 
+                                            if ($epe_mark) {
+                                                
+                                                $school_year_model->marks()->attach($epe_mark->id);
+                                            }
+
+                                        });
                                     }
                                 }
 
@@ -334,12 +337,14 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
 
                                     if($old && $old->value !== $participation){
 
-                                        $old->update(['value' => $validPart]);
+                                        $old->value = $validPart;
+
+                                        $old->saveQuietly();
 
                                     }
                                     else{
 
-                                        $part_mark = Mark::create([
+                                        $part_data = [
                                                 'value' => $validPart, 
                                                 'pupil_id' => $pupil->id, 
                                                 'user_id' => $user->id, 
@@ -351,12 +356,18 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
                                                 'type' => 'participation', 
                                                 'mark_index' => 1, 
                                                 'level_id' => $pupil->level_id, 
-                                        ]);
+                                        ];
 
-                                        if ($part_mark) {
+                                        $part_mark = Mark::withoutEvents(function() use ($part_data){
+
+                                            Mark::create($da);
+
+                                            if ($part_mark) {
                                             
-                                            $school_year_model->marks()->attach($part_mark->id);
-                                        }
+                                                $school_year_model->marks()->attach($part_mark->id);
+                                            }
+
+                                        });
 
                                     }
                                         
@@ -366,23 +377,30 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
                                         
                                     foreach($dev_tabs as $dev_k_index => $validDev){
 
-                                        $dev_mark = Mark::create([
-                                            'value' => $validDev, 
-                                            'pupil_id' => $pupil->id, 
-                                            'user_id' => $user->id, 
-                                            'creator' => $user->id, 
-                                            'school_year_id' => $school_year_model->id, 
-                                            'subject_id' => $subject_id, 
-                                            'classe_id' => $classe_id, 
-                                            'semestre' => $semestre, 
-                                            'type' => 'devoir', 
-                                            'mark_index' => $dev_k_index, 
-                                            'level_id' => $pupil->level_id, 
-                                        ]);
-                                        if ($dev_mark) {
+                                        Mark::withoutEvents(function() use ($validDev, $pupil, $user, $school_year_model, $classe_id, $semestre, $dev_k_index, $subject_id){
 
-                                            $school_year_model->marks()->attach($dev_mark->id);
-                                        }
+                                            $dev_mark = Mark::create([
+                                                'value' => $validDev, 
+                                                'pupil_id' => $pupil->id, 
+                                                'user_id' => $user->id, 
+                                                'creator' => $user->id, 
+                                                'school_year_id' => $school_year_model->id, 
+                                                'subject_id' => $subject_id, 
+                                                'classe_id' => $classe_id, 
+                                                'semestre' => $semestre, 
+                                                'type' => 'devoir', 
+                                                'mark_index' => $dev_k_index, 
+                                                'level_id' => $pupil->level_id, 
+                                            ]);
+
+                                            if ($dev_mark) {
+
+                                                $school_year_model->marks()->attach($dev_mark->id);
+                                            }
+
+                                        });
+
+                                        
 
                                     }
                                 }
@@ -413,11 +431,16 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
 
                             if($pupil){
 
-                                foreach($marks as $mark){
+                                RelatedMark::withoutEvents(function() use ($marks, $pupil, $related_data){
 
-                                    $this->markInserter($pupil, $related_data);
+                                    foreach($marks as $mark){
 
-                                }
+                                        $this->markInserter($pupil, $related_data);
+
+                                    }
+
+
+                                });
 
                             }
                         }
@@ -429,11 +452,14 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
 
                                 $pupils = $classe->getPupils($school_year_model->id);
 
-                                foreach($pupils as $p){
+                                RelatedMark::withoutEvents(function() use ($pupils, $related_data){
 
-                                    $this->markInserter($p, $related_data);
+                                    foreach($pupils as $p){
 
-                                }
+                                        $this->markInserter($p, $related_data);
+
+                                    }
+                                });
 
                             }
 

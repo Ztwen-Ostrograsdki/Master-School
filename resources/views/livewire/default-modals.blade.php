@@ -15,6 +15,8 @@
         @livewire('insert-pupil-marks')
         @livewire('insert-classe-pupils-marks-together')
         @livewire('classe-marks-convertion-confirmation')
+        @livewire('update-classe-marks-to-simple-excell-file')
+        @livewire('file-download-confirmation')
 
     @endif
     

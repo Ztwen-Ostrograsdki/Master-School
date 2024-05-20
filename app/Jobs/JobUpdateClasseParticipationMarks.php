@@ -69,59 +69,45 @@ class JobUpdateClasseParticipationMarks implements ShouldQueue
 
             $user = $this->user;
 
-
             $pupils = $classe->getNotAbandonnedPupils();
-
 
             if(count($pupils) > 0){
 
-                foreach($pupils as $pupil){
-
-                    $participation = $pupil->definedParticipationMark($semestre, $subject->id);
-
-
-                    $old = $pupil->marks()->where('marks.school_year_id', $school_year_model->id)
+                $participation_olds = Mark::where('marks.school_year_id', $school_year_model->id)
                                    ->where('marks.subject_id', $subject->id)
                                    ->where('marks.classe_id', $classe->id)
                                    ->where('marks.semestre', $semestre)
                                    ->where('marks.type', 'participation')
-                                   ->first();
+                                   ->forceDelete();
 
-                    if($old && $old->value !== $participation){
+                Mark::withoutEvents(function() use ($pupils, $semestre, $user, $subject, $school_year_model, $classe){
 
-                        $old->update(['value' => $participation]);
+                    foreach($pupils as $pupil){
 
-                    }
-                    else{
+                        $participation = $pupil->definedParticipationMark($semestre, $subject->id);
 
                         $part_mark = Mark::create([
-                                'value' => $participation, 
-                                'pupil_id' => $pupil->id, 
-                                'user_id' => $user->id, 
-                                'creator' => $user->id, 
-                                'subject_id' => $subject->id, 
-                                'school_year_id' => $school_year_model->id, 
-                                'classe_id' => $classe->id, 
-                                'semestre' => $semestre, 
-                                'type' => 'participation', 
-                                'mark_index' => 1, 
-                                'level_id' => $pupil->level_id, 
-                            ]);
+                            'value' => $participation, 
+                            'pupil_id' => $pupil->id, 
+                            'user_id' => $user->id, 
+                            'creator' => $user->id, 
+                            'subject_id' => $subject->id, 
+                            'school_year_id' => $school_year_model->id, 
+                            'classe_id' => $classe->id, 
+                            'semestre' => $semestre, 
+                            'type' => 'participation', 
+                            'mark_index' => 1, 
+                            'level_id' => $pupil->level_id, 
+                        ]);
 
-                            if ($part_mark) {
-                                
-                                $school_year_model->marks()->attach($part_mark->id);
-                            }
-
+                        if ($part_mark) {
+                            
+                            $school_year_model->marks()->attach($part_mark->id);
+                        }
                     }
 
-
-                }
-
-
+                });
             }
-
-
         });
     }
 }

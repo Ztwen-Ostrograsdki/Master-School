@@ -138,6 +138,13 @@ window.addEventListener('modal-updateClassePupilsNames', function(e) {
 window.addEventListener('modal-updateClassePupilsDataFromFile', function(e) {
     $('#updateClassePupilsDataFromFileModal').modal('show');
 });
+window.addEventListener('modal-updateClasseMarksToSimpleExcelFileModal', function(e) {
+    $('#updateClasseMarksToSimpleExcelFileModal').modal('show');
+});
+
+window.addEventListener('modal-excelFileDownloadConfirmation', function(e) {
+    $('#excelFileDownloadConfirmation').modal('show');
+});
 
 window.addEventListener('modal-insertClassePupilsMarksTogether', function(e) {
     $('#insertClassePupilsMarksTogether').modal('show', function(ex) {

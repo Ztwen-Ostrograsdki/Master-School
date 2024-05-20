@@ -230,7 +230,8 @@ trait ClasseTraits{
                     'forced_marks' => $forced_marks,
                     'not_forced_marks' => $not_forced_marks,
                     'participation' => $parts,
-                    'dev' => $devs
+                    'dev' => $devs,
+                    'pupil' => $pupil
                 ];
             }
         }

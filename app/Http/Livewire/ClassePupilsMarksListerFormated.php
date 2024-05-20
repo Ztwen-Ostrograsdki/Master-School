@@ -451,7 +451,10 @@ class ClassePupilsMarksListerFormated extends Component
 
         if($subject && $semestre && $semestre_type){
 
-            $file_name = 'Les-notes-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
+            // $file_name = 'Les-notes-de-' . $subject->name. '-de-la-classe-de-' . strtoupper($classe->name) . '-du-' . $semestre_type . '-' . $semestre . '-' . $school_year_model->school_year . ' - ' . time() . '.xlsx';
+
+            $file_name = strtoupper($classe->name) . '-' . $subject->name . '-SIMPLIFIEES.XLS';
+
 
             return Excel::download(new PupilsAveragesExports($classe, $school_year_model, $semestre, $subject), $file_name);
 

@@ -8,9 +8,14 @@ use App\Models\SchoolYear;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Style\Protection;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadings
+class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadings, WithEvents, WithStyles
 {
 
     use Exportable; 
@@ -79,6 +84,8 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
         $rank = "Non Classé";
 
         $epes = [];
+
+        $parts = [];
 
         $pupils = $classe->getNotAbandonnedPupils($school_year_model->id);
 
@@ -164,7 +171,8 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
                 $data[$p->id] = [
                     "N° d'ordre" => $k,
                     "Matricule" => $p->ltpk_matricule,
-                    'Nom et Prenoms' => $p->getName(),
+                    "Nom " => $p->firstName,
+                    'Prenoms' => $p->lastName,
                     'Moy Int' => $averageEPETab[$p->id],
                     'DEV 1' => $dev1,
                     'DEV 2' => $dev2,
@@ -180,7 +188,8 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
                 $to_fetch = [
                     "N° d'ordre" => $k,
                     "Matricule" => $p->ltpk_matricule,
-                    'Nom et Prenoms' => $p->getName(),
+                    "Nom " => $p->firstName,
+                    'Prenoms' => $p->lastName,
 
                 ];
 
@@ -193,6 +202,8 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
                     $all_marks = $all_marks[$subject->id];
 
                     $epes = $all_marks['epe'];
+
+                    $parts = $all_marks['participation'];
 
                     for($ii = 0; $ii < $this->epeMaxLenght; $ii++){
 
@@ -210,6 +221,19 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
                             $to_fetch["INT" . $id] = " - "; 
 
                         }
+
+                    }
+
+                    if(count($parts)){
+
+                        $part = $parts[0];
+
+                        $to_fetch["PART."] = $part->value == 0.0 ? '00' : $part->value; 
+
+                    }
+                    else{
+
+                        $to_fetch["PART."] = " - "; 
 
                     }
 
@@ -242,14 +266,14 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
     {
         if($this->all == false){
 
-            return ["N° d'ordre", 'MATRICULE', 'NOM ET PRENOMS', 'MOY. INT', 'DEV 1', 'DEV 2', 'MOY. Semestre', 'OBS'];
+            return ["N° d'ordre", 'MATRICULE', 'NOM', 'PRENOMS', 'MOY. INT', 'DEV 1', 'DEV 2', 'MOY. Semestre', 'OBS'];
 
         }
         else{
 
             $epe_size = $this->epeMaxLenght;
 
-            $headers = ["N° d'ordre", "MATRICULE", "NOM ET PRENOMS"];
+            $headers = ["N° d'ordre", "MATRICULE", "NOM", "PRENOMS"];
 
             $default_headers = ['MOY. INT', 'DEV 1', 'DEV 2', 'MOY', 'MOY. COEF', 'RANG', 'OBS'];
 
@@ -258,6 +282,8 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
                 
                 $headers[] = "INT " . $i;
             }
+
+            $headers[] = "PART.";
 
             foreach($default_headers as $h){
 
@@ -268,6 +294,41 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
             return $headers;
 
         }
+    }
+
+
+    public function styles(Worksheet $sheet)
+    {
+
+            // $sheet->getParent()->getActiveSheet()->getProtection()->setSheet(true);
+
+            // $sheet->getParent()->getActiveSheet()
+            //                    ->getStyle('T2:T10')
+            //                    ->getProtection()
+            //                    ->setLocked(Protection::PROTECTION_UNPROTECTED);
+
+        // $sheet->getProtection()->setSheet(true);
+
+        // $sheet->getStyle('A1:A10')->getProtection()->setLocked(Protection::PROTECTION_UNPROTECTED);
+
+
+    }
+
+
+    public function registerEvents() : array
+    {
+        return [
+
+            AfterSheet::class => function(AfterSheet $event){
+
+                $event->sheet->getDelegate()->freezePane("A1");
+
+                // $event->sheet->getDelegate()->freezePane("C1");
+
+            }
+
+
+        ];
     }
 
 

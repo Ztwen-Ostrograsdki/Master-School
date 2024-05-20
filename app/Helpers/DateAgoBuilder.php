@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Helpers\DateFormattor;
 use Illuminate\Support\Carbon;
 
 
@@ -459,52 +460,52 @@ trait DateAgoBuilder{
     }
 
 
-    public function __to($date = null, $with_hour = false)
-    {
-        $date = $this->created_at;
+    // public function __to($date = null, $with_hour = false)
+    // {
+    //     $date = $this->created_at;
 
-        $date_timestamp = Carbon::parse($date);
+    //     $date_timestamp = Carbon::parse($date);
 
-        $now_timestamp = Carbon::now();
+    //     $now_timestamp = Carbon::now();
 
-        $dates = explode(' ', Carbon::parse($date)->toDateTimeString());
+    //     $dates = explode(' ', Carbon::parse($date)->toDateTimeString());
 
-        $d = $dates[0];
+    //     $d = $dates[0];
 
-        $t = $dates[1];
+    //     $t = $dates[1];
 
-        $date_to_str = $this->__getDateAsString($date, null);
+    //     $date_to_str = $this->__getDateAsString($date, null);
 
-        $times = explode(':', $t);
+    //     $times = explode(':', $t);
 
-        $h = $times[0];
+    //     $h = $times[0];
 
-        $m = $times[1];
+    //     $m = $times[1];
 
-        if($now_timestamp->diffInHours($date_timestamp) > 24){
+    //     if($now_timestamp->diffInHours($date_timestamp) > 24){
 
-            $to = ucwords($date_to_str);
+    //         $to = ucwords($date_to_str);
 
-            if($with_hour){
+    //         if($with_hour){
 
-                $to.= ' à ' . $h . 'H ' . $m . "'";
+    //             $to.= ' à ' . $h . 'H ' . $m . "'";
 
-            }
+    //         }
 
-            $date_to_str = $to;
+    //         $date_to_str = $to;
 
-        }
-        else{
+    //     }
+    //     else{
 
-            $date_to_str = $this->getDateAgoFormated(false);
+    //         $date_to_str = $this->getDateAgoFormated(false);
 
-        }
+    //     }
 
 
-        return $date_to_str;
+    //     return $date_to_str;
 
         
-    }
+    // }
 
 
 

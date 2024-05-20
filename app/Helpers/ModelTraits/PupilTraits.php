@@ -10,6 +10,7 @@ use App\Models\PupilAbsences;
 use App\Models\PupilLates;
 use App\Models\School;
 use App\Models\SchoolYear;
+use App\Models\Subject;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -373,54 +374,108 @@ trait PupilTraits{
     public function getMarks($subject_id = null, $semestre = 1, $school_year = null)
     {
         $allMarks = [];
+
         $epes = [];
+
         $devs = [];
+
         $parts = [];
+
         if(!$school_year){
+
             $school_year_model = $this->getSchoolYear();
         }
         else{
+
             if(is_numeric($school_year)){
+
                 $school_year_model = SchoolYear::where('id', $school_year)->first();
             }
             else{
+
                 $school_year_model = SchoolYear::where('school_year', $school_year)->first();
             }
         }
         if($school_year_model){
-            $subjects = $this->classe->subjects;
-            if($subjects){
-                foreach ($subjects as $subject) {
-                    $epes = $this->marks()
-                                           ->where('school_year_id', $school_year_model->id)
-                                           ->where('semestre', $semestre)
-                                           ->where('subject_id', $subject->id)
-                                           ->where('classe_id', $this->classe_id)
-                                           ->where('type', 'epe')
-                                           ->orderBy('id', 'asc')->get();
-                    $parts = $this->marks()
-                                           ->where('school_year_id', $school_year_model->id)
-                                           ->where('semestre', $semestre)
-                                           ->where('subject_id', $subject->id)
-                                           ->where('classe_id', $this->classe_id)
-                                           ->where('type', 'participation')
-                                           ->orderBy('id', 'asc')->get();
-                    $devs = $this->marks()
-                                           ->where('school_year_id', $school_year_model->id)
-                                           ->where('semestre', $semestre)
-                                           ->where('subject_id', $subject->id)
-                                           ->where('classe_id', $this->classe_id)
-                                           ->where('type', 'devoir')
-                                           ->orderBy('id', 'asc')->get();
+
+            if($subject_id){
+
+                $subject = Subject::find($subject_id);
+
+                $epes = $this->marks()
+                               ->where('school_year_id', $school_year_model->id)
+                               ->where('semestre', $semestre)
+                               ->where('subject_id', $subject_id)
+                               ->where('classe_id', $this->classe_id)
+                               ->where('type', 'epe')
+                               ->orderBy('id', 'asc')->get();
+
+                $parts = $this->marks()
+                               ->where('school_year_id', $school_year_model->id)
+                               ->where('semestre', $semestre)
+                               ->where('subject_id', $subject_id)
+                               ->where('classe_id', $this->classe_id)
+                               ->where('type', 'participation')
+                               ->orderBy('id', 'asc')->get();
+                               
+                $devs = $this->marks()
+                               ->where('school_year_id', $school_year_model->id)
+                               ->where('semestre', $semestre)
+                               ->where('subject_id', $subject_id)
+                               ->where('classe_id', $this->classe_id)
+                               ->where('type', 'devoir')
+                               ->orderBy('id', 'asc')->get();
+                
+                $allMarks[$subject_id] = [
+                    'id' => $subject_id,
+                    'name' => $subject->name,
+                    'epe' => $epes,
+                    'participation' => $parts,
+                    'devoir' => $devs
+                ];
+
+            }
+            else{
+
+                $subjects = $this->classe->subjects;
+
+                if($subjects){
                     
-                    $allMarks[$subject->id] = [
-                        'id' => $subject->id,
-                        'name' => $subject->name,
-                        'epe' => $epes,
-                        'participation' => $parts,
-                        'devoir' => $devs
-                    ];
+                    foreach ($subjects as $subject) {
+
+                        $epes = $this->marks()
+                                       ->where('school_year_id', $school_year_model->id)
+                                       ->where('semestre', $semestre)
+                                       ->where('subject_id', $subject->id)
+                                       ->where('classe_id', $this->classe_id)
+                                       ->where('type', 'epe')
+                                       ->orderBy('id', 'asc')->get();
+                        $parts = $this->marks()
+                                       ->where('school_year_id', $school_year_model->id)
+                                       ->where('semestre', $semestre)
+                                       ->where('subject_id', $subject->id)
+                                       ->where('classe_id', $this->classe_id)
+                                       ->where('type', 'participation')
+                                       ->orderBy('id', 'asc')->get();
+                        $devs = $this->marks()
+                                       ->where('school_year_id', $school_year_model->id)
+                                       ->where('semestre', $semestre)
+                                       ->where('subject_id', $subject->id)
+                                       ->where('classe_id', $this->classe_id)
+                                       ->where('type', 'devoir')
+                                       ->orderBy('id', 'asc')->get();
+                        
+                        $allMarks[$subject->id] = [
+                            'id' => $subject->id,
+                            'name' => $subject->name,
+                            'epe' => $epes,
+                            'participation' => $parts,
+                            'devoir' => $devs
+                        ];
+                    }
                 }
+
+
             }
         }
         return $allMarks;

@@ -94,6 +94,11 @@ class ClasseMarksHeaderComponent extends Component
         $this->emit('UpdateClassePupilsPersoDataFromFile', $classe_id);
     }
 
+    public function updateClasseMarksToSimpleExcelFile($classe_id)
+    {
+        $this->emit('UpdateClasseMarksToSimpleExcelFile', $classe_id);
+    }
+
 
     public function reloadClasseDataOnSearch($value)
     {

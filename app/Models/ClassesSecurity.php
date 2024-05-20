@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 
 class ClassesSecurity extends Model
 {
@@ -30,6 +32,14 @@ class ClassesSecurity extends Model
         'locked', 
         'locked_marks_updating'
     ];
+
+
+    // public function prunable(): Builder
+    // {
+    //     return static::where('created_at', '<=', now()->subMonth());
+
+    // }
+
 
 
 }
