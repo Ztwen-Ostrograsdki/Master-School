@@ -113,12 +113,12 @@
                         <div class="m-0 p-0 w-100 my-2 p-2">
                                 <div>
                                     <label class="text-orange" for="files">Selectionner votre épreuve</label>
-                                    <input placeholder="Sélectionner votre épreuve" class="form-control bg-transparent text-white letter-spacing-12 text-italic border border-white" id="files" type="file" wire:model="pendingFiles" multiple>
+                                    <input placeholder="Sélectionner votre épreuve" class="form-control bg-transparent text-white letter-spacing-12 text-italic border border-white" id="files" type="file" wire:model="pendingFile">
                                 </div>
 
                                 <div class="my-3 p-2 d-flex justify-content-start flex-column">
-                                    <span class="ml-3 text-warning letter-spacing-12 text-italic text-center" wire:loading wire:target="pendingFiles" >Chargement en cours, veuillez patienter...</span>
-                                    @forelse($pendingFiles as $key => $pend)
+                                    <span class="ml-3 text-warning letter-spacing-12 text-italic text-center" wire:loading wire:target="pendingFile" >Chargement en cours, veuillez patienter...</span>
+                                    @if($pendingFile)
                                         <span class="m-2 d-flex border rounded">
                                             <table class="m-0 w-100 table-striped table-bordered z-table text-white text-center p-3" style="">
                                                 <col>
@@ -128,42 +128,42 @@
                                                 <col>
                                                 <tr style="letter-spacing: 1.2px;" class="bg-secondary-light-0 p-2">
                                                     <th  class="py-2">
-                                                        Fichier N°{{ $key + 1 }}
+                                                        Fichier 
                                                     </th>
                                                     <th class="text-center" >
                                                         <img class="text-center mx-auto" width="30" src="{{asset('icons/unuse-file.png')}}" alt="une image">
                                                     </th>
                                                     <th >
                                                         <span class="text-white-50 font-italic letter-spacing-12">
-                                                            <small>{{ mb_substr($pend->getClientOriginalName(), 0, 25) }}</small>
+                                                            <small>{{ mb_substr($pendingFile->getClientOriginalName(), 0, 25) }}</small>
                                                         </span>
                                                     </th>
                                                     <th >
                                                         <span class="text-white-50 font-italic letter-spacing-12">
-                                                            <small>{{ number_format(($pend->getSize() / 1000), 2) }} Ko</small>
+                                                            <small>{{ number_format(($pendingFile->getSize() / 1000), 2) }} Ko</small>
                                                         </span>
                                                     </th>
                                                     <th >
                                                         <span class="text-white-50 font-italic letter-spacing-12">
-                                                            <small> .{{ $pend->extension() }}</small>
+                                                            <small> .{{ $pendingFile->extension() }}</small>
                                                         </span>
                                                     </th>
                                                 </tr>
 
                                             </table>                                            
                                         </span>
-                                    @empty
+                                    @else
                                         <span class="text-cyan text-center font-italic fx-20 letter-spacing-12 ">Aucun fichier sélectionné</span>
-                                    @endforelse
+                                    @endif
                                 </div>
 
                                 <div class="my-1 p-2 d-flex justify-content-start flex-column">
-                                    @error('pendingFiles.*')
+                                    @error('pendingFile')
                                         <small class="text-danger">{{$message}}</small>
                                     @enderror
                                 </div>
 
-                                @if($pendingFiles)
+                                @if($pendingFile)
                                 <div class="p-0 m-0 mx-auto d-flex justify-content-center pb-1 pt-1">
                                     <span   wire:click="initiateTransfer" class="text-dark border border-white rounded bg-primary h6 text-center cursor-pointer col-7 z-scale py-2 px-3 ">
                                         <span>Envoyer maintenant</span>

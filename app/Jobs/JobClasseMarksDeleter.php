@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\DispatchTransactionsCommitedEvent;
 use App\Models\Classe;
 use App\Models\Pupil;
 use App\Models\SchoolYear;
@@ -26,7 +27,13 @@ class JobClasseMarksDeleter implements ShouldQueue
 
     public $pupil_id;
 
+    public $total_marks_deleteds = 0;
+
     public $data = [];
+
+    public $tries = 5;
+
+    public $backoff = 3;
 
     /**
      * Create a new job instance.
@@ -95,6 +102,7 @@ class JobClasseMarksDeleter implements ShouldQueue
 
         DB::transaction(function($e) use($classe, $data, $school_year_model) {
 
+
             if($data != []){
 
                 $subject = $data['subject'];
@@ -116,12 +124,16 @@ class JobClasseMarksDeleter implements ShouldQueue
                             $classe->marks()->where('marks.school_year_id', $school_year_model->id)
                                             ->whereBetween('marks.created_at', [$start, $end])->each(function($mark){
 
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                 $mark->delete();
 
                             });
 
                             $classe->related_marks()->where('related_marks.school_year_id', $school_year_model->id)
                                             ->whereBetween('related_marks.created_at', [$start, $end])->each(function($r_m){
+
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                 $r_m->delete();
 
@@ -134,6 +146,7 @@ class JobClasseMarksDeleter implements ShouldQueue
                             $classe->marks()->where('marks.school_year_id', $school_year_model->id)
                                         ->where('marks.type', $type)
                                         ->whereBetween('marks.created_at', [$start, $end])->each(function($mark){
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                 $mark->delete();
 
@@ -142,6 +155,7 @@ class JobClasseMarksDeleter implements ShouldQueue
                             $classe->related_marks()->where('related_marks.school_year_id', $school_year_model->id)
                                         ->where('related_marks.type', $type)
                                         ->whereBetween('related_marks.created_at', [$start, $end])->each(function($r_m){
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                 $r_m->delete();
 
@@ -154,6 +168,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                         ->where('marks.semestre', $semestre)
                                         ->whereBetween('marks.created_at', [$start, $end])->each(function($mark){
 
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                 $mark->delete();
 
                             });
@@ -165,6 +181,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                         ->where('marks.subject_id', $subject->id)
                                         ->whereBetween('marks.created_at', [$start, $end])->each(function($mark){
 
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                 $mark->delete();
 
                             });
@@ -172,6 +190,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                             $classe->related_marks()->where('related_marks.school_year_id', $school_year_model->id)
                                         ->where('related_marks.subject_id', $subject->id)
                                         ->whereBetween('related_marks.created_at', [$start, $end])->each(function($r_m){
+
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                 $r_m->delete();
 
@@ -186,6 +206,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('marks.subject_id', $subject->id)
                                                 ->whereBetween('marks.created_at', [$start, $end])->each(function($mark){
 
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                     $mark->delete();
 
                                 });
@@ -194,6 +216,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('related_marks.type', $type)
                                                 ->where('related_marks.subject_id', $subject->id)
                                                 ->whereBetween('related_marks.created_at', [$start, $end])->each(function($r_m){
+
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                     $r_m->delete();
 
@@ -207,6 +231,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('marks.subject_id', $subject->id)
                                                 ->whereBetween('marks.created_at', [$start, $end])->each(function($mark){
 
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                     $mark->delete();
 
                                 });
@@ -215,6 +241,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('related_marks.semestre', $semestre)
                                                 ->where('related_marks.subject_id', $subject->id)
                                                 ->whereBetween('related_marks.created_at', [$start, $end])->each(function($r_m){
+
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                     $r_m->delete();
 
@@ -228,6 +256,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('marks.type', $type)
                                                 ->whereBetween('marks.created_at', [$start, $end])->each(function($mark){
 
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                     $mark->delete();
 
                                 });
@@ -238,6 +268,7 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('related_marks.semestre', $semestre)
                                                 ->where('related_marks.type', $type)
                                                 ->whereBetween('related_marks.created_at', [$start, $end])->each(function($r_m){
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                     $r_m->delete();
 
@@ -252,6 +283,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('marks.subject_id', $subject->id)
                                                 ->whereBetween('marks.created_at', [$start, $end])->each(function($mark){
 
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                     $mark->delete();
 
                                 });
@@ -263,6 +296,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('related_marks.type', $type)
                                                 ->where('related_marks.subject_id', $subject->id)
                                                 ->whereBetween('related_marks.created_at', [$start, $end])->each(function($r_m){
+
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                     $r_m->delete();
 
@@ -278,12 +313,16 @@ class JobClasseMarksDeleter implements ShouldQueue
                             $classe->marks()->where('marks.school_year_id', $school_year_model->id)
                                             ->each(function($mark){
 
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                 $mark->delete();
 
                             });
 
                             $classe->related_marks()->where('related_marks.school_year_id', $school_year_model->id)
                                             ->each(function($r_m){
+
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                 $r_m->delete();
 
@@ -297,6 +336,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                         ->where('marks.type', $type)
                                         ->each(function($mark){
 
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                 $mark->delete();
 
                             });
@@ -304,6 +345,7 @@ class JobClasseMarksDeleter implements ShouldQueue
                             $classe->related_marks()->where('related_marks.school_year_id', $school_year_model->id)
                                         ->where('related_marks.type', $type)
                                         ->each(function($r_m){
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                 $r_m->delete();
 
@@ -316,6 +358,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                         ->where('marks.semestre', $semestre)
                                         ->each(function($mark){
 
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                 $mark->delete();
 
                             });
@@ -323,6 +367,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                             $classe->related_marks()->where('related_marks.school_year_id', $school_year_model->id)
                                         ->where('related_marks.semestre', $semestre)
                                         ->each(function($r_m){
+
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                 $r_m->delete();
 
@@ -335,6 +381,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                         ->where('marks.subject_id', $subject->id)
                                         ->each(function($mark){
 
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                 $mark->delete();
 
                             });
@@ -342,6 +390,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                             $classe->related_marks()->where('related_marks.school_year_id', $school_year_model->id)
                                         ->where('related_marks.subject_id', $subject->id)
                                         ->each(function($r_m){
+
+                                $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                 $r_m->delete();
 
@@ -355,6 +405,7 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('marks.type', $type)
                                                 ->where('marks.subject_id', $subject->id)
                                                 ->each(function($mark){
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                     $mark->delete();
 
@@ -364,6 +415,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('related_marks.type', $type)
                                                 ->where('related_marks.subject_id', $subject->id)
                                                 ->each(function($r_m){
+
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                     $r_m->delete();
 
@@ -377,6 +430,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('marks.subject_id', $subject->id)
                                                 ->each(function($mark){
 
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                     $mark->delete();
 
                                 });
@@ -385,6 +440,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('related_marks.semestre', $semestre)
                                                 ->where('related_marks.subject_id', $subject->id)
                                                 ->each(function($r_m){
+
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                     $r_m->delete();
 
@@ -398,6 +455,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('marks.type', $type)
                                                 ->each(function($mark){
 
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                     $mark->delete();
 
                                 });
@@ -406,6 +465,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('related_marks.semestre', $semestre)
                                                 ->where('related_marks.type', $type)
                                                 ->each(function($r_m){
+
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                     $r_m->delete();
 
@@ -420,6 +481,8 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('marks.subject_id', $subject->id)
                                                 ->each(function($mark){
 
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                                     $mark->delete();
 
                                 });
@@ -429,6 +492,7 @@ class JobClasseMarksDeleter implements ShouldQueue
                                                 ->where('related_marks.type', $type)
                                                 ->where('related_marks.subject_id', $subject->id)
                                                 ->each(function($r_m){
+                                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
 
                                     $r_m->delete();
 
@@ -446,15 +510,37 @@ class JobClasseMarksDeleter implements ShouldQueue
 
                 $classe->marks()->where('marks.school_year_id', $school_year_model->id)->each(function($mark){
 
+                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                     $mark->delete();
 
                 });
 
                 $classe->related_marks()->where('related_marks.school_year_id', $school_year_model->id)->each(function($r_m){
 
+                    $this->total_marks_deleteds = $this->total_marks_deleteds + 1;
+
                     $r_m->delete();
 
                 });
+
+            }
+
+
+
+        });
+
+        DB::afterCommit(function(){
+
+            // DispatchTransactionsCommitedEvent::dispatch($this->batch()->id);
+
+            $batch_id = $this->batch()->id;
+
+            $delete_batch = $this->classe->marks_batches()->where('batch_id', $batch_id)->first();
+
+            if($delete_batch){
+
+                $delete_batch->update(['total_marks' => $this->total_marks_deleteds]);
 
             }
 

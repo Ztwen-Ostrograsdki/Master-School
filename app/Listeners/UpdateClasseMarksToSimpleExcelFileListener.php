@@ -26,9 +26,9 @@ class UpdateClasseMarksToSimpleExcelFileListener
     {
         $batch = Bus::batch([
 
-            new JobUpdateClasseMarksToSimpleExcelFile($event->classe, $event->file_name, $event->file_path, $event->file_sheet, $event->school_year_model, $event->semestre, $event->subject, $event->user, $event->pupil_id),
+            new JobUpdateClasseMarksToSimpleExcelFile($event->classe, $event->extension, $event->file_name, $event->file_path, $event->file_sheet, $event->school_year_model, $event->semestre, $event->subject, $event->user, $event->pupil_id),
 
-            new JobMigrateClasseMarksExcelFileDataToDatabase($event->classe, $event->file_name, $event->file_path, $event->school_year_model, $event->semestre, $event->subject, $event->user),
+            new JobMigrateClasseMarksExcelFileDataToDatabase($event->classe, $event->extension, $event->file_name, $event->file_path, $event->school_year_model, $event->semestre, $event->subject, $event->user),
 
         ])->then(function(Batch $batch) use ($event){
 

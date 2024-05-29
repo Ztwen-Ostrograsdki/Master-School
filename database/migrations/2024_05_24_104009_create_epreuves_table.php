@@ -13,18 +13,25 @@ class CreateEpreuvesTable extends Migration
      */
     public function up()
     {
+        Schema::disableForeignKeyConstraints();
         Schema::create('epreuves', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->boolean('authorized')->default(false);
-            $table->boolean('blocked')->default(false);
-
+            $table->id();
             $table->string('name');
-            $table->string('target')->nullable()->default('devoir');
+            $table->string('extension');
+            $table->string('path')->nullable()->default(null);
+            $table->string('trimestre')->nullable()->default(null);
+            $table->string('semestre')->nullable()->default(null);
+            $table->unsignedBigInteger('downloaded_counter')->nullable()->default(0);
+            $table->boolean('downloaded')->default(false);
+            $table->boolean('secure')->default(false);
+            $table->boolean('locked')->default(false);
+            $table->boolean('done')->default(false);
+            $table->boolean('authorized')->default(false);
+            $table->date('date')->nullable()->default(null);
             $table->text('description')->nullable()->default(null);
-            $table->text('duration')->nullable()->default(120);
+            $table->text('duration')->nullable();//In minutes
             $table->string('session')->nullable()->default(null);
             $table->string('exam_name')->nullable()->default(null);
-            $table->string('semestre')->nullable()->default(null);
 
             $table->unsignedBigInteger('level_id')->nullable()->default(null);
             $table->foreign('level_id')
@@ -74,6 +81,13 @@ class CreateEpreuvesTable extends Migration
             $table->foreign('school_year_id')
                   ->references('id')
                   ->on('school_years')
+                  ->onUpdate('restrict')
+                  ->onDelete('restrict');
+
+            $table->unsignedBigInteger('filial_id')->nullable()->default(null);
+            $table->foreign('filial_id')
+                  ->references('id')
+                  ->on('filials')
                   ->onUpdate('restrict')
                   ->onDelete('restrict');
             $table->timestamps();

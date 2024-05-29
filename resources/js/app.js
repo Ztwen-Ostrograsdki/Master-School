@@ -27,19 +27,15 @@ if (window.User) {
 e.private('user.' + window.ClientUser.id)
     .listen('UserLeavingChannelEvent', function(e) {
 
-        console.log(e.data, e.user, e)
-
         Livewire.emit('UserLeavingChannelLiveEvent', e);
     })
     .listen('UserJoiningChannelEvent', function(e) {
 
-        console.log(e.data, e.user, e)
 
         Livewire.emit('UserJoiningChannelLiveEvent', e);
     })
     .listen('PupilDataAreReadyToFetchEvent', function(e) {
 
-        console.log(e.data)
 
         Livewire.emit('DataAreReadyToFetchLiveEvent', e);
     })
@@ -198,8 +194,23 @@ e.private('user.' + window.ClientUser.id)
 
         Livewire.emit('ClasseExcelsFilesWasUpdatedLiveEvent');
     }) 
+    .listen('UpdatePupilsMarksInsertionProgressEvent', function(e) {
+
+        Livewire.emit('UpdatePupilsMarksInsertionProgressLiveEvent');
+    }) 
+    .listen('PupilsMarksUpdatingFailedEvent', function(e) {
+
+        Livewire.emit('PupilsMarksUpdatingFailedLiveEvent', e.data);
+    }) 
+     
 
 e.private('master')
+    .listen('DispatchTransactionsCommitedEvent', function(e) {
+
+        console.log(e);
+
+        // Livewire.emit('RefreshLockedRequestListLiveEvent');
+    })
     .listen('RefreshLockedRequestListEvent', function(e) {
 
         Livewire.emit('RefreshLockedRequestListLiveEvent');
@@ -248,6 +259,10 @@ e.private('master')
             toast: true,
             showConfirmButton: false,
         });
+    })
+    .listen('NewJobStartEvent', function(e) {
+
+        console.log(e);
     })
 
 e.private('reloadMarkChannel.' + window.ClientUser.id)

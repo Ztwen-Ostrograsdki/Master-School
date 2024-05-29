@@ -12,7 +12,7 @@ trait MarkTraits{
 
     use ModelQueryTrait;
 
-    public function ensureThatMarkUpdateNotDelayed()
+    public function ensureThatMarkUpdateNotDelayed($delay = null)
     {
         $auth = auth()->user();
 
@@ -27,7 +27,15 @@ trait MarkTraits{
 
         $now = Carbon::now()->timestamp;
 
-        return $this->calc($to_times, $now) <= $this->getDelay() ? true : false;
+        $delay_duration = $this->getDelay();
+
+        if($delay){
+
+            $delay_duration = $delay;
+
+        }
+
+        return $this->calc($to_times, $now) <= $delay_duration ? true : false;
 
         //$auth->isAdminAs('master') ? true : false
 

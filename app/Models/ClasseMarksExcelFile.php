@@ -14,9 +14,18 @@ class ClasseMarksExcelFile extends Model
 {
     use HasFactory, DateFormattor;
 
-    protected $fillable = ['name', 'path', 'classe_id', 'subject_id', 'school_year_id', 'semestre', 'user_id', 'downloaded', 'downloaded_counter', 'secure'];
+    protected $fillable = ['name', 'path', 'classe_id', 'subject_id', 'school_year_id', 'semestre', 'user_id', 'downloaded', 'downloaded_counter', 'secure', 'locked', 'extension'];
 
     private $table_name = "classe_marks_excel_files";
+
+
+
+    public function getFullPath()
+    {
+        $full_path = $this->path . '/' . $this->name . '' . $this->extension;
+
+        return $full_path;
+    }
 
     
 

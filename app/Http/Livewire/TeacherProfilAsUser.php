@@ -11,7 +11,7 @@ use Livewire\Component;
 
 class TeacherProfilAsUser extends Component
 {
-    protected $listeners = ['schoolYearChangedLiveEvent' => 'reloadData', 'NewClasseMarksInsert' => 'cleanRelaodNow'];
+    protected $listeners = ['schoolYearChangedLiveEvent' => 'reloadData', 'NewClasseMarksInsert' => 'cleanRelaodNow', 'PupilsMarksUpdatingFailedLiveEvent' => 'getMarksUpdatingMessage'];
 
     use ModelQueryTrait;
 
@@ -32,6 +32,12 @@ class TeacherProfilAsUser extends Component
                 'classe_general_stats' => 'Statistique de la classe',
                 'absences' => 'Gestion absences/présences de la classe'
             ];
+
+
+    public function getMarksUpdatingMessage($data)
+    {
+        dd($data);
+    }
 
 
 

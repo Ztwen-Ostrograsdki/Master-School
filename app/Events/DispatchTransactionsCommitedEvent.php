@@ -10,20 +10,22 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ClasseExcelsFilesWasUpdatedEvent implements ShouldBroadcast
+class DispatchTransactionsCommitedEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $user = null;
+    public $user;
+
+    public $transactions_committed = 0;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($user = null)
+    public function __construct($transactions_committed)
     {
-        $this->user = $user;
+        $this->transactions_committed = $transactions_committed;
     }
 
     /**
@@ -33,18 +35,6 @@ class ClasseExcelsFilesWasUpdatedEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        if($this->user){
-
-            if($this->user->id){
-
-                return new PrivateChannel('user.' . $this->user->id);
-
-            }
-
-            return new PrivateChannel('master');
-
-        }
-
         return new PrivateChannel('master');
     }
 }

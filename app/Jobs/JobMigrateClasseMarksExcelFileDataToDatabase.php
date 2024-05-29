@@ -27,6 +27,8 @@ class JobMigrateClasseMarksExcelFileDataToDatabase implements ShouldQueue
 
     public $semestre;
 
+    public $extension = '.XLS';
+
     public $file_path;
 
     public $subject;
@@ -40,11 +42,13 @@ class JobMigrateClasseMarksExcelFileDataToDatabase implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Classe $classe, $file_name, $file_path, SchoolYear $school_year_model, $semestre, Subject $subject, User $user)
+    public function __construct(Classe $classe, $extension, $file_name, $file_path, SchoolYear $school_year_model, $semestre, Subject $subject, User $user)
     {
         $this->classe = $classe;
 
         $this->school_year_model = $school_year_model;
+
+        $this->extension = $extension;
 
         $this->semestre = $semestre;
 
@@ -67,6 +71,7 @@ class JobMigrateClasseMarksExcelFileDataToDatabase implements ShouldQueue
     {
         $data = [
             'name' => $this->file_name,
+            'extension' => $this->extension,
             'path' => $this->file_path, 
             'classe_id' => $this->classe->id, 
             'subject_id' => $this->subject->id, 

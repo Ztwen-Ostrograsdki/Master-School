@@ -89,6 +89,14 @@ class ClasseMarksHeaderComponent extends Component
     }
 
 
+    public function showMarksInsertionProgress()
+    {
+        
+        $this->emit('ClasseProfilSectionSelectedChangedLiveEvent', 'classe_marks_insertion_progress');
+        
+    }
+
+
     public function updateClassePupilsPersoDataFromFile($classe_id)
     {
         $this->emit('UpdateClassePupilsPersoDataFromFile', $classe_id);

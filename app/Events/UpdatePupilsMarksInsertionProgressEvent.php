@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -10,18 +11,18 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ClasseExcelsFilesWasUpdatedEvent implements ShouldBroadcast
+class UpdatePupilsMarksInsertionProgressEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $user = null;
+    public $user;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($user = null)
+    public function __construct(User $user)
     {
         $this->user = $user;
     }
@@ -33,18 +34,6 @@ class ClasseExcelsFilesWasUpdatedEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        if($this->user){
-
-            if($this->user->id){
-
-                return new PrivateChannel('user.' . $this->user->id);
-
-            }
-
-            return new PrivateChannel('master');
-
-        }
-
-        return new PrivateChannel('master');
+        return new PrivateChannel('user.' . $this->user->id);
     }
 }

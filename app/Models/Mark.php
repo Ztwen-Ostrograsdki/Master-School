@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\UserTryingToUpdatePupilMarkEvent;
 use App\Helpers\DateFormattor;
 use App\Helpers\ModelTraits\MarkTraits;
 use App\Models\Classe;
@@ -13,12 +14,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Mark extends Model
 {
     use HasFactory, SoftDeletes, MarkTraits, DateFormattor, Prunable;
 
-    const DELAYED = 48; // For three hours among
+    const DELAYED = 72; // For three days among
 
     public function getDelay()
     {
@@ -38,17 +40,60 @@ class Mark extends Model
         'exam_name', 
         'session', 
         'month', 
-        'editing_value', 
         'edited', 
         'level_id', 
         'creator', 
         'editor', 
         'authorized',
+        'updating',
         'forget',
         'blocked',
         'forced_mark',
         'mark_index',
     ];
+
+
+    protected $casts = ['editing_value'];
+
+    public function validateUpdatingValue($new_value, User $user, $others_data = [])
+    {
+        DB::transaction(function($e) use($new_value, $user, $others_data){
+
+            if($user->isAdminAs('master')){
+
+                if($others_data){ 
+
+                    $this->update(['value' => $new_value]);
+
+                    return $this->update($others_data);
+
+
+                }
+
+                return $this->update(['value' => $new_value]);
+                
+            }
+            else{
+
+
+                if($others_data){ 
+
+                    $this->forceFill(['editing_value' => $new_value, 'editor' => $user->id, 'updating' => true]);
+
+                    return $this->update($others_data);
+
+
+                }
+
+                return $this->forceFill(['editing_value' => $new_value, 'editor' => $user->id, 'updating' => true]);
+
+
+            }
+
+        });
+    }
+
+
 
 
     public function prunable(): Builder

@@ -32,7 +32,16 @@ class MarkObserver
      */
     public function updated(Mark $mark)
     {
-        $mark->value > 0 && $mark->isDirty() ? $this->doJob($mark) : $this->doNotJob();
+        $targets = ['subject_id', 'classe_id', 'semestre', 'type', 'authorized', 'forget', 'forced_mark'
+        ];
+
+        if($mark->isDirty($targets)){
+
+            $this->doJob($mark);
+
+        }
+
+        // $mark->value > 0 && $mark->isDirty() ? $this->doJob($mark) : $this->doNotJob();
     }
 
     /**
@@ -55,7 +64,7 @@ class MarkObserver
     public function deleting(Mark $mark)
     {
 
-        // dispatch(new JobForceMarksDestroyingAfterMoreDays($mark))->delay(Carbon::now()->addDays(30));
+        dispatch(new JobForceMarksDestroyingAfterMoreDays($mark))->delay(Carbon::now()->addDays(30));
     }
 
     /**

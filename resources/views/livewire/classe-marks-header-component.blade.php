@@ -86,7 +86,7 @@
                     <span class="fa fa-trash"></span>
                 </span>
             @endif
-            <span wire:click="insertClasseMarks" class="btn btn-primary border z-scale border-white mr-1 float-right" title="Insérer des notes de classe">
+            <span wire:click.prefetch="insertClasseMarks" class="btn btn-primary border z-scale border-white mr-1 float-right" title="Insérer des notes de classe">
                 <span class="fa fa-upload"></span>
                 <small>Insérer</small>
             </span>
@@ -109,6 +109,10 @@
 
             <span wire:click="updateClasseMarksToSimpleExcelFile({{$classe->id}})" class="btn btn-success border z-scale border-white mr-1 float-right" title="Mettre à jour le fichier de notes des apprenants">
                 <span class="fa fa-upload"></span>
+            </span>
+
+            <span wire:click="showMarksInsertionProgress" class="btn btn-success border z-scale border-white mr-1 float-right" title="Afficher la progression des notes en cours">
+                <span class="fa fa-recycle"></span>
             </span>
         @endif
 

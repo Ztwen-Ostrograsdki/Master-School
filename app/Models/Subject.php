@@ -35,7 +35,7 @@ class Subject extends Model
 
     public function epreuves()
     {
-        return $this->hasMany(TransferFile::class);
+        // return $this->hasMany(TransferFile::class);
     }
 
 

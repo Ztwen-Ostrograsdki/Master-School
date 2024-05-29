@@ -38,6 +38,8 @@ class ClasseMarksDeletionCreatedEvent implements ShouldBroadcastNow
 
     public $data = [];
 
+    public $total_marks;
+
     /**
      * Create a new event instance.
      *
@@ -56,6 +58,8 @@ class ClasseMarksDeletionCreatedEvent implements ShouldBroadcastNow
         $this->type = $type;
 
         $this->end;
+
+        $this->total_marks = rand(14, 204);
 
         $this->start = $start;
 

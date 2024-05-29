@@ -22,6 +22,10 @@ class JobUpdateClasseAnnualAverageIntoDatabase implements ShouldQueue
 
     protected $school_year_model;
 
+    public $tries = 5;
+
+    public $backoff = 3;
+
 
     /**
      * Create a new job instance.
@@ -44,6 +48,12 @@ class JobUpdateClasseAnnualAverageIntoDatabase implements ShouldQueue
      */
     public function handle()
     {
+        if($this->batch()->cancelled()){
+
+            return;
+
+        }
+        
         $classe = $this->classe;
 
         $school_year_id = $this->school_year_model->id;

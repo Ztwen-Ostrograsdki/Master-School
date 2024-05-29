@@ -40,6 +40,7 @@ class ClasseProfil extends Component
         'PresenceLateWasUpdated' => 'reloadClasseData',
         'selectedClasseSubjectChangeLiveEvent' => 'reloadClasseSubjectSelected',
         'ClasseProfilSectionSelectedChangedLiveEvent' => 'reloadClasseSectionSelected',
+        'PupilsMarksUpdatingFailedLiveEvent' => 'getMarksUpdatingMessage',
     ];
 
     public $slug;
@@ -74,6 +75,7 @@ class ClasseProfil extends Component
         'classe_general_stats' => 'Tableau des stats', 
         'averages' => 'Les moyennes',
         'simple_classe_marks_view' => 'Vue Simplifiée des notes',
+        'classe_marks_insertion_progress' => 'Progression des notes en cours',
     ];
 
     protected $rules = ['classeName' => 'required|string'];
@@ -87,6 +89,12 @@ class ClasseProfil extends Component
         else{
             return abort(404);
         }
+    }
+
+
+    public function getMarksUpdatingMessage($data)
+    {
+        dd($data);
     }
 
     public function to_print()

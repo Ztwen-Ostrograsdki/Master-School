@@ -321,7 +321,7 @@ class PupilsAveragesExports implements FromCollection, ShouldAutoSize, WithHeadi
 
             AfterSheet::class => function(AfterSheet $event){
 
-                $event->sheet->getDelegate()->freezePane("A1");
+                // $event->sheet->getDelegate()->freezePane("A1");
 
                 // $event->sheet->getDelegate()->freezePane("C1");
 

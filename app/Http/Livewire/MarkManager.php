@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 
 use App\Events\NewMarkInsertEvent;
+use App\Events\UserTryingToUpdatePupilMarkEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Mark;
@@ -93,7 +94,7 @@ class MarkManager extends Component
 
             if($pupil && $mark){ 
 
-                $update_not_delayed = $mark->ensureThatMarkUpdateNotDelayed();
+                $update_not_delayed = $mark->ensureThatMarkUpdateNotDelayed(24*7); // Mark last updated under a week
 
                 if($update_not_delayed){
 
@@ -102,12 +103,15 @@ class MarkManager extends Component
                         $this->pupil = $pupil;
                         
                         $this->markModel = $mark;
+
                         $this->mark = $mark->value;
 
                         $this->type = $mark->type;
+
                         $this->mark_index = $mark->mark_index;
 
                         $this->semestre_id = $mark->semestre;
+
                         $this->dispatchBrowserEvent('modal-markManager');
                     }
                     else{
@@ -115,7 +119,7 @@ class MarkManager extends Component
                     }
                 }
                 else{
-                    $this->dispatchBrowserEvent('Toast', ['title' => 'EDITION NOTE EXPIREE', 'message' => "Cette note ne peut plus être éditée!", 'type' => 'warning']);
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'EDITION NOTE EXPIREE', 'message' => "Cette note ne peut plus être éditée! Veuillez vous rapprocher de l'administration", 'type' => 'warning']);
                 }
 
             }
@@ -213,27 +217,44 @@ class MarkManager extends Component
 
         }
 
+        $updater = auth()->user();
 
-        $not_secure = auth()->user()->ensureThatTeacherCanAccessToClass($classe_id);
+
+        $not_secure = $updater->ensureThatTeacherCanAccessToClass($classe_id);
+
         if($not_secure){
+
             if($semestre && $type && $mark && $pupil){
-                DB::transaction(function($e) use ($mark, $pupil, $semestre, $type, $mark_index){
-                    $this->markModel->update([
-                        'value' => $mark,
-                        'semestre' => $semestre,
-                        'type' => $type,
-                        'mark_index' => $mark_index,
-                        'editor' => auth()->user()->id, 
-                    ]);
 
-                    DB::afterCommit(function(){
-                        $this->emit('pupilUpdated');
-                        $this->emit('classeUpdated');
-                        $this->dispatchBrowserEvent('hide-form');
-                        $this->resetErrorBag();
-                    });
+                $new_value = $mark;
 
-                });
+                $others_data = [];
+
+                if($this->markModel->isDirty('semestre')){
+
+                    $others_data['semestre' => $semestre];
+
+                }
+
+                if($this->markModel->isDirty('type')){
+
+                    $others_data['type' => $type];
+
+                }
+
+                if($this->markModel->isDirty('mark_index')){
+
+                    $others_data['mark_index' => $mark_index];
+
+                }
+
+                UserTryingToUpdatePupilMarkEvent::dispatch($this->markModel, $updater, $new_value, $others_data);
+
+
+                $this->emit('pupilUpdated');
+                $this->emit('classeUpdated');
+                $this->dispatchBrowserEvent('hide-form');
+                $this->resetErrorBag();
 
             }
             else{
@@ -243,9 +264,6 @@ class MarkManager extends Component
         else{
             $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE', 'message' => "La mise à jour ou l'insertion des notes est temporairement indisponible pour cette classe!", 'type' => 'warning']);
         }
-
-
-       
 
     }
 }

@@ -30,6 +30,8 @@ class UpdateClasseMarksToSimpleExcelFileEvent implements ShouldBroadcast
 
     public $file_path;
 
+    public $extension = '.XLS';
+
     public $subject;
 
     public $user;
@@ -43,7 +45,7 @@ class UpdateClasseMarksToSimpleExcelFileEvent implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(Classe $classe, $file_name, $file_path, $file_sheet, SchoolYear $school_year_model, $semestre, Subject $subject, User $user, $pupil_id = null)
+    public function __construct(Classe $classe, $extension, $file_name, $file_path, $file_sheet, SchoolYear $school_year_model, $semestre, Subject $subject, User $user, $pupil_id = null)
     {
         $this->classe = $classe;
 
@@ -52,6 +54,8 @@ class UpdateClasseMarksToSimpleExcelFileEvent implements ShouldBroadcast
         $this->semestre = $semestre;
 
         $this->file_sheet = $file_sheet;
+
+        $this->extension = $extension;
 
         $this->file_path = $file_path;
 

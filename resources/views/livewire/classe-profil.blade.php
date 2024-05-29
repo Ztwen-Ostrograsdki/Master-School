@@ -435,6 +435,10 @@
                 @if($classe)
                     <div class="">
 
+                        <div>
+                            @livewire('progress-bar-small-component', ['classe_id' => $classe->id])
+                        </div>
+
                         @if($section_selected == 'liste')
 
                             @livewire('classe-pupils-lister', ['classe_id' => $classe->id])
@@ -443,7 +447,11 @@
 
                             @livewire('classe-marks-lister', ['classe_id' => $classe->id])
 
-                         @elseif($section_selected == 'excel_files')
+                        @elseif($section_selected == 'classe_marks_insertion_progress')
+
+                            @livewire('pupils-marks-insertion-progress-component', ['classe_id' => $classe->id])
+
+                        @elseif($section_selected == 'excel_files')
 
                             @livewire('classes-marks-excel-files-completed', ['classe_id' => $classe->id])
 

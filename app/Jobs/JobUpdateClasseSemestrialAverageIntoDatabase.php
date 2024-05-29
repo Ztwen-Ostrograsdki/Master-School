@@ -46,6 +46,12 @@ class JobUpdateClasseSemestrialAverageIntoDatabase implements ShouldQueue
      */
     public function handle()
     {
+        if($this->batch()->cancelled()){
+
+            return;
+
+        }
+
         $semestrialAverages = [];
 
         $classe = $this->classe;

@@ -34,26 +34,32 @@
                             <col>
                             <col>
                             <col>
+                            <col>
                             <tr class="text-center fx-15 text-orange bg-secondary-light-0" style="letter-spacing: 1.2px;">
                                 <td class="py-3">No</td>
-                                <td>Fichier</td>
+                                <td>
+                                    Fichier
+                                    <span>(type)</span>
+                                </td>
                                 <td>Matière</td>
                                 <td>Classe</td>
                                 <td>Auteur</td>
                                 <td>Téléchargements</td>
-                                <td>Action</td>
+                                <td>Type</td>
                                 <td>Taille</td>
+                                <td>Action</td>
                             </tr>
 
                             @foreach($classe_files as $cf)
 
-                            @php
-                                $full_path = $cf->path . '/' . $cf->name;
-                            @endphp
+                            
                             <tr class="text-center">
                                 <td class="text-center ">{{ $loop->iteration }}</td>
                                 <td class="text-left px-2 ">
-                                    <span class="d-block">{{ $cf->name }}</span>
+                                    <span class="d-block">
+                                        {{ $cf->name }}
+                                        <span class="float-right text-orange">( {{str_replace('.', '', $cf->extension)}} ) </span>
+                                    </span>
                                     <small class="float-right text-warning">
                                         Envoyé le {{ $cf->__to(null, false, true) }}
                                     </small>
@@ -65,10 +71,20 @@
                                 <td class=" ">
                                     {{ $cf->downloaded_counter }}
                                 </td>
+                                <td>
+                                    <span class="fa bi-filetype-{{str_replace('.', '', $cf->extension)}} fx-17"></span>
+                                </td>
+                                <td>
+                                    {{ number_format((Illuminate\Support\Facades\File::size($cf->getFullPath()) / 1000), 2)   }} Ko
+                                </td>
                                 <td class="p-0 m-0">
                                    <div class="d-flex justify-content-around">
-                                        <div title="Télécharger le fichier" class="btn btn-primary">
-                                            <span wire:click="downloadTheFile({{$cf->id}})" class="fa fa-download"></span>
+                                        <div wire:click="downloadTheFile({{$cf->id}})" title="Télécharger le fichier" class="btn btn-primary">
+                                            <span  class="fa fa-download"></span>
+                                       </div>                                        
+                                       <div wire:click="downloadThePDFFormat({{$cf->id}})" title="Convertir et télecharger en PDF" class="btn btn-primary border border-warning">
+                                            <span class="fa bi-filetype-pdf mr-2"></span>
+                                            <span class="fa fa-download"></span>
                                        </div>
                                        <div wire:click="deleteTheFile({{$cf->id}})" title="Supprimer le fichier" class="btn btn-danger">
                                             <span class="fa fa-trash"></span>
@@ -85,9 +101,7 @@
                                        @endif
                                    </div>
                                 </td>
-                                <td>
-                                    {{ number_format((Illuminate\Support\Facades\File::size($full_path) / 1000), 2)   }} Ko
-                                </td>
+                                
                             </tr>
                             @endforeach
                         </table>

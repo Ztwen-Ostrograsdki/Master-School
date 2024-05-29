@@ -27,6 +27,10 @@ class JobFlushAveragesIntoDataBase implements ShouldQueue
 
     public $semestre = null;
 
+    public $tries = 2;
+
+    public $backoff = 2;
+
     /**
      * Create a new event instance.
      *
@@ -51,6 +55,12 @@ class JobFlushAveragesIntoDataBase implements ShouldQueue
      */
     public function handle()
     {
+
+        if($this->batch()->cancelled()){
+
+            return;
+
+        }
 
         DB::transaction(function($e){
 

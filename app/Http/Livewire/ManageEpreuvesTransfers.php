@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Events\LocalTransfertCreatedEvent;
 use App\Events\NewEpreuveWasUploadedEvent;
 use App\Events\TeacherFileWasSentWithSuccessEvent;
+use App\Helpers\FileManager\ZtwenEpreuveFileManager;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\ClasseGroup;
@@ -23,7 +24,9 @@ class ManageEpreuvesTransfers extends Component
 
     public $targets = ['devoir' => 'Devoir', 'epe' => 'interrogation', 'bac' => "Examen BAC", 'bepc' => "Examen BEPC"];
 
-    public $pendingFiles = [];
+    public $pendingFile;
+
+    public $targets_files = [];
 
     public $semestre = 1;
 
@@ -58,7 +61,7 @@ class ManageEpreuvesTransfers extends Component
 
     protected $rules = [
 
-        'pendingFiles.*' => 'file|mimes:docx,pdf|max:1000',
+        'pendingFile' => 'file|mimes:docx,pdf|max:1000',
         'subject_id' => 'required|int',
         'duration' => 'required|int|max:6',
         'target' => 'required|string',
@@ -129,7 +132,6 @@ class ManageEpreuvesTransfers extends Component
         return view('livewire.manage-epreuves-transfers', compact('semestres', 'school_year_model', 'classes', 'classe_groups', 'user', 'subjects'));
     }
 
-
     public function initiateTransfer()
     {
         $user = auth()->user();
@@ -148,69 +150,118 @@ class ManageEpreuvesTransfers extends Component
 
         }
 
+        if($this->data_file && $this->subject && session('semestre_selected') && session('classe_subject_selected')){
+
+            $classe = $this->classe;
+
+            $user = auth()->user();
+
+            $file_sheet = $this->data_file->getRealPath();
+
+            $extension = '.' . $this->data_file->extension();
+
+            $semestre = $this->semestre_type . '-' . $this->semestre;
+
+            $manager = new ZtwenEpreuveFileManager($this->classe, "excels", null, $this->school_year_model, $semestre, $this->subject, $extension);
+
+            $file_name = $manager->file_name;
+
+            $path = $manager->storage_path;
+            
+
+            // UpdateClasseMarksToSimpleExcelFileEvent::dispatch($classe, $extension, $file_name, $path, $file_sheet, $this->school_year_model, $this->semestre, $this->subject, $user, $this->pupil_id);
+
+        }
+
+    }
+
+
+    public function putFile()
+    {
+
+    }
+
+
+    public function removeFile()
+    {
+
+    }
+
+    public function refreshFilesTables()
+    {
+        $this->resetErrorBag();
+        
+        $this->reset('pendingFile', 'targets_files');
+    }
+
+
+    public function frowTransfer()
+    {
+
+
         $transfer = $user->transfers()->create();
 
-        $transfer->files()->saveMany(
-            collect($this->pendingFiles)->map(function(TemporaryUploadedFile $pendFile) use($folder, $user){
+        // $transfer->files()->saveMany(
+        //     collect($this->pendingFiles)->map(function(TemporaryUploadedFile $pendFile) use($folder, $user){
 
-                $sub = '';
+        //         $sub = '';
 
-                $cln = '';
+        //         $cln = '';
 
-                if($this->subject_id){
+        //         if($this->subject_id){
 
-                    $sub = $user->teacher->speciality()->name;
+        //             $sub = $user->teacher->speciality()->name;
 
-                }
+        //         }
 
-                if($this->classe_id){
+        //         if($this->classe_id){
 
-                    $classe = Classe::find($this->classe_id);
+        //             $classe = Classe::find($this->classe_id);
 
-                    $cln = $classe->getSlug();
+        //             $cln = $classe->getSlug();
 
-                }
-                elseif($this->classe_group_id){
+        //         }
+        //         elseif($this->classe_group_id){
 
-                    $classe_group = ClasseGroup::find($this->classe_group_id);
+        //             $classe_group = ClasseGroup::find($this->classe_group_id);
 
-                    $cln = $classe_group->getSlug();
+        //             $cln = $classe_group->getSlug();
 
-                }
+        //         }
 
-                $time = time();
+        //         $time = time();
 
-                $name = $this->index. 'e-' . $this->target . '-' . $this->semestre . '' . substr($this->semestre_type, 0, 1) . '-' . $cln. '-' . $sub . '-' . str_replace(' ', '', $this->school_year) . 'fichier-' . $time . '.' . $pendFile->extension();
+        //         $name = $this->index. 'e-' . $this->target . '-' . $this->semestre . '' . substr($this->semestre_type, 0, 1) . '-' . $cln. '-' . $sub . '-' . str_replace(' ', '', $this->school_year) . 'fichier-' . $time . '.' . $pendFile->extension();
 
-                $file = $pendFile->storeAs($folder, $name);
+        //         $file = $pendFile->storeAs($folder, $name);
 
-                return new TransferFile([
+        //         return new TransferFile([
 
-                    'path' => str_replace('//', '/', $pendFile->getPath()),
-                    'size' => $pendFile->getSize(),
-                    'name' => $name,
-                    'subject_id' => $this->subject_id,
-                    'classe_id' => $this->classe_id,
-                    'school_year_id' => $this->school_year_id,
-                    'classe_group_id' => $this->classe_group_id,
-                    'target' => $this->target,
-                    'semestre' => $this->semestre,
-                    'teacher_id' => $this->teacher_id,
-                    'level_id' => $this->level_id,
-                    'duration' => $this->duration,
-                ]);
+        //             'path' => str_replace('//', '/', $pendFile->getPath()),
+        //             'size' => $pendFile->getSize(),
+        //             'name' => $name,
+        //             'subject_id' => $this->subject_id,
+        //             'classe_id' => $this->classe_id,
+        //             'school_year_id' => $this->school_year_id,
+        //             'classe_group_id' => $this->classe_group_id,
+        //             'target' => $this->target,
+        //             'semestre' => $this->semestre,
+        //             'teacher_id' => $this->teacher_id,
+        //             'level_id' => $this->level_id,
+        //             'duration' => $this->duration,
+        //         ]);
 
-            })
+        //     })
 
-        );
+        // );
 
-        $this->pendingFiles = [];
+        // $this->pendingFiles = [];
 
-        NewEpreuveWasUploadedEvent::dispatch($transfer);
+        // NewEpreuveWasUploadedEvent::dispatch($transfer);
 
-        TeacherFileWasSentWithSuccessEvent::dispatch($transfer, $user);
+        // TeacherFileWasSentWithSuccessEvent::dispatch($transfer, $user);
 
-        // LocalTransfertCreatedEvent::dispatch($transfer);
+        // // LocalTransfertCreatedEvent::dispatch($transfer);
         
 
     }
@@ -222,7 +273,7 @@ class ManageEpreuvesTransfers extends Component
     }
 
 
-    public function updatedPendingFiles()
+    public function updatedPendingFile()
     {
         $this->resetErrorBag();
     }

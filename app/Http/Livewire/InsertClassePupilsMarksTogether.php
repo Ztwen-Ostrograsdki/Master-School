@@ -21,6 +21,8 @@ class InsertClassePupilsMarksTogether extends Component
 
     public $classe_id;
 
+    public $total_marks = 0;
+
     public $targeted_pupil;
 
     public $subject_id;
@@ -273,6 +275,10 @@ class InsertClassePupilsMarksTogether extends Component
 
                     if($marks !== []){
 
+                        $this->total_marks = $this->getMarksCounterToInsert();
+
+                        $data['total_marks'] = $this->total_marks;
+
                         ClasseMarksInsertionCreatedEvent::dispatch($data);
 
                         $this->dispatchBrowserEvent('hide-form');
@@ -425,6 +431,39 @@ class InsertClassePupilsMarksTogether extends Component
         }
 
 
+    }
+
+
+    public function getMarksCounterToInsert()
+    {
+        $marks = $this->marks;
+
+        $total_marks = 0;
+
+        $all_marks = [];
+
+        foreach($marks as $markTab){
+
+            foreach($markTab as $marks_as_string){
+
+                if($marks_as_string){
+
+                    $marks_as_array = explode('-', $marks_as_string);
+
+                    foreach($marks_as_array as $mark){
+
+                        $all_marks[] = $mark;
+                    }
+
+                }
+
+            }
+
+        }
+
+        $total_marks = count($all_marks);
+
+        return $total_marks;
     }
 
 

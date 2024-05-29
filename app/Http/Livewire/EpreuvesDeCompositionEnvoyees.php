@@ -3,6 +3,9 @@
 namespace App\Http\Livewire;
 
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Models\Epreuves;
+use App\Models\Teacher;
+use App\Models\TransferFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
@@ -27,6 +30,8 @@ class EpreuvesDeCompositionEnvoyees extends Component
     {
         $aes = [];
 
+        $to_fetch = [];
+
         $epreuves_targets = config('app.local_epreuves_targets');
 
         if(session()->has('epreuves_target_selected')){
@@ -35,6 +40,8 @@ class EpreuvesDeCompositionEnvoyees extends Component
         }
 
         $subjects = [];
+
+        $teachers = [];
 
         $semestre_type = 'Semestre';
 
@@ -56,21 +63,42 @@ class EpreuvesDeCompositionEnvoyees extends Component
 
         $subjects = $school_year_model->subjects;
 
-        if($this->target_selected && $this->target_selected !== '2000'){
+        // $teachers_ids = TransferFile::query()->select('teacher_id')->with('teacher', '')->groupBy('teacher_id')->get();
 
-            $epreuves = $school_year_model->epreuves()->where('transfer_files.target', $this->target_selected)->where('transfer_files.semestre', $this->semestre_selected)->get();
-        }
-        elseif($this->target_selected == '2000'){
+        // $teachers = Teacher::whereIn($teachers_ids)->get();
 
-            $epreuves = $school_year_model->epreuves;
-        }
-        else{
+        // if(count($teachers)){
 
-            $epreuves = $school_year_model->epreuves()->whereNull('transfer_files.target')->get();
-        }
+        //     foreach($teachers as $teacher){
+
+        //         // $eprs = $teacher->epreuves()->where('transfer_files.school_year_id', $school_year_model->id)->where('transfer_files.semestre', $semestre)->get();
+
+        //         // $epreuves[$teacher->id] = ['epreuves' => $eprs, 'teacher' => $teacher];
+
+        //     }
 
 
-        return view('livewire.epreuves-de-composition-envoyees', compact('semestres', 'semestre_type', 'school_year_model', 'subjects', 'epreuves', 'epreuves_targets'));
+        // }
+
+        $epreuves = [];
+
+        
+
+        // if($this->target_selected && $this->target_selected !== 'all'){
+
+        //     $epreuves = $school_year_model->epreuves()->where('transfer_files.target', $this->target_selected)->where('transfer_files.semestre', $this->semestre_selected)->groupBy('teacher_id')->get();
+        // }
+        // elseif($this->target_selected == 'all'){
+
+        //     $epreuves = $school_year_model->epreuves()->groupBy('teacher_id')->get();
+        // }
+        // else{
+
+        //     $epreuves = $school_year_model->epreuves()->whereNull('transfer_files.target')->groupBy('teacher_id')->get();
+        // }
+
+
+        return view('livewire.epreuves-de-composition-envoyees', compact('semestres', 'semestre_type', 'school_year_model', 'subjects', 'epreuves', 'epreuves_targets', 'teachers'));
     }
 
     public function updatedSemestreSelected($semestre)
@@ -99,9 +127,11 @@ class EpreuvesDeCompositionEnvoyees extends Component
         $this->counter = rand(0, 14);
     }
 
-    public function ztwen($name = 2)
+    public function downloadPDF($name)
     {
-        Storage::download('epreuvesFolder', 'elle'.$name);
+        $path = storage_path().'/app/epreuvesFolder/' . $name;
+
+        return response()->download($path);
     }
 
     public function delete($name)

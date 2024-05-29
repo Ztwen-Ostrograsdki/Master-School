@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 
 use App\Events\InitiateClassePupilsDataUpdatingFromFileEvent;
 use App\Events\UpdateClasseMarksToSimpleExcelFileEvent;
+use App\Helpers\FileManager\ZtwenFileManager;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Imports\ImportPupilPersoDataFromFile;
 use App\Models\Pupil;
@@ -44,6 +45,8 @@ class UpdateClasseMarksToSimpleExcellFile extends Component
     public $show_form = true;
 
     public $target_row;
+
+    public $semestre_type = 'Semestre';
 
     public $row;
 
@@ -206,16 +209,18 @@ class UpdateClasseMarksToSimpleExcellFile extends Component
 
                 $file_sheet = $this->data_file->getRealPath();
 
-                $file_name = "Notes-" . $this->classe->name . "-" . $this->subject->name . ".XLS";
+                $extension = '.' . $this->data_file->extension();
 
-                $path = storage_path() . '/app/excels';
+                $semestre = $this->semestre_type . '-' . $this->semestre;
 
-                if(!File::isDirectory($path)){
+                $manager = new ZtwenFileManager($this->classe, "excels", null, $this->school_year_model, $semestre, $this->subject, $extension);
 
-                    File::makeDirectory($path, 0777, true, true);
-                }
+                $file_name = $manager->file_name;
 
-                UpdateClasseMarksToSimpleExcelFileEvent::dispatch($classe, $file_name, $path, $file_sheet, $this->school_year_model, $this->semestre, $this->subject, $user, $this->pupil_id);
+                $path = $manager->storage_path;
+                
+
+                UpdateClasseMarksToSimpleExcelFileEvent::dispatch($classe, $extension, $file_name, $path, $file_sheet, $this->school_year_model, $this->semestre, $this->subject, $user, $this->pupil_id);
 
             }
 
@@ -246,6 +251,14 @@ class UpdateClasseMarksToSimpleExcellFile extends Component
         if($classe_id){
 
             $this->school_year_model = $this->getSchoolYear();
+
+            $semestres = $this->getSemestres();
+
+            if(count($semestres) == 3){
+
+                $this->semestre_type = "Trimestre";
+
+            }
 
             $classe = $this->school_year_model->findClasse($classe_id);
 

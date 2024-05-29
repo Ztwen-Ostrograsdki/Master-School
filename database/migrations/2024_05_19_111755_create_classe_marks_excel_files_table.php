@@ -23,12 +23,14 @@ class CreateClasseMarksExcelFilesTable extends Migration
             $table->unsignedBigInteger('subject_id');
             $table->unsignedBigInteger('school_year_id');
             $table->string('name');
+            $table->string('extension');
             $table->string('path')->nullable()->default(null);
             $table->string('trimestre')->nullable()->default(null);
             $table->string('semestre')->nullable()->default(null);
             $table->unsignedBigInteger('downloaded_counter')->nullable()->default(0);
             $table->boolean('downloaded')->default(false);
             $table->boolean('secure')->default(false);
+            $table->boolean('locked')->default(false);
 
             $table->foreign('school_year_id')
                   ->references('id')

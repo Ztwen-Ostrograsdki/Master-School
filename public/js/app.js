@@ -8696,13 +8696,10 @@ if (window.User) {
 }
 
 e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', function (e) {
-  console.log(e.data, e.user, e);
   Livewire.emit('UserLeavingChannelLiveEvent', e);
 }).listen('UserJoiningChannelEvent', function (e) {
-  console.log(e.data, e.user, e);
   Livewire.emit('UserJoiningChannelLiveEvent', e);
 }).listen('PupilDataAreReadyToFetchEvent', function (e) {
-  console.log(e.data);
   Livewire.emit('DataAreReadyToFetchLiveEvent', e);
 }).listen('ParentRequestAcceptedEvent', function (e) {
   Swal.fire({
@@ -8792,8 +8789,12 @@ e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', f
   Livewire.emit('ClasseMarksToSimpleExcelFileCompletedLiveEvent', e.file_name);
 }).listen('ClasseExcelsFilesWasUpdatedEvent', function (e) {
   Livewire.emit('ClasseExcelsFilesWasUpdatedLiveEvent');
+}).listen('UpdatePupilsMarksInsertionProgressEvent', function (e) {
+  Livewire.emit('UpdatePupilsMarksInsertionProgressLiveEvent');
 });
-e["private"]('master').listen('RefreshLockedRequestListEvent', function (e) {
+e["private"]('master').listen('DispatchTransactionsCommitedEvent', function (e) {
+  console.log(e); // Livewire.emit('RefreshLockedRequestListLiveEvent');
+}).listen('RefreshLockedRequestListEvent', function (e) {
   Livewire.emit('RefreshLockedRequestListLiveEvent');
 }).listen('UserSentLockedRequestEvent', function (e) {
   Livewire.emit('UserSentLockedRequestLiveEvent');
@@ -8818,6 +8819,8 @@ e["private"]('master').listen('RefreshLockedRequestListEvent', function (e) {
     toast: true,
     showConfirmButton: false
   });
+}).listen('NewJobStartEvent', function (e) {
+  console.log(e);
 });
 e["private"]('reloadMarkChannel.' + window.ClientUser.id);
 e["private"]('reloader.' + window.ClientUser.id).listen('ClasseMarksWasUpdatedIntoDBSuccessfullyEvent', function (e) {

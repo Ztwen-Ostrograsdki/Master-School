@@ -24,6 +24,8 @@ class JobUpdateClasseMarksToSimpleExcelFile implements ShouldQueue
 
     public $classe;
 
+    public $extension = '.XLS';
+
     public $school_year_model;
 
     public $file_name;
@@ -47,9 +49,11 @@ class JobUpdateClasseMarksToSimpleExcelFile implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Classe $classe, $file_name, $file_path, $file_sheet, SchoolYear $school_year_model, $semestre, Subject $subject, User $user, $pupil_id = null)
+    public function __construct(Classe $classe, $extension, $file_name, $file_path, $file_sheet, SchoolYear $school_year_model, $semestre, Subject $subject, User $user, $pupil_id = null)
     {
         $this->classe = $classe;
+
+        $this->extension = $extension;
 
         $this->school_year_model = $school_year_model;
 
@@ -185,7 +189,7 @@ class JobUpdateClasseMarksToSimpleExcelFile implements ShouldQueue
 
         // $path = storage_path() . '/app/excels';
 
-        $writer = (new Xls($spreadsheet))->save($this->file_path . '/' . $this->file_name);
+        $writer = (new Xls($spreadsheet))->save($this->file_path . '/' . $this->file_name . '' . $this->extension);
 
     }
 }

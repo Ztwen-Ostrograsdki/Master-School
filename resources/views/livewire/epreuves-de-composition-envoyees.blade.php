@@ -48,7 +48,7 @@
                                 @csrf()
                                 <select style="letter-spacing: 1.2px;" wire:model="target_selected" class="form-select text-uppercase font-weight-bold border border-orange custom-select ml-3">
                                     <option value="{{null}}">Veuillez sélectionner une section</option>
-                                    <option value="{{2000}}">Toutes sortes</option>
+                                    <option value="all">Toutes sortes</option>
                                     @foreach($epreuves_targets as $target => $title)
                                         <option value="{{$target}}" class="">Epreuves: {{$title}}</option>
                                     @endforeach
@@ -111,7 +111,7 @@
                                     </span>
                                     </th>
                                     <th class=""> {{$epreuve->__to($epreuve->created_at, true)}} </th>
-                                    <th wire:click="ztwen('{{$epreuve->name}}')"> 
+                                    <th wire:click="downloadPDF('{{$epreuve->name}}')"> 
                                         <span title="Télécharger l'épreuve {{$epreuve->name}}"  class="btn btn-success text-light-0 w-100">
                                             <span class="fa fa-download"></span>
                                             <span class="">Télécharger</span>

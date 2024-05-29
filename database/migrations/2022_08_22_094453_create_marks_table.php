@@ -25,6 +25,7 @@ class CreateMarksTable extends Migration
             $table->boolean('edited')->default(false);
             $table->boolean('forced_mark')->default(false);
             $table->float('value')->nullable();
+            $table->boolean('updating')->default(false);
             $table->float('editing_value')->nullable()->default(null);
 
             $table->string('type');

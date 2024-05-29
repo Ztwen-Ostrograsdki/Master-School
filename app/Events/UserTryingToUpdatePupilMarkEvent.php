@@ -2,6 +2,8 @@
 
 namespace App\Events;
 
+use App\Models\Mark;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -10,20 +12,32 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ClasseExcelsFilesWasUpdatedEvent implements ShouldBroadcast
+class UserTryingToUpdatePupilMarkEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $user = null;
+    public $mark_editor;
+
+    public $mark;
+
+    public $new_value = 0;
+
+    public $others_data = [];
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($user = null)
+    public function __construct(Mark $mark, User $mark_editor, $new_value, $others_data = [])
     {
-        $this->user = $user;
+        $this->mark_editor = $mark_editor;
+
+        $this->mark = $mark;
+
+        $this->new_value = $new_value;
+
+        $this->others_data = $others_data;
     }
 
     /**
@@ -33,18 +47,6 @@ class ClasseExcelsFilesWasUpdatedEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        if($this->user){
-
-            if($this->user->id){
-
-                return new PrivateChannel('user.' . $this->user->id);
-
-            }
-
-            return new PrivateChannel('master');
-
-        }
-
         return new PrivateChannel('master');
     }
 }

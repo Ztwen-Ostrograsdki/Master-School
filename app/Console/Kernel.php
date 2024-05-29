@@ -22,6 +22,11 @@ class Kernel extends ConsoleKernel
             '--model' => [Mark::class, RelatedMark::class],
 
         ])->sundays();
+
+        // $schedule->command('queue:prune-batches --hours=48 --unfinished=72')->daily();
+
+        // $schedule->command('queue:prune-batches --hours=48 --cancelled=72')->daily();
+
     }
 
     /**

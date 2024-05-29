@@ -5,31 +5,30 @@ namespace App\Models;
 use App\Helpers\DateFormattor;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
+use App\Models\ClasseGroup;
+use App\Models\Filial;
 use App\Models\Subject;
 use App\Models\Teacher;
-use App\Models\Transfer;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TransferFile extends Model
+class Epreuve extends Model
 {
-    use HasFactory;
+    use HasFactory, DateFormattor, ModelQueryTrait;
 
-    use DateFormattor;
-
-    use ModelQueryTrait;
-
-    protected $table_name = 'transfer_files';
+    protected $table_name = 'epreuves';
 
     public $imagesFolder = 'epreuvesFolder';
 
     protected $fillable = [
-        'name', 'classe_id', 'semestre', 'school_year_id', 'subject_id', 'description', 'target', 'duration', 'classe_group_id', 'teacher_id', 'user_id', 'session', 'exam_name', 'blocked', 'authorized', 'level_id', 'transfer_id', 'disk', 'path', 'size'
+        'name', 'path', 'extension', 'classe_id', 'semestre', 'school_year_id', 'subject_id', 'description', 'target', 'duration', 'classe_group_id', 'filial_id', 'teacher_id', 'author', 'session', 'exam_name', 'authorized', 'level_id', 'locked', 'downloaded', 'downloaded_counter', 'trimestre', 'done', 'date'
     ];
 
-
-    protected $casts = ['disk' => 'string', 'path' => 'string', 'size' => 'integer'];
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
+    }
 
     public function getDateAgoFormated($created_at = false)
     {
@@ -41,11 +40,9 @@ class TransferFile extends Model
     }
 
 
-
-
-    public function teacher()
+    public function classe_group()
     {
-        return $this->belongsTo(Teacher::class);
+        return $this->belongsTo(ClasseGroup::class);
     }
 
 
@@ -66,9 +63,16 @@ class TransferFile extends Model
     }
 
 
-    public function transfer()
+    public function filial()
     {
-        return $this->belongsTo(Transfer::class);
+        return $this->belongsTo(Filial::class);
 
+    }
+
+    public function getFullPath()
+    {
+        $full_path = $this->path . '/' . $this->name . '' . $this->extension;
+
+        return $full_path;
     }
 }

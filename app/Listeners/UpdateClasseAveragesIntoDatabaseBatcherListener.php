@@ -9,6 +9,7 @@ use App\Events\InitiateClasseDataUpdatingEvent;
 use App\Events\ParentAccountBlockedEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
+use App\Jobs\JobFlushAveragesIntoDataBase;
 use App\Jobs\JobUpdateClasseAnnualAverageIntoDatabase;
 use App\Jobs\JobUpdateClasseSemestrialAverageIntoDatabase;
 use Illuminate\Bus\Batch;
@@ -34,25 +35,51 @@ class UpdateClasseAveragesIntoDatabaseBatcherListener
 
         $jobs = [];
 
+        $updates_jobs = [];
+
+        $flush_jobs = [];
+
         if($event->allSemestres){
 
             $semestres = $this->getSemestres();
 
             foreach($semestres as $sem){
 
-                $jobs[] = new JobUpdateClasseSemestrialAverageIntoDatabase($event->classe, $sem, $event->school_year_model);
+                $updates_jobs[] = new JobUpdateClasseSemestrialAverageIntoDatabase($event->classe, $sem, $event->school_year_model);
+
+                $flush_jobs[] = new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, $event->sem);
+
             }
 
-            $jobs[] = new JobUpdateClasseAnnualAverageIntoDatabase($event->classe, $event->school_year_model);
+            $updates_jobs[] = new JobUpdateClasseAnnualAverageIntoDatabase($event->classe, $event->school_year_model);
+
+            $flush_jobs[] = new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, null);
+
+            
 
         }
         else{
 
             $jobs = [
-                new JobUpdateClasseSemestrialAverageIntoDatabase($event->classe, $event->semestre, $event->school_year_model),
 
-                new JobUpdateClasseAnnualAverageIntoDatabase($event->classe, $event->school_year_model)
+                [
+                    new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, $event->semestre),
+                                
+                    new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, null)
+                ],
+
+                [
+                    new JobUpdateClasseSemestrialAverageIntoDatabase($event->classe, $event->semestre, $event->school_year_model),
+                
+                    new JobUpdateClasseAnnualAverageIntoDatabase($event->classe, $event->school_year_model)
+                ],
             ];
+
+        }
+
+        if($event->allSemestres){
+
+            $jobs = [ $flush_jobs, $updates_jobs ];
 
         }
 
@@ -66,6 +93,6 @@ class UpdateClasseAveragesIntoDatabaseBatcherListener
 
             })->finally(function(Batch $batch){
 
-        })->dispatch();
+        })->name('updating_marks_into_database')->dispatch();
     }
 }

@@ -5,6 +5,13 @@
 
     @if($is_loading)
     <div class="w-100 d-flex justify-content-center flex-column">
+        <h5 class="p-2">
+            <span>
+                <span wire:click="hideLoader" class="btn btn-primary border border-white">
+                    Fermer le loader et continuer
+                </span>
+            </span>
+        </h5>
         @livewire('loader-component')  
     </div>
     @else

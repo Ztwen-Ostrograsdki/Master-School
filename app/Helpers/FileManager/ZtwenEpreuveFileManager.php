@@ -7,7 +7,7 @@ use App\Models\SchoolYear;
 use App\Models\Subject;
 use Illuminate\Support\Facades\File;
 
-class ZtwenFileManager{
+class ZtwenEpreuveFileManager{
 
 	public $classe;
 
@@ -27,9 +27,9 @@ class ZtwenFileManager{
 
 	public $storage_path;
 
-	public $extension = '.XLS';
+	public $extension = '.docx';
 
-	public function __construct(Classe $classe, $base_folder, $name = null, SchoolYear $school_year_model, $semestre, Subject $subject, $extension = '.XLS')
+	public function __construct(Classe $classe, $base_folder, $name = null, SchoolYear $school_year_model, $semestre, Subject $subject, $extension = '.docx')
 	{
 
 		$this->classe = $classe;
@@ -61,7 +61,7 @@ class ZtwenFileManager{
 		}
 		else{
 
-			$file_name = "Notes-" . $this->classe->name . "-" . $this->subject->name . "-" . $this->semestre . "-" . $this->school_year_model->school_year;
+			$file_name = "Epreuves-" . $this->classe->name . "-" . $this->subject->name . "-" . $this->semestre . "-" . $this->school_year_model->school_year;
 
 			$this->file_name = str_replace(' ', '', $file_name);
 		}

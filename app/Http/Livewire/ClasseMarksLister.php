@@ -55,6 +55,7 @@ class ClasseMarksLister extends Component
     public $mark_key;
     public $targetedMark;
     public $count = 0;
+    public $counter = 0;
     public $search = null;
     public $computedRank = false;
     public $teacher_profil = false;
@@ -87,9 +88,16 @@ class ClasseMarksLister extends Component
         $this->search = $value;
     }
 
+    public function hideLoader()
+    {
+        $this->is_loading = false;
+    }
+
     public function dataWasLoaded()
     {
         $this->is_loading = false;
+
+        $this->counter = rand(12, 19785);
     }
 
     public function loadingDataStart()

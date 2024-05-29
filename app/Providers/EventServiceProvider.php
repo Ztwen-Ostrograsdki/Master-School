@@ -22,6 +22,7 @@ use App\Events\MakeClassePresenceLateEvent;
 use App\Events\MarksNullActionsEvent;
 use App\Events\MarksRestorationEvent;
 use App\Events\MigrateDataToTheNewSchoolYearEvent;
+use App\Events\NewJobStartEvent;
 use App\Events\NewProductCreatedEvent;
 use App\Events\ParentRequestToFollowPupilEvent;
 use App\Events\PaymentSystemEvent;
@@ -37,7 +38,9 @@ use App\Events\UpdateClasseSanctionsEvent;
 use App\Events\UpdateSchoolModelEvent;
 use App\Events\UserAccountBlockedEvent;
 use App\Events\UserConnectedEvent;
+use App\Events\UserTryingToUpdatePupilMarkEvent;
 use App\Listeners\AbsencesAndLatesDeleterBatcherListener;
+use App\Listeners\AdminGetNotificationAboutTheUserWhoTryingToUpdatePupilMarkListener;
 use App\Listeners\BlockedOrUnblockedUserAccountListener;
 use App\Listeners\ClasseMarksConverterBatcherListener;
 use App\Listeners\ClasseMarksDeletionBatcherListener;
@@ -98,6 +101,8 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 
@@ -255,6 +260,10 @@ class EventServiceProvider extends ServiceProvider
             InsertClasseMarksExcelFileDataToDatabaseListener::class,
         ],
 
+        UserTryingToUpdatePupilMarkEvent::class => [
+            AdminGetNotificationAboutTheUserWhoTryingToUpdatePupilMarkListener::class,
+        ],
+
     
     ];
 
@@ -286,6 +295,30 @@ class EventServiceProvider extends ServiceProvider
         ParentRequestToFollowPupil::observe(ParentRequestToFollowPupilObserver::class);
 
         ClasseMarksExcelFile::observe(ClasseMarksExcelFileObserver::class);
+
+
+        // Queue::before(function(JobProcessing $event){
+
+        //     NewJobStartEvent::dispatch("event");
+
+        // });
+
+        // Queue::after(function(JobProcessed $event){
+
+
+
+        // });
+
+        Queue::looping(function(){
+
+            while (DB::transactionLevel() > 0){
+
+                DB::rollBack();
+
+            }
+
+
+        });
 
     }
 

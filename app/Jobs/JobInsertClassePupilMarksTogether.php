@@ -16,6 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 
 class JobInsertClassePupilMarksTogether implements ShouldQueue
@@ -39,6 +40,7 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
     public $related = false;
 
     public $related_data = [];
+
 
     /**
      * Create a new job instance.
@@ -66,6 +68,7 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
         $this->school_year_model = $data['school_year_model'];
     }
 
+
     /**
      * Execute the job.
      *
@@ -73,6 +76,12 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
      */
     public function handle()
     {
+        if($this->batch()->cancelled()){
+
+            return;
+
+        }
+
         $user = $this->user;
 
         $not_secure = $user->ensureThatTeacherCanAccessToClass($this->classe->id);
@@ -88,6 +97,9 @@ class JobInsertClassePupilMarksTogether implements ShouldQueue
 
         }
     }
+
+
+
 
 
     public function doJob()

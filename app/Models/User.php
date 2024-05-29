@@ -20,6 +20,7 @@ use App\Models\ResetEmailConfirmation;
 use App\Models\Role;
 use App\Models\Teacher;
 use App\Models\Transfer;
+use App\Models\UpdatePupilsMarksBatches;
 use App\Models\User as ModelsUser;
 use App\Models\UserAdminKey;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -112,6 +113,12 @@ class User extends Authenticatable
     public function lockedRoutes()
     {
         return $this->hasMany(LockedRoutes::class);
+    }
+
+
+    public function marks_batches()
+    {
+        return $this->hasMany(UpdatePupilsMarksBatches::class);
     }
 
 

@@ -25,6 +25,7 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeacherCursus;
 use App\Models\TimePlan;
+use App\Models\UpdatePupilsMarksBatches;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -51,6 +52,11 @@ class Classe extends Model
         'teacher_id',
         'filial_id',
     ];
+
+    public function marks_batches()
+    {
+        return $this->hasMany(UpdatePupilsMarksBatches::class);
+    }
 
 
     public function loadClasseDataOfPositionAndPromotionFilial()

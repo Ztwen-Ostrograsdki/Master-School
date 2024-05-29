@@ -5,10 +5,12 @@ namespace App\Http\Livewire;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\ClasseMarksExcelFile;
+use PDF;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use PhpOffice\PhpSpreadsheet\Reader\Xls;
 
 class ClassesMarksExcelFilesCompleted extends Component
 {
@@ -63,15 +65,76 @@ class ClassesMarksExcelFilesCompleted extends Component
 
             if(!$file_model->secure){
 
-                $full_path = $file_model->path . '/' . $file_model->name;
+                $full_path = $file_model->getFullPath();
 
-                $d = response()->download($full_path, $file_model->name);
+                $d = response()->download($full_path, $file_model->name . '' . $file_model->extension);
 
                 if($d){
 
                     $dc =  $file_model->downloaded_counter + 1;
 
                     $file_model->update(['downloaded' => true, 'downloaded_counter' => $dc]);
+
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'TELECHARGEMENT LANCE', 'message' => "Le fichier est en cours de téléchargement", 'type' => 'success']);
+
+                    return $d;
+
+                }
+                else{
+
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'ERREURE', 'message' => "Une erreure s'est produite au cours du téléchargement!", 'type' => 'error']);
+
+                }
+
+            }
+            else{
+
+                $this->dispatchBrowserEvent('Toast', ['title' => 'FICHIER VERROUILLE', 'message' => "Le téléchargement du fichier a été bloqué, vous ne pouvez pas le télécharger!", 'type' => 'info']);
+
+            }
+
+        }
+        else{
+
+            $this->dispatchBrowserEvent('Toast', ['title' => 'FICHIER INEXISTANT OU SUPPRIME', 'message' => "Le fichier n'a pas été trouvé !", 'type' => 'warning']);
+
+        }
+    }
+
+
+    public function downloadThePDFFormat($file_id)
+    {
+        return false ;
+        
+        $file_model = ClasseMarksExcelFile::find($file_id);
+
+        if($file_model){
+
+            if(!$file_model->locked){
+
+                $full_path = $file_model->getFullPath();
+
+                if(true){
+
+                    $i = 1;
+
+                    // foreach($data as $value){
+
+                        $html = '';
+
+                        // $view = view('pdf.employee')->with(compact('data'));
+
+                        // $html .= $view->render();
+
+                        // PDF::loadFile($full_path)->stream($file_model->name . '.pdf');
+
+                        // return response()->download($full_path, $file_model->name . '.pdf');
+
+                    // }
+
+                    // $dc =  $file_model->downloaded_counter + 1;
+
+                    // $file_model->update(['downloaded' => true, 'downloaded_counter' => $dc]);
 
                     $this->dispatchBrowserEvent('Toast', ['title' => 'TELECHARGEMENT LANCE', 'message' => "Le fichier est en cours de téléchargement", 'type' => 'success']);
 
@@ -136,7 +199,7 @@ class ClassesMarksExcelFilesCompleted extends Component
 
             if(!$file_model->secure){
 
-                $file_model->update(['secure' => false]);
+                $file_model->update(['secure' => false, 'locked' => false]);
 
                 $this->dispatchBrowserEvent('Toast', ['title' => 'DEVEROUILLAGE TERMINE', 'message' => "Le fichier a été déverrouillé avec succès", 'type' => 'success']);
 
@@ -164,7 +227,7 @@ class ClassesMarksExcelFilesCompleted extends Component
 
             if(!$file_model->secure){
 
-                $full_path = $file_model->path . '/' . $file_model->name;
+                $full_path = $file_model->getFullPath();
 
                 $del = $file_model->delete();
 
