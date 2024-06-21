@@ -6,12 +6,14 @@ use App\Models\Classe;
 use App\Models\SchoolYear;
 use App\Models\Subject;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 
 class UpdatePupilsMarksBatches extends Model
 {
-    use HasFactory;
+    use HasFactory, Prunable;
 
     protected $fillable = [
         'classe_id', 'subject_id', 'school_year_id', 'semestre', 'user_id', 'finished', 'total_marks', 'method_type', 'batch_id', 'classes', 'subjects', 'types', 'all_classes', 'all_subjects', 'all_semestres', 'all_types', 'description',
@@ -44,4 +46,10 @@ class UpdatePupilsMarksBatches extends Model
 
         return $this->belongsTo(SchoolYear::class);
     } 
+
+
+    public function prunable(): Builder
+    {
+        return static::where('created_at', '<=', now()->subMonth(12));
+    }
 }

@@ -42,6 +42,6 @@ class AdminGetNotificationAboutTheUserWhoTryingToUpdatePupilMarkListener
             ->finally(function(Batch $batch){
 
 
-            })->name('trying_pupil_mark_updating')->dispatch();
+            })->name('trying_to_update_pupil_mark')->dispatch();
     }
 }

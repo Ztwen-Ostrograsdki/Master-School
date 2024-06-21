@@ -6,20 +6,21 @@
                 Fiche des santions de la classe de <span class="text-warning">{{ $classe->name }} </span> au cours de l'année scolaire {{ session('school_year_selected')}}
             </span>
 
-            <span class="justify-content-between">
-                <span wire:click="refreshClasseRelatedsMarks({{$classe->id}})" title="Supprimer toutes les notes de participation - Bonus - Sanctions" class="float-right z-scale btn btn-primary mr-2 border">
-                    <span class="bi-trash text-orange"></span>
-                    <span class="ml-1">Vider</span>
-                </span>
-                <span wire:click="makeRelatedMarkTogether({{$classe->id}})" title="Ajouter une note collective à toute la classe de {{$classe->name}} : Sanction ou Bonus à toute la classe" class="float-right btn btn-warning mr-2 border z-scale">
-                    <span class="ml-1 text-dark">
-                        <span>+ / -</span> 
-                        <span class="fa-people"></span>
-                        <span class="bi-person text-dark"></span>
+            @if($not_stopped)
+                <span class="justify-content-between">
+                    <span wire:click="refreshClasseRelatedsMarks({{$classe->id}})" title="Supprimer toutes les notes de participation - Bonus - Sanctions" class="float-right z-scale btn btn-primary mr-2 border">
+                        <span class="bi-trash text-orange"></span>
+                        <span class="ml-1">Vider</span>
+                    </span>
+                    <span wire:click="makeRelatedMarkTogether({{$classe->id}})" title="Ajouter une note collective à toute la classe de {{$classe->name}} : Sanction ou Bonus à toute la classe" class="float-right btn btn-warning mr-2 border z-scale">
+                        <span class="ml-1 text-dark">
+                            <span>+ / -</span> 
+                            <span class="fa-people"></span>
+                            <span class="bi-person text-dark"></span>
+                        </span>
                     </span>
                 </span>
-
-            </span>
+            @endif
         </h6>
     </div>
     <div class="w-100 m-0 p-0 mt-3">
@@ -33,7 +34,9 @@
                 <th>Dernière</th>
                 <th>Date</th>
                 <th>Horaire</th>
-                <th>Actions</th>
+                @if($not_stopped)
+                    <th>Actions</th>
+                @endif
             </thead>
             <tbody>
                 @foreach($pupils as $p)
@@ -49,19 +52,21 @@
                             <td class="text-center"> {{ $p->getLastRelatedMarkValue($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), true) ? $p->getLastRelatedMarkValue($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected'), true) : '-'}}</td>
                             <td class="text-center text-capitalize"> {{ $p->getLastRelatedMarkDate($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) ? $p->getLastRelatedMarkDate($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) : '-' }}</td>
                             <td class="text-center text-capitalize"> {{ $p->getLastRelatedMarkHoraire($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) ? $p->getLastRelatedMarkHoraire($classe->id, session('classe_subject_selected'), session('semestre_selected'), session('school_year_selected')) : '-' }}</td>
-                            <td class="text-center"> 
-                                <span class="row w-100 m-0 p-0">
-                                    <span title="Supprimer la Dernière note" class="col-4 m-0 p-0 cursor-pointer">
-                                        <span class="text-warning cursor-pointer fa fa-trash py-2 px-2"></span>
+                            @if($not_stopped)
+                                <td class="text-center"> 
+                                    <span class="row w-100 m-0 p-0">
+                                        <span title="Supprimer la Dernière note" class="col-4 m-0 p-0 cursor-pointer">
+                                            <span class="text-warning cursor-pointer fa fa-trash py-2 px-2"></span>
+                                        </span>
+                                        <span wire:click="refreshPupilRelatedsMarks({{$p->id}})" title="Supprimer toutes les notes bonus - sanctions de l'apprenant {{$p->getName()}}" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                            <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
+                                        </span>
+                                        <span wire:click="insertRelatedMark({{$p->id}})" title="Faire un bonus ou une sanction à {{$p->getName()}}" class="text-danger col-4 m-0 p-0 cursor-pointer">
+                                            <span class="text-primary cursor-pointer fa fa-edit py-2 px-2"></span>
+                                        </span>
                                     </span>
-                                    <span wire:click="refreshPupilRelatedsMarks({{$p->id}})" title="Supprimer toutes les notes bonus - sanctions de l'apprenant {{$p->getName()}}" class="text-danger col-4 m-0 p-0 cursor-pointer">
-                                        <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
-                                    </span>
-                                    <span wire:click="insertRelatedMark({{$p->id}})" title="Faire un bonus ou une sanction à {{$p->getName()}}" class="text-danger col-4 m-0 p-0 cursor-pointer">
-                                        <span class="text-primary cursor-pointer fa fa-edit py-2 px-2"></span>
-                                    </span>
-                                </span>
-                            </td>
+                                </td>
+                            @endif
 
                         </tr>
                     @endif

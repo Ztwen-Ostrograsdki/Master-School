@@ -24,6 +24,7 @@ class ClassePupilRelatedMark extends Component
     public $counter = 0;
     public $selected;
     public $selectedAction;
+    public $teacher_profil = false;
 
 
     public function render()
@@ -59,9 +60,12 @@ class ClassePupilRelatedMark extends Component
         if($classe){
 
             $pupils = $classe->getPupils($school_year_model->id);
+
+            $not_stopped = !is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) 
+                    && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, session('semestre_selected'));
         }
 
-        return view('livewire.classe-pupil-related-mark', compact('classe', 'pupils', 'classe_subject_selected'));
+        return view('livewire.classe-pupil-related-mark', compact('classe', 'pupils', 'classe_subject_selected', 'school_year_model', 'not_stopped'));
     }
 
 

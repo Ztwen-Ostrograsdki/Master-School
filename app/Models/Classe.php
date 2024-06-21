@@ -7,6 +7,7 @@ use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\AverageModality;
 use App\Models\Averages;
 use App\Models\ClasseGroup;
+use App\Models\ClasseMarksStoppedForSchoolYear;
 use App\Models\ClassePupilSchoolYear;
 use App\Models\ClasseSanctionables;
 use App\Models\ClassesSecurity;
@@ -129,6 +130,55 @@ class Classe extends Model
     public function averages()
     {
         return $this->hasMany(Averages::class);
+    }
+
+
+    public function classeMarksStoppedForSchoolYear()
+    {
+        return $this->hasMany(ClasseMarksStoppedForSchoolYear::class);
+    }
+
+    public function classeMarksWasStoppedForThisSchoolYear($semestre = null, $subject_id = null)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+
+        if(is_marks_stopped($this->id, $this->level_id, $school_year_model->id, $semestre)){
+
+            return true;
+
+        }
+
+        if($subject_id){
+
+            if($semestre){
+
+                $stopped = $this->classeMarksStoppedForSchoolYear()->where('school_year_id', $school_year_model->id)->where('subject_id', $subject_id)->where('semestre', $semestre)->first();
+
+            }
+            else{
+
+                $stopped = $this->classeMarksStoppedForSchoolYear()->where('school_year_id', $school_year_model->id)->where('subject_id', $subject_id)->first();
+
+            }
+
+        }
+        else{
+
+            if($semestre){
+
+                $stopped = $this->classeMarksStoppedForSchoolYear()->where('school_year_id', $school_year_model->id)->where('semestre', $semestre)->first();
+
+            }
+            else{
+
+                $stopped = $this->classeMarksStoppedForSchoolYear()->where('school_year_id', $school_year_model->id)->first();
+
+            }
+
+        }
+
+        return ($stopped && $stopped->activated) ? true : false;
     }
 
     public function averages_of($semestre = null, $school_year = null)

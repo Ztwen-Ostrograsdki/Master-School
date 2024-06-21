@@ -16,6 +16,7 @@ class TeacherListing extends Component
         'InitiateTeachersDataUploadingLiveEvent' => 'loadingDataStart',
         'OldsTeachersUploadingCompletedLiveEvent' => 'dataWasLoaded',
         'DataLoadedSuccessfully' => 'dataWasLoaded',
+        'NewTeacherWasCreatedLiveEvent' => 'reloadData',
     ];
 
     use ModelQueryTrait;

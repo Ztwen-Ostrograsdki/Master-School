@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Classe;
+use App\Models\Pupil;
 use App\Models\SchoolYear;
 use App\Models\User;
 use Illuminate\Broadcasting\Channel;
@@ -17,28 +18,37 @@ class DetachPupilsFromSchoolYearEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $pupils = [];
-
-    public $school_year_model;
+    public $user;
 
     public $classe;
 
-    public $user;
+    public $school_year_model;
+
+    public $pupils = [];
+
+    public $from_data_base = false;
+
+    public $forceDelete = false;
 
     /**
-     * Create a new event instance.
+     * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(User $user, SchoolYear $school_year_model, Classe $classe, $pupils)
+    public function __construct(User $user, SchoolYear $school_year_model, Classe $classe, array $pupils, $from_data_base = false, $forceDelete = false)
     {
         $this->user = $user;
-
+        
         $this->school_year_model = $school_year_model;
 
         $this->pupils = $pupils;
 
         $this->classe = $classe;
+
+        $this->from_data_base = $from_data_base;
+
+        $this->forceDelete = $forceDelete;
+
     }
 
     /**
@@ -48,6 +58,6 @@ class DetachPupilsFromSchoolYearEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('user.' . $this->user->id);
+        return [new PrivateChannel('master'), new PrivateChannel('user.' . $this->user->id)];
     }
 }

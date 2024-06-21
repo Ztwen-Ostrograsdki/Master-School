@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\DB;
 
 class Mark extends Model
 {
-    use HasFactory, SoftDeletes, MarkTraits, DateFormattor, Prunable;
+    use HasFactory, SoftDeletes, MarkTraits, DateFormattor;
 
     const DELAYED = 72; // For three days among
 
@@ -55,52 +55,12 @@ class Mark extends Model
 
     protected $casts = ['editing_value'];
 
-    public function validateUpdatingValue($new_value, User $user, $others_data = [])
-    {
-        DB::transaction(function($e) use($new_value, $user, $others_data){
 
-            if($user->isAdminAs('master')){
+    // public function prunable(): Builder
+    // {
+    //     return static::where('deleted_at', '<=', now()->subMonth());
+    // }
 
-                if($others_data){ 
-
-                    $this->update(['value' => $new_value]);
-
-                    return $this->update($others_data);
-
-
-                }
-
-                return $this->update(['value' => $new_value]);
-                
-            }
-            else{
-
-
-                if($others_data){ 
-
-                    $this->forceFill(['editing_value' => $new_value, 'editor' => $user->id, 'updating' => true]);
-
-                    return $this->update($others_data);
-
-
-                }
-
-                return $this->forceFill(['editing_value' => $new_value, 'editor' => $user->id, 'updating' => true]);
-
-
-            }
-
-        });
-    }
-
-
-
-
-    public function prunable(): Builder
-    {
-        return static::where('deleted_at', '<=', now()->subMonth());
-
-    }
 
     public function user()
     {

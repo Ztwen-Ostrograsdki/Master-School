@@ -8697,6 +8697,15 @@ if (window.User) {
 
 e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', function (e) {
   Livewire.emit('UserLeavingChannelLiveEvent', e);
+}).listen('DispatchIrregularsSemestrialMarksToConcernedTeachersEvent', function (e) {
+  classe = e.classe;
+  Swal.fire({
+    icon: 'success',
+    title: "Vous avez reçu une notification et un couriel",
+    text: "Il semble que certains de cos apprenants de la classe de " + classe.name + " n'ont pas le nombre de notes minimal requis!",
+    toast: true,
+    showConfirmButton: true
+  });
 }).listen('UserJoiningChannelEvent', function (e) {
   Livewire.emit('UserJoiningChannelLiveEvent', e);
 }).listen('PupilDataAreReadyToFetchEvent', function (e) {
@@ -8707,7 +8716,7 @@ e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', f
     title: "Demande Acceptée",
     text: " Votre compte parent est désormais actif et accessible",
     toast: true,
-    showConfirmButton: false
+    showConfirmButton: true
   });
   Livewire.emit('NotifyMeWhenMyRequestAccepted', e.user);
 }).listen('PupilSetToOrFromAbandonnedEvent', function (e) {
@@ -8718,7 +8727,7 @@ e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', f
     title: "PROCEDURE INEVITABLE: RUPTURE DE CONNEXION",
     text: " Vous allez être déconnecté dans quelques secondes!",
     toast: true,
-    showConfirmButton: false
+    showConfirmButton: true
   });
   Livewire.emit('RedirectoLoginPage');
 }).listen('UserAdminSessionKeyExpiredEvent', function (e) {
@@ -8729,7 +8738,7 @@ e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', f
     title: "Status Admin retiré",
     text: " Vous n'avez plus le status administrateur",
     toast: true,
-    showConfirmButton: false
+    showConfirmButton: true
   });
   Livewire.emit('ReloadComponentEvent');
   window.location.reload();
@@ -8739,7 +8748,7 @@ e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', f
     title: "Status Admin attribué",
     text: " Vous avez reçu le status administrateur",
     toast: true,
-    showConfirmButton: false
+    showConfirmButton: true
   });
   Livewire.emit('ReloadComponentEvent'); // window.location.reload(); 
 }).listen('InitiateClasseDataUpdatingEvent', function (e) {
@@ -8783,7 +8792,8 @@ e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', f
   Livewire.emit('ClasseDataWasUpdated');
 }).listen('MyParentRequestToFollowPupilCreatedEvent', function (e) {
   Livewire.emit('MyParentRequestToFollowPupilCreatedLiveEvent');
-}).listen('AboutMyParentRequestsEvent', function (e) {
+}).listen('DispatchDetailsAboutMyParentsRequestsEvent', function (e) {
+  console.log(e);
   Livewire.emit('AboutMyParentRequestsLiveEvent');
 }).listen('ClasseMarksToSimpleExcelFileCompletedEvent', function (e) {
   Livewire.emit('ClasseMarksToSimpleExcelFileCompletedLiveEvent', e.file_name);
@@ -8791,8 +8801,60 @@ e["private"]('user.' + window.ClientUser.id).listen('UserLeavingChannelEvent', f
   Livewire.emit('ClasseExcelsFilesWasUpdatedLiveEvent');
 }).listen('UpdatePupilsMarksInsertionProgressEvent', function (e) {
   Livewire.emit('UpdatePupilsMarksInsertionProgressLiveEvent');
+}).listen('PupilsMarksUpdatingFailedEvent', function (e) {
+  Livewire.emit('PupilsMarksUpdatingFailedLiveEvent', e.data);
+}).listen('NewTeacherWasCreatedEvent', function (e) {
+  Livewire.emit('NewTeacherWasCreatedLiveEvent');
 });
-e["private"]('master').listen('DispatchTransactionsCommitedEvent', function (e) {
+e["private"]('master').listen('MarksStoppingDispatchedEvent', function (e) {
+  Livewire.emit('MarksStoppingDispatchedLiveEvent');
+  Swal.fire({
+    icon: 'success',
+    title: "LA CLOTURE EST TERMINEE",
+    text: "La cloture de l'année scolaire ou du semestre s'est bien déroulée!",
+    toast: true,
+    showConfirmButton: true
+  });
+}).listen('DispatchingMarksStoppingFailedEvent', function (e) {
+  Livewire.emit('DispatchingMarksStoppingFailedLiveEvent');
+  Swal.fire({
+    icon: 'error',
+    title: "LA CLOTURE A ECHOUE",
+    text: "La cloture de l'année scolaire ou du semestre a échoué!",
+    toast: true,
+    showConfirmButton: true
+  });
+}).listen('PupilDetachingFailedEvent', function (e) {
+  console.log(e);
+  Swal.fire({
+    icon: 'error',
+    title: "DETACHEMENT ECHOUE",
+    text: "Le détachement des apprenants de l'année scolaire a échoué",
+    toast: true,
+    showConfirmButton: true
+  });
+  Livewire.emit('RefreshLockedRequestListLiveEvent');
+}).listen('PupilDeletionFailedEvent', function (e) {
+  console.log(e);
+  Swal.fire({
+    icon: 'error',
+    title: "SUPPRESSION ECHOUE",
+    text: "La suppression des apprenants a échoué",
+    toast: true,
+    showConfirmButton: true
+  });
+  Livewire.emit('RefreshLockedRequestListLiveEvent');
+}).listen('PupilDetachingOrDeletionCompletedEvent', function (e) {
+  console.log(e);
+  Swal.fire({
+    icon: 'success',
+    title: "SUPPRESSION - DETACHEMENT TERMINE AVEC SUCCES",
+    text: "La suppression/détachement des apprenants s'est bien déroulée",
+    toast: true,
+    showConfirmButton: true
+  });
+  Livewire.emit('RefreshLockedRequestListLiveEvent');
+}).listen('DispatchTransactionsCommitedEvent', function (e) {
   console.log(e); // Livewire.emit('RefreshLockedRequestListLiveEvent');
 }).listen('RefreshLockedRequestListEvent', function (e) {
   Livewire.emit('RefreshLockedRequestListLiveEvent');
@@ -8810,19 +8872,53 @@ e["private"]('master').listen('DispatchTransactionsCommitedEvent', function (e) 
   Livewire.emit('ParentHaveBeenJoinedToPupilLiveEvent');
 }).listen('NewUserCreatedEvent', function (e) {
   Livewire.emit('NewUserCreatedLiveEvent');
+}).listen('UserWasDeletedEvent', function (e) {
+  Livewire.emit('UserWasDeletedLiveEvent');
+}).listen('UserDeletionFailedEvent', function (e) {
+  console.log(e);
+  Swal.fire({
+    icon: 'error',
+    title: "SUPPRESSION ECHOUE",
+    text: "La suppression de l'utilisateur a échoué",
+    toast: true,
+    showConfirmButton: true
+  });
+  Livewire.emit('UserDeletionFailedLiveEvent');
 }).listen('UserConfirmedEmailEvent', function (e) {
   Livewire.emit('UserConfirmedEmailLiveEvent');
+}).listen('UpdatePupilsMarksUpdatingRequestsEvent', function (e) {
+  Swal.fire({
+    icon: 'info',
+    title: "Un prof a tenté de modifier la note d'un apprenant",
+    toast: true,
+    showConfirmButton: true
+  });
+  Livewire.emit('UpdatePupilsMarksUpdatingRequestsLiveEvent');
 }).listen('ClasseMarksWasFailedEvent', function (e) {
   Swal.fire({
     icon: 'error',
     title: "Le traitement des notes a échoué",
     toast: true,
-    showConfirmButton: false
+    showConfirmButton: true
   });
 }).listen('NewJobStartEvent', function (e) {
   console.log(e);
+}).listen('NewTeacherWasCreatedEvent', function (e) {
+  Livewire.emit('NewTeacherWasCreatedLiveEvent');
+}).listen('TeacherCreatingOrUpdatingFailedEvent', function (e) {
+  Swal.fire({
+    icon: 'error',
+    title: "ERREURE CREATION - EDITION ENSEIGNANT",
+    text: e.error_message,
+    toast: true,
+    showConfirmButton: true
+  });
+  Livewire.emit('TeacherCreatingOrUpdatingFailedLiveEvent');
 });
 e["private"]('reloadMarkChannel.' + window.ClientUser.id);
+e["private"]('users').listen('MarksStoppingDispatchedEvent', function (e) {
+  Livewire.emit('MarksStoppingDispatchedLiveEvent');
+});
 e["private"]('reloader.' + window.ClientUser.id).listen('ClasseMarksWasUpdatedIntoDBSuccessfullyEvent', function (e) {
   Livewire.emit('ClasseDataLoadedSuccessfully');
   Livewire.emit('NewClasseMarksInsert');

@@ -6,6 +6,7 @@ use App\Events\NewAddParentRequestEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\ParentRequestToFollowPupil;
 use App\Models\Parentable;
+use App\Models\SchoolYear;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -32,6 +33,8 @@ class ParentProfil extends Component
 
     public $contacts;
 
+    public $school_year_selected;
+
     public $job;
 
     public $name;
@@ -43,6 +46,8 @@ class ParentProfil extends Component
         'UpdateParentAccountAfterBlocked' => 'reloadData',
         'MyParentRequestToFollowPupilCreatedLiveEvent' => 'reloadData',
         'AboutMyParentRequestsLiveEvent' => 'reloadData',
+        'ReloadSchoolYearData' => 'reloadData',
+        'SchoolYearWasChanged' => 'schoolYearWasChanged',
     ];
 
     protected $rules = [
@@ -64,6 +69,31 @@ class ParentProfil extends Component
 
         }
 
+        if(session()->has('school_year_selected_for_parent') && session('school_year_selected_for_parent') !== null){
+
+            $this->school_year_selected = session('school_year_selected_for_parent');
+
+        }
+
+    }
+
+    public function updatedSchoolYearSelected($school_year)
+    {
+        $this->school_year_selected = $school_year;
+
+        session()->put('school_year_selected_for_parent', $school_year);
+
+        $this->emit('SchoolYearWasChanged', $school_year);
+
+    }
+
+    public function schoolYearWasChanged($school_year)
+    {
+        $this->school_year_selected = $school_year;
+
+        session()->put('school_year_selected_for_parent', $school_year);
+
+        $this->emit('ReloadSchoolYearData', $school_year);
     }
 
 
@@ -95,7 +125,19 @@ class ParentProfil extends Component
 
         }
 
-        return view('livewire.parent-profil', compact('auth', 'parent_requests'));
+        if(session()->has('school_year_selected_for_parent') && session('school_year_selected_for_parent') !== null){
+
+            $this->school_year_selected = session('school_year_selected_for_parent');
+
+        }
+
+        $school_year_selected = $this->school_year_selected;
+
+        $school_year_model = $this->getSchoolYear($school_year_selected);
+
+        $school_years = SchoolYear::orderBy('school_year', 'desc')->get();
+
+        return view('livewire.parent-profil', compact('auth', 'parent_requests', 'school_year_model', 'school_years'));
     }
 
 

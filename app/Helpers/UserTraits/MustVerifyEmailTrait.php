@@ -252,7 +252,7 @@ trait MustVerifyEmailTrait
 
         if($forced){
             return URL::temporarySignedRoute(
-                'force-email-verification-notify',
+                'email-verification-notify',
                 Carbon::now()->addMinutes(30),
                 [
                     'email' => $this->getEmailForVerification(),

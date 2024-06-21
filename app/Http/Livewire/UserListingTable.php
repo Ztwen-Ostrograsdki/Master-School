@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\PrepareUserDeletingEvent;
 use App\Events\UserConfirmedEmailEvent;
 use App\Models\Parentable;
 use App\Models\Teacher;
@@ -17,6 +18,8 @@ class UserListingTable extends Component
         'UserConfirmedEmailLiveEvent' => 'refreshData',
         'NewUserCreatedLiveEvent' => 'refreshData',
         'OnlineUsersLiveEvent' => 'getOnlineUsers',
+        'UserWasDeletedLiveEvent' => 'refreshData',
+        'UserDeletionFailedLiveEvent' => 'refreshData',
     ];
 
     public $active_section = null;
@@ -245,5 +248,28 @@ class UserListingTable extends Component
     public function refreshData()
     {
         $this->counter = 1;
+    }
+
+
+    public function deleteUser($user_id)
+    {
+        $user = User::find($user_id);
+
+        if($user){
+
+            PrepareUserDeletingEvent::dispatch($user, false);
+
+        }
+    }
+
+    public function forceDeleteUser($user_id)
+    {
+        $user = User::find($user_id);
+
+        if($user){
+
+            PrepareUserDeletingEvent::dispatch($user, true);
+
+        }
     }
 }

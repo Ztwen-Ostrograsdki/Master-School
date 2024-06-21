@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Events\NewUserCreatedEvent;
 use App\Events\UserAccountBlockedEvent;
 use App\Models\User;
 
@@ -15,23 +16,38 @@ class UserObserver
      */
     public function created(User $user)
     {
-        //
+        NewUserCreatedEvent::dispatch($user);
     }
 
     /**
-     * Handle the User "updated" event.
+     * Handle the User "updating" event.
      *
      * @param  \App\Models\User  $user
      * @return void
      */
-    public function updated(User $user)
+    public function updating(User $user)
     {
-        if($user->locked == true || $user->blocked == true){
+        if($user->isDirty(['locked', 'blocked']) && ($user->locked == true || $user->blocked == true)){
 
             UserAccountBlockedEvent::dispatch($user);
 
         }
     }
+
+    // /**
+    //  * Handle the User "updated" event.
+    //  *
+    //  * @param  \App\Models\User  $user
+    //  * @return void
+    //  */
+    // public function updated(User $user)
+    // {
+    //     if($user->isDirty(['locked', 'blocked']) && ($user->locked == true || $user->blocked == true)){
+
+    //         UserAccountBlockedEvent::dispatch($user);
+
+    //     }
+    // }
 
     /**
      * Handle the User "deleted" event.

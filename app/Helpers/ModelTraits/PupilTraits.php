@@ -6,8 +6,10 @@ use App\Helpers\Tools\Tools;
 use App\Jobs\JobPupilDeleterFromDatabase;
 use App\Models\Classe;
 use App\Models\ClassePupilSchoolYear;
+use App\Models\Mark;
 use App\Models\PupilAbsences;
 use App\Models\PupilLates;
+use App\Models\RelatedMark;
 use App\Models\School;
 use App\Models\SchoolYear;
 use App\Models\Subject;
@@ -37,7 +39,7 @@ trait PupilTraits{
 
         $school_year_model = $this->getSchoolYear($school_year);
 
-        $classe = $this->getCurrentClasse();
+        $classe = $this->getCurrentClasse($school_year_model->id);
 
         $time_plans = [];
 
@@ -141,6 +143,97 @@ trait PupilTraits{
         }
         
     }
+
+    public function pupilDeleteManager($school_year_model = null, $from_data_base = false, $forceDelete = false)
+    {
+        $pupil = $this;
+
+        $classe = $this->getCurrentClasse();
+
+        if(!$school_year_model){
+
+            $school_year_model = $this->getSchoolYear();
+
+        }
+
+        DB::transaction(function($e) use($school_year_model, $pupil, $classe, $from_data_base, $forceDelete){
+
+            if(!$forceDelete){
+
+                if($pupil->isPupilOfThisYear($school_year_model->school_year)){
+
+
+
+                    $classe_year = $pupil->getClasseAndYear($classe->id, $school_year_model->id);
+
+                    if($classe_year){
+
+                        Mark::withoutEvents(function() use ($pupil, $school_year_model, $classe){
+
+                            $pupil->marks()->where('marks.school_year_id', $school_year_model->id)
+                                            ->where('marks.classe_id', $classe->id)
+                                            ->each(function($mark){
+
+                                $mark->delete();
+
+                            });
+
+                        });
+
+
+                        RelatedMark::withoutEvents(function() use ($pupil, $school_year_model, $classe){
+
+                            $pupil->related_marks()->where('related_marks.school_year_id', $school_year_model->id)
+                                            ->where('related_marks.classe_id', $classe->id)
+                                            ->each(function($r_m){
+
+                                $r_m->delete();
+
+                            });
+
+                        });
+
+                        
+
+                        $pupil->lates()->where('pupil_lates.school_year_id', $school_year_model->id)
+                                        ->where('pupil_lates.classe_id', $classe->id)
+                                        ->each(function($pl){
+
+                            $pl->delete();
+
+                        });
+
+                        $pupil->absences()->where('pupil_absences.school_year_id', $school_year_model->id)
+                                        ->where('pupil_absences.classe_id', $classe->id)
+                                        ->each(function($p_abs){
+
+                            $p_abs->delete();
+
+                        });
+
+
+                        $classe->classePupils()->detach($pupil->id);
+
+                        $classe_year->delete();
+
+                        $school_year_model->pupils()->detach($pupil->id);
+
+                    }
+
+                }
+            }
+            else{
+
+                $pupil->delete();
+
+                dispatch(new JobPupilDeleterFromDatabase($pupil, false))->delay(Carbon::now()->addMinutes(2));
+
+            }
+
+        });
+    }
+
+
 
     public function pupilDestroyer($school_year)
     {

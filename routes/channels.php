@@ -24,6 +24,10 @@ Broadcast::channel('parent.{id}', function ($user, $id) {
     return (int) $user->parentable->id === (int) $id;
 });
 
+Broadcast::channel('users', function () {
+    return true;
+});
+
 Broadcast::channel('master', function ($user) {
     return (int) $user->isAdminAs('master');
 });

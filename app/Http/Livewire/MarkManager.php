@@ -94,7 +94,7 @@ class MarkManager extends Component
 
             if($pupil && $mark){ 
 
-                $update_not_delayed = $mark->ensureThatMarkUpdateNotDelayed(24*7); // Mark last updated under a week
+                $update_not_delayed = $mark->ensureThatMarkUpdateNotDelayed(24*70000); // Mark last updated under a week
 
                 if($update_not_delayed){
 
@@ -112,7 +112,37 @@ class MarkManager extends Component
 
                         $this->semestre_id = $mark->semestre;
 
-                        $this->dispatchBrowserEvent('modal-markManager');
+                        $subject_id = $mark->subject_id;
+
+                        $classe = $mark->classe;
+
+                        $semestre_id = $this->semestre_id;
+
+                        $mark_stopped_1 = $classe->classeMarksWasStoppedForThisSchoolYear($semestre_id, $subject_id);
+
+                        $mark_stopped_2 = $classe->classeMarksWasStoppedForThisSchoolYear();
+
+
+                        if(! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, session('semestre_selected'))){
+
+                            if(!$mark_stopped_1 && !$mark_stopped_2){
+
+                                $this->dispatchBrowserEvent('modal-markManager');
+
+                            }
+                            else{
+
+                                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => "ARRET NOTE", 'message' => "Aucune action n'est possible sur les notes de cette classe!", 'type' => 'info']);
+
+                            }
+                        }
+                        else{
+
+                            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => "ARRET NOTE", 'message' => "Aucune action n'est possible sur les notes de cette classe!", 'type' => 'info']);
+
+                        }
+
+                        
                     }
                     else{
                         $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'CLASSE VERROUILLEE', 'message' => "La mise à jour ou l'insertion des notes est temporairement indisponible pour cette classe!", 'type' => 'warning']);
@@ -232,27 +262,26 @@ class MarkManager extends Component
 
                 if($this->markModel->isDirty('semestre')){
 
-                    $others_data['semestre' => $semestre];
+                    $others_data['semestre'] = $semestre;
 
                 }
 
                 if($this->markModel->isDirty('type')){
 
-                    $others_data['type' => $type];
+                    $others_data['type'] = $type;
 
                 }
 
                 if($this->markModel->isDirty('mark_index')){
 
-                    $others_data['mark_index' => $mark_index];
+                    $others_data['mark_index'] = $mark_index;
 
                 }
 
                 UserTryingToUpdatePupilMarkEvent::dispatch($this->markModel, $updater, $new_value, $others_data);
 
-
-                $this->emit('pupilUpdated');
-                $this->emit('classeUpdated');
+                // $this->emit('pupilUpdated');
+                // $this->emit('classeUpdated');
                 $this->dispatchBrowserEvent('hide-form');
                 $this->resetErrorBag();
 

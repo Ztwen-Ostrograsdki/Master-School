@@ -3,7 +3,9 @@
 namespace App\Console;
 
 use App\Models\Mark;
+use App\Models\Pupil;
 use App\Models\RelatedMark;
+use App\Models\UpdatePupilsMarksBatches;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -20,6 +22,18 @@ class Kernel extends ConsoleKernel
         $schedule->command('model:prune', [
 
             '--model' => [Mark::class, RelatedMark::class],
+
+        ])->sundays();
+
+        $schedule->command('model:prune', [
+
+            '--model' => [Pupil::class],
+
+        ])->sundays();
+
+        $schedule->command('model:prune', [
+
+            '--model' => [UpdatePupilsMarksBatches::class],
 
         ])->sundays();
 

@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Events\AboutMyParentRequestsEvent;
+use App\Events\DispatchDetailsAboutMyParentsRequestsEvent;
 use App\Events\JoinParentToPupilNowEvent;
 use App\Events\MyParentRequestToFollowPupilCreatedEvent;
 use App\Events\ParentRequestToFollowPupilWasDeletedEvent;
@@ -30,6 +31,7 @@ class ParentRequestToFollowPupilObserver
      */
     public function updated(ParentRequestToFollowPupil $parentRequestToFollowPupil)
     {
+
         if($parentRequestToFollowPupil->authorized){
 
             $joined = $parentRequestToFollowPupil->parentable->pupils()->where('parent_pupils.pupil_id', $parentRequestToFollowPupil->pupil_id)->first();
@@ -38,12 +40,17 @@ class ParentRequestToFollowPupilObserver
 
                 JoinParentToPupilNowEvent::dispatch($parentRequestToFollowPupil);
 
+                DispatchDetailsAboutMyParentsRequestsEvent::dispatch($parentRequestToFollowPupil->parentable->user);
+
+
             }
         }
+        else{
 
-        AboutMyParentRequestsEvent::dispatch($parentRequestToFollowPupil->parentable);
+            DispatchDetailsAboutMyParentsRequestsEvent::dispatch($parentRequestToFollowPupil->parentable->user);
 
-        ParentRequestToFollowPupilWasDeletedEvent::dispatch();
+        }
+
     }
 
     /**
@@ -68,16 +75,19 @@ class ParentRequestToFollowPupilObserver
 
             });
 
-            AboutMyParentRequestsEvent::dispatch($parentRequestToFollowPupil->parentable);
+            DB::afterCommit(function(){
 
-            ParentRequestToFollowPupilWasDeletedEvent::dispatch();
+                ParentRequestToFollowPupilWasDeletedEvent::dispatch();
+
+                DispatchDetailsAboutMyParentsRequestsEvent::dispatch($parentRequestToFollowPupil->parentable->user);
+
+            });
 
         }
         else{
 
-            AboutMyParentRequestsEvent::dispatch($parentRequestToFollowPupil->parentable);
+            DispatchDetailsAboutMyParentsRequestsEvent::dispatch($parentRequestToFollowPupil->parentable->user);
 
-            ParentRequestToFollowPupilWasDeletedEvent::dispatch();
 
         }
 

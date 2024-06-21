@@ -28,23 +28,37 @@ class FreshAveragesIntoDBBatcherListener
         
         $jobs = [];
 
+        $school_year_model = $event->school_year_model;
+
+        $classe  = $event->classe;
+
         if($event->allSemestres){
 
             $semestres = $this->getSemestres();
 
             foreach($semestres as $sem){
 
-                $jobs[] = new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, $sem);
+                if(! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, $sem)){
+
+                    $jobs[] = new JobFlushAveragesIntoDataBase($event->user, $classe, $school_year_model, $sem);
+
+                }
 
             }
         }
         else{
 
-            $jobs = [
-                new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, $event->semestre),
+            $jbs = [];
 
-                new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, null)
-            ];
+            if(! is_marks_stopped($classe->level_id, $school_year_model->id, $event->semestre)){
+
+                $jbs[] = new JobFlushAveragesIntoDataBase($event->user, $classe, $school_year_model, $event->semestre);
+
+            }
+
+            $jbs[] = new JobFlushAveragesIntoDataBase($event->user, $classe, $school_year_model, null);
+
+            $jobs = $jbs;
 
         }
 

@@ -2,7 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\Mark;
 use App\Models\Pupil;
+use App\Models\RelatedMark;
+use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,18 +16,23 @@ use Illuminate\Support\Facades\DB;
 
 class JobPupilDeleterFromDatabase implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $pupil;
+    public $pupil;
+
+    public $before_pruned = false;
+
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Pupil $pupil)
+    public function __construct(Pupil $pupil, $before_pruned = false)
     {
-         $this->pupil = $pupil;
+        $this->pupil = $pupil;
+
+        $this->before_pruned = $before_pruned;
     }
 
     /**
@@ -49,13 +57,26 @@ class JobPupilDeleterFromDatabase implements ShouldQueue
                 $abs->delete();
             });
 
-            $pupil->marks()->each(function($mark){
-                $mark->delete();
+            Mark::withoutEvents(function() use ($pupil){
+
+                $pupil->marks()->each(function($mark){
+
+                    $mark->forceDelete();
+                });
+
             });
 
-            $pupil->related_marks()->each(function($r_m){
-                $r_m->delete();
+            RelatedMark::withoutEvents(function() use ($pupil){
+
+                $pupil->related_marks()->each(function($r_m){
+
+                    $r_m->forceDelete();
+                });
+
             });
+            
+
+            
 
             $pupil->classes()->each(function($classe) use($pupil){
 
@@ -74,7 +95,11 @@ class JobPupilDeleterFromDatabase implements ShouldQueue
 
             });
 
-            $pupil->forceDelete();
+            if(!$this->before_pruned){
+
+                $pupil->forceDelete();
+
+            }
 
         });
     }

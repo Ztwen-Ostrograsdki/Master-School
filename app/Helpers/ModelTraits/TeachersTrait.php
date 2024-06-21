@@ -54,12 +54,11 @@ trait TeachersTrait{
 
     public function getCurrentTimePlans($classe_id = null, $school_year_id = null)
     {
-        $school_year_model = $this->getSchoolYear();
+        $school_year_model = $this->getSchoolYear($school_year_id);
 
-        if(!$school_year_id){
-            $school_year_id = $school_year_model->id;
+        $school_year_id = $school_year_model->id;
 
-        }
+        
         if($classe_id){
             return $this->timePlans()->where('time_plans.classe_id', $classe_id)->where('time_plans.school_year_id', $school_year_id)->where('time_plans.subject_id', $this->speciality()->id)->orderBy('day_index', 'asc')->get();
         }

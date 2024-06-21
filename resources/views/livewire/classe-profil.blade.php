@@ -23,26 +23,32 @@
                             <a class="dropdown-item" title="Déplacer un apprenant de cette classe vers une autre classe" wire:click="movePupilFromThisClasse({{$classe->id}})" tabindex="-1" href="#">Déplacer un apprenant de cette classe</a>
                             <a class="dropdown-item" title="Importer des apprenants" wire:click="addNewsPupils({{$classe->id}})" tabindex="-1" href="#">Ajouter des apprenants à cette classe</a>
                             <a class="dropdown-item" title="Importer des apprenants dans cette classe" wire:click="importPupilsIntoClasse({{$classe->id}})" tabindex="-1" href="#">Importer des apprenants dans cette classe</a>
-                            <a class="dropdown-item" wire:click="optimizeClasseAveragesIntoDatabase({{$classe->id}})" tabindex="-1" href="#">Optimiser les moyennes en base de données</a>
-                            <a class="dropdown-item" wire:click="optimizeSemestrialAverageFromDatabase({{$classe->id}})" tabindex="-1" href="#">Charger les moyennes semestrielles</a>
-                            <a class="dropdown-item" tabindex="-1" wire:click="refreshClasseMarks('{{$classe->id}}')" href="#">Vider les notes de cette classe</a>
-                            <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
-                            <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Rafraichir les retards</a>
-                            <a class="dropdown-item" wire:click="updateClassePupilsPersoDataFromFile"  tabindex="-1" href="#">Mettre à jour les données à partir d'un fichier</a>
+                            @if($not_stopped)
+                                <a class="dropdown-item" wire:click="optimizeClasseAveragesIntoDatabase({{$classe->id}})" tabindex="-1" href="#">Optimiser les moyennes en base de données</a>
+                                <a class="dropdown-item" wire:click="optimizeSemestrialAverageFromDatabase({{$classe->id}})" tabindex="-1" href="#">Charger les moyennes semestrielles</a>
+                                <a class="dropdown-item" tabindex="-1" wire:click="refreshClasseMarks('{{$classe->id}}')" href="#">Vider les notes de cette classe</a>
+                                <a class="dropdown-item" wire:click="resetAbsences" tabindex="-1" href="#">Rafraichir les absences</a>
+                                <a class="dropdown-item" wire:click="resetLates" tabindex="-1" href="#">Rafraichir les retards</a>
+                                <a class="dropdown-item" wire:click="updateClassePupilsPersoDataFromFile"  tabindex="-1" href="#">Mettre à jour les données à partir d'un fichier</a>
+                            @endif
                             <a class="dropdown-item" wire:click="updateClassePupilsNames"  tabindex="-1" href="#">Mettre à jour les noms et prenoms</a>
                             <a class="dropdown-item" wire:click="updatePupilsLTPKMatricule"  tabindex="-1" href="#">Mettre à jour les matricules</a>
-                            <a class="dropdown-item" wire:click="insertClasseMarks"  tabindex="-1" href="#">Insérer des notes de classe</a>
-                            <a class="dropdown-item" wire:click="convertClasseLastMarksToParticipateMarks"  tabindex="-1" href="#">Convertir des notes vers un autre type</a>
-                            <a class="dropdown-item" wire:click="insertClasseParticipateMarks"  tabindex="-1" href="#">Insérer des notes de Participation de classe</a>
+                            @if($not_stopped)
+                                <a class="dropdown-item" wire:click="insertClasseMarks"  tabindex="-1" href="#">Insérer des notes de classe</a>
+                                <a class="dropdown-item" wire:click="convertClasseLastMarksToParticipateMarks"  tabindex="-1" href="#">Convertir des notes vers un autre type</a>
+                                <a class="dropdown-item" wire:click="insertClasseParticipateMarks"  tabindex="-1" href="#">Insérer des notes de Participation de classe</a>
+                            @endif
                             <a class="dropdown-item" wire:click="createNewClasse" tabindex="-1" href="#">Créer une classe</a>
                             <a class="dropdown-item" wire:click="editClasseGroup({{$classe->id}})" tabindex="-1" href="#">Modifier la promotion</a>
-                            <a wire:click="editClasseSubjects({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Définir les matières</a>
-                            <a wire:click="settingsOnMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Effectuer une opération sur les notes</a>
-                            <a wire:click="restorMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Restaurer des notes de classe</a>
-                            @if(session()->has('classe_subject_selected') && session('classe_subject_selected') && $classe->hasNullsMarks(session('semestre_selected'), null, session('classe_subject_selected')) )
-                                <a wire:click="deleteNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Supprimer les notes zéros</a>
-                                <a wire:click="desactivateNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Désactiver les zéros</a>
-                                <a wire:click="normalizeNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Normaliser les notes zéros</a><a wire:click="activateNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Activer les zéros</a>
+                            @if($not_stopped)
+                                <a wire:click="editClasseSubjects({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Définir les matières</a>
+                                <a wire:click="settingsOnMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Effectuer une opération sur les notes</a>
+                                <a wire:click="restorMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Restaurer des notes de classe</a>
+                                @if(session()->has('classe_subject_selected') && session('classe_subject_selected') && $classe->hasNullsMarks(session('semestre_selected'), null, session('classe_subject_selected')) )
+                                    <a wire:click="deleteNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Supprimer les notes zéros</a>
+                                    <a wire:click="desactivateNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Désactiver les zéros</a>
+                                    <a wire:click="normalizeNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Normaliser les notes zéros</a><a wire:click="activateNullMarks({{$classe->id}})"  class="dropdown-item" tabindex="-1" href="#">Activer les zéros</a>
+                                @endif
                             @endif
                             <a class="dropdown-item" title="Imprimer les notes formatées en format Excel" wire:click="printSingleMarksAsExcelFile" tabindex="-1" href="#">Imprimer notes formatter en format excel</a>
                             <a class="dropdown-item" title="Imprimer les toutes les notes en format Excel" wire:click="printMarksAsExcelFile" tabindex="-1" href="#">Imprimer toutes les notes en format excel</a>
@@ -446,6 +452,10 @@
                         @elseif($section_selected == 'marks')
 
                             @livewire('classe-marks-lister', ['classe_id' => $classe->id])
+
+                        @elseif($section_selected == 'classe_marks_updating_requests')
+
+                            @livewire('pupil-marks-updating-by-teacher-component', ['classe_id' => $classe->id])
 
                         @elseif($section_selected == 'classe_marks_insertion_progress')
 

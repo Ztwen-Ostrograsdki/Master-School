@@ -24,6 +24,10 @@ class JobUpdatingPupilsMarksManager implements ShouldQueue
 
     public $others_data = [];
 
+    public $tries = 2;
+
+    public $deleteWhenMissingModels = true;
+
     /**
      * Create a new job instance.
      *
@@ -53,7 +57,7 @@ class JobUpdatingPupilsMarksManager implements ShouldQueue
 
         }
 
-        return $this->mark->validateUpdatingValue($this->new_value, $this->updater, $this->others_data);
+        return $this->mark->validateUpdatingValue($this->new_value, $this->mark_editor, $this->others_data);
     }
 
 

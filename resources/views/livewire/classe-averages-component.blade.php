@@ -30,11 +30,26 @@
                     <span>Bulletins</span>
                 </span>
 
+                
                 @if($classe && is_object($classe))
-                    <span wire:click="optimizeClasseAveragesIntoDatabase({{$classe->id}})" class="btn mx-2 bg-success border border-white float-right px-2 z-scale" title="Recharger les moyennes de classe...">
-                        <span class="fa fa-recycle"></span>
-                        <span>Recharger</span>
-                    </span>
+                    @if(! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, session('semestre_selected')))
+                        <span wire:click="optimizeClasseAveragesIntoDatabase({{$classe->id}})" class="btn mx-2 bg-success border border-white float-right px-2 z-scale" title="Recharger les moyennes de classe...">
+                            <span class="fa fa-recycle"></span>
+                            <span>Recharger</span>
+                        </span>
+
+                        <span wire:click="closeSemestre" class="btn mx-2 bg-orange border border-white float-right px-2 z-scale" title="Cloturer le {{ $semestre_type . ' ' . session('semestre_selected') }}">
+                            <span class="fa fa-lock"></span>
+                            <span>Cloturer le {{ $semestre_type . ' ' . session('semestre_selected') }} </span>
+                        </span>
+                    @endif
+
+                    @if(! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id))
+                        <span wire:click="closeSchoolYear" class="btn mx-2 bg-warning border border-white float-right px-2 z-scale" title="Cloturer l'année-scolaire {{ session('school_year_selected') }}">
+                            <span class="fa fa-lock"></span>
+                            <span>Cloturer l'année-scolaire {{ session('school_year_selected') }}</span>
+                        </span>
+                    @endif
                 @endif
 
                 <span wire:click="refreshOrder" class="btn {{(!$order && !$targetToOrder) ? 'd-none' : ''}} mx-2 btn-warning border border-white float-right px-2 z-scale" title="Ordonner par liste alphabétique...">
@@ -59,7 +74,6 @@
                         <colgroup span="{{count($semestres) + 1}}"></colgroup>
                         <colgroup span="3"></colgroup>
                         <col>
-                        <col>
                         <tr class="text-center bg-secondary-light-1 ">
                             <th rowspan="2">No</th>
                             <th rowspan="2">Nom et Prénoms </th>
@@ -67,7 +81,6 @@
                             <th rowspan="2">Contacts</th>
                             <th colspan="{{count($semestres) + 1}}" scope="colgroup">Moyennes</th>
                             <th rowspan="2">Actions</th>
-                            <th rowspan="2">Suppr.</th>
                         </tr>
                         <tr class="text-center bg-secondary-light-3">
                             @foreach($semestres as $s)
@@ -140,7 +153,7 @@
 
                                         @if($semestrialAverage)
                                             <span class="{{$moy_sm >= 10 ? 'text-green-y' : 'text-danger'}}">
-                                                {{ $moy_sm > 9 ? $moy_sm : '0' . $moy_sm }}
+                                                {{ numb_formatted($moy_sm) }}
                                             </span>
                                             (<span class="text-warning">
                                                 <span>{{$rank_sm}}</span><sup>{{$exp_sm}}</sup><small>{{$base_sm }} </small>
@@ -182,7 +195,7 @@
 
                                     @if($annualAverage)
                                         <span class="{{$moy_an >= 10 ? 'text-green-y' : 'text-danger'}}">
-                                            {{ $moy_an > 9 ? $moy_an : '0' . $moy_an }}
+                                            {{ numb_formatted( $moy_an) }}
                                         </span>
                                         (<span class="text-warning">
                                             <span>{{$rank_an}}</span><sup>{{$exp_an}}</sup><small>{{$base_an }} </small>
@@ -224,11 +237,6 @@
                                                     <span class="fa fa-recycle py-2 px-2"></span>
                                                 </span>
                                             @endif
-                                        </span>
-                                    </th>
-                                    <th class="text-center">
-                                        <span wire:click="forceDelete({{$p->id}})" title="Supprimer définitivement l'apprenant {{$p->name}}" class="text-danger m-0 p-0 cursor-pointer">
-                                            <span class="fa fa-trash py-2 px-2"></span>
                                         </span>
                                     </th>
                             </tr>

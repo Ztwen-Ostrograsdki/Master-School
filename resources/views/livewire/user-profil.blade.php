@@ -3,6 +3,7 @@
        <div class="w-100 border m-0 p-0">
           <div class="m-0 p-0 w-100"> 
              <div class="row w-100 m-0">
+
                 @isMySelf($user)
                 <div class="col-2 m-0 text-capitalize border border-dark bg-dark p-0 text-white" style="min-height: 650px;">
                    <div class="d-fex flex-column w-100 mb-3">
@@ -119,7 +120,7 @@
                                         <h6 class="text-white-50">
                                             <span class="fa fa-clock"></span>
                                             <span>Emploi du temps ({{ $user->teacher->speciality()->name }}) </span>
-                                            @if(auth()->user()->isAdminAs('master'))
+                                            @if(auth_user()->isAdminAs('master'))
                                                 <span wire:click="insertTeachersTimePlan({{$user->teacher->id}})" class="float-right fa fa-edit text-primary cursor-pointer fx-20 mx-1" title="Insérer l'emploi du temps..."></span>
                                                 @if(count($user->teacher->getCurrentTimePlans(null, null))>0)
                                                     <span wire:click="deleteTeacherTimePlans" class="fa fa-trash text-danger cursor-pointer fx-20 mx-1 float-right" title="Supprimer les Emplois du temps de cet enseignant..."></span>
@@ -140,7 +141,7 @@
                                                                 <span class="col-4">
                                                                     {{ $clll['root'] }}<sup>{{ $clll['sup'] }} </sup> {{ $clll['idc'] }}
                                                                 </span>
-                                                                @if(auth()->user()->isAdminAs('master'))
+                                                                @if(auth_user()->isAdminAs('master'))
                                                                     <span class="col-3 d-flex justify-content-around">
                                                                         <span wire:click="insertTeachersTimePlan({{$user->teacher->id}}, {{$cll->id}})" class="float-right fa fa-edit text-primary cursor-pointer fx-20" title="Définir l'emploi du temps de cette classe..."></span>
                                                                         @if(count($time_plans) > 0)
@@ -175,7 +176,7 @@
                                         <h6 class="text-white-50">
                                             <span class="fa fa-user"></span>
                                             <span>Mes infos personnelles</span>
-                                            @if(auth()->user()->isAdminAs('master') || auth()->user->id == $user->id)
+                                            @if(auth_user()->isAdminAs('master') || auth_user()->id == $user->id)
                                                 <span wire:click="updateTeacherPersoData({{$user->teacher->id}})" class="float-right fa fa-edit text-secondary cursor-pointer fx-20" title="Editer mes infos..."></span>
                                             @endif
                                         </h6>
@@ -192,7 +193,7 @@
                                                     <span class="text-warning">Spécialité:</span>
                                                     <span>{{ $user->teacher->speciality()->name }}</span>
                                                 </span>
-                                                @if(auth()->user()->isAdminAs('master'))
+                                                @if(auth_user()->isAdminAs('master'))
                                                     <span class="fa fa-edit ml-4 cursor-pointer fx-15 text-primary" title="Changer la matière ou la Spécialité de {{$user->teacher->getFormatedName()}}" wire:click="updateTeacherSubject({{$user->teacher->id}})"></span>
                                                 @endif
                                             </h6>

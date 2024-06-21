@@ -23,7 +23,7 @@ class AbsencesAndLatesDeleterBatcherListener
      */
     public function handle(AbsencesAndLatesDeleterEvent $event)
     {
-         $batch = Bus::batch([
+        $batch = Bus::batch([
 
             new JobDeleteAbsencesAndLates($event->user, $event->classe, $event->semestre, $event->school_year_model, $event->subject_id, $event->pupil_id, $event->target)
 

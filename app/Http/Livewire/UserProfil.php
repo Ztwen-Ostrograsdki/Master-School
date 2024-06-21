@@ -47,6 +47,7 @@ class UserProfil extends Component
         'IsendNewFriendRequest_L_Event' => 'notifyMeWhenNewFollower',
         'schoolYearChangedLiveEvent' => 'reloadData',
         'ReloadComponentEvent' => 'reloadData',
+        'NewTeacherWasCreatedLiveEvent' => 'reloadData',
     ];
     protected $rules = [
         'name' => 'required|string|between:5,50',
@@ -58,16 +59,19 @@ class UserProfil extends Component
         'old_pwd' => 'required|string|between:4,40',
     ];
 
-    use WithFileUploads;
-    use ModelQueryTrait;
+    use WithFileUploads, ModelQueryTrait;
 
 
     public function render()
     {
         $this->hasNewData = true;
+
         $user = User::find($this->user_id);
+
         $myFollowers = $this->getMyFollowers();
+
         $myFriends = [];
+
         // $myFriends = $user->getMyFriends();
         $demandes = $this->getDemandes();
 
@@ -137,12 +141,19 @@ class UserProfil extends Component
     public function mount(int $id)
     {
         if($id){
+
             $this->user_id = $id;
+
             $user = User::find($id);
+
             if($user){
+
                 $this->user_id = $id;
+
                 $this->name = $user->name;
+
                 $this->email = $user->email;
+                
                 $this->new_email = $user->new_email;
             }
             else{

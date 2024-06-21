@@ -248,8 +248,6 @@ class AuthRedirections extends Component
 
                         $this->dispatchBrowserEvent('RegistredSelf');
 
-                        NewUserCreatedEvent::dispatch($this->user, $this->user);
-
                         Auth::login($this->user);
                     }
                     else{
@@ -257,8 +255,6 @@ class AuthRedirections extends Component
                         $this->resetErrorBag();
 
                         $this->dispatchBrowserEvent('hide-form');
-
-                        NewUserCreatedEvent::dispatch($this->auth, $this->user);
 
                         // $this->user->sendEmailVerificationNotification();
 

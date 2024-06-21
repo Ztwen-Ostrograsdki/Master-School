@@ -74,12 +74,37 @@
                             <blockquote class="text-warning">
                                 <div class="d-flex justify-content-between">
                                     <h6 class="m-0 p-0 h6 text-white-50 py-2">
-                                        Liste des enseignants de la <a class="text-warning" href="{{route('classe_profil', ['slug' => $classe->slug])}}">{{$classe->name}}</a> la plateforme <span class="text-warning"></span>
+                                        Liste des enseignants de la <a class="text-warning" href="{{route('classe_profil', ['slug' => $classe->slug])}}">{{$classe->name}}</a> de la plateforme <span class="text-warning"></span>
                                     </h6>
                                 
                                 </div>
                             </blockquote>
                         </div>
+                        
+                        @foreach($semestres as $sem)
+
+                            @if(! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, $sem))
+
+                                <span wire:click="closeSemestre({{$sem}})" class="btn mx-2 bg-secondary-light-{{$sem - 1}}  border text-white border-white py-3 px-3 z-scale" title="Cloturer le {{ $semestre_type . ' ' . $sem }}">
+                                    <span class="fa fa-lock"></span>
+                                    <span>Cloturer le {{ $semestre_type . ' ' . $sem }} </span>
+                                </span>
+                            @else
+                                <span disabled class="btn mx-2 bg-secondary opacity-25  border text-white border-white py-3 px-3 z-scale" title="Cloturer le {{ $semestre_type . ' ' . $sem }}">
+                                    <span class="fa fa-lock"></span>
+                                    <span>{{ $semestre_type . ' ' . $sem }} déjà clôturé </span>
+                                </span>
+                            @endif
+
+                        @endforeach
+
+                        @if(! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, []))
+                            <span wire:click="closeSchoolYear" class="btn mx-2 bg-warning border border-white p-3 z-scale" title="Cloturer l'année-scolaire {{ session('school_year_selected') }}">
+                                <span class="fa fa-lock"></span>
+                                <span>Cloturer l'année-scolaire {{ session('school_year_selected') }}</span>
+                            </span>
+                        @endif
+                        
                         <div class="w-100 m-0 p-0 mt-3">
                         @if(count($teachers))
                             <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white text-center">
@@ -93,7 +118,7 @@
                                 <col>
                                 <tr class="text-center z-bg-secondary-dark ">
                                     <th rowspan="2">No</th>
-                                    <th rowspan="2">Nom et Prénoms <span class="text-orange">(Classes)</span></th>
+                                    <th rowspan="2">Nom et Prénoms <span class="text-orange">(Autres lasses tenues)</span></th>
                                     <th rowspan="2">Emploi du temps</th>
                                     <th rowspan="2">Tient la classe depuis</th>
                                     <th rowspan="2">Contacts</th>
@@ -116,18 +141,21 @@
                                                 </span>
                                                 <span class="pr-1">
                                                     @if($t->hasClasses())
-                                                        <span class="d-flex justify-content-between">
-                                                            (<span class="d-flex justify-content-start small text-orange">
-                                                                @foreach($t->getTeachersCurrentClasses() as $c)
+                                                        <select wire:model="selected_classe" class="form-select custom-select" name="selected_classe" id="">
+                                                            <option value="{{null}}">Les autres classes tenues ( + {{ numb_formatted(count($t->getTeachersCurrentClasses()) - 1) }} classes) </option>
+                                                            @foreach($t->getTeachersCurrentClasses() as $c)
+                                                                @if($c->id !== $classe->id)
                                                                     @php
                                                                         $cl = $c->getNumericName();
                                                                     @endphp
-                                                                    <small style="color: inherit !important;" class=" py-1 px-2 mr-1 my-1">
-                                                                        {{ $cl['root'] }}<sup>{{ $cl['sup'] }} </sup> {{ $cl['idc'] }}
-                                                                    </small>
-                                                                @endforeach
-                                                            </span>)
-                                                        </span>
+                                                                    <option title="charger le profil de tous les enseignants de la classe de {{ $cl['root'] . '' . $cl['sup'] . ' ' . $cl['idc'] }}" value="{{$c->id}}">
+                                                                        <small style="color: inherit !important;" class=" py-1 px-2 mr-1 my-1">
+                                                                            {{ $cl['root'] }}<sup>{{ $cl['sup'] }} </sup> {{ $cl['idc'] }}
+                                                                        </small>
+                                                                    </option>
+                                                                @endif
+                                                            @endforeach
+                                                        </select>
                                                     @else
                                                         <small class="text-orange">Aucune classe assignée!</small>
                                                     @endif

@@ -32,7 +32,7 @@ class UpdateClasseAveragesIntoDatabaseEvent implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(User $user, Classe $classe, $semestre, SchoolYear $school_year_model, bool $allSemestres = false)
+    public function __construct(?User $user, Classe $classe, $semestre, SchoolYear $school_year_model, bool $allSemestres = false)
     {
         $this->user = $user;
 
@@ -61,6 +61,15 @@ class UpdateClasseAveragesIntoDatabaseEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('reloadMarkChannel.' . $this->user->id);
+        if($this->user){
+
+            return [new PrivateChannel('reloadMarkChannel.' . $this->user->id), new PrivateChannel('master')];
+
+        }
+        else{
+
+            return new PrivateChannel('master');
+
+        }
     }
 }

@@ -312,6 +312,98 @@
                         <h6 class="text-warning letter-spacing-12">Aucune tâche en cours</h6>
                     @endif
                 </div>
+
+                <div class="w-100 mb-2 bg-secondary-light-3 border rounded p-2">
+                    <h6>TACHES D'EDITION DE NOTES</h6>
+                    @if(count($trying_to_update_pupil_mark_batches))
+                        @foreach($trying_to_update_pupil_mark_batches as $batch)
+                            <div class="my-2 border rounded @if($batch->hasFailures()) bg-danger @endif">
+
+                                @php
+                                    $subject = null;
+
+                                    $details = $classe->marks_batches()->where('batch_id', $batch->id)->where('user_id', auth()->user()->id)->first();
+
+                                    if($details){
+
+                                        if($details->subject_id){
+
+                                            $subject = $details->subject;
+
+                                        }
+                                    }
+                                @endphp
+
+                                <h6 class="text-warning text-right m-0 p-0">
+                                    @if($details)
+                                        <p class="px-1 pr-2">
+                                            Details: @if($details->method_type == 'updating') Mise à jour @endif de {{ $details->total_marks }} notes @if($subject) de {{ $subject->name }} @else dans toutes les matières  @endif
+                                        </p>
+
+                                    @endif
+                                </h6>
+
+                                <div class="d-flex justify-between">
+                                    <div class="my-2 col-8">
+                                        @php
+                                            $prog = $batch->progress();
+                                        @endphp
+                                        <div class="progress" style="height: 12px;">
+
+                                            <div class="progress-bar progress-bar-striped border @if(!$batch->finished() ) progress-bar-animated @endif rounded @if($batch->hasFailures()) bg-danger @endif @if($batch->finished()) bg-success @endif @if(!$batch->finished() && !$batch->hasFailures()) bg-primary @endif " role="progressbar" style="width: {{$prog}}%;" aria-valuenow="$prog" aria-valuemin="0" aria-valuemax="100">
+                                                {{$prog}}%
+
+                                            </div>
+                                        </div>
+                                        <span> {{ $prog }} % </span>
+                                        @if($batch->hasFailures())
+                                            <span class=" ml-2 letter-spacing-12">Opération échouée</span>
+                                        @else
+                                            <small class="text-white letter-spacing-12 float-right">
+                                                Terminée {{ Illuminate\Support\Carbon::parse($batch->finishedAt)->diffForHumans() }}
+                                            </small>
+                                        @endif
+                                        
+                                        <small class="text-orange letter-spacing-12 float-right mx-2"> {{ $batch->id }} </small>
+
+                                    </div>
+                                    <div class="d-flex justify-between  p-1">
+                                        @if($batch->hasFailures())
+                                            <span wire:click="retryXBatch('{{$batch->id}}')" class="btn btn-primary p-2 mr-2">
+                                                <span class="fa fa-recycle"></span>
+                                                <span>Relancer</span>
+                                            </span>
+                                        @endif
+
+                                        @if(!$batch->finished() && !$batch->hasFailures())
+                                            <span wire:click="cancelXBatch('{{$batch->id}}')" class="btn btn-info p-2 mr-2">
+                                                <span class="fa fa-square text-danger"></span>
+                                                <span>Annuler</span>
+                                            </span>
+                                        @endif
+
+                                        @if($batch->finished() || $batch->hasFailures())
+                                            <span wire:click="deleteXBatch('{{$batch->id}}')" class="btn btn-warning p-2">
+                                                <span class="fa fa-trash"></span>
+                                                <span>Supprimer</span>
+                                            </span>
+                                        @endif
+
+                                        @if(!$batch->finished())
+                                            <span wire:click="deleteXBatch('{{$batch->id}}')" class="btn btn-warning p-2">
+                                                <span class="fa fa-trash"></span>
+                                                <span>Annuler et Suppr</span>
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+
+                    @else
+                        <h6 class="text-warning letter-spacing-12">Aucune tâche en cours</h6>
+                    @endif
+                </div>
             </div>
         </div>
         @endif

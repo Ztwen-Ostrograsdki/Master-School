@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\InitiateMarksStoppingEvent;
 use App\Helpers\AdminTraits\AdminTrait;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
@@ -15,19 +16,31 @@ class TeacherListingByClasse extends Component
 
     use AdminTrait;
 
-    protected $listeners = ['schoolYearChangedLiveEvent' => 'reloadData', 'GlobalDataUpdated' => 'reloadData'];
+    protected $listeners = [
+        'schoolYearChangedLiveEvent' => 'reloadData', 
+        'GlobalDataUpdated' => 'reloadData',
+        'MarksStoppingDispatchedLiveEvent' => 'reloadData',
+    ];
 
     public $classe_id = null;
+
     public $counter = 0;
+
     public $occurence = 0;
+
     public $baseRoute = 'teacher_listing';
+
     public $search = '';
+
     public $semestre_type = 'Semestre';
+
+    public $selected_classe;
 
 
     public function mount($slug)
     {
         if($slug){
+
             $this->slug = $slug;
         }
         else{
@@ -44,6 +57,8 @@ class TeacherListingByClasse extends Component
         $school = School::first();
 
         $semestres = [1, 2];
+
+
 
         if($school){
 
@@ -72,6 +87,71 @@ class TeacherListingByClasse extends Component
         }
 
         return view('livewire.teacher-listing-by-classe', compact('classe', 'school_year_model', 'teachers', 'semestres'));
+    }
+
+    public function updatedSelectedClasse($classe_id)
+    {
+        $classe = Classe::find($classe_id);
+
+        if($classe && $classe->id !== $this->classe_id){
+
+            $this->selected_classe = $classe;
+
+            redirect()->route('classe_teachers', ['slug' => $classe->getSlug()]);
+
+        }
+        else{
+
+            $this->selected_classe = null;
+
+        }
+
+    }
+
+    public function closeSemestre($semestre)
+    {
+
+        $school_year_model = $this->getSchoolYear();
+
+        $classe = Classe::find($this->classe_id);
+
+        if($classe){
+
+            $verify_semestre_marks_status = $classe->getTheClasseSemestreMarksStatus($semestre);
+
+            if($verify_semestre_marks_status && $verify_semestre_marks_status['status']){
+
+                $level = $classe->level;
+
+                InitiateMarksStoppingEvent::dispatch($classe, $level, $school_year_model, $semestre, null, []);
+
+            }
+            else{
+
+                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => "DES MATIERES AVEC IRREGULARITES DE NOTES", 'message' => "Des matières avec des irrégularités de notes ont étés détectées dans cette classe. Vous ne pouvez pas cloturer le semestre dans cette classe si ces irrégularités de notes n'ont pas été corrigées!", 'type' => 'warning']);
+
+            }
+        }
+    }
+
+
+    public function closeSchoolYear()
+    {
+
+        $school_year_model = $this->getSchoolYear();
+
+        $classe = Classe::find($this->classe_id);
+
+        if($classe){
+
+            $level = $classe->level;
+
+            $semestre = session('semestre_selected');
+
+            InitiateMarksStoppingEvent::dispatch($classe, $level, $school_year_model, null, null, []);
+
+        }
+
     }
 
 

@@ -5,11 +5,13 @@ namespace App\Observers;
 use App\Events\FlushAveragesIntoDataBaseEvent;
 use App\Events\UpdateClasseAveragesIntoDatabaseEvent;
 use App\Jobs\JobForceMarksDestroyingAfterMoreDays;
+use App\Jobs\JobToArchiveMarkAction;
 use App\Jobs\JobUpdateClasseAnnualAverageIntoDatabase;
 use App\Jobs\JobUpdateClasseSemestrialAverageIntoDatabase;
 use App\Jobs\UpdateAverageTable;
 use App\Models\Mark;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class MarkObserver
 {
@@ -44,6 +46,45 @@ class MarkObserver
         // $mark->value > 0 && $mark->isDirty() ? $this->doJob($mark) : $this->doNotJob();
     }
 
+    public function updating(Mark $mark)
+    {
+
+        $archives_targets = ['subject_id', 'classe_id', 'semestre', 'type'];
+
+        if($mark->isDirty($targets)){
+
+            $this->doJob($mark);
+
+        }
+
+        if($mark->isDirty($archives_targets)){
+
+            $action = "updated";
+
+            $user = auth_user();
+
+            $description = "La note (" . get_mark_type($mark->type) . ") N°" . $mark->mark_index . " de " . $mark->pupil->getName() . " en " . $mark->subject->name . " a été éditée par " . $user->pseudo . "(Email: " . $user->email . ")." ;
+
+            if($mark->isDirty('value')){
+
+                $description .= " La valeur de la note est passée de " . $mark->getOriginal('value') . " à " . $mark->value; 
+
+            }
+
+            if($mark->isDirty('type')){
+
+                $description .= " Le type de la note est passé de " . get_mark_type($mark->getOriginal('type')) . " à " . get_mark_type($mark->type); 
+
+            }
+
+            dispatch(new JobToArchiveMarkAction("deleted", $description, $mark, $user));
+
+        }
+
+        // $mark->value > 0 && $mark->isDirty() ? $this->doJob($mark) : $this->doNotJob();
+    }
+
+
     /**
      * Handle the Mark "deleted" event.
      *
@@ -65,6 +106,15 @@ class MarkObserver
     {
 
         dispatch(new JobForceMarksDestroyingAfterMoreDays($mark))->delay(Carbon::now()->addDays(30));
+
+        $action = "deleted";
+
+        $user = Auth::user();
+
+        $description = "La note (" . get_mark_type($mark->type) . ") N°" . $mark->mark_index . " de " . $mark->pupil->getName() . " en " . $mark->subject->name . " a été supprimée par " . $user->pseudo . "(Email: " . $user->email . ")." ;
+
+        dispatch(new JobToArchiveMarkAction("deleted", $description, $mark, $user));
+
     }
 
     /**

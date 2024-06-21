@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use App\Models\Pupil;
+use App\Models\ParentRequestToFollowPupil;
 use App\Models\Parentable;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Pupil;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 
 /**
@@ -31,6 +32,11 @@ class ParentPupil extends Model
     public function pupil()
     {
         return $this->belongsTo(Pupil::class);
+    }
+
+    public function following_request()
+    {
+        return ParentRequestToFollowPupil::where(['pupil_id' => $this->pupil_id, 'parentable_id' => $this->parentable_id])->first();
     }
 
 

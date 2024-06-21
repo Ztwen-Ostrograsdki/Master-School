@@ -3,7 +3,7 @@
         <div class="m-0 p-0 w-100">
             <blockquote class="text-warning p-0">
                 <hr class=" w-100 m-0 p-0 bg-primary">
-                <h6 style="letter-spacing: 1.2px" class="w-100 py-2 m-0 fx-17 text-orange text-right px-2 mr-2 font-italic">{{ count($parents) >= 10 ? count($parents) : '0' . count($parents) }} Parents d'élève enregistré(s) sur la plateforme </h6>
+                <h6 style="letter-spacing: 1.2px" class="w-100 py-2 m-0 fx-17 text-orange text-right px-2 mr-2 font-italic">{{ numb_formatted(count($parents)) }} Parents d'élève enregistré(s) sur la plateforme </h6>
                 <hr class=" w-100 m-0 p-0 bg-primary">
             </blockquote>
         </div>
@@ -79,8 +79,8 @@
                                     @endif
                                 </td>
                                 <td class=" ">
-                                    {{ count($p->pupils) >= 10 ? count($p->pupils) : '0' . count($p->pupils) }}
-                                    <small title="Les demandes en cours de traitement..." class="text-warning mx-2"> ({{ count($p->notConfirmedsParentRequests()) >= 10 ? count($p->notConfirmedsParentRequests()) : '0' . count($p->notConfirmedsParentRequests()) }}) </small>
+                                    {{ numb_formatted(count($p->pupils)) }}
+                                    <small title="Les demandes en cours de traitement..." class="text-warning mx-2"> ({{ numb_formatted(count($p->notConfirmedsParentRequests())) }}) </small>
                                 </td>
                                 <td class=" ">
                                     @if($p->authorized)

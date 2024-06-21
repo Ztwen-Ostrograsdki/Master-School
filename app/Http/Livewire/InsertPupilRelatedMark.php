@@ -157,7 +157,35 @@ class InsertPupilRelatedMark extends Component
 
                         $this->end = intval(date('H')) + 2;
 
-                        $this->dispatchBrowserEvent('modal-insertPupilRelatedMark');
+                        $semestre_id = $this->semestre_id;
+
+                        $subject_id = $this->subject_id;
+
+                        $classe = $this->classe;
+
+                        $mark_stopped_1 = $classe->classeMarksWasStoppedForThisSchoolYear($semestre_id, $subject_id);
+
+                        $mark_stopped_2 = $classe->classeMarksWasStoppedForThisSchoolYear();
+
+                        if(! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, session('semestre_selected'))){
+
+                            if(!$mark_stopped_1 && !$mark_stopped_2){
+
+                                $this->dispatchBrowserEvent('modal-insertPupilRelatedMark');
+
+                            }
+                            else{
+
+                                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => "ARRET NOTE", 'message' => "Aucune action n'est possible sur les notes de cette classe!", 'type' => 'info']);
+
+                            }
+
+                        }
+                        else{
+
+                            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => "ARRET NOTE", 'message' => "Aucune action n'est possible sur les notes de cette classe!", 'type' => 'info']);
+
+                        }
 
                     }
                     else{
@@ -209,7 +237,32 @@ class InsertPupilRelatedMark extends Component
 
                         $this->end = intval(date('H')) + 2;
 
-                        $this->dispatchBrowserEvent('modal-insertPupilRelatedMark');
+                        $semestre_id = $this->semestre_id;
+
+                        $mark_stopped_1 = $classe->classeMarksWasStoppedForThisSchoolYear($semestre_id, $subject_id);
+
+                        $mark_stopped_2 = $classe->classeMarksWasStoppedForThisSchoolYear();
+
+                        if(! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, session('semestre_selected'))){
+
+                            if(!$mark_stopped_1 && !$mark_stopped_2){
+
+                                $this->dispatchBrowserEvent('modal-insertPupilRelatedMark');
+
+                            }
+                            else{
+
+                                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => "ARRET NOTE", 'message' => "Aucune action n'est possible sur les notes de cette classe!", 'type' => 'info']);
+
+                            }
+
+                        }
+                        else{
+
+                            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => "ARRET NOTE", 'message' => "Aucune action n'est possible sur les notes de cette classe!", 'type' => 'info']);
+
+                        }
+                        
                     }
                     else{
 

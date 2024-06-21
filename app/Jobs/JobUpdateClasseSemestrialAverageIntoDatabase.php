@@ -24,6 +24,8 @@ class JobUpdateClasseSemestrialAverageIntoDatabase implements ShouldQueue
 
     protected $semestre;
 
+    public $deleteWhenMissingModels = true;
+
     /**
      * Create a new job instance.
      *

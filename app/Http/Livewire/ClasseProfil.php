@@ -32,6 +32,7 @@ class ClasseProfil extends Component
         'classePupilListUpdated' => 'reloadClasseData',
         'setPupilToAbandonned' => 'toAbandonned',
         'classeUpdated' => 'reloadClasseData',
+        'MarksStoppingDispatchedLiveEvent' => 'reloadClasseData',
         'ClassesUpdatedLiveEvent' => 'reloadClasseData',
         'ClasseDataWasUpdated' => 'reloadClasseData',
         'newLevelCreated' => 'reloadClasseData',
@@ -76,6 +77,7 @@ class ClasseProfil extends Component
         'averages' => 'Les moyennes',
         'simple_classe_marks_view' => 'Vue Simplifiée des notes',
         'classe_marks_insertion_progress' => 'Progression des notes en cours',
+        'classe_marks_updating_requests' => 'Requêtes de mise de jour de notes',
     ];
 
     protected $rules = ['classeName' => 'required|string'];
@@ -349,7 +351,20 @@ class ClasseProfil extends Component
             return abort(404, $msg);
         }
 
-        return view('livewire.classe-profil', compact('classe', 'pupils', 'semestres', 'classeSelf', 'classesToShow', 'school_year_model'));
+        if($classeSelf && !is_null($classeSelf) && isset($classeSelf->id)){
+
+            $not_stopped = !is_marks_stopped($classeSelf->id, $classeSelf->level_id, $school_year_model->id) 
+                    && ! is_marks_stopped($classeSelf->id, $classeSelf->level_id, $school_year_model->id, session('semestre_selected'));
+
+        }
+        elseif($classe){
+
+            $not_stopped = !is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) 
+                    && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, session('semestre_selected'));
+
+        }
+
+        return view('livewire.classe-profil', compact('classe', 'pupils', 'semestres', 'classeSelf', 'classesToShow', 'school_year_model', 'not_stopped'));
     }
 
 

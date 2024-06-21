@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\PreparingToCreateNewTeacherEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Level;
 use App\Models\SchoolYear;
@@ -216,7 +217,6 @@ class AddNewTeacher extends Component
 
     public function insert()
     {
-            
         $this->validateOnly('email');
 
         $v = $this->validate();
@@ -240,127 +240,140 @@ class AddNewTeacher extends Component
         else{
             $this->resetErrorBag('name', 'surname');
 
-            DB::transaction(function($e){
+            $school_year_model = $this->getSchoolYear();
 
-                if($this->creating){
-                    try {
-                        $teacher = Teacher::create([
-                            'name' => strtoupper($this->name),
-                            'surname' => ucwords($this->surname),
-                            'nationality' => $this->nationality,
-                            'contacts' => $this->contacts,
-                            'marital_status' => $this->marital_status,
-                            'level_id' => $this->level_id,
-                            'user_id' => $this->user->id
+            $subject = Subject::find($this->subject_id);
 
-                        ]);
+            PreparingToCreateNewTeacherEvent::dispatch($this->contacts, $this->level_id, $this->name, $this->nationality, $this->marital_status, $school_year_model, $subject, $this->surname, $this->user, $this->updating, $this->edit_subject, $this->old_subject);
 
-                        if($teacher){
+            $this->dispatchBrowserEvent('hide-form');
 
-                            $school_year_model = SchoolYear::find($this->school_year);
+            $this->resetErrorBag();
 
-                            $subject = Subject::find($this->subject_id);
+            $name = strtoupper($this->name);
 
-                            $school_year_model->teachers()->attach($teacher->id);
+            $surname = ucwords($this->surname);
 
-                            $subject->teachers()->attach($teacher->id);
+            $this->dispatchBrowserEvent('Toast', ['title' => 'OPERATION TERMINEE', 'message' => "Les données de l'enseignant $name $surname ont été mises à jour avec succès! ", 'type' => 'success']);
 
-                            $this->user->update(['teacher_id' => $teacher->id]);
+            $this->reset('name', 'surname', 'subject_id', 'contacts', 'school_year', 'nationality', 'level_id', 'marital_status', 'user', 'email', 'edit_subject', 'teacher', 'updating', 'creating', 'old_subject');
 
-                        }
-                    } catch (Exception $e) {
+            $this->emit('UpdatedSchoolYearData');
 
-                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'enseignant a échoué!", 'type' => 'error']);
-                    }
+        }
 
-                }
-                elseif ($this->updating) {
+    }
 
-                    $this->teacher->update([
+
+    public function brouillon()
+    {
+        DB::transaction(function($e){
+
+            if($this->creating){
+                try {
+                    $teacher = Teacher::create([
                         'name' => strtoupper($this->name),
                         'surname' => ucwords($this->surname),
                         'nationality' => $this->nationality,
                         'contacts' => $this->contacts,
-                        'marital_status' => $this->marital_status
-
-                    ]);
-                }
-                elseif ($this->edit_subject) {
-
-                    $update = $this->teacher->update([
+                        'marital_status' => $this->marital_status,
                         'level_id' => $this->level_id,
+                        'user_id' => $this->user->id
+
                     ]);
 
-                    if($update){
+                    if($teacher){
 
                         $school_year_model = SchoolYear::find($this->school_year);
 
                         $subject = Subject::find($this->subject_id);
 
-                        $this->old_subject->teachers()->detach($this->teacher->id);
+                        $school_year_model->teachers()->attach($teacher->id);
 
-                        $subject->teachers()->attach($this->teacher->id);
-                        
-                        if($this->old_subject->id !== $this->subject_id){
+                        $subject->teachers()->attach($teacher->id);
 
-                            $classes = $this->teacher->getTeachersCurrentClasses(true);
+                        $this->user->update(['teacher_id' => $teacher->id]);
 
-                            foreach($classes as $classe_id => $data){
-
-                                $classe = $data['classe'];
-
-                                $cursus = $data['cursus'];
-
-                                $canMarkedAsWorked = $data['asWorkedDuration'];
-
-                                DB::transaction(function($e) use ($classe, $cursus, $canMarkedAsWorked){
-                                    try {
-                                        try {
-                                            if($cursus){
-
-                                                $cursus->update(['end' => Carbon::now(), 'teacher_has_worked' => $canMarkedAsWorked]);
-                                            }
-                                            else{
-
-                                                $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur', 'message' => "La mise à jour n'a pas été effective!", 'type' => 'error']);
-                                            }
-                                        } catch (Exception $ee) {
-
-                                            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur Serveur niveau 1', 'message' => "Une erreure inconnue est survenue veuillez réessayer dans quelques secondes!", 'type' => 'warning']);
-                                        }
-                                    } catch (Exception $e) {
-
-                                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur Serveur niveau 2', 'message' => "Une erreure inconnue est survenue veuillez réessayer dans quelques secondes!", 'type' => 'warning']);
-                                    }
-                                });
-                            }
-
-                        }
                     }
+                } catch (Exception $e) {
 
+                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreure serveur', 'message' => "L'insertion de l'enseignant a échoué!", 'type' => 'error']);
                 }
-            });
 
-            DB::afterCommit(function(){
+            }
+            elseif ($this->updating) {
 
-                $name = strtoupper($this->name);
+                $this->teacher->update([
+                    'name' => strtoupper($this->name),
+                    'surname' => ucwords($this->surname),
+                    'nationality' => $this->nationality,
+                    'contacts' => $this->contacts,
+                    'marital_status' => $this->marital_status
 
-                $surname = ucwords($this->surname);
+                ]);
+            }
+            elseif ($this->edit_subject) {
 
-                $this->dispatchBrowserEvent('hide-form');
+                $update = $this->teacher->update([
+                    'level_id' => $this->level_id,
+                ]);
 
-                $this->resetErrorBag();
+                if($update){
 
-                $this->reset('name', 'surname', 'subject_id', 'contacts', 'school_year', 'nationality', 'level_id', 'marital_status', 'user', 'email', 'edit_subject', 'teacher', 'updating', 'creating', 'old_subject');
+                    $school_year_model = SchoolYear::find($this->school_year);
 
-                $this->dispatchBrowserEvent('Toast', ['title' => 'OPERATION TERMINEE', 'message' => "Les données de l'enseignant $name $surname ont été mises à jour avec succès! ", 'type' => 'success']);
+                    $subject = Subject::find($this->subject_id);
 
-                $this->emit('UpdatedSchoolYearData');
+                    $this->old_subject->teachers()->detach($this->teacher->id);
 
-                $this->emit('newTeacherHasBeenAdded');
-            });
-        }
+                    $subject->teachers()->attach($this->teacher->id);
+                    
+                    if($this->old_subject->id !== $this->subject_id){
 
+                        $classes = $this->teacher->getTeachersCurrentClasses(true);
+
+                        foreach($classes as $classe_id => $data){
+
+                            $classe = $data['classe'];
+
+                            $cursus = $data['cursus'];
+
+                            $canMarkedAsWorked = $data['asWorkedDuration'];
+
+                            DB::transaction(function($e) use ($classe, $cursus, $canMarkedAsWorked){
+                                try {
+                                    try {
+                                        if($cursus){
+
+                                            $cursus->update(['end' => Carbon::now(), 'teacher_has_worked' => $canMarkedAsWorked]);
+                                        }
+                                        else{
+
+                                            $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur', 'message' => "La mise à jour n'a pas été effective!", 'type' => 'error']);
+                                        }
+                                    } catch (Exception $ee) {
+
+                                        $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur Serveur niveau 1', 'message' => "Une erreure inconnue est survenue veuillez réessayer dans quelques secondes!", 'type' => 'warning']);
+                                    }
+                                } catch (Exception $e) {
+
+                                    $this->dispatchBrowserEvent('Toast', ['title' => 'Erreur Serveur niveau 2', 'message' => "Une erreure inconnue est survenue veuillez réessayer dans quelques secondes!", 'type' => 'warning']);
+                                }
+                            });
+                        }
+
+                    }
+                }
+
+            }
+        });
+
+        DB::afterCommit(function(){
+
+            
+
+            
+        });
     }
 
 

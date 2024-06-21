@@ -38,6 +38,8 @@ class ClassePresenceAbsence extends Component
 
     public $semestre_selected = 1;
 
+    public $teacher_profil = false;
+
     use ModelQueryTrait;
 
 
@@ -100,7 +102,20 @@ class ClassePresenceAbsence extends Component
             }
         }
 
-        return view('livewire.classe-presence-absence', compact('classe', 'pupils', 'subjects', 'subject_selected'));
+
+        if($classe){
+
+            $not_stopped = !is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) 
+                    && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, session('semestre_selected'));
+
+        }
+        else{
+
+            $not_stopped = false;
+
+        }
+
+        return view('livewire.classe-presence-absence', compact('classe', 'pupils', 'subjects', 'subject_selected', 'not_stopped', 'school_year_model'));
     }
 
     public function editClasseSubjects($classe_id = null)

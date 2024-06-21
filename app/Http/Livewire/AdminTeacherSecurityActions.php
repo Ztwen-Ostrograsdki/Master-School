@@ -2,10 +2,12 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\InitiateMarksStoppingEvent;
 use App\Helpers\AdminTraits\AdminTrait;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Level;
+use App\Models\MarkStopped;
 use App\Models\Subject;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -74,7 +76,9 @@ class AdminTeacherSecurityActions extends Component
     public function render()
     {
         $levels = Level::all();
+
         $classes = Classe::all();
+
         $subjects = Subject::all();
 
         if(session()->has('teacher_level_list_selected') && session('teacher_level_list_selected') !== null){
@@ -94,6 +98,7 @@ class AdminTeacherSecurityActions extends Component
         
         return view('livewire.admin-teacher-security-actions', compact('classes', 'levels', 'subjects'));
     }
+
 
     public function setTeachersActiveSection($section)
     {

@@ -1,7 +1,7 @@
 <div>
     @if($classe)
         <div class="w-100 my-1 mt-2">
-            @if(auth()->user()->isAdminAs('master'))
+            @if(auth()->user()->isAdminAs('master') && !$teacher_profil)
                 <span wire:click="multiplePupilInsertions" class="btn bg-orange z-scale border border-white" title="Ajouter des aprrenants à cette classe">
                     <span class="fa fa-user-plus"></span>
                     <span>Multiple Ajout</span>
@@ -20,11 +20,11 @@
                 </span>
             @endif
             @if($pupils && count($pupils))
-            <span wire:click="toExcel" class="z-scale btn mx-2 btn-info border border-white float-right" title="Exporter la liste de la classe vers un fichier de calcul excel...">
+            <span wire:click="toExcel" class="z-scale btn mx-2 my-2 btn-info border border-white float-right" title="Exporter la liste de la classe vers un fichier de calcul excel...">
                 <span class="fa bi-file"></span>
                 <span>To Excel File.</span>
             </span>
-            <span wire:click="downloadPDF" class="z-scale btn mx-2 btn-secondary border border-white float-right" title="Imprimer la liste de cette classe...">
+            <span wire:click="downloadPDF" class="z-scale btn mx-2 my-2 btn-secondary border border-white float-right" title="Imprimer la liste de cette classe...">
                 <span class="fa fa-print"></span>
                 <span>Impr.</span>
             </span>
@@ -37,17 +37,19 @@
         @else
         <div class="w-100 m-0 p-0 mt-3">
         @if($pupils && count($pupils) > 0)
-            <table class="w-100 m-0 p-0 table-striped table-bordered z-table text-white">
+            <table class="w-100 m-0 my-2 p-0 table-striped table-bordered z-table text-white">
                 <thead class="text-white text-center">
                     <th class="py-2 text-center">#ID</th>
                     <th class="">Nom et Prénoms</th>
                     <th class="">Sexe</th>
                     <th>Matricule</th>
                     <th>Inscrit depuis</th>
-                    <th> + Actions</th>
-                    <th>Retirer.</th>
-                    <th>Suppr.</th>
-                    <th>Abd.</th>
+                    @if(!$teacher_profil && auth()->user()->isAdminAs('master'))
+                        <th> + Actions</th>
+                        <th>Retirer.</th>
+                        <th>Suppr.</th>
+                        <th>Abd.</th>
+                    @endif
                 </thead>
                 <tbody>
                     @foreach($pupils as $k => $p)
@@ -68,7 +70,7 @@
                                             </span>
                                         </a>
                                         @endif
-                                        @if($editingPupilName && $p->id == $pupil_id)
+                                        @if($editingPupilName && $p->id == $pupil_id && !$teacher_profil && auth()->user()->isAdminAs('master'))
                                             <form wire:submit.prevent="updatePupilName" autocomplete="off" class="my-0 d-flex p-1 cursor-pointer w-100 shadow table align-middle m-2">
                                             <div class="d-flex justify-between px-1 align-middle table w-100 row m-0 p-0">
                                                 <div class="col-9 d-flex align-middle justify-content-between row m-0 p-0 px-1">
@@ -96,7 +98,7 @@
                                             </span>
                                         </a>
                                         @endif
-                                        @if (!$editingPupilName)
+                                        @if (!$editingPupilName && !$teacher_profil && auth()->user()->isAdminAs('master'))
                                             <span title="Editer le nom de l'apprenant {{$p->firstName . ' ' . $p->lastName}}" wire:click="editPupilName({{$p->id}})" class="fa bi-pen cursor-pointer mx-2 float-right"></span>
                                         @endif
                                         @if($editingPupilName && $p->id == $pupil_id)
@@ -105,9 +107,16 @@
                                     </span>
                                 </td>
                                 @if(!$editingPupilName || $editingPupilName && $pupil_id !== $p->id)
-                                <td wire:click="changePupilSexe({{$p->id}})" class="text-center cursor-pointer" title="Doublecliquer pour changer le sexe">
-                                    {{ $p->getSexe() }}
-                                </td>
+                                
+                                @if(!$teacher_profil && auth()->user()->isAdminAs('master'))
+                                    <td wire:click="changePupilSexe({{$p->id}})" class="text-center cursor-pointer" title="Doublecliquer pour changer le sexe">
+                                        {{ $p->getSexe() }}
+                                    </td>
+                                @else
+                                    <td class="text-center cursor-pointer">
+                                        {{ $p->getSexe() }}
+                                    </td>
+                                @endif
                                 <td class="text-center">
                                     {{ $p->ltpk_matricule }}
                                 </td>
@@ -117,6 +126,7 @@
                                         Mise à jour Il y a {{ str_ireplace("Il y a ", '', $p->getDateAgoFormated(false)) }}
                                     </small>
                                 </td>
+                                @if(!$teacher_profil && auth()->user()->isAdminAs('master'))
                                 <td class="text-center w-auto p-0">
                                     <span class="row w-100 m-0 p-0">
                                         @if ($p->inPolyvalenceClasse())
@@ -157,7 +167,7 @@
                                     </span>
                                 </td>
                                 <td class="text-center">
-                                    <span wire:click="forceDelete({{$p->id}})" title="Supprimer définitivement l'apprenant {{$p->name}}" class="text-danger m-0 p-0 cursor-pointer">
+                                    <span wire:click="deletePupil({{$p->id}})" title="Supprimer définitivement l'apprenant {{$p->name}}" class="text-danger m-0 p-0 cursor-pointer">
                                         <span class="fa fa-trash py-2 px-2"></span>
                                     </span>
                                 </td>
@@ -175,6 +185,7 @@
                                     </td>
                                 @endif
                                 @endif
+                            @endif
                             </tr>
                     @endforeach
                 </tbody>

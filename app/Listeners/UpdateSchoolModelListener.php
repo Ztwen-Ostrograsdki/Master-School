@@ -23,7 +23,7 @@ class UpdateSchoolModelListener
 
         $batch = Bus::batch([
 
-            new JobUpdateSchoolModel($event->user),
+            new JobUpdateSchoolModel($event->user, 'Pupil', 'pupils_counter'),
 
             ])->then(function(Batch $batch) use ($event){
 

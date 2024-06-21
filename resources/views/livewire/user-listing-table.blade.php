@@ -68,7 +68,7 @@
                             <td class="text-center"> 
                                 @if(!$u->isAdminAs('master'))
                                 <span class="row w-100 m-0 p-0">
-                                    <span title="Supprimer cet utilisateur" wire:click="delete({{$u->id}})" class="text-danger col-3 m-0 p-0 cursor-pointer">
+                                    <span title="Supprimer définivement cet utilisateur de la plateforme" wire:click="forceDeleteUser({{$u->id}})" class="text-danger col-3 m-0 p-0 cursor-pointer">
                                         <span class="text-danger cursor-pointer fa fa-trash py-2 px-2"></span>
                                     </span>
                                     @if($u->hasVerifiedEmail())

@@ -31,6 +31,8 @@ class JobFlushAveragesIntoDataBase implements ShouldQueue
 
     public $backoff = 2;
 
+    public $deleteWhenMissingModels = true;
+
     /**
      * Create a new event instance.
      *
@@ -64,7 +66,7 @@ class JobFlushAveragesIntoDataBase implements ShouldQueue
 
         DB::transaction(function($e){
 
-            $this->classe->averages()->where('averages.school_year_id', $this->school_year_model->id)->each(function($average){
+            $this->classe->averages()->where('averages.school_year_id', $this->school_year_model->id)->where('averages.semestre', $this->semestre)->each(function($average){
 
                 $average->delete();
 

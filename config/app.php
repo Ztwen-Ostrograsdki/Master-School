@@ -30,6 +30,10 @@ return [
 
     'teacher_classes_limit' => 4,
 
+    'minimum_epe_length_by_subject' => 2,
+
+    'minimum_dev_length_by_subject' => 3,
+
     // 'min_mark_value_for_participation_calculation' 
     'MMVFPC' => 5,
 

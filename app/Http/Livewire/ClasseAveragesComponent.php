@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Events\FreshAveragesIntoDBEvent;
+use App\Events\InitiateMarksStoppingEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Classe;
 use App\Models\Pupil;
@@ -25,6 +26,8 @@ class ClasseAveragesComponent extends Component
         'JobProcessedWorks' => 'getJobsOk',
         'InitiateClasseDataUpdatingLiveEvent' => 'loadingDataStart',
         'ClasseDataLoadedSuccessfully' => 'dataWasLoaded',
+        'MarksStoppingDispatchedLiveEvent' => 'reloadClasseData',
+        'semestreWasChanged' => 'reloadClasseData',
     ];
 
     public $classe_id;
@@ -316,6 +319,44 @@ class ClasseAveragesComponent extends Component
 
             FreshAveragesIntoDBEvent::dispatch($user, $classe, $school_year_model, $semestre, true);
             
+        }
+
+    }
+
+
+    public function closeSemestre()
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        $classe = Classe::find($this->classe_id);
+
+        if($classe){
+
+            $level = $classe->level;
+
+            $semestre = session('semestre_selected');
+
+            InitiateMarksStoppingEvent::dispatch($classe, $level, $school_year_model, $semestre, null, []);
+
+        }
+    }
+
+
+    public function closeSchoolYear()
+    {
+
+        $school_year_model = $this->getSchoolYear();
+
+        $classe = Classe::find($this->classe_id);
+
+        if($classe){
+
+            $level = $classe->level;
+
+            $semestre = session('semestre_selected');
+
+            InitiateMarksStoppingEvent::dispatch($classe, $level, $school_year_model, null, null, []);
+
         }
 
     }

@@ -113,8 +113,34 @@ class InsertPupilMarks extends Component
                         $this->mark_index = $mark_index;
 
                         $this->type = $type;
+
+                        $semestre_id = $this->semestre_id;
+
+                        $mark_stopped_1 = $classe->classeMarksWasStoppedForThisSchoolYear($semestre_id, $subject_id);
+
+                        $mark_stopped_2 = $classe->classeMarksWasStoppedForThisSchoolYear();
+
+                        if(! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, session('semestre_selected'))){
+
+                            if(!$mark_stopped_1 && !$mark_stopped_2){
+
+                                $this->dispatchBrowserEvent('modal-insertPupilMarks');
+
+                            }
+                            else{
+
+                                $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => "ARRET NOTE", 'message' => "Aucune action n'est possible sur les notes de cette classe!", 'type' => 'info']);
+
+                            }
+                        }
+                        else{
+
+                            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => "ARRET NOTE", 'message' => "Aucune action n'est possible sur les notes de cette classe!", 'type' => 'info']);
+
+                        }
+
+
                         
-                        $this->dispatchBrowserEvent('modal-insertPupilMarks');
                     }
                     else{
                         $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure serveur', 'message' => "Vos données sont ambigües, nous n'avons trouvé aucun apprenant et ou la matière correspondant(e)!", 'type' => 'error']);

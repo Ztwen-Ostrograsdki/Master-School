@@ -9,6 +9,8 @@ class MarkStopped extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['stopped', 'school_year_id', 'semestre'];
+    private $table_name = "mark_stoppeds";
+
+    protected $fillable = ['stopped', 'school_year_id', 'semestre', 'level_id'];
     
 }

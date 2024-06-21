@@ -253,6 +253,7 @@ class ClassePupilsMarksListerFormated extends Component
 
                     $modality = null;
                 }
+
             }
 
         }
@@ -269,7 +270,7 @@ class ClassePupilsMarksListerFormated extends Component
                     compact(
                         'classe',
                         'current_period',
-                        'pupils', 'marks', 'devMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model', 'printing'
+                        'pupils', 'marks', 'devMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model', 'printing',
                     )
                 );
     }

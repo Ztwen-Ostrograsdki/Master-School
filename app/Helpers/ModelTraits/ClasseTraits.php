@@ -1,6 +1,7 @@
 <?php
 namespace App\Helpers\ModelTraits;
 
+use App\Events\DispatchIrregularsTeachersAndPupilsOnSemestrialMarksEvent;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Helpers\Tools\Tools;
 use App\Jobs\JobMigratePupilsToClasse;
@@ -2144,5 +2145,113 @@ trait ClasseTraits{
     }
 
 
+    /**
+     * Determine if all of pupil of a current model classe has a required minimum marks number
+     * minimum of epe = 2 and of dev = 2
+     * @return array 
+     * @param semestre int|string numeric
+     */
+    public function getTheClasseSemestreMarksStatus($semestre)
+    {
+        $school_year_model = $this->getSchoolYear();
 
+        $this_classe_marks_is_okay = true;
+
+        $irregulars_teachers = [];
+
+        $irregulars_pupils = [];
+
+        $minimum_epe = config('app.minimum_epe_length_by_subject');
+
+        $minimum_dev = config('app.minimum_dev_length_by_subject');
+
+        $classe = $this;
+
+        if($classe){
+
+            $teachers = $classe->getClasseCurrentTeachers();
+
+            $pupils = $classe->getNotAbandonnedPupils();
+
+            if(count($teachers) && count($pupils)){
+
+                foreach($teachers as $teacher){
+
+                    $epe = $classe->getMarksTypeLenght($teacher->speciality()->id, $semestre, $school_year_model->id, 'epe');
+
+                    $dev = $classe->getMarksTypeLenght($teacher->speciality()->id, $semestre, $school_year_model->id, 'devoir');
+
+                    if($epe < $minimum_epe || $dev < $minimum_dev){
+
+                        $irregulars_teachers[$teacher->id] = $teacher;
+
+                    }
+                }
+
+
+                foreach($pupils as $pupil){
+
+                    foreach($teachers as $t){
+
+                        $subject = $t->speciality();
+
+                        $p_epe = $pupil->getMarksTypeLenght($subject->id, $semestre, $school_year_model->id, 'epe');
+
+                        $p_dev = $pupil->getMarksTypeLenght($subject->id, $semestre, $school_year_model->id, 'devoir');
+
+                        if($p_epe < $minimum_epe || $p_dev < $minimum_dev){
+
+                            $irregulars_pupils[$pupil->id][$subject->id] = $subject;
+
+                        }
+
+                    }
+
+                    if(isset($irregulars_pupils[$pupil->id]) && count($irregulars_pupils[$pupil->id]) > 0){
+
+                        $irregulars_pupils[$pupil->id]['pupil'] = $pupil;
+
+                    }
+
+
+                }
+
+            }
+            else{
+
+                $this_classe_marks_is_okay = false;
+            }
+
+        }
+        else{
+
+            $this_classe_marks_is_okay = false;
+
+        }
+
+        if(count($irregulars_teachers) > 0 || count($irregulars_pupils) > 0){
+
+            $this_classe_marks_is_okay = false;
+
+        }
+
+
+        $status = $this_classe_marks_is_okay;
+
+        $data = [
+            'status' => $status, 
+            'semestre_is_okay' => $status, 
+            'irregulars_teachers' => $irregulars_teachers, 
+            'irregulars_pupils' => $irregulars_pupils
+        ];
+
+        if($data && !$status && (count($irregulars_pupils) || count($irregulars_teachers))){
+
+            DispatchIrregularsTeachersAndPupilsOnSemestrialMarksEvent::dispatch($classe, $data, $semestre, $school_year_model);
+
+        }
+
+        return $data;
+        
+    }
 }

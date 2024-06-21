@@ -58,7 +58,7 @@
 
                                                     <h3 class="card-title">
                                                         Les demandes de Mr/Mme {{ $req->parentable->name }}
-                                                        <small class="ml-4 mt-2 float-right text-warning letter-spacing-12">{{ $req->parentable->pupils->count() }} enfants déjà suivi</small>
+                                                        <small class="ml-4 mt-2 float-right text-warning letter-spacing-12">{{ numb_formatted($req->parentable->pupils->count()) }} enfants déjà suivi</small>
                                                     </h3>
 
                                                     <div class="card-tools">

@@ -6,6 +6,7 @@ use App\Helpers\DateFormattor;
 use App\Helpers\ModelTraits\PupilTraits;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Helpers\ZtwenManagers\GaleryManager;
+use App\Jobs\JobPupilDeleterFromDatabase;
 use App\Models\Averages;
 use App\Models\Classe;
 use App\Models\ClassePupilSchoolYear;
@@ -18,8 +19,10 @@ use App\Models\PupilCursus;
 use App\Models\PupilLates;
 use App\Models\RelatedMark;
 use App\Models\SchoolYear;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pupil extends Model
@@ -30,6 +33,7 @@ class Pupil extends Model
     use DateFormattor;
     use PupilTraits;
     use ModelQueryTrait;
+    use Prunable;
 
     protected $fillable = [
         'firstName',
@@ -69,6 +73,19 @@ class Pupil extends Model
     {
         return $this->forceFill(['ltpk_matricule' => $value,])->save();
         
+    }
+
+
+    public function prunable(): Builder
+    {
+        return static::where('deleted_at', '<>', null);
+
+    }
+
+
+    public function pruning()
+    {
+        dispatch(new JobPupilDeleterFromDatabase($this, true));
     }
 
 

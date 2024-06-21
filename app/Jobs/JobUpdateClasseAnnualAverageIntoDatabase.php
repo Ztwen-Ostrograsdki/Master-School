@@ -26,6 +26,8 @@ class JobUpdateClasseAnnualAverageIntoDatabase implements ShouldQueue
 
     public $backoff = 3;
 
+    public $deleteWhenMissingModels = true;
+
 
     /**
      * Create a new job instance.

@@ -21,16 +21,20 @@ class JobUpdateSchoolModel implements ShouldQueue
 
     public $classMapping;
 
+    public $column;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(User $user, $classMapping, $column)
+    public function __construct(?User $user, $classMapping = null, $column = null)
     {
         $this->user = $user;
 
         $this->classMapping = $classMapping;
+
+        $this->column = $column;
     }
 
     /**
@@ -42,8 +46,14 @@ class JobUpdateSchoolModel implements ShouldQueue
     {
         $school = School::first();
 
-        $total = $this->classMapping::all()->count();
+        if($this->column == 'pupils_counter'){
 
-        $school->update(['pupils_counter' => $total]);
+            $total = Pupil::all()->count();
+
+            $school->update(['pupils_counter' => $total]);
+
+        }
+
+        
     }
 }

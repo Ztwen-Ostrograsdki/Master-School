@@ -23,6 +23,7 @@ class ClasseMarksHeaderComponent extends Component
         'classePupilListUpdated' => 'reloadData',
         'schoolYearChangedLiveEvent' => 'reloadData',
         'classeUpdated' => 'reloadData',
+        'MarksStoppingDispatchedLiveEvent' => 'reloadData',
         'semestreWasChanged',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
         'UpdatedGlobalSearch' => 'reloadClasseDataOnSearch',
@@ -146,6 +147,8 @@ class ClasseMarksHeaderComponent extends Component
 
         $school_year_model = $this->getSchoolYear();
 
+        $classeSelf = null;
+
         $classe = $school_year_model->findClasse($this->classe_id);
 
         if($classe){
@@ -237,6 +240,20 @@ class ClasseMarksHeaderComponent extends Component
 
         }
 
+
+        if($classeSelf && !is_null($classeSelf) && isset($classeSelf->id)){
+
+            $not_stopped = !is_marks_stopped($classeSelf->id, $classeSelf->level_id, $school_year_model->id) 
+                    && ! is_marks_stopped($classeSelf->id, $classeSelf->level_id, $school_year_model->id, session('semestre_selected'));
+
+        }
+        elseif($classe){
+
+            $not_stopped = !is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) 
+                    && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, session('semestre_selected'));
+
+        }
+
         $calendar_profiler = $school_year_model->calendarProfiler();
 
         $current_period = $calendar_profiler['current_period'];
@@ -246,7 +263,7 @@ class ClasseMarksHeaderComponent extends Component
                         'classe',
                         'current_period',
                         'marks', 'pupils',
-                        'modality', 'modalitiesActivated', 'hasModalities', 'classe_subject_coef', 'classe_subjects', 'school_year_model', 'printing'
+                        'modality', 'modalitiesActivated', 'hasModalities', 'classe_subject_coef', 'classe_subjects', 'school_year_model', 'printing', 'not_stopped'
                     )
                 );
     }

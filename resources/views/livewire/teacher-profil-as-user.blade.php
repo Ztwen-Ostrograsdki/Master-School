@@ -80,7 +80,7 @@
                                     <div class="d-flex justify-content-end float-right">
                                         <h6 class="mt-2">
                                             <span class="text-warning">Mes classes:</span>
-                                            <span>
+                                            <span class="d-flex justify-between">
                                                 @if($user->teacher->hasClasses())
                                                     @foreach($user->teacher->getTeachersCurrentClasses() as $c)
                                                         @php
@@ -111,7 +111,7 @@
                                 <div class="d-flex w-100 justify-content-between">
                                     <form class=" bg-dark m-2 w-25 rounded" action="">
                                         @csrf()
-                                        <select wire:model="semestre_selected" wire:change="changeSemestre" class="form-select bg-secondary-dark custom-select z-bg-  m-2 zw-95 text-white">
+                                        <select wire:model="semestre_selected" wire:change="changeSemestre" class="form-select bg-secondary-dark custom-select  m-2 zw-95 text-white">
                                           <option value="{{null}}">Veuillez sélectionner le {{$semestre_type}}</option>
                                           @foreach ($semestres as $semestre)
                                               <option value="{{$semestre}}">{{$semestre_type . ' ' . $semestre}}</option>
@@ -136,16 +136,37 @@
                                 <hr class="m-0 p-0 bg-white text-white">
                                 <div>
                                     @if($section_to_display == 'marks')
-                                        @livewire('classe-marks-lister', ['classe_id' => $classe->id, 'subject_selected' => $user->teacher->speciality(), 'classe_subject_selected' => $user->teacher->speciality()->id, 'semestre_selected' => $semestre_selected, 'teacher_profil' => $teacher_profil])
+                                        @livewire('classe-marks-lister', 
+                                            [
+                                            'classe_id' => $classe->id,
+                                            'subject_selected' => $user->teacher->speciality(), 
+                                            'classe_subject_selected' => $user->teacher->speciality()->id, 
+                                            'semestre_selected' => $semestre_selected, 
+                                            'teacher_profil' => $teacher_profil
+                                            ])
                                     @elseif($section_to_display == 'liste')
-                                        @livewire('classe-pupils-lister', ['classe_id' => $classe->id])
+                                        @livewire('classe-pupils-lister', 
+                                            [
+                                                'classe_id' => $classe->id,
+                                                'teacher_profil' => $teacher_profil,
+                                            ])
 
                                     @elseif($section_to_display == 'related_marks')
-                                        @livewire('classe-pupil-related-mark', ['classe_id' => $classe->id])
+                                        @livewire('classe-pupil-related-mark', 
+                                        [
+                                            'classe_id' => $classe->id,
+                                            'teacher_profil' => $teacher_profil,
+                                        ])
                                     @elseif($section_to_display == 'classe_general_stats')
                                         @livewire('classe-generals-stats', ['classe_id' => $classe->id, 'semestre_selected' => $semestre_selected, 'subject_selected' => $user->teacher->speciality()->id, 'teacher_id' => $user->teacher->id])
                                     @elseif($section_to_display == 'absences')
-                                        @livewire('classe-presence-absence', ['classe_id' => $classe->id, 'semestre_selected' => $semestre_selected, 'classe_subject_selected' => $user->teacher->speciality()->id])
+                                        @livewire('classe-presence-absence', 
+                                            [
+                                                'classe_id' => $classe->id, 
+                                                'semestre_selected' => $semestre_selected, 
+                                                'classe_subject_selected' => $user->teacher->speciality()->id,
+                                                'teacher_profil' => $teacher_profil,
+                                            ])
                                     @else
                                         <blockquote class="">
                                             <h6 class="h6 text-white-50">

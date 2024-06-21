@@ -18,17 +18,13 @@ class NewUserCreatedEvent implements ShouldBroadcastNow
 
     public $user;
 
-    public $auth;
-
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(User $auth, User $user)
+    public function __construct(User $user)
     {
-        $this->auth = $auth;
-
         $this->user = $user;
     }
 

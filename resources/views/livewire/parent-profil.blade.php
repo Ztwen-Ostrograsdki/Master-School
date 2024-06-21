@@ -43,7 +43,7 @@
                      </div>
                      <div class="border mt-3 p-3">
                         <div class="mx-auto justify-center d-flex w-100">
-                           <h5 class=" text-white w-100">
+                            <h5 class=" text-white w-100">
                                <span class="float-left text-uppercase"> 
 
                                </span>
@@ -51,7 +51,19 @@
                                    <span class="">Identifier un enfant à moi à suivre</span>
                                    <strong class="bi-person-plus text-white "></strong>
                                </span>
-                           </h5>
+                            </h5>
+
+                            <div class="m-0 p-0 px-2 d-inline-block my-2">
+                                <form class="d-inline" action="">
+                                    @csrf()
+                                    <select id="school_year_selected" wire:model="school_year_selected" class="form-select custom-select border bg-secondary-light-0 text-white border-warning">
+                                      <option disabled value="{{null}}">Veuillez sélectionner une année-scolaire</option>
+                                        @foreach ($school_years as $school_year)
+                                            <option value="{{$school_year->school_year}}"> Année-Scolaire {{ $school_year->school_year }}</option>
+                                        @endforeach
+                                    </select>
+                                </form>
+                            </div>
                         </div>
                         <hr class="w-100 bg-white text-white mt-2">
                         <div class="px-2" >
@@ -90,12 +102,12 @@
                                             </h6>
                                             <h6 class="">
                                                 <span class="text-warning">Profession:</span>
-                                                <span>{{ 'A renseigner' }}</span>
+                                                <span>{{ $parentable->job }}</span>
                                             </h6>
 
                                             <h6 class="">
-                                                <span class="text-warning">Ses apprenants:</span>
-                                                <span>12</span>
+                                                <span class="text-warning">Apprenants suivis:</span>
+                                                <span> {{ numb_formatted($parentable->pupils->count()) }} </span>
                                             </h6>
 
                                         </div>
@@ -107,18 +119,18 @@
                                             <span>Emploi du temps ({{ $user->teacher->speciality()->name }}) </span>
                                         </h6>
                                         <hr class="m-0 p-0 bg-white text-white">
-                                        <div class="d-flex justify-content-between flex-column">
-                                            @if($user->teacher->hasClasses())
-                                                @foreach($user->teacher->getTeachersCurrentClasses() as $cll)
+                                        <div style="max-height: 600px; overflow-y: auto;" class="d-flex justify-content-between flex-column">
+                                            @if($user->teacher->hasClasses($school_year_selected))
+                                                @foreach($user->teacher->getTeachersCurrentClasses(false, $school_year_selected) as $cll)
                                                     @php
                                                         $clll = $cll->getNumericName();
-                                                        $time_plans = $user->teacher->getCurrentTimePlans($cll->id);
+                                                        $time_plans = $user->teacher->getCurrentTimePlans($cll->id, $school_year_selected);
                                                     @endphp
                                                     <div class="col-11 border rounded p-1 m-1">
                                                         <div class="m-0 p-0">
                                                             <h6 class="d-flex justify-content-between">
                                                                 <span class="">
-                                                                    <span class="text-orange">Pierre Marc</span>
+                                                                    <span class="text-orange">Classe: </span>
                                                                     <span class="text-white-50 ml-2">{{ $clll['root'] }}<sup>{{ $clll['sup'] }} </sup> {{ $clll['idc'] }}</span>
                                                                 </span>
                                                             </h6>
@@ -159,11 +171,13 @@
                                         </h6>
                                         <hr class="m-0 p-0 bg-white text-white">
 
-                                        <div class="row d-flex justify-content-center w-95 mx-auto">
+                                        <div style="max-height: 600px; overflow-y: auto;" class="row d-flex justify-content-center w-100 mx-auto">
 
                                             @php
 
                                                 $sons = $parentable->pupils;
+
+                                                $has_request = false;
 
                                             @endphp
 
@@ -172,111 +186,130 @@
                                                 @foreach($sons as $son)
 
                                                     @php
-                                                        $pupil = $son->pupil;
+                                                        
+                                                        $has_request = $son->following_request();
+
                                                     @endphp
 
-                                                    <div class="col-12 shadow border-orange border rounded float-right p-2 m-2">
-                                                        <h6 class=" text-right d-flex">
-                                                            <span>
-                                                                <a class="nav-link btn btn-primary p-2" href="{{route('pupil_marks_listing_for_parent', ['id' => $pupil->id])}}">Voir les notes</a>
-                                                            </span>
-                                                            <span class="mx-2 btn btn-warning p-2" wire:click="delete({{$son->id}})" title="Ne plus suivre {{ $pupil->getName() }}">
-                                                                <span>Ne plus suivre</span>
-                                                                <span class=" mr-2 cursor-pointer fa fa-trash"></span>
-                                                            </span>
-                                                        </h6>
-                                                        <hr class="bg-secondary">
-                                                        <h6 class="">
-                                                            <span>
-                                                                <span class="text-warning">Apprenant(e) :</span>
-                                                                <span>{{ $pupil->getName() }}</span>
-                                                            </span>
-                                                            
-                                                        </h6>
-                                                        <h6 class="">
-                                                            <span>
-                                                                <span class="text-warning">N° EducMaster :</span>
-                                                                <span>{{ $pupil->educmaster ? $pupil->educmaster : $pupil->ltpk_matricule ? : 'Inconnu' }}</span>
-                                                            </span>
-                                                            
-                                                        </h6>
-                                                        <h6 class="">
-                                                            <span>
-                                                                <span class="text-warning">Classe:</span>
-                                                                <span> {{ $pupil->getCurrentClasse()->name }} </span>
-                                                            </span>
-                                                        </h6>
-                                                        <h6 class="">
-                                                            <span>
-                                                                <span class="text-warning">Relation familiale:</span>
-                                                                <span>{{ $parentable->parent_relation($pupil->id) }}</span>
-                                                            </span>
-                                                        </h6>
-                                                        <hr class="bg-orange">
+                                                    @if($has_request)
 
-                                                        <h6 class="">
-                                                            <div class="w-100 m-0 p-0 mx-auto">
-                                                                <span class="text-orange text-center py-2">Emploi du temps:</span>
-                                                                <div class="d-flex justify-content-between flex-column">
+                                                        @php
 
+                                                            $pupil = $son->pupil;
+
+                                                        @endphp
+
+                                                        <div class="col-11 shadow border-orange border rounded float-right p-2 m-2">
+                                                            <h6 class=" text-right d-flex">
+                                                                <span>
+                                                                    <a class="nav-link btn btn-primary p-2" href="{{route('pupil_marks_listing_for_parent', ['id' => $pupil->id])}}">Voir les notes</a>
+                                                                </span>
+                                                                <span class="mx-2 btn btn-warning p-2" wire:click="delete({{$son->id}})" title="Ne plus suivre {{ $pupil->getName() }}">
+                                                                    <span>Ne plus suivre</span>
+                                                                    <span class=" mr-2 cursor-pointer fa fa-trash"></span>
+                                                                </span>
+                                                            </h6>
+                                                            <hr class="bg-secondary">
+                                                            <h6 class="">
+                                                                <span>
+                                                                    <span class="text-warning">Apprenant(e) :</span>
+                                                                    <span>{{ $pupil->getName() }}</span>
+                                                                </span>
+                                                                
+                                                            </h6>
+                                                            <h6 class="">
+                                                                <span>
+                                                                    <span class="text-warning">N° EducMaster :</span>
+                                                                    <span>{{ $pupil->educmaster ? $pupil->educmaster : $pupil->ltpk_matricule ? : 'Inconnu' }}</span>
+                                                                </span>
+                                                                
+                                                            </h6>
+                                                            <h6 class="">
+                                                                <span>
+                                                                    <span class="text-warning">Classe:</span>
+                                                                    <span> 
+                                                                        @if($pupil->getCurrentClasse($school_year_selected))
+                                                                            {{ $pupil->getCurrentClasse($school_year_selected)->name }} 
+                                                                        @else
+                                                                            <span class="text-orange">Auncune classe assignée en {{ $school_year_selected }}</span>
+                                                                        @endif
+                                                                    </span>
+                                                                </span>
+                                                            </h6>
+                                                            <h6 class="">
+                                                                <span>
+                                                                    <span class="text-warning">Relation familiale:</span>
+                                                                    <span>{{ $parentable->parent_relation($pupil->id) }}</span>
+                                                                </span>
+                                                            </h6>
+                                                            <hr class="bg-orange">
+
+                                                            <h6 class="">
+                                                                <div class="w-100 m-0 p-0 mx-auto">
+                                                                    <span class="text-orange text-center py-2">Emploi du temps:</span>
                                                                     <div class="d-flex justify-content-between flex-column">
-                                                                        @if($pupil->getCurrentClasse())
 
-                                                                            @php
-                                                                                $time_plans = $pupil->getPupilTimePlans()
+                                                                        <div class="d-flex justify-content-between flex-column">
+                                                                            @if($pupil->getCurrentClasse($school_year_selected))
 
-                                                                            @endphp
+                                                                                @php
+                                                                                    $time_plans = $pupil->getPupilTimePlans($school_year_selected)
 
-                                                                            @if(count($time_plans))
+                                                                                @endphp
 
-                                                                                @foreach($time_plans as $time_data)
+                                                                                @if(count($time_plans))
 
-                                                                                    @php
+                                                                                    @foreach($time_plans as $time_data)
 
-                                                                                        $subject = $time_data['subject'];
+                                                                                        @php
 
-                                                                                        $horars = $time_data['times'];
+                                                                                            $subject = $time_data['subject'];
 
-                                                                                    @endphp
-                                                                                    <div class="col-12 bg-secondary-light-0 border rounded p-1 m-1">
-                                                                                        <div class="m-0 p-0">
-                                                                                            <h6 class="d-flex justify-content-between">
-                                                                                                <span class="">
-                                                                                                    <span class="text-orange"> {{ $subject->name }} </span>
-                                                                                                </span>
-                                                                                            </h6>
-                                                                                            <hr class="m-0 p-0 bg-secondary text-secondary">
+                                                                                            $horars = $time_data['times'];
+
+                                                                                        @endphp
+                                                                                        <div class="col-12 bg-secondary-light-0 border rounded p-1 m-1">
                                                                                             <div class="m-0 p-0">
-                                                                                                @if(count($horars) > 0)
-                                                                                                    @foreach($horars as $tm)
-                                                                                                        <h6 class="">
-                                                                                                            <span class="text-warning"> {{$tm->day}} :</span>
-                                                                                                            <span>{{ $tm->start . 'H à ' . $tm->end . 'H' }}</span>
-                                                                                                        </h6>
-                                                                                                    @endforeach
-                                                                                                @else
-                                                                                                    <span class="text-white-50 font-italic">Pas encore défini!</span>
-                                                                                                @endif
+                                                                                                <h6 class="d-flex justify-content-between">
+                                                                                                    <span class="">
+                                                                                                        <span class="text-orange"> {{ $subject->name }} </span>
+                                                                                                    </span>
+                                                                                                </h6>
+                                                                                                <hr class="m-0 p-0 bg-secondary text-secondary">
+                                                                                                <div class="m-0 p-0">
+                                                                                                    @if(count($horars) > 0)
+                                                                                                        @foreach($horars as $tm)
+                                                                                                            <h6 class="">
+                                                                                                                <span class="text-warning"> {{$tm->day}} :</span>
+                                                                                                                <span>{{ $tm->start . 'H à ' . $tm->end . 'H' }}</span>
+                                                                                                            </h6>
+                                                                                                        @endforeach
+                                                                                                    @else
+                                                                                                        <span class="text-white-50 font-italic">Pas encore défini!</span>
+                                                                                                    @endif
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
-                                                                                    </div>
-                                                                                @endforeach
+                                                                                    @endforeach
 
+                                                                                @endif
+                                                                            @else
+                                                                                <span class="text-white-50 font-italic letter-spacing-12">
+                                                                                    Aucune classe assignée!
+                                                                                </span>
                                                                             @endif
-                                                                        @else
-                                                                            Aucune classe assignée!
-                                                                        @endif
+                                                                        </div>
+                                                                    
                                                                     </div>
-                                                                
+                                                                    
                                                                 </div>
-                                                                
-                                                            </div>
-                                                        </h6>
-                                                    </div>
+                                                            </h6>
+                                                        </div>
+                                                    @endif
                                                 @endforeach
                                             @else
 
-                                                <span>La liste est vide! </span>
+                                                <span>Pas d'apprenant suivi : La liste est vide! </span>
 
                                             @endif
                                         </div>

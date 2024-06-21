@@ -5,6 +5,9 @@ namespace App\Listeners;
 use App\Events\ClassePupilsListUpdatedEvent;
 use App\Events\ClassePupilsListUpdatingEvent;
 use App\Events\DetachPupilsFromSchoolYearEvent;
+use App\Events\PupilDetachingFailedEvent;
+use App\Events\PupilDetachingOrDeletionCompletedEvent;
+use App\Jobs\JobDeletePupilFromSchoolYearOrFromDatabase;
 use App\Jobs\JobDetachPupilsFromSchoolYear;
 use Illuminate\Bus\Batch;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,24 +27,38 @@ class DetachPupilsFromSchoolYearBatcherListener
     {
         // ClassePupilsListUpdatingEvent::dispatch($event->user, $event->classe);
 
-        $batch = Bus::batch([
+        $jobs = [];
 
-            new JobDetachPupilsFromSchoolYear($event->user, $event->school_year_model, $event->classe, $event->pupils)
+        if($event && $event->pupils && count($event->pupils)){
 
-            ])->then(function(Batch $batch) use ($event){
+            foreach($event->pupils as $pupil){
+
+                $jobs[] = new JobDetachPupilsFromSchoolYear($event->user, $event->school_year_model, $event->classe, $pupil, false, false);
+
+            }
+
+        }
+
+        $batch = Bus::batch(
+
+            $jobs
+
+            )->then(function(Batch $batch) use ($event){
 
                 ClassePupilsListUpdatedEvent::dispatch($event->user, $event->classe);
+
+                PupilDetachingOrDeletionCompletedEvent::dispatch($event->user);
 
             })
             ->catch(function(Batch $batch, Throwable $er){
 
-                // ClasseMarksWasFailedEvent::dispatch($event->user, $event->classe);
+                PupilDetachingFailedEvent::dispatch($event->user, $event->pupils);
 
             })
 
             ->finally(function(Batch $batch){
 
 
-            })->dispatch();
+            })->name('pupil_detaching_school_year')->dispatch();
     }
 }

@@ -4,9 +4,11 @@ namespace App\Observers;
 
 use App\Events\UpdateSchoolModelEvent;
 use App\Helpers\AdminTraits\AdminTrait;
+use App\Jobs\JobFinalisePupilDeletionFromDataBase;
 use App\Jobs\JobUpdateSchoolModel;
 use App\Models\Pupil;
 use App\Models\School;
+use Illuminate\Support\Carbon;
 
 class PupilObserver
 {
@@ -34,6 +36,12 @@ class PupilObserver
     public function updated(Pupil $pupil)
     {
         // dd($pupil);
+    }
+
+
+    public function deleting(Pupil $pupil)
+    {
+        JobFinalisePupilDeletionFromDataBase::dispatch($pupil)->delay(Carbon::now()->addDays(30));
     }
 
     /**

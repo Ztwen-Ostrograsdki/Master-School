@@ -11,7 +11,12 @@ use Livewire\Component;
 
 class TeacherProfilAsUser extends Component
 {
-    protected $listeners = ['schoolYearChangedLiveEvent' => 'reloadData', 'NewClasseMarksInsert' => 'cleanRelaodNow', 'PupilsMarksUpdatingFailedLiveEvent' => 'getMarksUpdatingMessage'];
+    protected $listeners = [
+        'schoolYearChangedLiveEvent' => 'reloadData', 
+        'MarksStoppingDispatchedLiveEvent' => 'reloadData', 
+        'NewClasseMarksInsert' => 'cleanRelaodNow', 
+        'PupilsMarksUpdatingFailedLiveEvent' => 'getMarksUpdatingMessage'
+    ];
 
     use ModelQueryTrait;
 
@@ -25,6 +30,7 @@ class TeacherProfilAsUser extends Component
     public $school_year;
     public $semestre_selected = 1;
     public $search = null;
+    
     public $titles = [
                 'liste' => 'La liste de la classe',
                 'marks' => 'Les notes de la classe',
@@ -101,7 +107,9 @@ class TeacherProfilAsUser extends Component
     public function mount($id, $slug)
     {
         $auth = auth()->user();
+
         $teacher = Teacher::find($id);
+        
         $this->slug = $slug;
 
         $this->user = $teacher->user;

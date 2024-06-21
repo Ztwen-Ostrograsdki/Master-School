@@ -7,7 +7,10 @@ use App\Events\ClasseMarksDeletionCreatedEvent;
 use App\Events\ClasseMarksInsertionCreatedEvent;
 use App\Events\ClasseRefereesManagerEvent;
 use App\Events\CompletedClasseCreationEvent;
+use App\Events\DeletePupilsFromDataBaseEvent;
 use App\Events\DetachPupilsFromSchoolYearEvent;
+use App\Events\DispatchIrregularsSemestrialMarksToConcernedTeachersEvent;
+use App\Events\DispatchIrregularsTeachersAndPupilsOnSemestrialMarksEvent;
 use App\Events\FlushAveragesIntoDataBaseEvent;
 use App\Events\FreshAveragesIntoDBEvent;
 use App\Events\ImportRegistredTeachersToTheCurrentYearEvent;
@@ -15,12 +18,14 @@ use App\Events\InitiateClasseParticipationMarksEvent;
 use App\Events\InitiateClassePupilsDataUpdatingFromFileEvent;
 use App\Events\InitiateClassePupilsMatriculeUpdateEvent;
 use App\Events\InitiateClassePupilsNamesUpdateEvent;
+use App\Events\InitiateMarksStoppingEvent;
 use App\Events\InitiateSettingsOnMarksEvent;
 use App\Events\JoinParentToPupilNowEvent;
 use App\Events\LocalTransfertCreatedEvent;
 use App\Events\MakeClassePresenceLateEvent;
 use App\Events\MarksNullActionsEvent;
 use App\Events\MarksRestorationEvent;
+use App\Events\MarksStoppingDispatchingEvent;
 use App\Events\MigrateDataToTheNewSchoolYearEvent;
 use App\Events\NewJobStartEvent;
 use App\Events\NewProductCreatedEvent;
@@ -28,6 +33,8 @@ use App\Events\ParentRequestToFollowPupilEvent;
 use App\Events\PaymentSystemEvent;
 use App\Events\PrepareClasseMarksExcelFileDataInsertionToDatabaseEvent;
 use App\Events\PreparePupilDataToFetchEvent;
+use App\Events\PrepareUserDeletingEvent;
+use App\Events\PreparingToCreateNewTeacherEvent;
 use App\Events\PupilAbandonnedClassesEvent;
 use App\Events\ReloadClassesPromotionAndPositionEvent;
 use App\Events\StartNewsPupilsInsertionEvent;
@@ -48,12 +55,19 @@ use App\Listeners\ClasseMarksInsertionBatchListener;
 use App\Listeners\ClassePupilsNamesUpdatingListener;
 use App\Listeners\ClasseRefereesManagerBatcherListener;
 use App\Listeners\CompletedClasseCreationBatcherListener;
+use App\Listeners\CreateNewTeacherListener;
 use App\Listeners\CreatedTransferBatchListener;
 use App\Listeners\DataMigrationToTheNewSchoolYearBatcherListener;
+use App\Listeners\DeletePupilsFromDataBaseListener;
+use App\Listeners\DeleteUserListener;
 use App\Listeners\DetachPupilsFromSchoolYearBatcherListener;
+use App\Listeners\DispatchIrregularsSemestrialMarksToConcernedTeachersListener;
+use App\Listeners\DispatchIrregularsTeachersAndPupilsOnSemestrialMarksListener;
+use App\Listeners\DispatchingMarksStoppedListener;
 use App\Listeners\FlushAveragesIntoDataBaseBatcherListener;
 use App\Listeners\FreshAveragesIntoDBBatcherListener;
 use App\Listeners\ImportRegistredTeachersToTheCurrentYearBatcherListener;
+use App\Listeners\InitMarksStoppingListener;
 use App\Listeners\InitiateSettingsOnMarksBatcherListener;
 use App\Listeners\InsertClasseMarksExcelFileDataToDatabaseListener;
 use App\Listeners\JoinParentToPupilNowListener;
@@ -81,6 +95,7 @@ use App\Models\ClasseMarksExcelFile;
 use App\Models\ClassesSecurity;
 use App\Models\LockedUsersRequest;
 use App\Models\Mark;
+use App\Models\MarkActionHistory;
 use App\Models\ParentRequestToFollowPupil;
 use App\Models\Pupil;
 use App\Models\RelatedMark;
@@ -91,6 +106,7 @@ use App\Observers\ClasseMarksExcelFileObserver;
 use App\Observers\ClasseObserver;
 use App\Observers\ClassesSecurityObserver;
 use App\Observers\LockedUsersRequestObserver;
+use App\Observers\MarkArchivesObserver;
 use App\Observers\MarkObserver;
 use App\Observers\ParentRequestToFollowPupilObserver;
 use App\Observers\PupilObserver;
@@ -179,6 +195,10 @@ class EventServiceProvider extends ServiceProvider
             DetachPupilsFromSchoolYearBatcherListener::class,
         ],
 
+        DeletePupilsFromDataBaseEvent::class => [
+            DeletePupilsFromDataBaseListener::class,
+        ],
+
         MakeClassePresenceLateEvent::class => [
             MakeClassePresenceLateBatcherListener::class,
         ],
@@ -264,6 +284,30 @@ class EventServiceProvider extends ServiceProvider
             AdminGetNotificationAboutTheUserWhoTryingToUpdatePupilMarkListener::class,
         ],
 
+        PreparingToCreateNewTeacherEvent::class => [
+            CreateNewTeacherListener::class,
+        ], 
+
+        PrepareUserDeletingEvent::class => [
+            DeleteUserListener::class,
+        ],
+        
+        InitiateMarksStoppingEvent::class => [
+            InitMarksStoppingListener::class,
+        ],
+
+        MarksStoppingDispatchingEvent::class => [
+            DispatchingMarksStoppedListener::class,
+        ],
+
+        DispatchIrregularsTeachersAndPupilsOnSemestrialMarksEvent::class => [
+            DispatchIrregularsTeachersAndPupilsOnSemestrialMarksListener::class,
+        ],
+
+        // DispatchIrregularsSemestrialMarksToConcernedTeachersEvent::class => [
+        //     DispatchIrregularsSemestrialMarksToConcernedTeachersListener::class,
+        // ],
+
     
     ];
 
@@ -295,6 +339,8 @@ class EventServiceProvider extends ServiceProvider
         ParentRequestToFollowPupil::observe(ParentRequestToFollowPupilObserver::class);
 
         ClasseMarksExcelFile::observe(ClasseMarksExcelFileObserver::class);
+        
+        MarkActionHistory::observe(MarkArchivesObserver::class);
 
 
         // Queue::before(function(JobProcessing $event){

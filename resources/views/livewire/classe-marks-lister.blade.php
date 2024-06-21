@@ -207,10 +207,17 @@
                                     </td>
                                 @endif
                                 <td class="text-center">
-                                    <span wire:click="insertRelatedMark({{$p->id}})" title="Ajouter une note relative : Sanction ou Bonus" class="cursor-pointer">
-                                        <strong class="bi-plus text-success"></strong>/
-                                        <strong class="text-danger"> - </strong>
-                                    </span>
+                                    @if(! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id) && ! is_marks_stopped($classe->id, $classe->level_id, $school_year_model->id, session('semestre_selected')))
+                                        <span wire:click="insertRelatedMark({{$p->id}})" title="Ajouter une note relative : Sanction ou Bonus" class="cursor-pointer">
+                                            <strong class="bi-plus text-success"></strong>/
+                                            <strong class="text-danger"> - </strong>
+                                        </span>
+                                    @else
+                                        <span title="Vous ne pouvez plus insérer de notes car le {{ $semestre_type . ' ' . session('semestre_selected')}} est déjà clôturé!" class="cursor-pointer">
+                                            <strong class="bi-plus text-success"></strong>/
+                                            <strong class="text-danger"> - </strong>
+                                        </span>
+                                    @endif
                                 </td>
                             @else
                                 @if(!$simpleFormat)

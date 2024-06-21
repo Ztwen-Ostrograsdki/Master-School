@@ -4,10 +4,12 @@
     <span class="text-white mt-2 h6">
         Gestionnaire de la présence de cette classe à l'année {{ session('school_year_selected') }} en <span class="text-warning"> {{ $subject_selected->name }}</span>
     </span>
-    <span wire:click="throwPresence({{$classe->id}})" class="float-right z-scale cursor-pointer btn btn-primary border mb-2 px-2">
-        Faire la présence
-        <span class="bi-clock"></span>
-    </span>
+    @if($not_stopped)
+        <span wire:click="throwPresence({{$classe->id}})" class="float-right z-scale cursor-pointer btn btn-primary border mb-2 px-2">
+            Faire la présence
+            <span class="bi-clock"></span>
+        </span>
+    @endif
     @endif
 
     @if($pupils && count($pupils))
@@ -18,7 +20,9 @@
                     <th class="">Nom et Prénoms</th>
                     <th>Absences</th>
                     <th>Retards</th>
-                    <th>Actions</th>
+                    @if($not_stopped)
+                        <th>Actions</th>
+                    @endif
                 </thead>
                 <tbody>
                     @foreach($pupils as $k => $p)

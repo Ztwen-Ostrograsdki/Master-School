@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\Parentable;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -12,20 +13,20 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class AboutMyParentRequestsEvent implements ShouldBroadcastNow
+class AboutMyParentRequestsEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $parentable;
+    public $user_parent;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Parentable $parentable)
+    public function __construct(User $user_parent)
     {
-        $this->parentable = $parentable;
+        $this->user_parent = $user_parent;
     }
 
     /**
@@ -35,6 +36,6 @@ class AboutMyParentRequestsEvent implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('user.' . $this->parentable->user->id);
+        return new PrivateChannel('user.' . $this->user_parent->id);
     }
 }

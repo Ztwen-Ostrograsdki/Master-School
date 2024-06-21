@@ -91,11 +91,11 @@
                     </div>
                     @else
                     <div class="w-100 mt-3 d-flex justify-center">
-                        <span wire:click="forcedEmailVerification" class="text-white cursor-pointer text-center bg-success border rounded px-3 py-2" >
+                        <span wire:click="forcedEmailVerification" class="text-white cursor-pointer text-center bg-success border rounded px-3 mr-1 py-2" >
                             <span class="bi-key mx-2"></span>
                             <span>Confirmer mon compte</span>
                         </span>
-                        <span wire:click="retryLogin" class="text-white cursor-pointer text-center z-bg-orange border rounded px-3 py-2" >
+                        <span wire:click="retryLogin" class="text-white ml-1 cursor-pointer text-center z-bg-orange border rounded px-3 py-2" >
                             <span class="bi-person-check mx-2"></span>
                             <span>Réessayer</span>
                         </span>

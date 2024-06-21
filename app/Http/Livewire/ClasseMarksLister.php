@@ -25,6 +25,7 @@ class ClasseMarksLister extends Component
         'classePupilListUpdated' => 'reloadData',
         'schoolYearChangedLiveEvent' => 'reloadData',
         'classeUpdated' => 'reloadData',
+        'MarksStoppingDispatchedLiveEvent' => 'reloadData',
         'semestreWasChanged',
         'UpdatedClasseListOnSearch' => 'reloadClasseDataOnSearch',
         'ClasseDataWasUpdated' => 'reloadData',
@@ -281,10 +282,6 @@ class ClasseMarksLister extends Component
 
         }
 
-
-       
-
-
         $calendar_profiler = $school_year_model->calendarProfiler();
 
         $current_period = $calendar_profiler['current_period'];
@@ -293,7 +290,7 @@ class ClasseMarksLister extends Component
                     compact(
                         'classe',
                         'current_period',
-                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model', 'printing'
+                        'pupils', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'modality', 'modalitiesActivated', 'hasModalities', 'averageEPETab', 'averageTab', 'classe_subject_coef', 'ranksTab', 'classe_subjects', 'school_year_model', 'printing',
                     )
                 );
     }

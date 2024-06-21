@@ -17,6 +17,9 @@ class JobForceMarksDestroyingAfterMoreDays implements ShouldQueue
 
     public $mark;
 
+
+    public $deleteWhenMissingModels = true;
+
     /**
      * Create a new job instance.
      *

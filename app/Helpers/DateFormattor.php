@@ -194,7 +194,7 @@ trait DateFormattor{
 
             $this->dateAgoToString = ($this->__strings($matrice['created_at'], $matrice['updated_at']))['created_at'];
 
-            $this->dateAgoToStringForUpdated = ($this->__strings($matrice['created_at'], $matrice['updated_at']))['updated_at'];
+            $this->dateAgoToStringForUpdated = ($this->__strings($matrice['updated_at'], $matrice['updated_at']))['updated_at'];
         }
     }
 
@@ -238,7 +238,16 @@ trait DateFormattor{
 
     public function __to($date = null, $with_hour = false, $created_at = false)
     {
-        $date = $this->created_at;
+        if($created_at){
+
+            $date = $this->created_at;
+
+        }
+        else{
+
+            $date = $this->updated_at;
+
+        }
 
         $date_timestamp = Carbon::parse($date);
 

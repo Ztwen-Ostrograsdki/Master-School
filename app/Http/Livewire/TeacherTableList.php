@@ -19,7 +19,8 @@ class TeacherTableList extends Component
         'changeTeacherList' => 'reloadDataOnSection', 
         'userDataEdited' => 'reloadData', 
         'selectedsWasChanged' => 'reGetUpdatesOfSelecteds', 
-        'TeacherTableListFetchOnSearch' => 'updatedSearch'
+        'TeacherTableListFetchOnSearch' => 'updatedSearch',
+        'NewTeacherWasCreatedLiveEvent' => 'reloadData',
     ];
 
     public $counter = 0;
@@ -279,6 +280,7 @@ class TeacherTableList extends Component
                 if($update){
 
                     $name = $teacher->getFormatedName();
+                    
                     $speciality = $teacher->speciality()->name;
 
                     $this->dispatchBrowserEvent('Toast', ['title' => 'Mise à jour terminée', 'message' => "L'utilisateur de $name a été réinséré dans le corps des enseigants comme prof de $speciality !", 'type' => 'success']);

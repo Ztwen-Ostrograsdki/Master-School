@@ -53,6 +53,7 @@ class PasswordHaveBeenResetNotification extends Notification
         ->line("")
         ->line("Nous vous remercions de votre fidélité");
     }
+    
     protected function isNotMeUrl($notifiable)
     {
         return URL::temporarySignedRoute(

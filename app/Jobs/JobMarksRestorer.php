@@ -28,6 +28,8 @@ class JobMarksRestorer implements ShouldQueue
 
     public $data = [];
 
+    public $deleteWhenMissingModels = true;
+
     /**
      * Create a new job instance.
      *

@@ -21,7 +21,7 @@ class UpdateSchoolModelEvent implements ShouldBroadcast
      *
      * @return void
      */
-    public function __construct(User $user)
+    public function __construct(?User $user)
     {
         $this->user = $user;
     }
@@ -33,6 +33,14 @@ class UpdateSchoolModelEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('user.' . $this->user->id);
+        $user = $this->user;
+
+        if($user && isset($user->id)){
+
+            return [new PrivateChannel('user.' . $this->user->id), new PrivateChannel('master')];
+
+        }
+        
+        return new PrivateChannel('master');
     }
 }

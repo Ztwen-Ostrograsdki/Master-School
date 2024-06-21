@@ -19,14 +19,18 @@ class JobUserAccountBlockingManager implements ShouldQueue
 
     public $user;
 
+    public $force_blocking = false;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(User $user)
+    public function __construct(User $user, $force_blocking = false)
     {
         $this->user = $user;
+
+        $this->force_blocking = $force_blocking;
     }
 
     /**
@@ -36,19 +40,34 @@ class JobUserAccountBlockingManager implements ShouldQueue
      */
     public function handle()
     {
+        if($this->force_blocking){
 
-        if($this->user->isBlocked()){
-
-            $this->user->__unlockOrLockThisUser();
-
-        }
-        else{
+            $this->user->update(['locked' => true, 'blocked' => true, 'unlock_token' => null]);
 
             Auth::guard('web')->logout();
 
             Session::flush();
 
         }
+
+        else{
+
+            if($this->user->isBlocked()){
+
+                $this->user->__unlockOrLockThisUser();
+
+            }
+            else{
+
+                Auth::guard('web')->logout();
+
+                Session::flush();
+
+            }
+
+        }
+
+        
 
 
     }

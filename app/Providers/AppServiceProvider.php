@@ -32,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
         Blade::if('isTeacher', function($user = null){
             if(Auth::user()){
                 if($user == null){

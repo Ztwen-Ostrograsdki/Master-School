@@ -35,7 +35,16 @@ class PupilsMarksInsertionProgressComponent extends Component
 
         $db_updating_marks_batches = [];
 
+        $trying_to_update_pupil_mark_batches = [];
+
+        // $marks_insertion_tasks = [];
+        // $trying_to_update_pupil_mark_tasks = [];
+        // $marks_deletion_tasks = [];
+        // $db_updating_marks = [];
+
         $marks_insertion_tasks = DB::table('job_batches')->where('total_jobs', '>', 0)->where('name', "marks_insertion")->orderBy('created_at', 'desc')->take($taking)->get();
+
+        $trying_to_update_pupil_mark_tasks = DB::table('job_batches')->where('total_jobs', '>', 0)->where('name', "trying_to_update_pupil_mark")->orderBy('created_at', 'desc')->take($taking)->get();
 
         $marks_deletion_tasks = DB::table('job_batches')->where('total_jobs', '>', 0)->where('name', "marks_deletion")->orderBy('created_at', 'desc')->take($taking)->get();
 
@@ -60,7 +69,13 @@ class PupilsMarksInsertionProgressComponent extends Component
 
         }
 
-        return view('livewire.pupils-marks-insertion-progress-component', compact('marks_insertion_batches', 'marks_deletion_batches', 'db_updating_marks_batches', 'classe', 'failed_jobs'));
+        foreach($trying_to_update_pupil_mark_tasks as $task4){
+
+            $trying_to_update_pupil_mark_batches[] = Bus::findBatch($task4->id);
+
+        }
+
+        return view('livewire.pupils-marks-insertion-progress-component', compact('marks_insertion_batches', 'marks_deletion_batches', 'db_updating_marks_batches', 'trying_to_update_pupil_mark_batches', 'classe', 'failed_jobs'));
     }
 
     // public function getListeners()

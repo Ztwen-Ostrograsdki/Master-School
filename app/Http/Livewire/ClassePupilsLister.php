@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 
+use App\Events\DeletePupilsFromDataBaseEvent;
 use App\Events\DetachPupilsFromSchoolYearEvent;
 use App\Exports\ExportPupils;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
@@ -57,6 +58,8 @@ class ClassePupilsLister extends Component
     public $editingPupilName = false;
 
     public $is_loading = false;
+
+    public $teacher_profil = false;
 
 
     public function render()
@@ -148,12 +151,6 @@ class ClassePupilsLister extends Component
     }
 
 
-    public function deletePupil($pupil_id)
-    {
-       
-    }
-
-
     public function the_loading()
     {
         $this->is_loading = true;
@@ -182,15 +179,6 @@ class ClassePupilsLister extends Component
         $this->search = $value;
     }
 
-    public function forceDeletePupil($pupil_id)
-    {
-        $pupil = Pupil::find($pupil_id);
-
-        if($pupil){
-
-            $pupil->pupilDeleter(null, true);
-        }
-    }
 
     public function editClasseSubjects($classe_id = null)
     {
@@ -411,20 +399,47 @@ class ClassePupilsLister extends Component
 
         if($pupil){
 
+            $pupils[] = $pupil;
+
             $user = auth()->user();
 
             $classe = $school_year_model->findClasse($this->classe_id);
 
-            $pupils[] = $pupil;
-
             $name = $pupil->getName();
 
-            DetachPupilsFromSchoolYearEvent::dispatch($user, $school_year_model, $classe, $pupils);
+            DetachPupilsFromSchoolYearEvent::dispatch($user, $school_year_model, $classe, $pupils, false, false);
 
             $this->dispatchBrowserEvent('Toast', ['title' => 'SUPPRESSION LANCEE', 'message' => "Le retrait de l'apprenant $name de la classe a été lancée avec succès!", 'type' => 'success']);
 
         }
 
+    }
+
+    public function deletePupil($pupil_id)
+    {
+        $school_year_model = $this->getSchoolYear();
+
+        $pupil = $school_year_model->findPupil($pupil_id);
+
+        if($pupil){
+
+            $user = auth()->user();
+
+            $classe = $school_year_model->findClasse($this->classe_id);
+
+            $name = $pupil->getName();
+
+            $forceDelete = true;
+
+            $from_data_base = true;
+
+            $pupils = [$pupil];
+
+            DeletePupilsFromDataBaseEvent::dispatch($user, $school_year_model, $classe, $pupils, $from_data_base, $forceDelete);
+
+            $this->dispatchBrowserEvent('Toast', ['title' => 'SUPPRESSION LANCEE', 'message' => "La suppression définitive de l'apprenant $name de la base de donée a été lancée avec succès!", 'type' => 'success']);
+
+        }
 
     }
 

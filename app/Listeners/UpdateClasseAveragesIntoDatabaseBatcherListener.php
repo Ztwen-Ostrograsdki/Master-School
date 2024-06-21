@@ -47,39 +47,26 @@ class UpdateClasseAveragesIntoDatabaseBatcherListener
 
                 $updates_jobs[] = new JobUpdateClasseSemestrialAverageIntoDatabase($event->classe, $sem, $event->school_year_model);
 
-                $flush_jobs[] = new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, $event->sem);
-
             }
 
             $updates_jobs[] = new JobUpdateClasseAnnualAverageIntoDatabase($event->classe, $event->school_year_model);
 
-            $flush_jobs[] = new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, null);
-
-            
 
         }
         else{
 
             $jobs = [
 
-                [
-                    new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, $event->semestre),
-                                
-                    new JobFlushAveragesIntoDataBase($event->user, $event->classe, $event->school_year_model, null)
-                ],
-
-                [
-                    new JobUpdateClasseSemestrialAverageIntoDatabase($event->classe, $event->semestre, $event->school_year_model),
-                
-                    new JobUpdateClasseAnnualAverageIntoDatabase($event->classe, $event->school_year_model)
-                ],
+                new JobUpdateClasseSemestrialAverageIntoDatabase($event->classe, $event->semestre, $event->school_year_model),
+            
+                new JobUpdateClasseAnnualAverageIntoDatabase($event->classe, $event->school_year_model)
             ];
 
         }
 
         if($event->allSemestres){
 
-            $jobs = [ $flush_jobs, $updates_jobs ];
+            $jobs = [$updates_jobs];
 
         }
 

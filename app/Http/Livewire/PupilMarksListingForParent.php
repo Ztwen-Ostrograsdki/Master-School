@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Helpers\ModelsHelpers\ModelQueryTrait;
 use App\Models\Pupil;
 use App\Models\School;
+use App\Models\SchoolYear;
 use Livewire\Component;
 
 class PupilMarksListingForParent extends Component
@@ -15,24 +16,42 @@ class PupilMarksListingForParent extends Component
     protected $listeners = [
         'schoolYearChangedLiveEvent' => 'reloadPupilData',
         'classePupilListUpdated' => 'reloadPupilData',
-        'semestreWasChanged',
+        'MarksStoppingDispatchedLiveEvent' => 'reloadPupilData',
+        'ReloadSemestreData' => 'reloadPupilData',
+        'ReloadSchoolYearData' => 'reloadPupilData',
+        'SchoolYearWasChanged' => 'schoolYearWasChanged',
         'pupilUpdated' => 'reloadPupilData',
     ];
 
 
     public $pupil_id;
+
     public $educmaster;
+
     public $school_year;
+
     public $semestre_selected = 1;
+
+    public $school_year_selected;
+
     public $edit_mark_value = 0;
+
     public $edit_mark_type = 'epe';
+
     public $editing_mark = false;
+
     public $subject_selected;
+
     public $invalid_mark = false;
+
     public $display_annual_data = false;
+
     public $edit_key;
+
     public $mark_key;
+
     public $targetedMark;
+
     public $count = 0;
 
     public function mount($id)
@@ -45,8 +64,11 @@ class PupilMarksListingForParent extends Component
             // $this->educmaster = $educmaster;
 
             $this->pupil = Pupil::find($id);
+        }
 
+        if(session()->has('school_year_selected_for_parent') && session('school_year_selected_for_parent') !== null){
 
+            $this->school_year_selected = session('school_year_selected_for_parent');
 
         }
     }
@@ -59,10 +81,22 @@ class PupilMarksListingForParent extends Component
         $effectif = 0;
         
         $marks = null;
+
+        $school_years = [];
+
+        $pupil_school_years = [];
         
         $pupil_id = $this->pupil_id;
 
-        $school_year_model = $this->getSchoolYear();
+        if(session()->has('school_year_selected_for_parent') && session('school_year_selected_for_parent') !== null){
+
+            $this->school_year_selected = session('school_year_selected_for_parent');
+
+        }
+
+        $school_year_selected = $this->school_year_selected;
+
+        $school_year_model = $this->getSchoolYear($school_year_selected);
 
         $devMaxLenght = 2;
         
@@ -105,11 +139,11 @@ class PupilMarksListingForParent extends Component
         }
 
 
-        if(session()->has('semestre_selected') && session('semestre_selected')){
+        if(session()->has('semestre_selected_for_parent') && session('semestre_selected_for_parent')){
 
-            $semestre = intval(session('semestre_selected'));
+            $semestre = intval(session('semestre_selected_for_parent'));
 
-            session()->put('semestre_selected', $semestre);
+            session()->put('semestre_selected_for_parent', $semestre);
 
             $this->semestre_selected = $semestre;
         }
@@ -176,6 +210,8 @@ class PupilMarksListingForParent extends Component
 
                 $participMaxLenght = 1;
 
+                $pupil_school_years = $pupil->school_years()->pluck('school_years.id')->toArray();
+
             }
 
             if(($epeMaxLenght < 1 && $participMaxLenght < 1 && $devMaxLenght < 1)){
@@ -192,6 +228,8 @@ class PupilMarksListingForParent extends Component
             if(!($epeMaxLenght && $devMaxLenght && $participMaxLenght)){
                 $noMarks = true;
             }
+
+            $school_years = SchoolYear::orderBy('school_year', 'desc')->get();
                 
         }
         else{
@@ -199,28 +237,39 @@ class PupilMarksListingForParent extends Component
         }
 
 
-        return view('livewire.pupil-marks-listing-for-parent', compact('pupil', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'classeCoefTabs', 'averageEPETabs', 'averageTabs', 'ranksTabs', 'school_year_model', 'semestre_type', 'semestres', 'semestrialAverages', 'annualAverage', 'classe', 'effectif'));
+        return view('livewire.pupil-marks-listing-for-parent', compact('pupil', 'marks', 'epeMaxLenght', 'devMaxLenght', 'participMaxLenght', 'noMarks', 'classeCoefTabs', 'averageEPETabs', 'averageTabs', 'ranksTabs', 'school_year_model', 'semestre_type', 'semestres', 'semestrialAverages', 'annualAverage', 'classe', 'effectif', 'school_years', 'pupil_school_years'));
     }
 
-    public function addNewPupil()
+   
+
+    public function updatedSemestreSelected($semestre)
     {
-        $school_year = session('school_year_selected');
-        
-        $school_year_model = SchoolYear::where('school_year', $school_year)->first();
-        
-        $classe = $school_year_model->classes()->first();
-        
-        if($classe){
-            $this->emit('addNewPupilToClasseLiveEvent', $classe->id);
-        }
-        else{
-            $this->dispatchBrowserEvent('ToastDoNotClose', ['title' => 'Erreure', 'message' => "Vous ne pouvez pas encore de ajouter d'apprenant sans avoir au préalable créer au moins une classe!", 'type' => 'error']);
-        }
+        $this->semestre_selected = $semestre;
+
+        session()->put('semestre_selected_for_parent', $semestre);
+
+        $this->emit('ReloadSemestreData', $semestre);
 
     }
 
+    public function updatedSchoolYearSelected($school_year)
+    {
+        $this->school_year_selected = $school_year;
 
+        session()->put('school_year_selected_for_parent', $school_year);
 
+        $this->emit('SchoolYearWasChanged', $school_year);
+
+    }
+
+    public function schoolYearWasChanged($school_year)
+    {
+        $this->school_year_selected = $school_year;
+
+        session()->put('school_year_selected_for_parent', $school_year);
+
+        $this->emit('ReloadSchoolYearData', $school_year);
+    }
 
 
 
@@ -229,9 +278,5 @@ class PupilMarksListingForParent extends Component
         $this->counter = 1;
     }
 
-    public function semestreWasChanged($semestre_selected = null)
-    {
-        session()->put('semestre_selected', $semestre_selected);
-        $this->semestre_selected = $semestre_selected;
-    }
+    
 }

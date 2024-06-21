@@ -16,7 +16,7 @@
                     <div class="w-100">
                         <div class="w-100 d-flex justify-content-between border rounded">
                             <strong class="bi-unlock zw-15 text-center z-color-orange" style="font-size: 1.5rem"></strong>
-                            <input name="code" wire:model="code"  type="password" class="form-control  @error('code') text-danger border border-danger @enderror text-white zw-85 p-3 z-bg-secondary-dark border-left" placeholder="Veuillez renseigner la clé...">
+                            <input name="code" wire:model="code" autofocus  type="password" class="form-control  @error('code') text-danger border border-danger @enderror text-white zw-85 p-3 z-bg-secondary-dark border-left" placeholder="Veuillez renseigner la clé...">
                         </div>
                         @error('code')
                             <span class="py-1 mb-3 z-color-orange">{{$message}}</span>
